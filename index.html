@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -21,7 +22,7 @@
         header {
             background-color: #17365d;
             color: white;
-            padding: 28px 20px;
+            padding: 32px 20px;
             text-align: center;
         }
 
@@ -81,8 +82,87 @@
             display: inline-block;
             padding: 5px 10px;
             border-radius: 15px;
-            background-color: #e
+            background-color: #e5f4e8;
+            color: #216e39;
+            font-size: 13px;
         }
 
-        </body>
+        footer {
+            margin-top: 35px;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 23px;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            main {
+                margin-top: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Plataforma de Dados Educacionais</h1>
+        <p>Informações e indicadores para apoiar a gestão educacional</p>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Bem-vindo à plataforma</h2>
+
+            <p>
+                Este ambiente reunirá dados e indicadores educacionais
+                para facilitar consultas, comparações e análises históricas.
+            </p>
+
+            <span class="status">Projeto em desenvolvimento</span>
+
+            <div class="modulos">
+
+                <article class="modulo">
+                    <h3>Prova Paulista</h3>
+                    <p>
+                        Futuras consultas de participação, resultados por
+                        componente curricular e evolução entre bimestres.
+                    </p>
+                </article>
+
+                <article class="modulo">
+                    <h3>SARESP</h3>
+                    <p>
+                        Espaço reservado para indicadores e resultados
+                        históricos do SARESP.
+                    </p>
+                </article>
+
+                <article class="modulo">
+                    <h3>IDEB</h3>
+                    <p>
+                        Espaço reservado para indicadores de qualidade
+                        da educação básica e comparações históricas.
+                    </p>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Plataforma de Dados Educacionais
+    </footer>
+
+</body>
 </html>
+```
