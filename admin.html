@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <title>Área Administrativa - Plataforma Educacional</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
@@ -34,6 +35,34 @@
         <tr><td colspan="3">A carregar utilizadores...</td></tr>
     </tbody>
 </table>
+
+
+<hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
+
+<h3>Importar Planilha Educacional (2024-2026)</h3>
+<p>Selecione o ficheiro Excel (.xlsx) ou CSV para carregar os dados na plataforma.</p>
+
+<div style="margin-bottom: 20px;">
+    <input type="file" id="input-planilha" accept=".xlsx, .xls, .csv" style="padding: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+</div>
+
+<div id="preview-container" style="display: none; margin-top: 15px; padding: 15px; background: #e2e8f0; border-radius: 6px;">
+    <h4>Pré-visualização do Carregamento</h4>
+    <p id="status-preview"></p>
+    <button id="btn-confirmar-importacao" style="background-color: #2e7d32;">Confirmar e Gravar no Supabase</button>
+</div>
+
+
+
+
+
+            
+
+
+
+
+
+            
             <button id="btn-voltar" onclick="window.location.href='resultados.html'">Voltar aos Resultados</button>
         </div>
     </main>
