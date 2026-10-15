@@ -124,16 +124,19 @@
                 edicoesUnicas.map(e => `<option value="${e}">${e}</option>`).join('');
         }
 
-        // Renderiza a tabela tratando metadados e posicionando a linha Total ao final
+        // Renderiza a tabela ocultando metadados e mantendo o Total no final
         function renderizarTabela() {
             const anoSelecionado = document.getElementById('filtro-ano').value;
             const edicaoSelecionada = document.getElementById('filtro-edicao').value;
 
-            // 1. Filtra os dados e ignora a linha de metadados ("Filtros aplicados...")
+            // 1. Filtra os dados e ignora qualquer linha onde 'escola' contenha a palavra 'filtros'
             const filtrados = todosResultados.filter(r => {
                 const bateAno = !anoSelecionado || r.ano === anoSelecionado;
                 const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
-                const eMetadado = r.escola && r.escola.toLowerCase().includes('filtros aplicados');
+                
+                const nomeEscola = (r.escola || '').toLowerCase().trim();
+                const eMetadado = nomeEscola.includes('filtros');
+
                 return bateAno && bateEdicao && !eMetadado;
             });
 
@@ -141,7 +144,7 @@
             const linhasEscolas = filtrados.filter(r => !r.escola || r.escola.trim().toLowerCase() !== 'total');
             const linhaTotal = filtrados.find(r => r.escola && r.escola.trim().toLowerCase() === 'total');
 
-            // 3. Adiciona o Total ao final da lista de exibição
+            // 3. Posiciona o Total ao final da lista
             if (linhaTotal) {
                 linhasEscolas.push(linhaTotal);
             }
@@ -201,4 +204,41 @@
                 .eq('id', session.user.id)
                 .single();
 
-            if (profile && profile.role ===
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
+
+            const { data: resultados, error } = await supabaseClient
+                .from('dados_educacionais')
+                .select('*')
+                .order('escola', { ascending: true });
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else {
+                todosResultados = resultados || [];
+                carregarFiltros(todosResultados);
+                renderizarTabela();
+
+                document.getElementById('filtro-ano').addEventListener('change', () => {
+                    const anoSel = document.getElementById('filtro-ano').value;
+                    const selectEdicao = document.getElementById('filtro-edicao');
+                    
+                    const edicoesFiltradas = [...new Set(todosResultados
+                        .filter(r => !anoSel || r.ano === anoSel)
+                        .map(r => r.edicao_planilha)
+                        .filter(Boolean))].sort();
+
+                    selectEdicao.innerHTML = '<option value="">Todas as Edições</option>' + 
+                        edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+
+                    renderizarTabela();
+                });
+
+                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+            }
+        });
+    </script>
+</body>
+</html>
