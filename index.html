@@ -168,7 +168,7 @@
         Consulte os resultados educacionais publicados no banco de dados.
     </p>
 
-    <button id="btn-carregar-resultados" type="button"
+  <button id="btn-consultar-prova-paulista" type="button"
             style="padding:10px 14px;background:#17365d;color:white;border:0;border-radius:6px;cursor:pointer;">
         Consultar resultados
     </button>
@@ -331,6 +331,15 @@ document.getElementById('conteudo-plataforma').hidden = false;
 mensagemLogin.textContent = 'Login realizado com sucesso.';
 console.log('Usuário autenticado:', data.user.id);
     });
+
+const btnProvaPaulista = document.getElementById('btn-consultar-prova-paulista');
+if (btnProvaPaulista) {
+    btnProvaPaulista.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'resultados.html';
+    });
+}
+    
 </script>
 
 </body>
