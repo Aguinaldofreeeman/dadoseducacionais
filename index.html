@@ -255,9 +255,15 @@ document.getElementById('btn-carregar-resultados').addEventListener('click', asy
         return;
     }
 
-    const tabela = document.createElement('table');
-    tabela.style.width = '100%';
-    tabela.style.borderCollapse = 'collapse';
+ const areaTabela = document.createElement('div');
+areaTabela.style.width = '100%';
+areaTabela.style.overflowX = 'auto';
+
+const tabela = document.createElement('table');
+tabela.style.width = '100%';
+tabela.style.minWidth = '650px';
+tabela.style.borderCollapse = 'collapse';
+tabela.style.tableLayout = 'auto';
 
     const cabecalho = document.createElement('tr');
 
