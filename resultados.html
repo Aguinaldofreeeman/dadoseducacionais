@@ -9,7 +9,10 @@
         .header { background-color: #17365d; color: white; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
         .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn { background-color: #17365d; color: white; padding: 8px 12px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; cursor: pointer; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        .filtros { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #e2e8f0; padding: 15px; border-radius: 6px; }
+        .filtros div { display: flex; flex-direction: column; gap: 5px; }
+        .filtros select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; min-width: 200px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         th { background-color: #17365d; color: white; text-align: left; padding: 8px; white-space: nowrap; }
         td { padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
@@ -25,6 +28,22 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0;">Resultados Educacionais Publicados</h3>
             <a href="admin.html" id="btn-admin" class="btn" style="display: none;">Área Administrativa</a>
+        </div>
+
+        <!-- Painel de Seleção/Filtros -->
+        <div class="filtros">
+            <div>
+                <label for="filtro-ano"><strong>Ano Letivo:</strong></label>
+                <select id="filtro-ano">
+                    <option value="">Todos os Anos</option>
+                </select>
+            </div>
+            <div>
+                <label for="filtro-edicao"><strong>Bimestre / Edição da Prova:</strong></label>
+                <select id="filtro-edicao">
+                    <option value="">Todas as Edições</option>
+                </select>
+            </div>
         </div>
 
         <div style="overflow-x: auto;">
@@ -43,10 +62,24 @@
                         <th>BIO</th>
                         <th>QUI</th>
                         <th>ING</th>
+                        <th>CIE</th>
+                        <th>FIS</th>
+                        <th>ED FIN</th>
+                        <th>EMP</th>
+                        <th>TEC ROB</th>
+                        <th>ING IT</th>
+                        <th>ART</th>
+                        <th>MID DIG</th>
+                        <th>LIDE</th>
+                        <th>ORATORIA</th>
+                        <th>GEO POL</th>
+                        <th>FIL E SOC MOD</th>
+                        <th>BIO TEC</th>
+                        <th>QUIM APL</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="12">A carregar resultados...</td></tr>
+                    <tr><td colspan="26">A carregar resultados...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -58,50 +91,48 @@
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-        // Função auxiliar para converter valores decimais brutos em percentual visual
+        let todosResultados = [];
+
+        // Converte valores decimais para percentagem formatada
         function formatarPercentual(valor) {
             if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
             const num = parseFloat(String(valor).replace(',', '.'));
             if (isNaN(num)) return valor;
             if (num === 0) return '0%';
-            
-            // Se o valor estiver em escala decimal (ex: 0.9846), multiplica por 100
             const pct = (Math.abs(num) <= 1 && num !== 0) ? num * 100 : num;
             return pct.toFixed(1).replace('.', ',') + '%';
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Verifica autenticação
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
+        // Popula os menus de seleção
+        function carregarFiltros(dados) {
+            const selectAno = document.getElementById('filtro-ano');
+            const selectEdicao = document.getElementById('filtro-edicao');
 
-            // 2. Exibe botão administrativo apenas para perfil admin
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+            const anosUnicos = [...new Set(dados.map(item => item.ano).filter(Boolean))].sort();
+            const edicoesUnicas = [...new Set(dados.map(item => item.edicao_planilha).filter(Boolean))].sort();
 
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
+            selectAno.innerHTML = '<option value="">Todos os Anos</option>' + 
+                anosUnicos.map(a => `<option value="${a}">${a}</option>`).join('');
 
-            // 3. Consulta os registos na tabela dados_educacionais
-            const { data: resultados, error } = await supabaseClient
-                .from('dados_educacionais')
-                .select('*')
-                .order('escola', { ascending: true });
+            selectEdicao.innerHTML = '<option value="">Todas as Edições</option>' + 
+                edicoesUnicas.map(e => `<option value="${e}">${e}</option>`).join('');
+        }
+
+        // Renderiza as linhas da tabela aplicando os filtros ativos
+        function renderizarTabela() {
+            const anoSelecionado = document.getElementById('filtro-ano').value;
+            const edicaoSelecionada = document.getElementById('filtro-edicao').value;
+
+            const filtrados = todosResultados.filter(r => {
+                const bateAno = !anoSelecionado || r.ano === anoSelecionado;
+                const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
+                return bateAno && bateEdicao;
+            });
 
             const tabela = document.getElementById('tabela-resultados');
 
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                tabela.innerHTML = `<tr><td colspan="12">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else if (resultados && resultados.length > 0) {
-                tabela.innerHTML = resultados.map(r => `
+            if (filtrados.length > 0) {
+                tabela.innerHTML = filtrados.map(r => `
                     <tr>
                         <td><strong>${r.escola || 'N/D'}</strong></td>
                         <td>${r.edicao_planilha || '-'}</td>
@@ -115,10 +146,74 @@
                         <td>${formatarPercentual(r.bio)}</td>
                         <td>${formatarPercentual(r.qui)}</td>
                         <td>${formatarPercentual(r.ing)}</td>
+                        <td>${formatarPercentual(r.cie)}</td>
+                        <td>${formatarPercentual(r.fis)}</td>
+                        <td>${formatarPercentual(r.ed_fin)}</td>
+                        <td>${formatarPercentual(r.emp)}</td>
+                        <td>${formatarPercentual(r.tec_rob)}</td>
+                        <td>${formatarPercentual(r.ing_it)}</td>
+                        <td>${formatarPercentual(r.art)}</td>
+                        <td>${formatarPercentual(r.mid_dig)}</td>
+                        <td>${formatarPercentual(r.lide)}</td>
+                        <td>${formatarPercentual(r.oratoria)}</td>
+                        <td>${formatarPercentual(r.geo_pol)}</td>
+                        <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
+                        <td>${formatarPercentual(r.bio_tec)}</td>
+                        <td>${formatarPercentual(r.quim_apl)}</td>
                     </tr>
                 `).join('');
             } else {
-                tabela.innerHTML = '<tr><td colspan="12">Nenhum registo encontrado na base de dados.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="26">Nenhum registo encontrado para os filtros selecionados.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
+
+            const { data: resultados, error } = await supabaseClient
+                .from('dados_educacionais')
+                .select('*')
+                .order('escola', { ascending: true });
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="26">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else {
+                todosResultados = resultados || [];
+                carregarFiltros(todosResultados);
+                renderizarTabela();
+
+                // Atualiza o seletor de edições quando o ano for alterado
+                document.getElementById('filtro-ano').addEventListener('change', () => {
+                    const anoSel = document.getElementById('filtro-ano').value;
+                    const selectEdicao = document.getElementById('filtro-edicao');
+                    
+                    const edicoesFiltradas = [...new Set(todosResultados
+                        .filter(r => !anoSel || r.ano === anoSel)
+                        .map(r => r.edicao_planilha)
+                        .filter(Boolean))].sort();
+
+                    selectEdicao.innerHTML = '<option value="">Todas as Edições</option>' + 
+                        edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+
+                    renderizarTabela();
+                });
+
+                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
             }
         });
     </script>
