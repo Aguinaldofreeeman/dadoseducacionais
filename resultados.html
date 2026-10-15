@@ -107,6 +107,26 @@
         return;
     }
 
+// Consulta a função do utilizador na tabela profiles
+const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('role')
+    .eq('id', session.user.id)
+    .single();
+
+// Se for administrador, exibe o botão administrativo
+if (profile && profile.role === 'admin') {
+    const btnAdmin = document.getElementById('btn-admin');
+    if (btnAdmin) {
+        btnAdmin.style.display = 'inline-block';
+        btnAdmin.addEventListener('click', () => {
+            window.location.href = 'admin.html';
+        });
+    }
+}
+
+
+        
     // Código existente para carregar os resultados da Prova Paulista...
 });
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
