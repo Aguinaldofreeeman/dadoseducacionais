@@ -10,8 +10,8 @@
         .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn { background-color: #17365d; color: white; padding: 8px 12px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; cursor: pointer; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-        th { background-color: #17365d; color: white; text-align: left; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        th { background-color: #17365d; color: white; text-align: left; padding: 8px; white-space: nowrap; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
     </style>
 </head>
@@ -32,6 +32,7 @@
                 <thead>
                     <tr>
                         <th>Escola</th>
+                        <th>Edição / Planilha</th>
                         <th>Participação</th>
                         <th>Acertos</th>
                         <th>Evolução</th>
@@ -45,7 +46,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="11">A carregar resultados...</td></tr>
+                    <tr><td colspan="12">A carregar resultados...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -57,6 +58,18 @@
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+        // Função auxiliar para converter valores decimais brutos em percentual visual
+        function formatarPercentual(valor) {
+            if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
+            const num = parseFloat(String(valor).replace(',', '.'));
+            if (isNaN(num)) return valor;
+            if (num === 0) return '0%';
+            
+            // Se o valor estiver em escala decimal (ex: 0.9846), multiplica por 100
+            const pct = (Math.abs(num) <= 1 && num !== 0) ? num * 100 : num;
+            return pct.toFixed(1).replace('.', ',') + '%';
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             // 1. Verifica autenticação
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -65,7 +78,7 @@
                 return;
             }
 
-            // 2. Exibe botão administrativo apenas se o perfil for admin
+            // 2. Exibe botão administrativo apenas para perfil admin
             const { data: profile } = await supabaseClient
                 .from('profiles')
                 .select('role')
@@ -76,7 +89,7 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
-            // 3. Consulta e exibe os dados da tabela dados_educacionais
+            // 3. Consulta os registos na tabela dados_educacionais
             const { data: resultados, error } = await supabaseClient
                 .from('dados_educacionais')
                 .select('*')
@@ -86,25 +99,26 @@
 
             if (error) {
                 console.error('Erro ao carregar dados:', error.message);
-                tabela.innerHTML = `<tr><td colspan="11">Erro ao carregar dados: ${error.message}</td></tr>`;
+                tabela.innerHTML = `<tr><td colspan="12">Erro ao carregar dados: ${error.message}</td></tr>`;
             } else if (resultados && resultados.length > 0) {
                 tabela.innerHTML = resultados.map(r => `
                     <tr>
                         <td><strong>${r.escola || 'N/D'}</strong></td>
-                        <td>${r.participacao || '-'}</td>
-                        <td>${r.acertos_prova || '-'}</td>
-                        <td>${r.evolucao || '-'}</td>
-                        <td>${r.port || '-'}</td>
-                        <td>${r.mat || '-'}</td>
-                        <td>${r.his || '-'}</td>
-                        <td>${r.geo || '-'}</td>
-                        <td>${r.bio || '-'}</td>
-                        <td>${r.qui || '-'}</td>
-                        <td>${r.ing || '-'}</td>
+                        <td>${r.edicao_planilha || '-'}</td>
+                        <td>${formatarPercentual(r.participacao)}</td>
+                        <td>${formatarPercentual(r.acertos_prova)}</td>
+                        <td>${formatarPercentual(r.evolucao)}</td>
+                        <td>${formatarPercentual(r.port)}</td>
+                        <td>${formatarPercentual(r.mat)}</td>
+                        <td>${formatarPercentual(r.his)}</td>
+                        <td>${formatarPercentual(r.geo)}</td>
+                        <td>${formatarPercentual(r.bio)}</td>
+                        <td>${formatarPercentual(r.qui)}</td>
+                        <td>${formatarPercentual(r.ing)}</td>
                     </tr>
                 `).join('');
             } else {
-                tabela.innerHTML = '<tr><td colspan="11">Nenhum registo encontrado na base de dados.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="12">Nenhum registo encontrado na base de dados.</td></tr>';
             }
         });
     </script>
