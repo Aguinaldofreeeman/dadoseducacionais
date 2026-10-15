@@ -19,6 +19,9 @@
         th { background-color: #17365d; color: white; text-align: left; padding: 10px 8px; white-space: nowrap; position: sticky; top: 0; }
         td { padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
+        
+        /* Destaque para a linha de Total no final */
+        tr.linha-total { font-weight: bold; background-color: #e2e8f0 !important; border-top: 2px solid #17365d; }
     </style>
 </head>
 <body>
@@ -121,49 +124,65 @@
                 edicoesUnicas.map(e => `<option value="${e}">${e}</option>`).join('');
         }
 
-        // Renderiza a tabela mantendo as 25 colunas dos indicadores
+        // Renderiza a tabela tratando metadados e posicionando a linha Total ao final
         function renderizarTabela() {
             const anoSelecionado = document.getElementById('filtro-ano').value;
             const edicaoSelecionada = document.getElementById('filtro-edicao').value;
 
+            // 1. Filtra os dados e ignora a linha de metadados ("Filtros aplicados...")
             const filtrados = todosResultados.filter(r => {
                 const bateAno = !anoSelecionado || r.ano === anoSelecionado;
                 const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
-                return bateAno && bateEdicao;
+                const eMetadado = r.escola && r.escola.toLowerCase().includes('filtros aplicados');
+                return bateAno && bateEdicao && !eMetadado;
             });
+
+            // 2. Separa as escolas normais da linha de "Total"
+            const linhasEscolas = filtrados.filter(r => !r.escola || r.escola.trim().toLowerCase() !== 'total');
+            const linhaTotal = filtrados.find(r => r.escola && r.escola.trim().toLowerCase() === 'total');
+
+            // 3. Adiciona o Total ao final da lista de exibição
+            if (linhaTotal) {
+                linhasEscolas.push(linhaTotal);
+            }
 
             const tabela = document.getElementById('tabela-resultados');
 
-            if (filtrados.length > 0) {
-                tabela.innerHTML = filtrados.map(r => `
-                    <tr>
-                        <td><strong>${r.escola || 'N/D'}</strong></td>
-                        <td>${formatarPercentual(r.participacao)}</td>
-                        <td>${formatarPercentual(r.acertos_prova)}</td>
-                        <td>${formatarPercentual(r.evolucao)}</td>
-                        <td>${formatarPercentual(r.port)}</td>
-                        <td>${formatarPercentual(r.mat)}</td>
-                        <td>${formatarPercentual(r.his)}</td>
-                        <td>${formatarPercentual(r.geo)}</td>
-                        <td>${formatarPercentual(r.bio)}</td>
-                        <td>${formatarPercentual(r.qui)}</td>
-                        <td>${formatarPercentual(r.ing)}</td>
-                        <td>${formatarPercentual(r.cie)}</td>
-                        <td>${formatarPercentual(r.fis)}</td>
-                        <td>${formatarPercentual(r.ed_fin)}</td>
-                        <td>${formatarPercentual(r.emp)}</td>
-                        <td>${formatarPercentual(r.tec_rob)}</td>
-                        <td>${formatarPercentual(r.ing_it)}</td>
-                        <td>${formatarPercentual(r.art)}</td>
-                        <td>${formatarPercentual(r.mid_dig)}</td>
-                        <td>${formatarPercentual(r.lide)}</td>
-                        <td>${formatarPercentual(r.oratoria)}</td>
-                        <td>${formatarPercentual(r.geo_pol)}</td>
-                        <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
-                        <td>${formatarPercentual(r.bio_tec)}</td>
-                        <td>${formatarPercentual(r.quim_apl)}</td>
-                    </tr>
-                `).join('');
+            if (linhasEscolas.length > 0) {
+                tabela.innerHTML = linhasEscolas.map(r => {
+                    const isTotal = r.escola && r.escola.trim().toLowerCase() === 'total';
+                    const classeLinha = isTotal ? 'class="linha-total"' : '';
+                    
+                    return `
+                        <tr ${classeLinha}>
+                            <td><strong>${r.escola || 'N/D'}</strong></td>
+                            <td>${formatarPercentual(r.participacao)}</td>
+                            <td>${formatarPercentual(r.acertos_prova)}</td>
+                            <td>${formatarPercentual(r.evolucao)}</td>
+                            <td>${formatarPercentual(r.port)}</td>
+                            <td>${formatarPercentual(r.mat)}</td>
+                            <td>${formatarPercentual(r.his)}</td>
+                            <td>${formatarPercentual(r.geo)}</td>
+                            <td>${formatarPercentual(r.bio)}</td>
+                            <td>${formatarPercentual(r.qui)}</td>
+                            <td>${formatarPercentual(r.ing)}</td>
+                            <td>${formatarPercentual(r.cie)}</td>
+                            <td>${formatarPercentual(r.fis)}</td>
+                            <td>${formatarPercentual(r.ed_fin)}</td>
+                            <td>${formatarPercentual(r.emp)}</td>
+                            <td>${formatarPercentual(r.tec_rob)}</td>
+                            <td>${formatarPercentual(r.ing_it)}</td>
+                            <td>${formatarPercentual(r.art)}</td>
+                            <td>${formatarPercentual(r.mid_dig)}</td>
+                            <td>${formatarPercentual(r.lide)}</td>
+                            <td>${formatarPercentual(r.oratoria)}</td>
+                            <td>${formatarPercentual(r.geo_pol)}</td>
+                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
+                            <td>${formatarPercentual(r.bio_tec)}</td>
+                            <td>${formatarPercentual(r.quim_apl)}</td>
+                        </tr>
+                    `;
+                }).join('');
             } else {
                 tabela.innerHTML = '<tr><td colspan="25">Nenhum registo encontrado para os filtros selecionados.</td></tr>';
             }
@@ -182,41 +201,4 @@
                 .eq('id', session.user.id)
                 .single();
 
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
-
-            const { data: resultados, error } = await supabaseClient
-                .from('dados_educacionais')
-                .select('*')
-                .order('escola', { ascending: true });
-
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else {
-                todosResultados = resultados || [];
-                carregarFiltros(todosResultados);
-                renderizarTabela();
-
-                document.getElementById('filtro-ano').addEventListener('change', () => {
-                    const anoSel = document.getElementById('filtro-ano').value;
-                    const selectEdicao = document.getElementById('filtro-edicao');
-                    
-                    const edicoesFiltradas = [...new Set(todosResultados
-                        .filter(r => !anoSel || r.ano === anoSel)
-                        .map(r => r.edicao_planilha)
-                        .filter(Boolean))].sort();
-
-                    selectEdicao.innerHTML = '<option value="">Todas as Edições</option>' + 
-                        edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
-
-                    renderizarTabela();
-                });
-
-                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
-            }
-        });
-    </script>
-</body>
-</html>
+            if (profile && profile.role ===
