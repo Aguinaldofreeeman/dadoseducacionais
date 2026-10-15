@@ -126,15 +126,28 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
     const inputFicheiro = document.getElementById('input-planilha');
     const nomeFicheiro = inputFicheiro.files[0]?.name || 'Importacao';
 
-    // Mapeia os dados da planilha para as colunas da tabela mantendo fidelidade aos valores
+    // Extrai dinamicamente o ano (ex: 2024, 2025, 2026) a partir do nome do ficheiro
+    const anoMatch = nomeFicheiro.match(/202[0-9]/);
+    const anoDetectado = anoMatch ? anoMatch[0] : '2024';
+
+    // Mapeia os dados da planilha para as colunas da tabela
     const payload = dadosPlanilhaParaImportar.map(row => {
         const getVal = (keyName) => {
-            const foundKey = Object.keys(row).find(k => k.trim().toLowerCase() === keyName.trim().toLowerCase());
+            const keys = Object.keys(row);
+            // Procura correspondência exata ou variações comuns do nome da coluna
+            const foundKey = keys.find(k => {
+                const kClean = k.trim().toLowerCase();
+                const keyClean = keyName.trim().toLowerCase();
+                if (keyClean === 'escola') {
+                    return kClean === 'escola' || kClean === 'nm_escola' || kClean === 'nome_escola' || kClean === 'nome da escola';
+                }
+                return kClean === keyClean;
+            });
             return foundKey ? String(row[foundKey]) : '';
         };
 
         return {
-            ano: '2024',
+            ano: anoDetectado,
             edicao_planilha: nomeFicheiro,
             escola: getVal('Escola'),
             participacao: getVal('(%) Participação'),
@@ -174,11 +187,15 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
     if (error) {
         alert('Erro ao gravar dados: ' + error.message);
     } else {
-        alert(`Sucesso! ${payload.length} registos importados para o Supabase com sucesso.`);
+        alert(`Sucesso! ${payload.length} registos do ano ${anoDetectado} importados para o Supabase com sucesso.`);
         document.getElementById('preview-container').style.display = 'none';
         inputFicheiro.value = '';
     }
 });
+
+
+
+        
         
         
         // Converte a folha para JSON preservando os valores originais
