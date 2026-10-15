@@ -333,11 +333,16 @@ console.log('Usuário autenticado:', data.user.id);
     });
 
 const btnProvaPaulista = document.getElementById('btn-consultar-prova-paulista');
-if (btnProvaPaulista) {
-    btnProvaPaulista.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.href = 'resultados.html';
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    const btnProva = document.getElementById('btn-consultar-prova-paulista');
+    if (btnProva) {
+        btnProva.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'resultados.html';
+        });
+    }
+});
+    
 }
     
 </script>
