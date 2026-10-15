@@ -1,1 +1,62 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Administrativa - Plataforma Educacional</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #17365d; color: white; padding: 20px; text-align: center; }
+        main { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        button { padding: 10px 16px; background-color: #17365d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Painel Administrativo</h1>
+    </header>
+    <main>
+        <h2>Gestão da Plataforma</h2>
+        <p id="status-carregamento">A verificar permissões de acesso...</p>
+        <div id="conteudo-admin" style="display: none;">
+            <p>Bem-vindo à área restrita de administração.</p>
+            <button id="btn-voltar" onclick="window.location.href='resultados.html'">Voltar aos Resultados</button>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Verifica se existe sessão ativa
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 2. Consulta o perfil na tabela profiles
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            // 3. Bloqueia acessos de utilizadores comuns
+            if (!profile || profile.role !== 'admin') {
+                alert('Acesso negado: Apenas administradores podem aceder a esta página.');
+                window.location.href = 'resultados.html';
+                return;
+            }
+
+            // 4. Exibe o conteúdo exclusivo de administrador
+            document.getElementById('status-carregamento').style.display = 'none';
+            document.getElementById('conteudo-admin').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
