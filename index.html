@@ -195,6 +195,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
 <script>
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
@@ -204,7 +205,32 @@
         SUPABASE_PUBLISHABLE_KEY
     );
 
-    console.log('Biblioteca do Supabase carregada.');
+    const formLogin = document.getElementById('form-login');
+    const mensagemLogin = document.getElementById('mensagem-login');
+
+    formLogin.addEventListener('submit', async (evento) => {
+        evento.preventDefault();
+
+        mensagemLogin.textContent = 'Verificando acesso...';
+
+        const email = document.getElementById('email').value.trim();
+        const senha = document.getElementById('senha').value;
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password: senha
+        });
+
+        if (error) {
+            mensagemLogin.textContent = 'Não foi possível entrar. Verifique suas credenciais.';
+            console.error('Erro de autenticação:', error.message);
+            return;
+        }
+
+        mensagemLogin.textContent = 'Login realizado com sucesso.';
+        console.log('Usuário autenticado:', data.user.id);
+    });
 </script>
+
 </body>
 </html>
