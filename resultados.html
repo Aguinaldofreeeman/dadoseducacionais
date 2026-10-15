@@ -93,6 +93,32 @@
             <tbody id="corpo-tabela"></tbody>
         </table>
     </div>
+
+
+
+    <h3>Resultados Educacionais Publicados</h3>
+<div style="overflow-x: auto; margin-top: 20px;">
+    <table border="1" cellpadding="6" style="border-collapse: collapse; width: 100%; text-align: left; font-size: 14px;">
+        <thead>
+            <tr style="background-color: #17365d; color: white;">
+                <th>Escola</th>
+                <th>Participação</th>
+                <th>Acertos</th>
+                <th>Evolução</th>
+                <th>PORT</th>
+                <th>MAT</th>
+                <th>HIS</th>
+                <th>GEO</th>
+                <th>BIO</th>
+                <th>QUI</th>
+                <th>ING</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-resultados">
+            <tr><td colspan="11">A carregar resultados...</td></tr>
+        </tbody>
+    </table>
+</div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -137,10 +163,51 @@ if (profile && profile.role === 'admin') {
         SUPABASE_PUBLISHABLE_KEY
     );
 
+
+// Consulta os registos educacionais na tabela dados_educacionais do Supabase
+const { data: resultados, error: erroResultados } = await supabaseClient
+    .from('dados_educacionais')
+    .select('*')
+    .order('escola', { ascending: true });
+
+const tabelaResultados = document.getElementById('tabela-resultados');
+
+if (erroResultados) {
+    console.error('Erro ao carregar resultados:', erroResultados.message);
+    tabelaResultados.innerHTML = '<tr><td colspan="11">Erro ao carregar dados educacionais.</td></tr>';
+} else if (resultados && resultados.length > 0) {
+    tabelaResultados.innerHTML = resultados.map(r => `
+        <tr>
+            <td><strong>${r.escola || 'N/D'}</strong></td>
+            <td>${r.participacao || '-'}</td>
+            <td>${r.acertos_prova || '-'}</td>
+            <td>${r.evolucao || '-'}</td>
+            <td>${r.port || '-'}</td>
+            <td>${r.mat || '-'}</td>
+            <td>${r.his || '-'}</td>
+            <td>${r.geo || '-'}</td>
+            <td>${r.bio || '-'}</td>
+            <td>${r.qui || '-'}</td>
+            <td>${r.ing || '-'}</td>
+        </tr>
+    `).join('');
+} else {
+    tabelaResultados.innerHTML = '<tr><td colspan="11">Nenhum registo encontrado na base de dados.</td></tr>';
+}
+
+
+
+    
     document.getElementById('btn-voltar').addEventListener('click', () => {
         window.location.href = '/';
     });
 
+
+
+
+
+
+    
     async function carregarResultados() {
         const mensagem = document.getElementById('mensagem');
         const corpo = document.getElementById('corpo-tabela');
