@@ -227,8 +227,11 @@
             return;
         }
 
-        mensagemLogin.textContent = 'Login realizado com sucesso.';
-        console.log('Usuário autenticado:', data.user.id);
+       document.getElementById('area-login').hidden = true;
+document.getElementById('conteudo-plataforma').hidden = false;
+
+mensagemLogin.textContent = 'Login realizado com sucesso.';
+console.log('Usuário autenticado:', data.user.id);
     });
 </script>
 
