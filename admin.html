@@ -38,59 +38,83 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
-        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Verifica se existe sessão ativa
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-            // 2. Consulta o perfil na tabela profiles
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+    // Função global para atualizar o perfil do utilizador
+    window.alterarPerfil = async (userId, novaRole) => {
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update({ role: novaRole })
+            .eq('id', userId);
 
-            // 3. Bloqueia acessos de utilizadores comuns
-            if (!profile || profile.role !== 'admin') {
-                alert('Acesso negado: Apenas administradores podem aceder a esta página.');
-                window.location.href = 'resultados.html';
-                return;
-            }
+        if (error) {
+            alert('Erro ao atualizar perfil: ' + error.message);
+        } else {
+            alert('Perfil atualizado com sucesso!');
+        }
+    };
 
-            // 4. Exibe o conteúdo exclusivo de administrador
-            document.getElementById('status-carregamento').style.display = 'none';
-            document.getElementById('conteudo-admin').style.display = 'block';
-            // 5. Consulta todos os perfis registados no Supabase
-const { data: utilizadores, error: erroUtilizadores } = await supabaseClient
-    .from('profiles')
-    .select('email, role, created_at');
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 1. Verifica se existe sessão ativa
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+            return;
+        }
 
-const tabela = document.getElementById('tabela-utilizadores');
+        // 2. Consulta o perfil na tabela profiles
+        const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
 
-if (erroUtilizadores) {
-    console.error('Erro ao carregar utilizadores:', erroUtilizadores.message);
-    tabela.innerHTML = '<tr><td colspan="3">Erro ao carregar lista de utilizadores.</td></tr>';
-} else if (utilizadores && utilizadores.length > 0) {
-    tabela.innerHTML = utilizadores.map(u => `
-        <tr>
-            <td>${u.email || 'N/D'}</td>
-            <td><strong>${u.role}</strong></td>
-            <td>${new Date(u.created_at).toLocaleDateString('pt-PT')}</td>
-        </tr>
-    `).join('');
-} else {
-    tabela.innerHTML = '<tr><td colspan="3">Nenhum utilizador encontrado.</td></tr>';
-}
-        });
-    </script>
+        // 3. Bloqueia acessos de utilizadores comuns
+        if (!profile || profile.role !== 'admin') {
+            alert('Acesso negado: Apenas administradores podem aceder a esta página.');
+            window.location.href = 'resultados.html';
+            return;
+        }
+
+        // 4. Exibe o conteúdo exclusivo de administrador
+        document.getElementById('status-carregamento').style.display = 'none';
+        document.getElementById('conteudo-admin').style.display = 'block';
+
+        // 5. Consulta todos os perfis registados incluindo o ID
+        const { data: utilizadores, error: erroUtilizadores } = await supabaseClient
+            .from('profiles')
+            .select('id, email, role, created_at');
+
+        const tabela = document.getElementById('tabela-utilizadores');
+
+        if (erroUtilizadores) {
+            console.error('Erro ao carregar utilizadores:', erroUtilizadores.message);
+            tabela.innerHTML = '<tr><td colspan="3">Erro ao carregar lista de utilizadores.</td></tr>';
+        } else if (utilizadores && utilizadores.length > 0) {
+            tabela.innerHTML = utilizadores.map(u => `
+                <tr>
+                    <td>${u.email || 'N/D'}</td>
+                    <td>
+                        <select onchange="alterarPerfil('${u.id}', this.value)" ${u.id === session.user.id ? 'disabled' : ''}>
+                            <option value="usuario" ${u.role === 'usuario' ? 'selected' : ''}>usuario</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                        </select>
+                    </td>
+                    <td>${new Date(u.created_at).toLocaleDateString('pt-PT')}</td>
+                </tr>
+            `).join('');
+        } else {
+            tabela.innerHTML = '<tr><td colspan="3">Nenhum utilizador encontrado.</td></tr>';
+        }
+    });
+</script>
+
+
+    
 </body>
 </html>
