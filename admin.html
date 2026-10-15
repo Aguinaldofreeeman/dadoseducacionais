@@ -112,6 +112,7 @@ document.getElementById('input-planilha')?.addEventListener('change', (e) => {
         const worksheet = workbook.Sheets[sheetName];
 
 
+
 // Escuta o clique no botão de confirmação e grava os dados no Supabase
 document.getElementById('btn-confirmar-importacao')?.addEventListener('click', async () => {
     if (!dadosPlanilhaParaImportar || dadosPlanilhaParaImportar.length === 0) {
@@ -130,20 +131,32 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
     const anoMatch = nomeFicheiro.match(/202[0-9]/);
     const anoDetectado = anoMatch ? anoMatch[0] : '2024';
 
+    // Helper para normalizar textos (remove acentos, espaços extras e converte para minúsculas)
+    const normalizar = (texto) => {
+        return String(texto || '')
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    };
+
     // Mapeia os dados da planilha para as colunas da tabela
     const payload = dadosPlanilhaParaImportar.map(row => {
+        const keys = Object.keys(row);
+
         const getVal = (keyName) => {
-            const keys = Object.keys(row);
-            // Procura correspondência exata ou variações comuns do nome da coluna
+            const keyClean = normalizar(keyName);
+
             const foundKey = keys.find(k => {
-                const kClean = k.trim().toLowerCase();
-                const keyClean = keyName.trim().toLowerCase();
+                const kClean = normalizar(k);
+
                 if (keyClean === 'escola') {
-                    return kClean === 'escola' || kClean === 'nm_escola' || kClean === 'nome_escola' || kClean === 'nome da escola';
+                    return kClean.includes('escola') || kClean.includes('unidade') || kClean.includes('nm_escola');
                 }
                 return kClean === keyClean;
             });
-            return foundKey ? String(row[foundKey]) : '';
+
+            return foundKey && row[foundKey] !== undefined && row[foundKey] !== null ? String(row[foundKey]).trim() : '';
         };
 
         return {
@@ -194,6 +207,9 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
 });
 
 
+
+
+        
 
         
         
