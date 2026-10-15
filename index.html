@@ -231,6 +231,71 @@
 }
 
 verificarSessao();
+    
+document.getElementById('btn-carregar-resultados').addEventListener('click', async () => {
+    const status = document.getElementById('status-resultados');
+    const lista = document.getElementById('lista-resultados');
+
+    status.textContent = 'Consultando resultados...';
+    lista.replaceChildren();
+
+    const { data, error } = await supabaseClient
+        .from('resultados_publicados')
+        .select('escola, avaliacao, indicador, componente, valor_numerico')
+        .limit(20);
+
+    if (error) {
+        console.error('Erro ao consultar resultados:', error.message);
+        status.textContent = 'Não foi possível carregar os resultados.';
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        status.textContent = 'Nenhum resultado publicado encontrado.';
+        return;
+    }
+
+    const tabela = document.createElement('table');
+    tabela.style.width = '100%';
+    tabela.style.borderCollapse = 'collapse';
+
+    const cabecalho = document.createElement('tr');
+
+    ['Escola', 'Avaliação', 'Indicador', 'Componente', 'Valor'].forEach((texto) => {
+        const th = document.createElement('th');
+        th.textContent = texto;
+        th.style.textAlign = 'left';
+        th.style.padding = '8px';
+        th.style.borderBottom = '1px solid #dce4ee';
+        cabecalho.appendChild(th);
+    });
+
+    tabela.appendChild(cabecalho);
+
+    data.forEach((registro) => {
+        const linha = document.createElement('tr');
+
+        [
+            registro.escola,
+            registro.avaliacao,
+            registro.indicador,
+            registro.componente ?? '—',
+            registro.valor_numerico ?? '—'
+        ].forEach((valor) => {
+            const td = document.createElement('td');
+            td.textContent = valor == null ? '—' : String(valor);
+            td.style.padding = '8px';
+            td.style.borderBottom = '1px solid #e5eaf0';
+            linha.appendChild(td);
+        });
+
+        tabela.appendChild(linha);
+    });
+
+    lista.appendChild(tabela);
+    status.textContent = `${data.length} registros carregados (limite de 20).`;
+});
+
 
     formLogin.addEventListener('submit', async (evento) => {
         evento.preventDefault();
