@@ -1,273 +1,112 @@
-
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados — Prova Paulista</title>
-
+    <title>Resultados - Prova Paulista</title>
     <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 24px;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f3f6fa;
-            color: #243247;
-        }
-
-        main {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 24px;
-            border-radius: 10px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.06);
-        }
-
-        h1 { color: #17365d; }
-
-        .tabela-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            min-width: 850px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dce4ee;
-            white-space: nowrap;
-        }
-
-        th {
-            background: #17365d;
-            color: white;
-        }
-
-        tr:nth-child(even) { background: #f7f9fc; }
-
-        #mensagem { margin: 16px 0; }
-
-        button {
-            padding: 10px 16px;
-            background: #17365d;
-            color: white;
-            border: 0;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f8; color: #333; }
+        .header { background-color: #17365d; color: white; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { background-color: #17365d; color: white; padding: 8px 12px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; cursor: pointer; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th { background-color: #17365d; color: white; text-align: left; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        tr:nth-child(even) { background-color: #f8fafc; }
     </style>
 </head>
 <body>
-<main>
-    <h1>Resultados — Prova Paulista</h1>
-    <p>Resultados publicados disponíveis para sua conta autenticada.</p>
-
-  <button id="btn-admin" style="display: none; padding: 10px 14px; background: #d97706; color: white; border: 0; border-radius: 6px; cursor: pointer; margin-left: 10px;">
-    Área Administrativa
-</button>
-    <p id="mensagem" role="status" aria-live="polite">Verificando autenticação...</p>
-
-    <div class="tabela-container">
-        <table>
-           <thead>
-    <tr>
-        <th>Escola</th>
-        <th>Participação</th>
-        <th>Acertos Prova</th>
-        <th>PORT</th>
-        <th>MAT</th>
-        <th>HIS</th>
-        <th>GEO</th>
-    </tr>
-</thead>
-            <tbody id="corpo-tabela"></tbody>
-        </table>
+    <div class="header">
+        <h2 style="margin: 0;">Resultados — Prova Paulista</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">Plataforma de Consulta Educacional</p>
     </div>
 
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0;">Resultados Educacionais Publicados</h3>
+            <a href="admin.html" id="btn-admin" class="btn" style="display: none;">Área Administrativa</a>
+        </div>
 
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Escola</th>
+                        <th>Participação</th>
+                        <th>Acertos</th>
+                        <th>Evolução</th>
+                        <th>PORT</th>
+                        <th>MAT</th>
+                        <th>HIS</th>
+                        <th>GEO</th>
+                        <th>BIO</th>
+                        <th>QUI</th>
+                        <th>ING</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-resultados">
+                    <tr><td colspan="11">A carregar resultados...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <h3>Resultados Educacionais Publicados</h3>
-<div style="overflow-x: auto; margin-top: 20px;">
-    <table border="1" cellpadding="6" style="border-collapse: collapse; width: 100%; text-align: left; font-size: 14px;">
-        <thead>
-            <tr style="background-color: #17365d; color: white;">
-                <th>Escola</th>
-                <th>Participação</th>
-                <th>Acertos</th>
-                <th>Evolução</th>
-                <th>PORT</th>
-                <th>MAT</th>
-                <th>HIS</th>
-                <th>GEO</th>
-                <th>BIO</th>
-                <th>QUI</th>
-                <th>ING</th>
-            </tr>
-        </thead>
-        <tbody id="tabela-resultados">
-            <tr><td colspan="11">A carregar resultados...</td></tr>
-        </tbody>
-    </table>
-</div>
-</main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Verifica se existe uma sessão ativa no Supabase
-    const { data: { session } } = await supabaseClient.auth.getSession();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Verifica autenticação
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
 
-    if (!session) {
-        // Se não houver sessão ativa, redireciona para a página de login
-        window.location.href = 'index.html';
-        return;
-    }
+            // 2. Exibe botão administrativo apenas se o perfil for admin
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
 
-// Consulta a função do utilizador na tabela profiles
-const { data: profile } = await supabaseClient
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
 
-// Se for administrador, exibe o botão administrativo
-if (profile && profile.role === 'admin') {
-    const btnAdmin = document.getElementById('btn-admin');
-    if (btnAdmin) {
-        btnAdmin.style.display = 'inline-block';
-        btnAdmin.addEventListener('click', () => {
-            window.location.href = 'admin.html';
+            // 3. Consulta e exibe os dados da tabela dados_educacionais
+            const { data: resultados, error } = await supabaseClient
+                .from('dados_educacionais')
+                .select('*')
+                .order('escola', { ascending: true });
+
+            const tabela = document.getElementById('tabela-resultados');
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                tabela.innerHTML = `<tr><td colspan="11">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else if (resultados && resultados.length > 0) {
+                tabela.innerHTML = resultados.map(r => `
+                    <tr>
+                        <td><strong>${r.escola || 'N/D'}</strong></td>
+                        <td>${r.participacao || '-'}</td>
+                        <td>${r.acertos_prova || '-'}</td>
+                        <td>${r.evolucao || '-'}</td>
+                        <td>${r.port || '-'}</td>
+                        <td>${r.mat || '-'}</td>
+                        <td>${r.his || '-'}</td>
+                        <td>${r.geo || '-'}</td>
+                        <td>${r.bio || '-'}</td>
+                        <td>${r.qui || '-'}</td>
+                        <td>${r.ing || '-'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tabela.innerHTML = '<tr><td colspan="11">Nenhum registo encontrado na base de dados.</td></tr>';
+            }
         });
-    }
-}
-
-
-        
-    // Código existente para carregar os resultados da Prova Paulista...
-});
-    const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
-
-    const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
-
-
-// Consulta os registos educacionais na tabela dados_educacionais do Supabase
-const { data: resultados, error: erroResultados } = await supabaseClient
-    .from('dados_educacionais')
-    .select('*')
-    .order('escola', { ascending: true });
-
-const tabelaResultados = document.getElementById('tabela-resultados');
-
-if (erroResultados) {
-    console.error('Erro ao carregar resultados:', erroResultados.message);
-    tabelaResultados.innerHTML = '<tr><td colspan="11">Erro ao carregar dados educacionais.</td></tr>';
-} else if (resultados && resultados.length > 0) {
-    tabelaResultados.innerHTML = resultados.map(r => `
-        <tr>
-            <td><strong>${r.escola || 'N/D'}</strong></td>
-            <td>${r.participacao || '-'}</td>
-            <td>${r.acertos_prova || '-'}</td>
-            <td>${r.evolucao || '-'}</td>
-            <td>${r.port || '-'}</td>
-            <td>${r.mat || '-'}</td>
-            <td>${r.his || '-'}</td>
-            <td>${r.geo || '-'}</td>
-            <td>${r.bio || '-'}</td>
-            <td>${r.qui || '-'}</td>
-            <td>${r.ing || '-'}</td>
-        </tr>
-    `).join('');
-} else {
-    tabelaResultados.innerHTML = '<tr><td colspan="11">Nenhum registo encontrado na base de dados.</td></tr>';
-}
-
-
-
-    
-    document.getElementById('btn-voltar').addEventListener('click', () => {
-        window.location.href = '/';
-    });
-
-
-
-
-
-
-    
-    async function carregarResultados() {
-        const mensagem = document.getElementById('mensagem');
-        const corpo = document.getElementById('corpo-tabela');
-
-        const { data: sessaoData, error: erroSessao } =
-            await supabaseClient.auth.getSession();
-
-        if (erroSessao || !sessaoData.session) {
-            mensagem.textContent = 'Faça login na página inicial para consultar os resultados.';
-            return;
-        }
-
-        mensagem.textContent = 'Carregando resultados da Prova Paulista 2024...';
-
-        const { data, error } = await supabaseClient
-            .from('prova_paulista_1bim_2024')
-            .select('escola, participacao, acertos_prova, port, mat, his, geo')
-            .limit(100);
-
-        if (error) {
-            console.error('Erro ao carregar resultados:', error.message);
-            mensagem.textContent = 'Não foi possível carregar os resultados.';
-            return;
-        }
-
-        if (!data || data.length === 0) {
-            mensagem.textContent = 'Nenhum resultado encontrado na base de dados.';
-            return;
-        }
-
-        corpo.replaceChildren();
-
-        data.forEach(registro => {
-            const linha = document.createElement('tr');
-
-            [
-                registro.escola,
-                registro.participacao ?? '—',
-                registro.acertos_prova ?? '—',
-                registro.port ?? '—',
-                registro.mat ?? '—',
-                registro.his ?? '—',
-                registro.geo ?? '—'
-            ].forEach(valor => {
-                const celula = document.createElement('td');
-                celula.textContent = valor == null ? '—' : String(valor);
-                linha.appendChild(celula);
-            });
-
-            corpo.appendChild(linha);
-        });
-
-        mensagem.textContent = `${data.length} registo(s) carregado(s).`;
-    }
-
-    carregarResultados();
-</script>
-
-
-
-    
+    </script>
 </body>
 </html>
