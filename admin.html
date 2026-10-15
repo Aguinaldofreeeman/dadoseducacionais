@@ -110,6 +110,76 @@ document.getElementById('input-planilha')?.addEventListener('change', (e) => {
         const workbook = XLSX.read(data, { type: 'array', raw: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
+
+
+// Escuta o clique no botão de confirmação e grava os dados no Supabase
+document.getElementById('btn-confirmar-importacao')?.addEventListener('click', async () => {
+    if (!dadosPlanilhaParaImportar || dadosPlanilhaParaImportar.length === 0) {
+        alert('Nenhum dado para importar.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-confirmar-importacao');
+    btn.disabled = true;
+    btn.innerText = 'A gravar no Supabase...';
+
+    const inputFicheiro = document.getElementById('input-planilha');
+    const nomeFicheiro = inputFicheiro.files[0]?.name || 'Importacao';
+
+    // Mapeia os dados da planilha para as colunas da tabela mantendo fidelidade aos valores
+    const payload = dadosPlanilhaParaImportar.map(row => {
+        const getVal = (keyName) => {
+            const foundKey = Object.keys(row).find(k => k.trim().toLowerCase() === keyName.trim().toLowerCase());
+            return foundKey ? String(row[foundKey]) : '';
+        };
+
+        return {
+            ano: '2024',
+            edicao_planilha: nomeFicheiro,
+            escola: getVal('Escola'),
+            participacao: getVal('(%) Participação'),
+            acertos_prova: getVal('(%) Acertos Prova'),
+            evolucao: getVal('*Evolução'),
+            port: getVal('PORT'),
+            mat: getVal('MAT'),
+            his: getVal('HIS'),
+            geo: getVal('GEO'),
+            bio: getVal('BIO'),
+            qui: getVal('QUI'),
+            ing: getVal('ING'),
+            cie: getVal('CIE'),
+            fis: getVal('FIS'),
+            ed_fin: getVal('ED FIN'),
+            emp: getVal('EMP'),
+            tec_rob: getVal('TEC ROB'),
+            ing_it: getVal('ING IT'),
+            art: getVal('ART'),
+            mid_dig: getVal('MID DIG'),
+            lide: getVal('LIDE'),
+            oratoria: getVal('ORATORIA'),
+            geo_pol: getVal('GEO POL'),
+            fil_e_soc_mod: getVal('FIL E SOC MOD'),
+            bio_tec: getVal('BIO TEC'),
+            quim_apl: getVal('QUIM APL')
+        };
+    });
+
+    const { error } = await supabaseClient
+        .from('dados_educacionais')
+        .insert(payload);
+
+    btn.disabled = false;
+    btn.innerText = 'Confirmar e Gravar no Supabase';
+
+    if (error) {
+        alert('Erro ao gravar dados: ' + error.message);
+    } else {
+        alert(`Sucesso! ${payload.length} registos importados para o Supabase com sucesso.`);
+        document.getElementById('preview-container').style.display = 'none';
+        inputFicheiro.value = '';
+    }
+});
+        
         
         // Converte a folha para JSON preservando os valores originais
         const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
