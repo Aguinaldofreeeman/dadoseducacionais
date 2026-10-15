@@ -96,6 +96,43 @@
             return;
         }
 
+
+        let dadosPlanilhaParaImportar = [];
+
+// Escuta a seleção do ficheiro no input
+document.getElementById('input-planilha')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array', raw: true });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        // Converte a folha para JSON preservando os valores originais
+        const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (jsonRows.length === 0) {
+            alert('A planilha selecionada não contém dados.');
+            return;
+        }
+
+        dadosPlanilhaParaImportar = jsonRows;
+        
+        // Exibe o painel de pré-visualização
+        document.getElementById('status-preview').innerText = 
+            `Ficheiro "${file.name}" lido com sucesso! Total de ${jsonRows.length} registos prontos para importação.`;
+        document.getElementById('preview-container').style.display = 'block';
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+
+
+        
+
         // 2. Consulta o perfil na tabela profiles
         const { data: profile } = await supabaseClient
             .from('profiles')
