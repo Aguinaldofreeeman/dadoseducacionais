@@ -202,7 +202,7 @@
         Plataforma de Dados Educacionais
     </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
@@ -219,8 +219,8 @@
             formLogin.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const emailInput = document.getElementById('email');
-                const passwordInput = document.getElementById('password');
-                const mensagem = document.getElementById('mensagem-erro') || document.getElementById('mensagem');
+                const passwordInput = document.getElementById('senha');
+                const mensagem = document.getElementById('mensagem-login');
 
                 if (!emailInput || !passwordInput) return;
 
