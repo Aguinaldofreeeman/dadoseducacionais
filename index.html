@@ -161,13 +161,22 @@
 
             <div class="modulos">
 
-                <article class="modulo">
-                    <h3>Prova Paulista</h3>
-                    <p>
-                        Futuras consultas de participação, resultados por
-                        componente curricular e evolução entre bimestres.
-                    </p>
-                </article>
+              
+<article class="modulo">
+    <h3>Prova Paulista</h3>
+    <p>
+        Consulte os resultados educacionais publicados no banco de dados.
+    </p>
+
+    <button id="btn-carregar-resultados" type="button"
+            style="padding:10px 14px;background:#17365d;color:white;border:0;border-radius:6px;cursor:pointer;">
+        Consultar resultados
+    </button>
+
+    <p id="status-resultados" role="status" aria-live="polite"></p>
+    <div id="lista-resultados"></div>
+</article>
+
 
                 <article class="modulo">
                     <h3>SARESP</h3>
