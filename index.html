@@ -205,135 +205,44 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
-<script>
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
 
-    const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
 
-    const formLogin = document.getElementById('form-login');
-    const mensagemLogin = document.getElementById('mensagem-login');
-    async function verificarSessao() {
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (error) {
-        console.error('Erro ao verificar sessão:', error.message);
-        return;
-    }
-
-    if (data.session) {
-        document.getElementById('area-login').hidden = true;
-        document.getElementById('conteudo-plataforma').hidden = false;
-    }
-}
-
-verificarSessao();
-    
-document.getElementById('btn-carregar-resultados').addEventListener('click', async () => {
-    const status = document.getElementById('status-resultados');
-    const lista = document.getElementById('lista-resultados');
-
-    status.textContent = 'Consultando resultados...';
-    lista.replaceChildren();
-
-    const { data, error } = await supabaseClient
-        .from('resultados_publicados')
-        .select('escola, avaliacao, indicador, componente, valor_numerico')
-        .limit(20);
-
-    if (error) {
-        console.error('Erro ao consultar resultados:', error.message);
-        status.textContent = 'Não foi possível carregar os resultados.';
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        status.textContent = 'Nenhum resultado publicado encontrado.';
-        return;
-    }
-
- const areaTabela = document.createElement('div');
-areaTabela.style.width = '100%';
-areaTabela.style.maxWidth = '100%';
-areaTabela.style.overflowX = 'auto';
-areaTabela.style.display = 'block';
-
-const tabela = document.createElement('table');
-tabela.style.width = '100%';
-tabela.style.minWidth = '650px';
-tabela.style.borderCollapse = 'collapse';
-tabela.style.tableLayout = 'auto';
-
-    const cabecalho = document.createElement('tr');
-
-    ['Escola', 'Avaliação', 'Indicador', 'Componente', 'Valor'].forEach((texto) => {
-        const th = document.createElement('th');
-        th.textContent = texto;
-        th.style.textAlign = 'left';
-        th.style.padding = '8px';
-        th.style.borderBottom = '1px solid #dce4ee';
-        cabecalho.appendChild(th);
-    });
-
-    tabela.appendChild(cabecalho);
-
-    data.forEach((registro) => {
-        const linha = document.createElement('tr');
-
-        [
-            registro.escola,
-            registro.avaliacao,
-            registro.indicador,
-            registro.componente ?? '—',
-            registro.valor_numerico ?? '—'
-        ].forEach((valor) => {
-            const td = document.createElement('td');
-            td.textContent = valor == null ? '—' : String(valor);
-            td.style.padding = '8px';
-            td.style.borderBottom = '1px solid #e5eaf0';
-            linha.appendChild(td);
-        });
-
-        tabela.appendChild(linha);
-    });
-
-   areaTabela.appendChild(tabela);
-lista.appendChild(areaTabela);
-    status.textContent = `${data.length} registros carregados (limite de 20).`;
-});
-
-
-    formLogin.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
-
-        mensagemLogin.textContent = 'Verificando acesso...';
-
-        const email = document.getElementById('email').value.trim();
-        const senha = document.getElementById('senha').value;
-
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email,
-            password: senha
-        });
-
-        if (error) {
-            mensagemLogin.textContent = 'Não foi possível entrar. Verifique suas credenciais.';
-            console.error('Erro de autenticação:', error.message);
-            return;
-        }
-
-       document.getElementById('area-login').hidden = true;
-document.getElementById('conteudo-plataforma').hidden = false;
-
-mensagemLogin.textContent = 'Login realizado com sucesso.';
-console.log('Usuário autenticado:', data.user.id);
-    });
-
-const btnProvaPaulista = document.getElementById('btn-consultar-prova-paulista');
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Gestão do Formulário de Login
+    const formLogin = document.getElementById('form-login');
+    if (formLogin) {
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const mensagem = document.getElementById('mensagem-erro') || document.getElementById('mensagem');
+
+            if (!emailInput || !passwordInput) return;
+
+            if (mensagem) mensagem.textContent = 'A autenticar...';
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: emailInput.value,
+                password: passwordInput.value
+            });
+
+            if (error) {
+                console.error('Erro de autenticação:', error.message);
+                if (mensagem) mensagem.textContent = 'Falha no login: ' + error.message;
+            } else {
+                if (mensagem) mensagem.textContent = 'Login efetuado com sucesso!';
+                window.location.href = 'resultados.html';
+            }
+        });
+    }
+
+    // 2. Redirecionamento do Botão da Prova Paulista
     const btnProva = document.getElementById('btn-consultar-prova-paulista');
     if (btnProva) {
         btnProva.addEventListener('click', (e) => {
@@ -342,10 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    
-}
-    
-</script>
 
 </body>
 </html>
