@@ -1,1 +1,162 @@
 
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados — Prova Paulista</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fa;
+            color: #243247;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        }
+
+        h1 { color: #17365d; }
+
+        .tabela-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dce4ee;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+        }
+
+        tr:nth-child(even) { background: #f7f9fc; }
+
+        #mensagem { margin: 16px 0; }
+
+        button {
+            padding: 10px 16px;
+            background: #17365d;
+            color: white;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Resultados — Prova Paulista</h1>
+    <p>Resultados publicados disponíveis para sua conta autenticada.</p>
+
+    <button id="btn-voltar" type="button">Voltar à plataforma</button>
+    <p id="mensagem" role="status" aria-live="polite">Verificando autenticação...</p>
+
+    <div class="tabela-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Escola</th>
+                    <th>Avaliação</th>
+                    <th>Indicador</th>
+                    <th>Componente</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
+        </table>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'SUA_PROJECT_URL';
+    const SUPABASE_PUBLISHABLE_KEY = 'SUA_PUBLISHABLE_KEY';
+
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+    document.getElementById('btn-voltar').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+
+    async function carregarResultados() {
+        const mensagem = document.getElementById('mensagem');
+        const corpo = document.getElementById('corpo-tabela');
+
+        const { data: sessaoData, error: erroSessao } =
+            await supabaseClient.auth.getSession();
+
+        if (erroSessao || !sessaoData.session) {
+            mensagem.textContent = 'Faça login na página inicial para consultar os resultados.';
+            return;
+        }
+
+        mensagem.textContent = 'Carregando resultados...';
+
+        const { data, error } = await supabaseClient
+            .from('resultados_publicados')
+            .select('escola, avaliacao, indicador, componente, valor_numerico')
+            .limit(100);
+
+        if (error) {
+            console.error('Erro ao carregar resultados:', error.message);
+            mensagem.textContent = 'Não foi possível carregar os resultados.';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            mensagem.textContent = 'Nenhum resultado publicado encontrado.';
+            return;
+        }
+
+        data.forEach(registro => {
+            const linha = document.createElement('tr');
+
+            [
+                registro.escola,
+                registro.avaliacao,
+                registro.indicador,
+                registro.componente ?? '—',
+                registro.valor_numerico ?? '—'
+            ].forEach(valor => {
+                const celula = document.createElement('td');
+                celula.textContent = valor == null ? '—' : String(valor);
+                linha.appendChild(celula);
+            });
+
+            corpo.appendChild(linha);
+        });
+
+        mensagem.textContent = `${data.length} registros carregados (limite de 100).`;
+    }
+
+    carregarResultados();
+</script>
+</body>
+</html>
