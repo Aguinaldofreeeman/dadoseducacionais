@@ -207,6 +207,21 @@
 
     const formLogin = document.getElementById('form-login');
     const mensagemLogin = document.getElementById('mensagem-login');
+    async function verificarSessao() {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+        console.error('Erro ao verificar sessão:', error.message);
+        return;
+    }
+
+    if (data.session) {
+        document.getElementById('area-login').hidden = true;
+        document.getElementById('conteudo-plataforma').hidden = false;
+    }
+}
+
+verificarSessao();
 
     formLogin.addEventListener('submit', async (evento) => {
         evento.preventDefault();
