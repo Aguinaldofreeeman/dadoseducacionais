@@ -117,11 +117,11 @@
             return;
         }
 
-        mensagem.textContent = 'Carregando resultados...';
+        mensagem.textContent = 'Carregando resultados da Prova Paulista 2024...';
 
         const { data, error } = await supabaseClient
-            .from('resultados_publicados')
-            .select('escola, avaliacao, indicador, componente, valor_numerico')
+            .from('prova_paulista_1bim_2024')
+            .select('escola, participacao, acertos_prova, port, mat, his, geo')
             .limit(100);
 
         if (error) {
@@ -131,19 +131,23 @@
         }
 
         if (!data || data.length === 0) {
-            mensagem.textContent = 'Nenhum resultado publicado encontrado.';
+            mensagem.textContent = 'Nenhum resultado encontrado na base de dados.';
             return;
         }
+
+        corpo.replaceChildren();
 
         data.forEach(registro => {
             const linha = document.createElement('tr');
 
             [
                 registro.escola,
-                registro.avaliacao,
-                registro.indicador,
-                registro.componente ?? '—',
-                registro.valor_numerico ?? '—'
+                registro.participacao ?? '—',
+                registro.acertos_prova ?? '—',
+                registro.port ?? '—',
+                registro.mat ?? '—',
+                registro.his ?? '—',
+                registro.geo ?? '—'
             ].forEach(valor => {
                 const celula = document.createElement('td');
                 celula.textContent = valor == null ? '—' : String(valor);
@@ -153,10 +157,14 @@
             corpo.appendChild(linha);
         });
 
-        mensagem.textContent = `${data.length} registros carregados (limite de 100).`;
+        mensagem.textContent = `${data.length} registo(s) carregado(s).`;
     }
 
     carregarResultados();
 </script>
+
+
+
+    
 </body>
 </html>
