@@ -112,7 +112,7 @@
 
         // Extrai/calcula o ano a partir do campo ou do nome do ficheiro
         function obterAno(item) {
-            if (item.ano && item.ano !== 'null' && String(item.ano).trim() !== '') return String(item.ano);
+            if (item.ano && item.ano !== 'null' && String(item.ano).trim() !== '') return String(item.ano).trim();
             const match = (item.edicao_planilha || '').match(/202[0-9]/);
             return match ? match[0] : '2024';
         }
@@ -130,7 +130,6 @@
         // Popula os menus de seleção ordenados
         function carregarFiltros(dados) {
             const selectAno = document.getElementById('filtro-ano');
-            const selectEdicao = document.getElementById('filtro-edicao');
 
             dados.forEach(item => {
                 item.ano_calculado = obterAno(item);
@@ -139,18 +138,29 @@
 
             const anosUnicos = [...new Set(dados.map(item => item.ano_calculado))].sort();
 
-            const edicoesUnicas = [...new Set(dados.map(item => item.edicao_planilha).filter(Boolean))].sort((a, b) => {
-                const anoA = (a.match(/202[0-9]/) || ['0'])[0];
-                const anoB = (b.match(/202[0-9]/) || ['0'])[0];
-                if (anoA !== anoB) return anoA.localeCompare(anoB);
-                return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-            });
-
             selectAno.innerHTML = '<option value="">Selecione o Ano...</option>' + 
                 anosUnicos.map(a => `<option value="${a}">${a}</option>`).join('');
 
+            atualizarOpcoesEdicao();
+        }
+
+        // Atualiza as edições com base no ano selecionado
+        function atualizarOpcoesEdicao() {
+            const anoSel = document.getElementById('filtro-ano').value;
+            const selectEdicao = document.getElementById('filtro-edicao');
+
+            const edicoesFiltradas = [...new Set(todosResultados
+                .filter(r => !anoSel || r.ano_calculado === anoSel)
+                .map(r => r.edicao_planilha)
+                .filter(Boolean))].sort((a, b) => {
+                    const anoA = (a.match(/202[0-9]/) || ['0'])[0];
+                    const anoB = (b.match(/202[0-9]/) || ['0'])[0];
+                    if (anoA !== anoB) return anoA.localeCompare(anoB);
+                    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+                });
+
             selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
-                edicoesUnicas.map(e => `<option value="${e}">${e}</option>`).join('');
+                edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
         }
 
         // Renderiza a tabela filtrada e deduplicada
@@ -251,10 +261,11 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
-            // Busca os dados da tabela sem a clausula SQL rígida de ordenação
+            // Busca até 5.000 registos para garantir o carregamento completo da tabela resultados_educacionais
             const { data: resultados, error } = await supabaseClient
                 .from('resultados_educacionais')
-                .select('*');
+                .select('*')
+                .range(0, 5000);
 
             if (error) {
                 console.error('Erro ao carregar dados:', error.message);
@@ -265,22 +276,7 @@
                 renderizarTabela();
 
                 document.getElementById('filtro-ano').addEventListener('change', () => {
-                    const anoSel = document.getElementById('filtro-ano').value;
-                    const selectEdicao = document.getElementById('filtro-edicao');
-                    
-                    const edicoesFiltradas = [...new Set(todosResultados
-                        .filter(r => !anoSel || r.ano_calculado === anoSel)
-                        .map(r => r.edicao_planilha)
-                        .filter(Boolean))].sort((a, b) => {
-                            const anoA = (a.match(/202[0-9]/) || ['0'])[0];
-                            const anoB = (b.match(/202[0-9]/) || ['0'])[0];
-                            if (anoA !== anoB) return anoA.localeCompare(anoB);
-                            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-                        });
-
-                    selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
-                        edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
-
+                    atualizarOpcoesEdicao();
                     renderizarTabela();
                 });
 
