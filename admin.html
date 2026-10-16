@@ -65,16 +65,18 @@
 
     const TABELA_DESTINO = 'dados_educacionais';
 
+    // "(%) Participação" -> "participacao"
     const compactar = (t) => String(t ?? '')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLowerCase().replace(/[^a-z0-9]/g, '');
 
     const igual = (...nomes) => (k) => nomes.includes(k);
 
-    // Mapeamento expandido para reconhecer as siglas exatas da sua planilha (ART MID D, FIL E SOC, etc.)
+    // Como reconhecer, na planilha, o cabeçalho de cada coluna do banco
     const CAMPOS = {
         escola:         (k) => k.includes('escola') || k.includes('unidade') || k === 'nmescola',
-        participacao:   (k) => k.includes('particip'),
+        total_alun:     (k) => k.includes('totalalun') || k === 'alunos' || k === 'totaldealunos',
+        participacao:   (k) => k.includes('partic'),
         acertos_prova:  (k) => k.includes('acerto'),
         evolucao:       (k) => k.includes('evolu'),
         port:           igual('port', 'portugues', 'lp', 'linguaportuguesa'),
@@ -87,18 +89,24 @@
         cie:            igual('cie', 'ciencias'),
         fis:            igual('fis', 'fisica'),
         ed_fin:         igual('edfin'),
-        emp:            (k) => k.includes('emp'),
+        emp:            (k) => k === 'emp' || k.startsWith('empreend'),
         tec_rob:        igual('tecrob'),
         ing_it:         igual('ingit'),
+        ing_if:         igual('ingif'),
         mid_dig:        igual('middig'),
-        art:            (k) => k.includes('artmidd') || k.includes('artmiddig') || k === 'art' || k === 'arte',
+        art:            (k) => k.includes('artmidd') || k === 'art' || k === 'arte',
         lide:           igual('lide', 'lid', 'lideranca'),
         oratoria:       igual('oratoria', 'ora'),
         fil_e_soc_mod:  (k) => (k.includes('fil') && k.includes('soc')) || k === 'filesoc',
+        filo:           igual('filo', 'filosofia'),
+        soc:            igual('soc', 'sociologia'),
+        prog:           igual('prog', 'programacao'),
+        tec_ino:        igual('tecino', 'tecinovacao'),
         geo_pol:        igual('geopol'),
-      
         bio_tec:        igual('biotec'),
-        quim_apl:       (k) => k.includes('quimapl')
+        quim_apl:       (k) => k.includes('quimapl'),
+        oe_port:        igual('oeport'),
+        oe_mat:         igual('oemat')
     };
 
     function lerPlanilha(arrayBuffer) {
@@ -216,6 +224,10 @@
                 dadosPlanilhaParaImportar = linhas;
                 mapaColunas = mapearCabecalhos(cabecalhos);
 
+                // Cabeçalhos da planilha que NÃO foram usados por nenhum campo (possíveis colunas perdidas)
+                const usados = new Set(Object.values(mapaColunas).filter(Boolean));
+                const semDestino = cabecalhos.filter(h => h && !usados.has(h));
+
                 const naoEncontradas = Object.entries(mapaColunas)
                     .filter(([, h]) => h === null).map(([campo]) => campo.toUpperCase());
                 const encontradas = Object.entries(mapaColunas)
@@ -225,8 +237,9 @@
                     `Ficheiro "${file.name}" lido com sucesso! Total de ${linhas.length} registos prontos para importação.`;
 
                 document.getElementById('status-colunas').innerHTML =
-                    `<b>Colunas mapeadas com sucesso:</b> ${encontradas.join(' | ')}<br><br>` +
-                    `<b style="color:#b91c1c;">Campos do banco sem correspondência na planilha (ficarão vazios):</b> ${naoEncontradas.length ? naoEncontradas.join(', ') : 'nenhuma'}`;
+                    `<b>Colunas mapeadas:</b> ${encontradas.join(' | ')}<br><br>` +
+                    `<b style="color:#b91c1c;">Campos do banco sem correspondência na planilha (ficarão vazios):</b> ${naoEncontradas.length ? naoEncontradas.join(', ') : 'nenhuma'}<br><br>` +
+                    `<b style="color:#b45309;">Colunas da planilha que NÃO serão importadas:</b> ${semDestino.length ? semDestino.map(h => `"${h}"`).join(', ') : 'nenhuma'}`;
 
                 document.getElementById('preview-container').style.display = 'block';
             };
