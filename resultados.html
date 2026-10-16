@@ -68,7 +68,8 @@
                         <th>EMP</th>
                         <th>TEC ROB</th>
                         <th>ING IT</th>
-                        <th>ART MID DIG</th>
+                        <th>ART</th>
+                        <th>MID DIG</th>
                         <th>LIDE</th>
                         <th>ORATORIA</th>
                         <th>GEO POL</th>
@@ -78,7 +79,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="24" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
+                    <tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -106,15 +107,9 @@
             const selectAno = document.getElementById('filtro-ano');
 
             dados.forEach(item => {
-                // Tenta extrair o ano da data de criação ou define 2024 como padrão
-                let anoExtraido = '2024';
-                if (item.criado_em) {
-                    const anoData = new Date(item.criado_em).getFullYear();
-                    if (!isNaN(anoData)) anoExtraido = String(anoData);
-                }
-                item.ano_calculado = item.ano ? String(item.ano) : anoExtraido;
+                item.ano_calculado = item.ano ? String(item.ano) : '2024';
                 item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
-                item.escola_exibicao = item.nome_escola_original || 'N/D';
+                item.escola_exibicao = item.escola || 'N/D';
             });
 
             const anosUnicos = [...new Set(dados.map(item => item.ano_calculado).filter(Boolean))].sort();
@@ -144,7 +139,7 @@
             const tabela = document.getElementById('tabela-resultados');
 
             if (!anoSelecionado && !edicaoSelecionada) {
-                tabela.innerHTML = '<tr><td colspan="24" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
                 return;
             }
 
@@ -156,83 +151,54 @@
                 return bateAno && bateEdicao && !eMetadado;
             });
 
-            const mapaEscolas = {};
+            // Separa escolas da linha TOTAL
+            const listaEscolas = filtrados
+                .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
+                .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
 
-            filtrados.forEach(r => {
-                const escola = r.escola_exibicao;
-                if (!mapaEscolas[escola]) {
-                    mapaEscolas[escola] = {
-                        escola: escola,
-                        participacao: null,
-                        acertos: null,
-                        evolucao: null,
-                        componentes: {}
-                    };
-                }
-
-                const val = (r.valor_original !== null && r.valor_original !== undefined) ? r.valor_original : r.valor_numerico;
-                const sigla = r.sigla_componente_original ? String(r.sigla_componente_original).trim().toUpperCase() : null;
-
-                if (sigla === null || sigla === '') {
-                    if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
-                    else if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
-
-                    if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
-                    if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
-                } else {
-                    mapaEscolas[escola].componentes[sigla] = val;
-                }
-            });
-
-            const todasEscolas = Object.values(mapaEscolas);
-
-            const listaEscolas = todasEscolas
-                .filter(e => e.escola.trim().toLowerCase() !== 'total')
-                .sort((a, b) => a.escola.localeCompare(b.escola));
-
-            const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
+            const linhaTotal = filtrados.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
 
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
 
             if (listaEscolas.length > 0) {
-                tabela.innerHTML = listaEscolas.map(e => {
-                    const isTotal = e.escola.trim().toLowerCase() === 'total';
+                tabela.innerHTML = listaEscolas.map(r => {
+                    const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
-                    const c = e.componentes;
 
                     return `
                         <tr ${classeLinha}>
-                            <td><strong>${e.escola}</strong></td>
-                            <td>${formatarPercentual(e.participacao)}</td>
-                            <td>${formatarPercentual(e.acertos)}</td>
-                            <td>${formatarPercentual(e.evolucao)}</td>
-                            <td>${formatarPercentual(c['PORT'])}</td>
-                            <td>${formatarPercentual(c['MAT'])}</td>
-                            <td>${formatarPercentual(c['HIS'])}</td>
-                            <td>${formatarPercentual(c['GEO'])}</td>
-                            <td>${formatarPercentual(c['BIO'])}</td>
-                            <td>${formatarPercentual(c['QUI'])}</td>
-                            <td>${formatarPercentual(c['ING'])}</td>
-                            <td>${formatarPercentual(c['CIE'])}</td>
-                            <td>${formatarPercentual(c['FIS'])}</td>
-                            <td>${formatarPercentual(c['ED FIN'])}</td>
-                            <td>${formatarPercentual(c['EMP'])}</td>
-                            <td>${formatarPercentual(c['TEC ROB'])}</td>
-                            <td>${formatarPercentual(c['ING IT'])}</td>
-                            <td>${formatarPercentual(c['ART MID DIG'])}</td>
-                            <td>${formatarPercentual(c['LIDE'])}</td>
-                            <td>${formatarPercentual(c['ORATORIA'])}</td>
-                            <td>${formatarPercentual(c['GEO POL'])}</td>
-                            <td>${formatarPercentual(c['FIL E SOC MOD'])}</td>
-                            <td>${formatarPercentual(c['BIO TEC'])}</td>
-                            <td>${formatarPercentual(c['QUIM APL'])}</td>
+                            <td><strong>${r.escola_exibicao}</strong></td>
+                            <td>${formatarPercentual(r.participacao)}</td>
+                            <td>${formatarPercentual(r.acertos_prova)}</td>
+                            <td>${formatarPercentual(r.evolucao)}</td>
+                            <td>${formatarPercentual(r.port)}</td>
+                            <td>${formatarPercentual(r.mat)}</td>
+                            <td>${formatarPercentual(r.his)}</td>
+                            <td>${formatarPercentual(r.geo)}</td>
+                            <td>${formatarPercentual(r.bio)}</td>
+                            <td>${formatarPercentual(r.qui)}</td>
+                            <td>${formatarPercentual(r.ing)}</td>
+                            <td>${formatarPercentual(r.cie)}</td>
+                            <td>${formatarPercentual(r.fis)}</td>
+                            <td>${formatarPercentual(r.ed_fin)}</td>
+                            <td>${formatarPercentual(r.emp)}</td>
+                            <td>${formatarPercentual(r.tec_rob)}</td>
+                            <td>${formatarPercentual(r.ing_it)}</td>
+                            <td>${formatarPercentual(r.art)}</td>
+                            <td>${formatarPercentual(r.mid_dig)}</td>
+                            <td>${formatarPercentual(r.lide)}</td>
+                            <td>${formatarPercentual(r.oratoria)}</td>
+                            <td>${formatarPercentual(r.geo_pol)}</td>
+                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
+                            <td>${formatarPercentual(r.bio_tec)}</td>
+                            <td>${formatarPercentual(r.quim_apl)}</td>
                         </tr>
                     `;
                 }).join('');
             } else {
-                tabela.innerHTML = '<tr><td colspan="24" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
             }
         }
 
@@ -253,14 +219,15 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
+            // Consulta direta na tabela dados_educacionais que corresponde exatamente à planilha
             const { data: resultados, error } = await supabaseClient
-                .from('resultados_educacionais')
+                .from('dados_educacionais')
                 .select('*')
                 .range(0, 5000);
 
             if (error) {
                 console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="24">Erro ao carregar dados: ${error.message}</td></tr>`;
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
             } else {
                 todosResultados = resultados || [];
                 carregarFiltros(todosResultados);
