@@ -106,7 +106,13 @@
             const selectAno = document.getElementById('filtro-ano');
 
             dados.forEach(item => {
-                item.ano_calculado = item.ano ? String(item.ano) : '2024';
+                // Tenta extrair o ano da data de criação ou define 2024 como padrão
+                let anoExtraido = '2024';
+                if (item.criado_em) {
+                    const anoData = new Date(item.criado_em).getFullYear();
+                    if (!isNaN(anoData)) anoExtraido = String(anoData);
+                }
+                item.ano_calculado = item.ano ? String(item.ano) : anoExtraido;
                 item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
                 item.escola_exibicao = item.nome_escola_original || 'N/D';
             });
@@ -167,7 +173,6 @@
                 const val = (r.valor_original !== null && r.valor_original !== undefined) ? r.valor_original : r.valor_numerico;
                 const sigla = r.sigla_componente_original ? String(r.sigla_componente_original).trim().toUpperCase() : null;
 
-                // Registos com sigla NULL contêm os dados gerais da escola (Participação/Acertos/Evolução)
                 if (sigla === null || sigla === '') {
                     if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
                     else if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
@@ -181,14 +186,12 @@
 
             const todasEscolas = Object.values(mapaEscolas);
 
-            // Separa as escolas e isola a linha TOTAL
             const listaEscolas = todasEscolas
                 .filter(e => e.escola.trim().toLowerCase() !== 'total')
                 .sort((a, b) => a.escola.localeCompare(b.escola));
 
             const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
 
-            // Garante que a linha TOTAL fica obrigatoriamente no final da tabela
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
@@ -205,4 +208,72 @@
                             <td>${formatarPercentual(e.participacao)}</td>
                             <td>${formatarPercentual(e.acertos)}</td>
                             <td>${formatarPercentual(e.evolucao)}</td>
-                            <td>${formatar
+                            <td>${formatarPercentual(c['PORT'])}</td>
+                            <td>${formatarPercentual(c['MAT'])}</td>
+                            <td>${formatarPercentual(c['HIS'])}</td>
+                            <td>${formatarPercentual(c['GEO'])}</td>
+                            <td>${formatarPercentual(c['BIO'])}</td>
+                            <td>${formatarPercentual(c['QUI'])}</td>
+                            <td>${formatarPercentual(c['ING'])}</td>
+                            <td>${formatarPercentual(c['CIE'])}</td>
+                            <td>${formatarPercentual(c['FIS'])}</td>
+                            <td>${formatarPercentual(c['ED FIN'])}</td>
+                            <td>${formatarPercentual(c['EMP'])}</td>
+                            <td>${formatarPercentual(c['TEC ROB'])}</td>
+                            <td>${formatarPercentual(c['ING IT'])}</td>
+                            <td>${formatarPercentual(c['ART MID DIG'])}</td>
+                            <td>${formatarPercentual(c['LIDE'])}</td>
+                            <td>${formatarPercentual(c['ORATORIA'])}</td>
+                            <td>${formatarPercentual(c['GEO POL'])}</td>
+                            <td>${formatarPercentual(c['FIL E SOC MOD'])}</td>
+                            <td>${formatarPercentual(c['BIO TEC'])}</td>
+                            <td>${formatarPercentual(c['QUIM APL'])}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tabela.innerHTML = '<tr><td colspan="24" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
+
+            const { data: resultados, error } = await supabaseClient
+                .from('resultados_educacionais')
+                .select('*')
+                .range(0, 5000);
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="24">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else {
+                todosResultados = resultados || [];
+                carregarFiltros(todosResultados);
+                renderizarTabela();
+
+                document.getElementById('filtro-ano').addEventListener('change', () => {
+                    atualizarOpcoesEdicao();
+                    renderizarTabela();
+                });
+
+                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+            }
+        });
+    </script>
+</body>
+</html>
