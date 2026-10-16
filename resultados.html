@@ -68,8 +68,7 @@
                         <th>EMP</th>
                         <th>TEC ROB</th>
                         <th>ING IT</th>
-                        <th>ART</th>
-                        <th>MID DIG</th>
+                        <th>ART MID DIG</th>
                         <th>LIDE</th>
                         <th>ORATORIA</th>
                         <th>GEO POL</th>
@@ -79,7 +78,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
+                    <tr><td colspan="24" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -101,11 +100,6 @@
             if (num === 0) return '0%';
             const pct = (Math.abs(num) <= 1 && num !== 0) ? num * 100 : num;
             return pct.toFixed(1).replace('.', ',') + '%';
-        }
-
-        function normalizarTexto(txt) {
-            if (!txt) return '';
-            return String(txt).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         }
 
         function carregarFiltros(dados) {
@@ -144,7 +138,7 @@
             const tabela = document.getElementById('tabela-resultados');
 
             if (!anoSelecionado && !edicaoSelecionada) {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="24" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
                 return;
             }
 
@@ -156,7 +150,6 @@
                 return bateAno && bateEdicao && !eMetadado;
             });
 
-            // Agrupa todos os registros por escola
             const mapaEscolas = {};
 
             filtrados.forEach(r => {
@@ -172,29 +165,30 @@
                 }
 
                 const val = (r.valor_original !== null && r.valor_original !== undefined) ? r.valor_original : r.valor_numerico;
-                const compNorm = normalizarTexto(r.sigla_componente_original);
+                const sigla = r.sigla_componente_original ? String(r.sigla_componente_original).trim().toUpperCase() : null;
 
-                if (compNorm === '' || compNorm === 'GERAL' || compNorm.includes('PARTICIP')) {
-                    mapaEscolas[escola].participacao = val;
-                } else if (compNorm.includes('ACERTO')) {
-                    mapaEscolas[escola].acertos = val;
-                } else if (compNorm.includes('EVOLUC')) {
-                    mapaEscolas[escola].evolucao = val;
+                // Registos com sigla NULL contêm os dados gerais da escola (Participação/Acertos/Evolução)
+                if (sigla === null || sigla === '') {
+                    if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
+                    else if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
+
+                    if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
+                    if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
                 } else {
-                    mapaEscolas[escola].componentes[compNorm] = val;
+                    mapaEscolas[escola].componentes[sigla] = val;
                 }
             });
 
             const todasEscolas = Object.values(mapaEscolas);
 
-            // Separa as escolas e localiza a linha TOTAL
+            // Separa as escolas e isola a linha TOTAL
             const listaEscolas = todasEscolas
                 .filter(e => e.escola.trim().toLowerCase() !== 'total')
                 .sort((a, b) => a.escola.localeCompare(b.escola));
 
             const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
 
-            // Garante que a linha TOTAL fique exatamente ao fim
+            // Garante que a linha TOTAL fica obrigatoriamente no final da tabela
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
@@ -205,82 +199,10 @@
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
                     const c = e.componentes;
 
-                    // Mapeamento flexível de disciplinas
-                    const valPort = c['PORT'] || c['PORTUGUES'] || c['LINGUA PORTUGUESA'] || c['LP'];
-                    
                     return `
                         <tr ${classeLinha}>
                             <td><strong>${e.escola}</strong></td>
                             <td>${formatarPercentual(e.participacao)}</td>
                             <td>${formatarPercentual(e.acertos)}</td>
                             <td>${formatarPercentual(e.evolucao)}</td>
-                            <td>${formatarPercentual(valPort)}</td>
-                            <td>${formatarPercentual(c['MAT'] || c['MATEMATICA'])}</td>
-                            <td>${formatarPercentual(c['HIS'] || c['HISTORIA'])}</td>
-                            <td>${formatarPercentual(c['GEO'] || c['GEOGRAFIA'])}</td>
-                            <td>${formatarPercentual(c['BIO'] || c['BIOLOGIA'])}</td>
-                            <td>${formatarPercentual(c['QUI'] || c['QUIMICA'])}</td>
-                            <td>${formatarPercentual(c['ING'] || c['INGLES'])}</td>
-                            <td>${formatarPercentual(c['CIE'] || c['CIENCIAS'])}</td>
-                            <td>${formatarPercentual(c['FIS'] || c['FISICA'])}</td>
-                            <td>${formatarPercentual(c['ED FIN'] || c['EDUCACAO FINANCEIRA'])}</td>
-                            <td>${formatarPercentual(c['EMP'] || c['EMPREENDEDORISMO'])}</td>
-                            <td>${formatarPercentual(c['TEC ROB'] || c['TECNOLOGIA'])}</td>
-                            <td>${formatarPercentual(c['ING IT'])}</td>
-                            <td>${formatarPercentual(c['ART'] || c['ARTE'])}</td>
-                            <td>${formatarPercentual(c['MID DIG'])}</td>
-                            <td>${formatarPercentual(c['LIDE'])}</td>
-                            <td>${formatarPercentual(c['ORATORIA'])}</td>
-                            <td>${formatarPercentual(c['GEO POL'])}</td>
-                            <td>${formatarPercentual(c['FIL E SOC MOD'] || c['FILOSOFIA'])}</td>
-                            <td>${formatarPercentual(c['BIO TEC'])}</td>
-                            <td>${formatarPercentual(c['QUIM APL'])}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
-
-            const { data: resultados, error } = await supabaseClient
-                .from('resultados_educacionais')
-                .select('*')
-                .range(0, 5000);
-
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else {
-                todosResultados = resultados || [];
-                carregarFiltros(todosResultados);
-                renderizarTabela();
-
-                document.getElementById('filtro-ano').addEventListener('change', () => {
-                    atualizarOpcoesEdicao();
-                    renderizarTabela();
-                });
-
-                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
-            }
-        });
-    </script>
-</body>
-</html>
+                            <td>${formatar
