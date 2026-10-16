@@ -136,9 +136,14 @@
         const ativo = document.getElementById('usr-ativo').checked;
 
         try {
-            // Cliente temporário sem persistência para criar a conta no Auth sem deslogar o Admin
+            // Cliente temporário totalmente isolado para registrar a conta sem deslogar o administrador
             const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-                auth: { persistSession: false }
+                auth: { 
+                    persistSession: false,
+                    autoRefreshToken: false,
+                    detectSessionInUrl: false,
+                    storageKey: 'sb-temp-auth-token'
+                }
             });
 
             const { data: authData, error: authError } = await tempClient.auth.signUp({
@@ -149,12 +154,11 @@
             if (authError) throw authError;
 
             if (authData.user) {
-                // Verificar se o usuário já existia (identities vazio indica conta já existente)
                 if (authData.user.identities && authData.user.identities.length === 0) {
                     throw new Error('Este e-mail já está cadastrado no sistema.');
                 }
 
-                // Inserir perfil estendido na tabela perfis_usuarios com a sessão ativa do Admin
+                // Inserir perfil estendido na tabela perfis_usuarios com a sessão do Admin
                 const { error: profileError } = await supabaseClient
                     .from('perfis_usuarios')
                     .insert([{
