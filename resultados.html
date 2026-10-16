@@ -12,16 +12,13 @@
         .filtros { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #e2e8f0; padding: 15px; border-radius: 6px; }
         .filtros div { display: flex; flex-direction: column; gap: 5px; }
         .filtros select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; min-width: 250px; }
-        
-        /* Contentor com rolagem horizontal visível na parte inferior */
         .tabela-container { overflow-x: auto; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th { background-color: #17365d; color: white; text-align: left; padding: 10px 8px; white-space: nowrap; position: sticky; top: 0; }
         td { padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
-        
-        /* Destaque para a linha de Total no final */
         tr.linha-total { font-weight: bold; background-color: #e2e8f0 !important; border-top: 2px solid #17365d; }
+        .erro-alerta { background-color: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #f87171; display: none; }
     </style>
 </head>
 <body>
@@ -36,7 +33,8 @@
             <a href="admin.html" id="btn-admin" class="btn" style="display: none;">Área Administrativa</a>
         </div>
 
-        <!-- Painel de Seleção/Filtros -->
+        <div id="alerta-erro" class="erro-alerta"></div>
+
         <div class="filtros">
             <div>
                 <label for="filtro-ano"><strong>Ano Letivo:</strong></label>
@@ -52,7 +50,6 @@
             </div>
         </div>
 
-        <!-- Tabela com Rolagem Inferior -->
         <div class="tabela-container">
             <table>
                 <thead>
@@ -99,181 +96,190 @@
 
         let todosResultados = [];
 
-        // Identifica dinamicamente o nome da escola independentemente da variação de coluna
-        function obterNomeEscola(item) {
-            if (!item) return 'N/D';
+        // Função universal para encontrar valores independentemente de caracteres especiais na coluna
+        function buscarValor(item, palavrasChave) {
+            if (!item) return null;
             const keys = Object.keys(item);
-            const foundKey = keys.find(k => {
-                const kClean = k.trim().toLowerCase();
-                return kClean === 'escola' || kClean === 'nm_escola' || kClean === 'nome_escola' || kClean === 'unidade';
+            const keyEncontrada = keys.find(k => {
+                const kNorm = String(k).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                return palavrasChave.some(p => kNorm.includes(p));
             });
-            return foundKey && item[foundKey] ? String(item[foundKey]).trim() : (item.escola || 'N/D');
+            return keyEncontrada ? item[keyEncontrada] : null;
         }
 
-        // Extrai/calcula o ano a partir do campo ou do nome do ficheiro
-        function obterAno(item) {
-            if (item.ano && item.ano !== 'null' && String(item.ano).trim() !== '') return String(item.ano).trim();
-            const match = (item.edicao_planilha || '').match(/202[0-9]/);
-            return match ? match[0] : '2024';
-        }
-
-        // Auxiliar de formatação para percentuais
         function formatarPercentual(valor) {
-            if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
-            const num = parseFloat(String(valor).replace(',', '.'));
-            if (isNaN(num)) return valor;
+            if (valor === null || valor === undefined || String(valor).trim() === '' || valor === '-') return '-';
+            const strVal = String(valor).replace(',', '.');
+            const num = parseFloat(strVal);
+            if (isNaN(num)) return valor; // Retorna texto original se não for número
             if (num === 0) return '0%';
-            const pct = (Math.abs(num) <= 1 && num !== 0) ? num * 100 : num;
+            const pct = (Math.abs(num) <= 1 && num !== 0 && !strVal.includes('%')) ? num * 100 : num;
             return pct.toFixed(1).replace('.', ',') + '%';
         }
 
-        // Popula os menus de seleção ordenados
         function carregarFiltros(dados) {
-            const selectAno = document.getElementById('filtro-ano');
+            try {
+                const selectAno = document.getElementById('filtro-ano');
 
-            dados.forEach(item => {
-                item.ano_calculado = obterAno(item);
-                item.escola_nome = obterNomeEscola(item);
-            });
-
-            const anosUnicos = [...new Set(dados.map(item => item.ano_calculado))].sort();
-
-            selectAno.innerHTML = '<option value="">Selecione o Ano...</option>' + 
-                anosUnicos.map(a => `<option value="${a}">${a}</option>`).join('');
-
-            atualizarOpcoesEdicao();
-        }
-
-        // Atualiza as edições com base no ano selecionado
-        function atualizarOpcoesEdicao() {
-            const anoSel = document.getElementById('filtro-ano').value;
-            const selectEdicao = document.getElementById('filtro-edicao');
-
-            const edicoesFiltradas = [...new Set(todosResultados
-                .filter(r => !anoSel || r.ano_calculado === anoSel)
-                .map(r => r.edicao_planilha)
-                .filter(Boolean))].sort((a, b) => {
-                    const anoA = (a.match(/202[0-9]/) || ['0'])[0];
-                    const anoB = (b.match(/202[0-9]/) || ['0'])[0];
-                    if (anoA !== anoB) return anoA.localeCompare(anoB);
-                    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+                dados.forEach(item => {
+                    // Mapeamento flexível das chaves cruciais
+                    const anoBruto = buscarValor(item, ['ano']) || '';
+                    const edicaoBruta = buscarValor(item, ['edicao', 'planilha', 'bimestre']) || '';
+                    
+                    item.ano_calculado = String(anoBruto).trim() || (String(edicaoBruta).match(/202[0-9]/) || ['2024'])[0];
+                    item.edicao_planilha_segura = String(edicaoBruta).trim();
+                    item.escola_nome = String(buscarValor(item, ['escola', 'unidade']) || 'N/D').trim();
                 });
 
-            selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
-                edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+                const anosUnicos = [...new Set(dados.map(item => item.ano_calculado).filter(Boolean))].sort();
+
+                selectAno.innerHTML = '<option value="">Selecione o Ano...</option>' + 
+                    anosUnicos.map(a => `<option value="${a}">${a}</option>`).join('');
+
+                atualizarOpcoesEdicao();
+            } catch (err) {
+                mostrarErro('Erro ao processar filtros: ' + err.message);
+            }
         }
 
-        // Renderiza a tabela filtrada e deduplicada
+        function atualizarOpcoesEdicao() {
+            try {
+                const anoSel = document.getElementById('filtro-ano').value;
+                const selectEdicao = document.getElementById('filtro-edicao');
+
+                const edicoesFiltradas = [...new Set(todosResultados
+                    .filter(r => !anoSel || r.ano_calculado === anoSel)
+                    .map(r => r.edicao_planilha_segura)
+                    .filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+
+                selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
+                    edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+            } catch (err) {
+                mostrarErro('Erro ao atualizar edições: ' + err.message);
+            }
+        }
+
+        function mostrarErro(mensagem) {
+            const alerta = document.getElementById('alerta-erro');
+            alerta.innerText = mensagem;
+            alerta.style.display = 'block';
+            console.error(mensagem);
+        }
+
         function renderizarTabela() {
-            const anoSelecionado = document.getElementById('filtro-ano').value;
-            const edicaoSelecionada = document.getElementById('filtro-edicao').value;
-            const tabela = document.getElementById('tabela-resultados');
+            try {
+                const anoSelecionado = document.getElementById('filtro-ano').value;
+                const edicaoSelecionada = document.getElementById('filtro-edicao').value;
+                const tabela = document.getElementById('tabela-resultados');
 
-            if (!anoSelecionado && !edicaoSelecionada) {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
-                return;
-            }
-
-            const filtrados = todosResultados.filter(r => {
-                const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
-                const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
-                const nomeEscola = (r.escola_nome || '').toLowerCase().trim();
-                const eMetadado = nomeEscola.includes('filtros');
-                return bateAno && bateEdicao && !eMetadado;
-            });
-
-            const escolasVistas = new Set();
-            const linhasDeduplicadas = [];
-
-            filtrados.forEach(r => {
-                const nomeNorm = (r.escola_nome || '').trim().toLowerCase();
-                const chave = `${nomeNorm}_${r.edicao_planilha}`;
-                if (!escolasVistas.has(chave)) {
-                    escolasVistas.add(chave);
-                    linhasDeduplicadas.push(r);
+                if (!anoSelecionado && !edicaoSelecionada) {
+                    tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
+                    return;
                 }
-            });
 
-            // Ordena alfabeticamente pelas escolas
-            linhasDeduplicadas.sort((a, b) => a.escola_nome.localeCompare(b.escola_nome));
+                const filtrados = todosResultados.filter(r => {
+                    const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
+                    const bateEdicao = !edicaoSelecionada || r.edicao_planilha_segura === edicaoSelecionada;
+                    const nomeEscola = (r.escola_nome || '').toLowerCase();
+                    const eMetadado = nomeEscola.includes('filtros');
+                    return bateAno && bateEdicao && !eMetadado;
+                });
 
-            const linhasEscolas = linhasDeduplicadas.filter(r => !r.escola_nome || r.escola_nome.trim().toLowerCase() !== 'total');
-            const linhaTotal = linhasDeduplicadas.find(r => r.escola_nome && r.escola_nome.trim().toLowerCase() === 'total');
+                const escolasVistas = new Set();
+                const linhasDeduplicadas = [];
 
-            if (linhaTotal) {
-                linhasEscolas.push(linhaTotal);
-            }
+                filtrados.forEach(r => {
+                    const chave = `${r.escola_nome.toLowerCase()}_${r.edicao_planilha_segura}`;
+                    if (!escolasVistas.has(chave)) {
+                        escolasVistas.add(chave);
+                        linhasDeduplicadas.push(r);
+                    }
+                });
 
-            if (linhasEscolas.length > 0) {
-                tabela.innerHTML = linhasEscolas.map(r => {
-                    const isTotal = r.escola_nome && r.escola_nome.trim().toLowerCase() === 'total';
-                    const classeLinha = isTotal ? 'class="linha-total"' : '';
-                    
-                    return `
-                        <tr ${classeLinha}>
-                            <td><strong>${r.escola_nome || 'N/D'}</strong></td>
-                            <td>${formatarPercentual(r.participacao)}</td>
-                            <td>${formatarPercentual(r.acertos_prova)}</td>
-                            <td>${formatarPercentual(r.evolucao)}</td>
-                            <td>${formatarPercentual(r.port)}</td>
-                            <td>${formatarPercentual(r.mat)}</td>
-                            <td>${formatarPercentual(r.his)}</td>
-                            <td>${formatarPercentual(r.geo)}</td>
-                            <td>${formatarPercentual(r.bio)}</td>
-                            <td>${formatarPercentual(r.qui)}</td>
-                            <td>${formatarPercentual(r.ing)}</td>
-                            <td>${formatarPercentual(r.cie)}</td>
-                            <td>${formatarPercentual(r.fis)}</td>
-                            <td>${formatarPercentual(r.ed_fin)}</td>
-                            <td>${formatarPercentual(r.emp)}</td>
-                            <td>${formatarPercentual(r.tec_rob)}</td>
-                            <td>${formatarPercentual(r.ing_it)}</td>
-                            <td>${formatarPercentual(r.art)}</td>
-                            <td>${formatarPercentual(r.mid_dig)}</td>
-                            <td>${formatarPercentual(r.lide)}</td>
-                            <td>${formatarPercentual(r.oratoria)}</td>
-                            <td>${formatarPercentual(r.geo_pol)}</td>
-                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
-                            <td>${formatarPercentual(r.bio_tec)}</td>
-                            <td>${formatarPercentual(r.quim_apl)}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+                linhasDeduplicadas.sort((a, b) => a.escola_nome.localeCompare(b.escola_nome));
+
+                const linhasEscolas = linhasDeduplicadas.filter(r => r.escola_nome.toLowerCase() !== 'total');
+                const linhaTotal = linhasDeduplicadas.find(r => r.escola_nome.toLowerCase() === 'total');
+
+                if (linhaTotal) linhasEscolas.push(linhaTotal);
+
+                if (linhasEscolas.length > 0) {
+                    tabela.innerHTML = linhasEscolas.map(r => {
+                        const isTotal = r.escola_nome.toLowerCase() === 'total';
+                        const classeLinha = isTotal ? 'class="linha-total"' : '';
+                        
+                        return `
+                            <tr ${classeLinha}>
+                                <td><strong>${r.escola_nome}</strong></td>
+                                <td>${formatarPercentual(buscarValor(r, ['participa']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['acerto']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['evolu']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['port']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['mat']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['his']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['geo']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['bio']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['qui']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['ing']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['cie']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['fis']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['fin']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['emp']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['rob']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['ing it', 'it in']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['art']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['mid', 'dig']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['lid']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['orat']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['geo pol']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['fil']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['bio tec']))}</td>
+                                <td>${formatarPercentual(buscarValor(r, ['quim apl']))}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+                }
+            } catch (err) {
+                mostrarErro('Erro ao processar tabela: ' + err.message);
             }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
 
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
+                if (profile && profile.role === 'admin') {
+                    document.getElementById('btn-admin').style.display = 'inline-block';
+                }
 
-            // Busca até 5.000 registos para garantir o carregamento completo da tabela resultados_educacionais
-            const { data: resultados, error } = await supabaseClient
-                .from('resultados_educacionais')
-                .select('*')
-                .range(0, 5000);
+                // Busca massiva de dados
+                const { data: resultados, error } = await supabaseClient
+                    .from('resultados_educacionais')
+                    .select('*')
+                    .range(0, 5000);
 
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else {
+                if (error) throw error;
+
                 todosResultados = resultados || [];
-                carregarFiltros(todosResultados);
-                renderizarTabela();
+                
+                if (todosResultados.length === 0) {
+                    mostrarErro('O banco de dados está vazio ou os registros não puderam ser carregados.');
+                } else {
+                    carregarFiltros(todosResultados);
+                    renderizarTabela();
+                }
 
                 document.getElementById('filtro-ano').addEventListener('change', () => {
                     atualizarOpcoesEdicao();
@@ -281,6 +287,9 @@
                 });
 
                 document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+
+            } catch (err) {
+                mostrarErro('Erro crítico de comunicação com o servidor: ' + err.message);
             }
         });
     </script>
