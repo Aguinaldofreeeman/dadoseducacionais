@@ -101,7 +101,7 @@
 
         // Extrai/calcula o ano a partir do campo ou do nome do ficheiro
         function obterAno(item) {
-            if (item.ano && item.ano !== 'null' && item.ano.trim() !== '') return item.ano;
+            if (item.ano && item.ano !== 'null' && String(item.ano).trim() !== '') return String(item.ano);
             const match = (item.edicao_planilha || '').match(/202[0-9]/);
             return match ? match[0] : '2024';
         }
@@ -141,7 +141,7 @@
                 edicoesUnicas.map(e => `<option value="${e}">${e}</option>`).join('');
         }
 
-        // Renderiza a tabela eliminando duplicados idênticos de escolas
+        // Renderiza a tabela filtrada e deduplicada
         function renderizarTabela() {
             const anoSelecionado = document.getElementById('filtro-ano').value;
             const edicaoSelecionada = document.getElementById('filtro-edicao').value;
@@ -156,4 +156,123 @@
                 const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
                 const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
                 const nomeEscola = (r.escola || '').toLowerCase().trim();
-                const eMetadado = nomeEscola.includes('
+                const eMetadado = nomeEscola.includes('filtros');
+                return bateAno && bateEdicao && !eMetadado;
+            });
+
+            const escolasVistas = new Set();
+            const linhasDeduplicadas = [];
+
+            filtrados.forEach(r => {
+                const nomeNorm = (r.escola || '').trim().toLowerCase();
+                const chave = `${nomeNorm}_${r.edicao_planilha}`;
+                if (!escolasVistas.has(chave)) {
+                    escolasVistas.add(chave);
+                    linhasDeduplicadas.push(r);
+                }
+            });
+
+            const linhasEscolas = linhasDeduplicadas.filter(r => !r.escola || r.escola.trim().toLowerCase() !== 'total');
+            const linhaTotal = linhasDeduplicadas.find(r => r.escola && r.escola.trim().toLowerCase() === 'total');
+
+            if (linhaTotal) {
+                linhasEscolas.push(linhaTotal);
+            }
+
+            if (linhasEscolas.length > 0) {
+                tabela.innerHTML = linhasEscolas.map(r => {
+                    const isTotal = r.escola && r.escola.trim().toLowerCase() === 'total';
+                    const classeLinha = isTotal ? 'class="linha-total"' : '';
+                    
+                    return `
+                        <tr ${classeLinha}>
+                            <td><strong>${r.escola || 'N/D'}</strong></td>
+                            <td>${formatarPercentual(r.participacao)}</td>
+                            <td>${formatarPercentual(r.acertos_prova)}</td>
+                            <td>${formatarPercentual(r.evolucao)}</td>
+                            <td>${formatarPercentual(r.port)}</td>
+                            <td>${formatarPercentual(r.mat)}</td>
+                            <td>${formatarPercentual(r.his)}</td>
+                            <td>${formatarPercentual(r.geo)}</td>
+                            <td>${formatarPercentual(r.bio)}</td>
+                            <td>${formatarPercentual(r.qui)}</td>
+                            <td>${formatarPercentual(r.ing)}</td>
+                            <td>${formatarPercentual(r.cie)}</td>
+                            <td>${formatarPercentual(r.fis)}</td>
+                            <td>${formatarPercentual(r.ed_fin)}</td>
+                            <td>${formatarPercentual(r.emp)}</td>
+                            <td>${formatarPercentual(r.tec_rob)}</td>
+                            <td>${formatarPercentual(r.ing_it)}</td>
+                            <td>${formatarPercentual(r.art)}</td>
+                            <td>${formatarPercentual(r.mid_dig)}</td>
+                            <td>${formatarPercentual(r.lide)}</td>
+                            <td>${formatarPercentual(r.oratoria)}</td>
+                            <td>${formatarPercentual(r.geo_pol)}</td>
+                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
+                            <td>${formatarPercentual(r.bio_tec)}</td>
+                            <td>${formatarPercentual(r.quim_apl)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
+
+            // Consulta direcionada à tabela correta 'resultados_educacionais'
+            const { data: resultados, error } = await supabaseClient
+                .from('resultados_educacionais')
+                .select('*')
+                .order('escola', { ascending: true });
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else {
+                todosResultados = resultados || [];
+                carregarFiltros(todosResultados);
+                renderizarTabela();
+
+                document.getElementById('filtro-ano').addEventListener('change', () => {
+                    const anoSel = document.getElementById('filtro-ano').value;
+                    const selectEdicao = document.getElementById('filtro-edicao');
+                    
+                    const edicoesFiltradas = [...new Set(todosResultados
+                        .filter(r => !anoSel || r.ano_calculado === anoSel)
+                        .map(r => r.edicao_planilha)
+                        .filter(Boolean))].sort((a, b) => {
+                            const anoA = (a.match(/202[0-9]/) || ['0'])[0];
+                            const anoB = (b.match(/202[0-9]/) || ['0'])[0];
+                            if (anoA !== anoB) return anoA.localeCompare(anoB);
+                            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+                        });
+
+                    selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
+                        edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+
+                    renderizarTabela();
+                });
+
+                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+            }
+        });
+    </script>
+</body>
+</html>
