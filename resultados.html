@@ -118,7 +118,6 @@
     }
 
     async function carregarFiltros() {
-        // Consulta direta à visão SQL edicoes_disponiveis
         const { data, error } = await supabaseClient
             .from('edicoes_disponiveis')
             .select('ano, edicao_planilha');
@@ -134,9 +133,18 @@
 
         const atualizarEdicoes = () => {
             const anoSel = selectAno.value;
-            const edicoes = [...new Set(data.filter(d => d.ano === anoSel).map(d => d.edicao_planilha).filter(Boolean))];
+            let edicoes = [...new Set(data.filter(d => d.ano === anoSel).map(d => d.edicao_planilha).filter(Boolean))];
+            
+            // 1. Ordenar as edições sequencialmente (1º bim, 2º bim, 3º bim, etc.)
+            edicoes.sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' }));
+
+            // 2. Montar as opções removendo a extensão .xlsx ou .xls do texto visível
             const selectEdicao = document.getElementById('select-edicao');
-            selectEdicao.innerHTML = edicoes.map(e => `<option value="${e}">${e}</option>`).join('');
+            selectEdicao.innerHTML = edicoes.map(e => {
+                const nomeExibicao = e.replace(/\.xlsx?$/i, '');
+                return `<option value="${e}">${nomeExibicao}</option>`;
+            }).join('');
+
             carregarTabela();
         };
 
