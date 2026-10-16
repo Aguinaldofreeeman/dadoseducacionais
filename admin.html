@@ -90,12 +90,13 @@
         emp:            (k) => k.includes('emp'),
         tec_rob:        igual('tecrob'),
         ing_it:         igual('ingit'),
-       art: igual('art', 'arte', 'artmidd', 'artmiddig'), // Captura "ART", "ARTE", "ART MID D", "ART MID DIG"
         mid_dig:        igual('middig'),
-        lide:           (k) => k.includes('lid'),
-        oratoria:       (k) => k.includes('ora'),
+        art:            (k) => k.includes('artmidd') || k.includes('artmiddig') || k === 'art' || k === 'arte',
+        lide:           igual('lide', 'lid', 'lideranca'),
+        oratoria:       igual('oratoria', 'ora'),
+        fil_e_soc_mod:  (k) => (k.includes('fil') && k.includes('soc')) || k === 'filesoc',
         geo_pol:        igual('geopol'),
-        fil_e_soc_mod:  (k) => k.includes('fil') && k.includes('soc'), // Captura "FIL E SOC", "FIL E SOC MOD", "FILO SOC"
+      
         bio_tec:        igual('biotec'),
         quim_apl:       (k) => k.includes('quimapl')
     };
