@@ -177,13 +177,14 @@
 
             filtrados.forEach(r => {
                 Object.keys(r).forEach(k => {
-                    if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined && String(r[k]).trim() !== '') {
+                    // Inclui todas as colunas existentes na tabela do Supabase para esta edicao, mesmo que em branco
+                    if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined) {
                         colunasEncontradas.add(k);
                     }
                 });
             });
 
-            // Ordem exata alinhada com a planilha Excel oficial
+            // Sequência exata de colunas alinhada 1:1 com a planilha Excel oficial
             const ordemDesejada = [
                 'total_alun', 'participacao', 'acertos_prova', 'evolucao', 
                 'port', 'mat', 'his', 'hist', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 
@@ -203,11 +204,11 @@
 
             if (colunasFinais.length === 0) {
                 cabecalho.innerHTML = '<tr><th>Escola</th><th>Aviso</th></tr>';
-                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registos desta edição não possuem notas numéricas preenchidas.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registos desta edição não possuem colunas de indicadores reconhecidas.</td></tr>';
                 return;
             }
 
-            // Mapeamento de rótulos fiéis às siglas e nomes da planilha oficial
+            // Mapeamento dos rótulos de cabeçalho idênticos à planilha oficial
             const mapaNomesLegiveis = {
                 'total_alun': 'Total Alun',
                 'participacao': '(%) Partic',
