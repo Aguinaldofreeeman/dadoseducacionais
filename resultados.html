@@ -99,6 +99,17 @@
 
         let todosResultados = [];
 
+        // Identifica dinamicamente o nome da escola independentemente da variação de coluna
+        function obterNomeEscola(item) {
+            if (!item) return 'N/D';
+            const keys = Object.keys(item);
+            const foundKey = keys.find(k => {
+                const kClean = k.trim().toLowerCase();
+                return kClean === 'escola' || kClean === 'nm_escola' || kClean === 'nome_escola' || kClean === 'unidade';
+            });
+            return foundKey && item[foundKey] ? String(item[foundKey]).trim() : (item.escola || 'N/D');
+        }
+
         // Extrai/calcula o ano a partir do campo ou do nome do ficheiro
         function obterAno(item) {
             if (item.ano && item.ano !== 'null' && String(item.ano).trim() !== '') return String(item.ano);
@@ -123,6 +134,7 @@
 
             dados.forEach(item => {
                 item.ano_calculado = obterAno(item);
+                item.escola_nome = obterNomeEscola(item);
             });
 
             const anosUnicos = [...new Set(dados.map(item => item.ano_calculado))].sort();
@@ -155,7 +167,7 @@
             const filtrados = todosResultados.filter(r => {
                 const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
                 const bateEdicao = !edicaoSelecionada || r.edicao_planilha === edicaoSelecionada;
-                const nomeEscola = (r.escola || '').toLowerCase().trim();
+                const nomeEscola = (r.escola_nome || '').toLowerCase().trim();
                 const eMetadado = nomeEscola.includes('filtros');
                 return bateAno && bateEdicao && !eMetadado;
             });
@@ -164,7 +176,7 @@
             const linhasDeduplicadas = [];
 
             filtrados.forEach(r => {
-                const nomeNorm = (r.escola || '').trim().toLowerCase();
+                const nomeNorm = (r.escola_nome || '').trim().toLowerCase();
                 const chave = `${nomeNorm}_${r.edicao_planilha}`;
                 if (!escolasVistas.has(chave)) {
                     escolasVistas.add(chave);
@@ -172,8 +184,11 @@
                 }
             });
 
-            const linhasEscolas = linhasDeduplicadas.filter(r => !r.escola || r.escola.trim().toLowerCase() !== 'total');
-            const linhaTotal = linhasDeduplicadas.find(r => r.escola && r.escola.trim().toLowerCase() === 'total');
+            // Ordena alfabeticamente pelas escolas
+            linhasDeduplicadas.sort((a, b) => a.escola_nome.localeCompare(b.escola_nome));
+
+            const linhasEscolas = linhasDeduplicadas.filter(r => !r.escola_nome || r.escola_nome.trim().toLowerCase() !== 'total');
+            const linhaTotal = linhasDeduplicadas.find(r => r.escola_nome && r.escola_nome.trim().toLowerCase() === 'total');
 
             if (linhaTotal) {
                 linhasEscolas.push(linhaTotal);
@@ -181,12 +196,12 @@
 
             if (linhasEscolas.length > 0) {
                 tabela.innerHTML = linhasEscolas.map(r => {
-                    const isTotal = r.escola && r.escola.trim().toLowerCase() === 'total';
+                    const isTotal = r.escola_nome && r.escola_nome.trim().toLowerCase() === 'total';
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
                     
                     return `
                         <tr ${classeLinha}>
-                            <td><strong>${r.escola || 'N/D'}</strong></td>
+                            <td><strong>${r.escola_nome || 'N/D'}</strong></td>
                             <td>${formatarPercentual(r.participacao)}</td>
                             <td>${formatarPercentual(r.acertos_prova)}</td>
                             <td>${formatarPercentual(r.evolucao)}</td>
@@ -236,11 +251,10 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
-            // Consulta direcionada à tabela correta 'resultados_educacionais'
+            // Busca os dados da tabela sem a clausula SQL rígida de ordenação
             const { data: resultados, error } = await supabaseClient
                 .from('resultados_educacionais')
-                .select('*')
-                .order('escola', { ascending: true });
+                .select('*');
 
             if (error) {
                 console.error('Erro ao carregar dados:', error.message);
