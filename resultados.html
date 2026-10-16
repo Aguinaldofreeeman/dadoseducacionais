@@ -186,7 +186,7 @@
                 const compBruto = (r.sigla_componente_original || r.componente || '').trim();
                 const compNorm = compBruto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-                // Mapeamento de Indicadores Gerais
+                // Captura dos Indicadores Globais
                 if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
                 if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
                 if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
@@ -204,14 +204,14 @@
 
             const todasEscolas = Object.values(mapaEscolas);
             
-            // Separa as escolas e localiza a linha TOTAL
+            // Separa as escolas normais e identifica a linha TOTAL
             const listaEscolas = todasEscolas
                 .filter(e => e.escola.trim().toLowerCase() !== 'total')
                 .sort((a, b) => a.escola.localeCompare(b.escola));
             
             const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
 
-            // Garante a linha TOTAL fixada ao fim
+            // Posiciona a linha TOTAL obrigatoriamente no fim da tabela
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
@@ -222,7 +222,7 @@
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
                     const c = e.componentes;
 
-                    // Mapeamento abrangente para PORT / LÍNGUA PORTUGUESA
+                    // Mapeamento abrangente de PORT / LÍNGUA PORTUGUESA
                     const valPort = c['PORT'] || c['PORTUGUES'] || c['LINGUA PORTUGUESA'] || c['LP'];
                     
                     return `
