@@ -71,7 +71,7 @@
 
     const igual = (...nomes) => (k) => nomes.includes(k);
 
-    // Mapeamento abrangente suportando todas as variacoes de titulos das planilhas oficiais
+    // Mapeamento alinhado estritamente com as colunas do schema do Supabase
     const CAMPOS = {
         escola:         (k) => k.includes('escola') || k.includes('unidade') || k === 'nmescola',
         participacao:   (k) => k.includes('particip') || k.includes('partic'),
