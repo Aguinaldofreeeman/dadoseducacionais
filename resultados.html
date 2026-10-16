@@ -48,38 +48,15 @@
         </div>
 
         <div class="tabela-container">
-            <table>
-                <thead>
+            <table id="tabela-dinamica">
+                <thead id="cabecalho-tabela">
                     <tr>
                         <th>Escola</th>
-                        <th>Participação</th>
-                        <th>Acertos</th>
-                        <th>Evolução</th>
-                        <th>PORT</th>
-                        <th>MAT</th>
-                        <th>HIS</th>
-                        <th>GEO</th>
-                        <th>BIO</th>
-                        <th>QUI</th>
-                        <th>ING</th>
-                        <th>CIE</th>
-                        <th>FIS</th>
-                        <th>ED FIN</th>
-                        <th>EMP</th>
-                        <th>TEC ROB</th>
-                        <th>ING IT</th>
-                        <th>ART</th>
-                        <th>MID DIG</th>
-                        <th>LIDE</th>
-                        <th>ORATORIA</th>
-                        <th>GEO POL</th>
-                        <th>FIL E SOC MOD</th>
-                        <th>BIO TEC</th>
-                        <th>QUIM APL</th>
+                        <th>Carregando...</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
+                    <tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -105,7 +82,6 @@
 
         function limparNomeEscola(nome) {
             if (!nome) return 'N/D';
-            // Remove o sufixo com hífen e código numérico do final se existir (ex.: " - 33881")
             return String(nome).replace(/\s*-\s*\d+$/, '').trim();
         }
 
@@ -142,10 +118,12 @@
         function renderizarTabela() {
             const anoSelecionado = document.getElementById('filtro-ano').value;
             const edicaoSelecionada = document.getElementById('filtro-edicao').value;
+            const cabecalho = document.getElementById('cabecalho-tabela');
             const tabela = document.getElementById('tabela-resultados');
 
             if (!anoSelecionado && !edicaoSelecionada) {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
+                cabecalho.innerHTML = '<tr><th>Escola</th><th>Resultados</th></tr>';
+                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
                 return;
             }
 
@@ -157,7 +135,67 @@
                 return bateAno && bateEdicao && !eMetadado;
             });
 
-            // Agrupa as linhas por escola para evitar duplicidades visuais derivadas das séries
+            if (filtrados.length === 0) {
+                cabecalho.innerHTML = '<tr><th>Escola</th><th>Resultados</th></tr>';
+                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
+                return;
+            }
+
+            // Identifica dinamicamente todas as colunas numéricas/de indicadores presentes nos dados
+            const colunasIgnorar = ['id', 'created_at', 'ano', 'edicao_planilha', 'escola', 'escola_limpa', 'ano_calculado', 'edicao_nome'];
+            const colunasEncontradas = new Set();
+
+            filtrados.forEach(r => {
+                Object.keys(r).forEach(k => {
+                    if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined && r[k] !== '') {
+                        colunasEncontradas.add(k);
+                    }
+                });
+            });
+
+            // Ordena as colunas fixando os indicadores gerais no início e as disciplinas em seguida
+            const ordemDesejada = ['participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'emp', 'tec_rob', 'ing_it', 'art', 'mid_dig', 'lide', 'oratoria', 'geo_pol', 'fil_e_soc_mod', 'bio_tec', 'quim_apl'];
+            
+            const colunasFinais = Array.from(colunasEncontradas).sort((a, b) => {
+                const idxA = ordemDesejada.indexOf(a);
+                const idxB = ordemDesejada.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            // Constrói o cabeçalho dinâmico
+            const mapaNomesLegiveis = {
+                'participacao': 'Participação',
+                'acertos_prova': 'Acertos',
+                'evolucao': 'Evolução',
+                'port': 'PORT',
+                'mat': 'MAT',
+                'his': 'HIS',
+                'geo': 'GEO',
+                'bio': 'BIO',
+                'qui': 'QUI',
+                'ing': 'ING',
+                'cie': 'CIE',
+                'fis': 'FIS',
+                'ed_fin': 'ED FIN',
+                'emp': 'EMP',
+                'tec_rob': 'TEC ROB',
+                'ing_it': 'ING IT',
+                'art': 'ART',
+                'mid_dig': 'MID DIG',
+                'lide': 'LIDE',
+                'oratoria': 'ORATORIA',
+                'geo_pol': 'GEO POL',
+                'fil_e_soc_mod': 'FIL E SOC MOD',
+                'bio_tec': 'BIO TEC',
+                'quim_apl': 'QUIM APL'
+            };
+
+            cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
+
+            // Agrupa e deduplica por escola
             const mapaEscolas = {};
 
             filtrados.forEach(r => {
@@ -166,14 +204,7 @@
                 if (!mapaEscolas[escolaKey]) {
                     mapaEscolas[escolaKey] = { ...r, escola_exibicao: r.escola_limpa };
                 } else {
-                    // Consolida os campos que porventura estejam vazios em uma linha e preenchidos em outra
-                    const colunas = [
-                        'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 
-                        'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'emp', 'tec_rob', 'ing_it', 
-                        'art', 'mid_dig', 'lide', 'oratoria', 'geo_pol', 'fil_e_soc_mod', 'bio_tec', 'quim_apl'
-                    ];
-
-                    colunas.forEach(col => {
+                    colunasFinais.forEach(col => {
                         const valExistente = mapaEscolas[escolaKey][col];
                         const valNovo = r[col];
                         if ((valExistente === null || valExistente === undefined || valExistente === '' || valExistente === 0) &&
@@ -186,7 +217,6 @@
 
             const listaAgrupada = Object.values(mapaEscolas);
 
-            // Separa a linha TOTAL para ficar no final
             const listaEscolas = listaAgrupada
                 .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
                 .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
@@ -198,44 +228,19 @@
                 listaEscolas.push(linhaTotal);
             }
 
-            if (listaEscolas.length > 0) {
-                tabela.innerHTML = listaEscolas.map(r => {
-                    const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
-                    const classeLinha = isTotal ? 'class="linha-total"' : '';
+            tabela.innerHTML = listaEscolas.map(r => {
+                const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
+                const classeLinha = isTotal ? 'class="linha-total"' : '';
 
-                    return `
-                        <tr ${classeLinha}>
-                            <td><strong>${r.escola_exibicao}</strong></td>
-                            <td>${formatarPercentual(r.participacao)}</td>
-                            <td>${formatarPercentual(r.acertos_prova)}</td>
-                            <td>${formatarPercentual(r.evolucao)}</td>
-                            <td>${formatarPercentual(r.port)}</td>
-                            <td>${formatarPercentual(r.mat)}</td>
-                            <td>${formatarPercentual(r.his)}</td>
-                            <td>${formatarPercentual(r.geo)}</td>
-                            <td>${formatarPercentual(r.bio)}</td>
-                            <td>${formatarPercentual(r.qui)}</td>
-                            <td>${formatarPercentual(r.ing)}</td>
-                            <td>${formatarPercentual(r.cie)}</td>
-                            <td>${formatarPercentual(r.fis)}</td>
-                            <td>${formatarPercentual(r.ed_fin)}</td>
-                            <td>${formatarPercentual(r.emp)}</td>
-                            <td>${formatarPercentual(r.tec_rob)}</td>
-                            <td>${formatarPercentual(r.ing_it)}</td>
-                            <td>${formatarPercentual(r.art)}</td>
-                            <td>${formatarPercentual(r.mid_dig)}</td>
-                            <td>${formatarPercentual(r.lide)}</td>
-                            <td>${formatarPercentual(r.oratoria)}</td>
-                            <td>${formatarPercentual(r.geo_pol)}</td>
-                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
-                            <td>${formatarPercentual(r.bio_tec)}</td>
-                            <td>${formatarPercentual(r.quim_apl)}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else {
-                tabela.innerHTML = '<tr><td colspan="25" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
-            }
+                const celulasIndicadores = colunasFinais.map(col => `<td>${formatarPercentual(r[col])}</td>`).join('');
+
+                return `
+                    <tr ${classeLinha}>
+                        <td><strong>${r.escola_exibicao}</strong></td>
+                        ${celulasIndicadores}
+                    </tr>
+                `;
+            }).join('');
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
