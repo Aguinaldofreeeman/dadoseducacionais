@@ -9,10 +9,9 @@
         header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 22px; }
         .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
-        main { padding: 30px; max-width: 600px; margin: 0 auto; }
+        main { padding: 30px; max-width: 800px; margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
         
-        /* Formulário de Usuário */
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-header h3 { margin: 0; font-size: 18px; color: #17365d; font-weight: bold; }
         .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
@@ -38,6 +37,16 @@
         .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; word-break: break-word; }
         .msg.success { background-color: #d1fae5; color: #065f46; display: block; border: 1px solid #a7f3d0; }
         .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
+
+        /* Tabela de Usuários */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .badge-ativo { background-color: #d1fae5; color: #065f46; }
+        .badge-inativo { background-color: #fee2e2; color: #991b1b; }
+        .badge-admin { background-color: #dbeafe; color: #1e40af; }
+        .badge-user { background-color: #f3f4f6; color: #374151; }
     </style>
 </head>
 <body>
@@ -95,6 +104,27 @@
                 </div>
             </form>
         </div>
+
+        <!-- Card Lista de Usuários -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Usuários Cadastrados</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Função</th>
+                        <th>Escopo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-usuarios">
+                    <tr><td colspan="5">Carregando usuários...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -108,6 +138,8 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.href = 'index.html';
+        } else {
+            carregarUsuarios();
         }
     }
     verificarSessao();
@@ -116,6 +148,37 @@
         await supabaseClient.auth.signOut();
         window.location.href = 'index.html';
     });
+
+    // Carregar Lista de Usuários
+    async function carregarUsuarios() {
+        const tbody = document.getElementById('lista-usuarios');
+        try {
+            const { data, error } = await supabaseClient
+                .from('perfis_usuarios')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Nenhum usuário cadastrado.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(usr => `
+                <tr>
+                    <td><strong>${usr.nome || '-'}</strong></td>
+                    <td>${usr.email || '-'}</td>
+                    <td>${usr.funcao || 'Sem função'}</td>
+                    <td><span class="badge ${usr.escopo === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${usr.escopo || 'USER'}</span></td>
+                    <td><span class="badge ${usr.ativo ? 'badge-ativo' : 'badge-inativo'}">${usr.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('Erro ao carregar usuários:', err);
+            tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Erro ao carregar lista: ${err.message}</td></tr>`;
+        }
+    }
 
     // Cadastro de Novo Usuário com Perfil Estendido
     document.getElementById('form-novo-usuario').addEventListener('submit', async (e) => {
@@ -136,7 +199,6 @@
         const ativo = document.getElementById('usr-ativo').checked;
 
         try {
-            // Cliente temporário totalmente isolado para registrar a conta sem deslogar o administrador
             const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
                 auth: { 
                     persistSession: false,
@@ -158,7 +220,6 @@
                     throw new Error('Este e-mail já está cadastrado no sistema.');
                 }
 
-                // Inserir perfil estendido na tabela perfis_usuarios com a sessão do Admin
                 const { error: profileError } = await supabaseClient
                     .from('perfis_usuarios')
                     .insert([{
@@ -176,6 +237,9 @@
                 msgEl.className = 'msg success';
                 document.getElementById('form-novo-usuario').reset();
                 document.getElementById('usr-ativo').checked = true;
+                
+                // Recarrega a tabela de usuários automaticamente
+                carregarUsuarios();
             }
         } catch (err) {
             console.error('Erro no cadastro:', err);
