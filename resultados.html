@@ -97,7 +97,6 @@
             return item.nome_escola_original || item.escola_nome || item.escola || 'N/D';
         }
 
-        // Ponto 1: Extrai o nome real da edição/ficheiro contendo o bimestre (ex.: 1º, 2º ou 3º bim)
         function obterEdicao(item) {
             if (item.edicao_planilha && item.edicao_planilha !== 'null' && !item.edicao_planilha.includes('Edicao_202')) {
                 return item.edicao_planilha;
@@ -184,31 +183,35 @@
                 }
 
                 const val = r.valor_original !== null && r.valor_original !== undefined ? r.valor_original : r.valor_numerico;
-                const comp = (r.sigla_componente_original || r.componente || '').trim().toUpperCase();
+                const compBruto = (r.sigla_componente_original || r.componente || '').trim();
+                const compNorm = compBruto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-                // Ponto 2: Captura flexível dos indicadores gerais e de PORT
-                if (comp === '' || comp === 'GERAL' || comp === 'PARTICIPACAO' || comp === 'PARTICIPAÇÃO') {
-                    if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
-                    else if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
-                }
-                
+                // Mapeamento de Indicadores Gerais
+                if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
                 if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
                 if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
 
-                if (comp) {
-                    mapaEscolas[escola].componentes[comp] = val;
+                if (compNorm === '' || compNorm === 'GERAL' || compNorm.includes('PARTICIP')) {
+                    if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
+                } else if (compNorm.includes('ACERTO')) {
+                    if (mapaEscolas[escola].acertos === null) mapaEscolas[escola].acertos = val;
+                } else if (compNorm.includes('EVOLUC')) {
+                    if (mapaEscolas[escola].evolucao === null) mapaEscolas[escola].evolucao = val;
+                } else {
+                    mapaEscolas[escola].componentes[compNorm] = val;
                 }
             });
 
-            // Separa as escolas normais da linha TOTAL (Ponto 3)
             const todasEscolas = Object.values(mapaEscolas);
+            
+            // Separa as escolas e localiza a linha TOTAL
             const listaEscolas = todasEscolas
                 .filter(e => e.escola.trim().toLowerCase() !== 'total')
                 .sort((a, b) => a.escola.localeCompare(b.escola));
             
             const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
 
-            // Ponto 3: Garante que a linha TOTAL fica sempre ao fim
+            // Garante a linha TOTAL fixada ao fim
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
@@ -219,8 +222,8 @@
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
                     const c = e.componentes;
 
-                    // Mapeamento abrangente de PORT
-                    const valPort = c['PORT'] || c['PORTUGUES'] || c['PORTUGUÊS'] || c['LÍNGUA PORTUGUESA'] || c['LINGUA PORTUGUESA'] || c['LP'];
+                    // Mapeamento abrangente para PORT / LÍNGUA PORTUGUESA
+                    const valPort = c['PORT'] || c['PORTUGUES'] || c['LINGUA PORTUGUESA'] || c['LP'];
                     
                     return `
                         <tr ${classeLinha}>
@@ -229,22 +232,22 @@
                             <td>${formatarPercentual(e.acertos)}</td>
                             <td>${formatarPercentual(e.evolucao)}</td>
                             <td>${formatarPercentual(valPort)}</td>
-                            <td>${formatarPercentual(c['MAT'] || c['MATEMATICA'] || c['MATEMÁTICA'])}</td>
-                            <td>${formatarPercentual(c['HIS'] || c['HISTORIA'] || c['HISTÓRIA'])}</td>
+                            <td>${formatarPercentual(c['MAT'] || c['MATEMATICA'])}</td>
+                            <td>${formatarPercentual(c['HIS'] || c['HISTORIA'])}</td>
                             <td>${formatarPercentual(c['GEO'] || c['GEOGRAFIA'])}</td>
                             <td>${formatarPercentual(c['BIO'] || c['BIOLOGIA'])}</td>
-                            <td>${formatarPercentual(c['QUI'] || c['QUIMICA'] || c['QUÍMICA'])}</td>
-                            <td>${formatarPercentual(c['ING'] || c['INGLES'] || c['INGLÊS'])}</td>
-                            <td>${formatarPercentual(c['CIE'] || c['CIENCIAS'] || c['CIÊNCIAS'])}</td>
-                            <td>${formatarPercentual(c['FIS'] || c['FISICA'] || c['FÍSICA'])}</td>
-                            <td>${formatarPercentual(c['ED FIN'] || c['EDUCACAO FINANCEIRA'] || c['EDUCAÇÃO FINANCEIRA'])}</td>
+                            <td>${formatarPercentual(c['QUI'] || c['QUIMICA'])}</td>
+                            <td>${formatarPercentual(c['ING'] || c['INGLES'])}</td>
+                            <td>${formatarPercentual(c['CIE'] || c['CIENCIAS'])}</td>
+                            <td>${formatarPercentual(c['FIS'] || c['FISICA'])}</td>
+                            <td>${formatarPercentual(c['ED FIN'] || c['EDUCACAO FINANCEIRA'])}</td>
                             <td>${formatarPercentual(c['EMP'] || c['EMPREENDEDORISMO'])}</td>
                             <td>${formatarPercentual(c['TEC ROB'] || c['TECNOLOGIA'])}</td>
                             <td>${formatarPercentual(c['ING IT'])}</td>
                             <td>${formatarPercentual(c['ART'] || c['ARTE'])}</td>
                             <td>${formatarPercentual(c['MID DIG'])}</td>
                             <td>${formatarPercentual(c['LIDE'])}</td>
-                            <td>${formatarPercentual(c['ORATORIA'] || c['ORATÓRIA'])}</td>
+                            <td>${formatarPercentual(c['ORATORIA'])}</td>
                             <td>${formatarPercentual(c['GEO POL'])}</td>
                             <td>${formatarPercentual(c['FIL E SOC MOD'] || c['FILOSOFIA'])}</td>
                             <td>${formatarPercentual(c['BIO TEC'])}</td>
