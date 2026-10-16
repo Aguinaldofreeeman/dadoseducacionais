@@ -93,23 +93,6 @@
 
         let todosResultados = [];
 
-        function obterNomeEscola(item) {
-            return item.nome_escola_original || item.escola_nome || item.escola || 'N/D';
-        }
-
-        function obterEdicao(item) {
-            if (item.edicao_planilha && item.edicao_planilha !== 'null' && !item.edicao_planilha.includes('Edicao_202')) {
-                return item.edicao_planilha;
-            }
-            if (item.edicao && item.edicao !== 'null') return item.edicao;
-            const keys = Object.keys(item);
-            const keyEdicao = keys.find(k => k.toLowerCase().includes('edicao') || k.toLowerCase().includes('planilha') || k.toLowerCase().includes('bimestre'));
-            if (keyEdicao && item[keyEdicao]) return item[keyEdicao];
-            
-            const anoStr = item.ano ? String(item.ano) : '2024';
-            return `Prova_Paulista_1º_bim_${anoStr}.xlsx`;
-        }
-
         function formatarPercentual(valor) {
             if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
             const str = String(valor).replace(',', '.');
@@ -120,13 +103,18 @@
             return pct.toFixed(1).replace('.', ',') + '%';
         }
 
+        function normalizarTexto(txt) {
+            if (!txt) return '';
+            return String(txt).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        }
+
         function carregarFiltros(dados) {
             const selectAno = document.getElementById('filtro-ano');
 
             dados.forEach(item => {
-                item.edicao_nome = obterEdicao(item);
-                item.ano_calculado = item.ano ? String(item.ano) : ((item.edicao_nome || '').match(/202[0-9]/) || ['2024'])[0];
-                item.escola_exibicao = obterNomeEscola(item);
+                item.ano_calculado = item.ano ? String(item.ano) : '2024';
+                item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
+                item.escola_exibicao = item.nome_escola_original || 'N/D';
             });
 
             const anosUnicos = [...new Set(dados.map(item => item.ano_calculado).filter(Boolean))].sort();
@@ -144,7 +132,7 @@
             const edicoesFiltradas = [...new Set(todosResultados
                 .filter(r => !anoSel || r.ano_calculado === anoSel)
                 .map(r => r.edicao_nome)
-                .filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+                .filter(Boolean))].sort();
 
             selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' + 
                 edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
@@ -168,6 +156,7 @@
                 return bateAno && bateEdicao && !eMetadado;
             });
 
+            // Agrupa todos os registros por escola
             const mapaEscolas = {};
 
             filtrados.forEach(r => {
@@ -182,36 +171,30 @@
                     };
                 }
 
-                const val = r.valor_original !== null && r.valor_original !== undefined ? r.valor_original : r.valor_numerico;
-                const compBruto = (r.sigla_componente_original || r.componente || '').trim();
-                const compNorm = compBruto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-                // Captura dos Indicadores Globais
-                if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
-                if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
-                if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
+                const val = (r.valor_original !== null && r.valor_original !== undefined) ? r.valor_original : r.valor_numerico;
+                const compNorm = normalizarTexto(r.sigla_componente_original);
 
                 if (compNorm === '' || compNorm === 'GERAL' || compNorm.includes('PARTICIP')) {
-                    if (mapaEscolas[escola].participacao === null) mapaEscolas[escola].participacao = val;
+                    mapaEscolas[escola].participacao = val;
                 } else if (compNorm.includes('ACERTO')) {
-                    if (mapaEscolas[escola].acertos === null) mapaEscolas[escola].acertos = val;
+                    mapaEscolas[escola].acertos = val;
                 } else if (compNorm.includes('EVOLUC')) {
-                    if (mapaEscolas[escola].evolucao === null) mapaEscolas[escola].evolucao = val;
+                    mapaEscolas[escola].evolucao = val;
                 } else {
                     mapaEscolas[escola].componentes[compNorm] = val;
                 }
             });
 
             const todasEscolas = Object.values(mapaEscolas);
-            
-            // Separa as escolas normais e identifica a linha TOTAL
+
+            // Separa as escolas e localiza a linha TOTAL
             const listaEscolas = todasEscolas
                 .filter(e => e.escola.trim().toLowerCase() !== 'total')
                 .sort((a, b) => a.escola.localeCompare(b.escola));
-            
+
             const linhaTotal = todasEscolas.find(e => e.escola.trim().toLowerCase() === 'total');
 
-            // Posiciona a linha TOTAL obrigatoriamente no fim da tabela
+            // Garante que a linha TOTAL fique exatamente ao fim
             if (linhaTotal) {
                 listaEscolas.push(linhaTotal);
             }
@@ -222,7 +205,7 @@
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
                     const c = e.componentes;
 
-                    // Mapeamento abrangente de PORT / LÍNGUA PORTUGUESA
+                    // Mapeamento flexível de disciplinas
                     const valPort = c['PORT'] || c['PORTUGUES'] || c['LINGUA PORTUGUESA'] || c['LP'];
                     
                     return `
