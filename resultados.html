@@ -13,7 +13,6 @@
         .filtros div { display: flex; flex-direction: column; gap: 5px; }
         .filtros select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; min-width: 250px; }
         
-        /* Contêiner com barra de rolagem horizontal sempre visível */
         .tabela-container { 
             overflow-x: scroll; 
             width: 100%; 
@@ -24,21 +23,10 @@
             padding-bottom: 5px;
         }
 
-        /* Personalização da barra de rolagem para destaque visual */
-        .tabela-container::-webkit-scrollbar {
-            height: 12px;
-        }
-        .tabela-container::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 6px;
-        }
-        .tabela-container::-webkit-scrollbar-thumb {
-            background: #17365d;
-            border-radius: 6px;
-        }
-        .tabela-container::-webkit-scrollbar-thumb:hover {
-            background: #0f2440;
-        }
+        .tabela-container::-webkit-scrollbar { height: 12px; }
+        .tabela-container::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 6px; }
+        .tabela-container::-webkit-scrollbar-thumb { background: #17365d; border-radius: 6px; }
+        .tabela-container::-webkit-scrollbar-thumb:hover { background: #0f2440; }
 
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1200px; }
         th { background-color: #17365d; color: white; text-align: left; padding: 10px 8px; white-space: nowrap; position: sticky; top: 0; }
@@ -97,8 +85,10 @@
 
         let todosResultados = [];
 
-        function formatarPercentual(valor) {
+        function formatarValor(col, valor) {
             if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
+            if (col === 'total_alun' || col === 'total_alunos') return String(valor);
+            
             const str = String(valor).replace(',', '.');
             const num = parseFloat(str);
             if (isNaN(num)) return valor;
@@ -179,131 +169,18 @@
                 });
             });
 
-            const ordemDesejada = ['participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'emp', 'tec_rob', 'ing_it', 'art', 'mid_dig', 'lide', 'oratoria', 'geo_pol', 'fil_e_soc_mod', 'bio_tec', 'quim_apl'];
+            // Ordem exata alinhada com os cabeçalhos das planilhas
+            const ordemDesejada = [
+                'total_alun', 'participacao', 'acertos_prova', 'evolucao', 
+                'port', 'mat', 'his', 'hist', 'geo', 'ing', 'cie', 'ed_fin', 
+                'fis', 'qui', 'bio', 'art', 'arte', 'emp', 'empr', 'ora', 'oratoria', 
+                'qui_apl', 'quim_apl', 'geo_pol', 'filo_soc', 'fil_e_soc_mod', 'bio_tec', 
+                'filo', 'soc', 'lid', 'lide', 'prog', 'tec_ino', 'tec_rob', 'ing_if', 'ing_it', 
+                'mid_dig', 'oe_port', 'oe_mat'
+            ];
             
             const colunasFinais = Array.from(colunasEncontradas).sort((a, b) => {
                 const idxA = ordemDesejada.indexOf(a);
                 const idxB = ordemDesejada.indexOf(b);
                 if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                 if (idxA !== -1) return -1;
-                if (idxB !== -1) return 1;
-                return a.localeCompare(b);
-            });
-
-            const mapaNomesLegiveis = {
-                'participacao': 'Participação',
-                'acertos_prova': 'Acertos',
-                'evolucao': 'Evolução',
-                'port': 'PORT',
-                'mat': 'MAT',
-                'his': 'HIS',
-                'geo': 'GEO',
-                'bio': 'BIO',
-                'qui': 'QUI',
-                'ing': 'ING',
-                'cie': 'CIE',
-                'fis': 'FIS',
-                'ed_fin': 'ED FIN',
-                'emp': 'EMP',
-                'tec_rob': 'TEC ROB',
-                'ing_it': 'ING IT',
-                'art': 'ART',
-                'mid_dig': 'MID DIG',
-                'lide': 'LIDE',
-                'oratoria': 'ORATORIA',
-                'geo_pol': 'GEO POL',
-                'fil_e_soc_mod': 'FIL E SOC MOD',
-                'bio_tec': 'BIO TEC',
-                'quim_apl': 'QUIM APL'
-            };
-
-            cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
-
-            const mapaEscolas = {};
-
-            filtrados.forEach(r => {
-                const escolaKey = r.escola_limpa.toLowerCase();
-
-                if (!mapaEscolas[escolaKey]) {
-                    mapaEscolas[escolaKey] = { ...r, escola_exibicao: r.escola_limpa };
-                } else {
-                    colunasFinais.forEach(col => {
-                        const valExistente = mapaEscolas[escolaKey][col];
-                        const valNovo = r[col];
-                        if ((valExistente === null || valExistente === undefined || valExistente === '' || valExistente === 0) &&
-                            (valNovo !== null && valNovo !== undefined && valNovo !== '' && valNovo !== 0)) {
-                            mapaEscolas[escolaKey][col] = valNovo;
-                        }
-                    });
-                }
-            });
-
-            const listaAgrupada = Object.values(mapaEscolas);
-
-            const listaEscolas = listaAgrupada
-                .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
-                .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
-
-            const linhaTotal = listaAgrupada.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
-
-            if (linhaTotal) {
-                linhaTotal.escola_exibicao = 'TOTAL';
-                listaEscolas.push(linhaTotal);
-            }
-
-            tabela.innerHTML = listaEscolas.map(r => {
-                const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
-                const classeLinha = isTotal ? 'class="linha-total"' : '';
-
-                const celulasIndicadores = colunasFinais.map(col => `<td>${formatarPercentual(r[col])}</td>`).join('');
-
-                return `
-                    <tr ${classeLinha}>
-                        <td><strong>${r.escola_exibicao}</strong></td>
-                        ${celulasIndicadores}
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
-
-            const { data: resultados, error } = await supabaseClient
-                .from('dados_educacionais')
-                .select('*')
-                .range(0, 5000);
-
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="25">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else {
-                todosResultados = resultados || [];
-                carregarFiltros(todosResultados);
-                renderizarTabela();
-
-                document.getElementById('filtro-ano').addEventListener('change', () => {
-                    atualizarOpcoesEdicao();
-                    renderizarTabela();
-                });
-
-                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
-            }
-        });
-    </script>
-</body>
-</html>
