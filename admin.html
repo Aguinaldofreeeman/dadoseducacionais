@@ -8,262 +8,113 @@
         body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
         header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 22px; }
-        header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
-        main { padding: 30px; max-width: 1000px; margin: 0 auto; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        main { padding: 30px; max-width: 600px; margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .btn { background-color: #17365d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; }
-        .btn-success { background-color: #16a34a; }
-        .btn-danger { background-color: #dc2626; }
-        .btn-secondary { background-color: #64748b; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .preview-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-top: 15px; font-size: 13px; max-height: 250px; overflow-y: auto; }
-        .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; font-weight: bold; }
-        .status-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .status-error { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
+        
+        /* Formulario de Utilizador */
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; font-size: 18px; color: #17365d; font-weight: bold; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+        
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: bold; color: #475569; }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus { border-color: #0d9488; }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+        .checkbox-group input { width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-group label { font-size: 14px; font-weight: normal; color: #334155; cursor: pointer; }
+        
+        .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+        .btn-cancel { background: white; border: 1px solid #cbd5e1; color: #0d9488; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-save { background: #0d9488; border: none; color: white; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-save:hover { background: #0f766e; }
+        
+        .msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
+        .msg.success { background-color: #d1fae5; color: #065f46; display: block; }
+        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; }
     </style>
 </head>
 <body>
     <header>
-        <div>
-            <h1>Área Administrativa</h1>
-            <p>Importação e Gestão de Planilhas Educacionais</p>
-        </div>
-        <div class="header-actions">
-            <a href="resultados.html" class="btn btn-secondary">Voltar aos Resultados</a>
-            <button id="btn-logout" class="btn btn-danger">Sair</button>
-        </div>
+        <h1>Área Administrativa — Prova Paulista</h1>
+        <button id="btn-sair" class="btn-logout">Sair</button>
     </header>
-
     <main>
-        <!-- CARD 1: CADASTRAR NOVO USUÁRIO -->
+        <!-- Card Novo Utilizador conforme imagem -->
         <div class="card">
-            <h2>Cadastrar Novo Usuário</h2>
-            <p>Crie contas de acesso para outros usuários da plataforma.</p>
+            <div class="modal-header">
+                <h3>Novo usuário</h3>
+                <button class="close-btn">&times;</button>
+            </div>
             <form id="form-novo-usuario">
                 <div class="form-group">
-                    <label for="novo-email">E-mail do Usuário:</label>
-                    <input type="email" id="novo-email" placeholder="usuario@escola.sp.gov.br" required>
+                    <label for="usr-nome">Nome</label>
+                    <input type="text" id="usr-nome" placeholder="Nome do utilizador" required>
                 </div>
                 <div class="form-group">
-                    <label for="nova-senha">Senha Temporária:</label>
-                    <input type="password" id="nova-senha" placeholder="Mínimo de 6 caracteres" minlength="6" required>
+                    <label for="usr-email">E-mail</label>
+                    <input type="email" id="usr-email" placeholder="exemplo@dominio.com" required>
                 </div>
-                <button type="submit" class="btn btn-success">Cadastrar Usuário</button>
+                <div class="form-group">
+                    <label for="usr-senha">Senha</label>
+                    <input type="password" id="usr-senha" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="usr-funcao">Função</label>
+                    <select id="usr-funcao">
+                        <option value="">Sem função definida</option>
+                        <option value="Coordenador">Coordenador</option>
+                        <option value="Diretor">Diretor</option>
+                        <option value="Professor">Professor</option>
+                        <option value="Analista">Analista Educacional</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="usr-escopo">Escopo</label>
+                    <select id="usr-escopo">
+                        <option value="USER" selected>USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="usr-ativo" checked>
+                    <label for="usr-ativo">Usuário ativo</label>
+                </div>
+                
+                <div id="usr-msg" class="msg"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" onclick="document.getElementById('form-novo-usuario').reset()">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar</button>
+                </div>
             </form>
-            <div id="status-usuario" class="status-msg"></div>
-        </div>
-
-        <!-- CARD 2: IMPORTAR PLANILHAS -->
-        <div class="card">
-            <h2>Importar Nova Planilha (.xlsx)</h2>
-            <p>Selecione o ano letivo, informe o nome da edição e escolha a planilha oficial para gravar os dados no Supabase.</p>
-            
-            <div class="form-group">
-                <label for="ano-letivo">Ano Letivo:</label>
-                <select id="ano-letivo">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="edicao-nome">Nome da Edição / Arquivo:</label>
-                <input type="text" id="edicao-nome" placeholder="Ex: Prova_Paulista_1º_bim_2026.xlsx">
-            </div>
-
-            <div class="form-group">
-                <label for="file-input">Selecione a Planilha XLSX:</label>
-                <input type="file" id="file-input" accept=".xlsx, .xls">
-            </div>
-
-            <div id="preview-area" style="display: none;">
-                <h3>Pré-visualização do Mapeamento</h3>
-                <div id="preview-info" class="preview-box"></div>
-                <br>
-                <button id="btn-gravar" class="btn btn-success">Confirmar e Gravar no Supabase</button>
-            </div>
-
-            <div id="status-message" class="status-msg"></div>
         </div>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    let dadosParaEnviar = [];
-
-    // Verificação de autenticação
-    async function verificarAutenticacao() {
+    // Proteção de rota não autenticada
+    async function verificarSessao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
-            alert('Acesso restrito! Por favor, faça login para acessar a Área Administrativa.');
             window.location.href = 'index.html';
         }
     }
+    verificarSessao();
 
-    // Botão de Logout
-    document.getElementById('btn-logout').addEventListener('click', async () => {
+    document.getElementById('btn-sair').addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
         window.location.href = 'index.html';
     });
-
-    // Cadastro de Usuários
-    document.getElementById('form-novo-usuario').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('novo-email').value.trim();
-        const password = document.getElementById('nova-senha').value;
-        const msgDiv = document.getElementById('status-usuario');
-
-        msgDiv.style.display = 'none';
-
-        const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-        });
-
-        if (error) {
-            msgDiv.className = 'status-msg status-error';
-            msgDiv.innerText = 'Erro ao cadastrar usuário: ' + error.message;
-            msgDiv.style.display = 'block';
-        } else {
-            msgDiv.className = 'status-msg status-success';
-            msgDiv.innerText = 'Usuário ' + email + ' cadastrado com sucesso!';
-            msgDiv.style.display = 'block';
-            document.getElementById('form-novo-usuario').reset();
-        }
-    });
-
-    // Leitura do Arquivo XLSX
-    document.getElementById('file-input').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        if (!document.getElementById('edicao-nome').value) {
-            document.getElementById('edicao-nome').value = file.name;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-
-            if (jsonRows.length === 0) {
-                mostrarMensagem('A planilha selecionada está vazia.', 'error');
-                return;
-            }
-
-            prepararDados(jsonRows);
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
-    function normalizarChave(str) {
-        return String(str)
-            .toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9]/g, "");
-    }
-
-    function prepararDados(rows) {
-        const ano = document.getElementById('ano-letivo').value;
-        const edicao = document.getElementById('edicao-nome').value.trim();
-
-        dadosParaEnviar = rows.map(row => {
-            const rowNormalizado = {};
-            Object.keys(row).forEach(k => {
-                rowNormalizado[normalizarChave(k)] = row[k];
-            });
-
-            const obterValor = (chaves) => {
-                for (let c of chaves) {
-                    const norm = normalizarChave(c);
-                    if (rowNormalizado[norm] !== undefined && rowNormalizado[norm] !== '') {
-                        return String(rowNormalizado[norm]).trim();
-                    }
-                }
-                return null;
-            };
-
-            return {
-                ano: ano,
-                edicao_planilha: edicao,
-                escola: obterValor(['ESCOLA', 'ESCOLAS', 'NM_ESCOLA', 'NOME DA ESCOLA', 'NOME ESCOLA']),
-                participacao: obterValor(['PARTICIPACAO', 'PARTICIPACAO_GERAL', '(%) Partic', '% PARTICIPACAO', '(%) DE PARTICIPACAO', 'PARTICIPACAO (%)']),
-                acertos_prova: obterValor(['ACERTOS_PROVA', 'ACERTO_GERAL', 'ACERTOS', '(%) Acerto', '% ACERTOS', '(%) DE ACERTOS']),
-                evolucao: obterValor(['EVOLUCAO', '*Evolução', 'EVOLUCAO_PERCENTUAL']),
-                port: obterValor(['PORT', 'PORTUGUES', 'LINGUA PORTUGUESA', 'LENGUA PORTUGUESA']),
-                mat: obterValor(['MAT', 'MATEMATICA']),
-                his: obterValor(['HIS', 'HISTORIA', 'HIST']),
-                geo: obterValor(['GEO', 'GEOGRAFIA']),
-                bio: obterValor(['BIO', 'BIOLOGIA']),
-                qui: obterValor(['QUI', 'QUIMICA']),
-                ing: obterValor(['ING', 'INGLES', 'LINGUA INGLESA']),
-                cie: obterValor(['CIE', 'CIENCIAS']),
-                fis: obterValor(['FIS', 'FISICA']),
-                ed_fin: obterValor(['ED FIN', 'ED_FIN', 'EDUCACAO FINANCEIRA', 'FIN']),
-                emp: obterValor(['EMP', 'EMPREENDEDORISMO']),
-                art: obterValor(['ART', 'ARTE', 'ARTES']),
-                lide: Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide')) ? rowNormalizado[Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide'))] : null,
-                oratoria: obterValor(['ORATORIA', 'ORATÓRIA']),
-                geo_pol: obterValor(['GEO POL', 'GEO_POL', 'GEOPOLITICA']),
-                fil_e_soc_mod: obterValor(['FIL/SOC', 'FIL_E_SOC_MOD']),
-                filo: obterValor(['FILO', 'FILOSOFIA']),
-                soc: obterValor(['SOC', 'SOCIOLOGIA']),
-                bio_tec: obterValor(['BIO TEC', 'BIO_TEC', 'BIOTECNOLOGIA', 'TEC']),
-                quim_apl: obterValor(['QUIM APL', 'QUIM_APL', 'QUIMICA APLICADA'])
-            };
-        });
-
-        const previewBox = document.getElementById('preview-info');
-        previewBox.innerHTML = `
-            <p><strong>Total de linhas processadas:</strong> ${dadosParaEnviar.length}</p>
-            <p><strong>Ano:</strong> ${ano} | <strong>Edição:</strong> ${edicao}</p>
-            <p><strong>Amostra do Primeiro Registro Mapeado:</strong></p>
-            <pre>${JSON.stringify(dadosParaEnviar[0], null, 2)}</pre>
-        `;
-        document.getElementById('preview-area').style.display = 'block';
-    }
-
-    document.getElementById('btn-gravar').addEventListener('click', async function() {
-        if (dadosParaEnviar.length === 0) return;
-
-        const btn = document.getElementById('btn-gravar');
-        btn.disabled = true;
-        btn.innerText = 'Gravando no Supabase...';
-
-        const { error } = await supabaseClient
-            .from('dados_educacionais')
-            .insert(dadosParaEnviar);
-
-        if (error) {
-            mostrarMensagem('Erro ao gravar dados no Supabase: ' + error.message, 'error');
-            btn.disabled = false;
-            btn.innerText = 'Confirmar e Gravar no Supabase';
-        } else {
-            mostrarMensagem('Dados importados com sucesso para o Supabase!', 'success');
-            btn.innerText = 'Gravação Concluída!';
-        }
-    });
-
-    function mostrarMensagem(texto, tipo) {
-        const msgDiv = document.getElementById('status-message');
-        msgDiv.className = 'status-msg ' + (tipo === 'success' ? 'status-success' : 'status-error');
-        msgDiv.innerText = texto;
-        msgDiv.style.display = 'block';
-    }
-
-    document.addEventListener('DOMContentLoaded', verificarAutenticacao);
 </script>
 </body>
 </html>
