@@ -51,7 +51,7 @@
             <div>
                 <label for="filtro-ano"><strong>Ano Letivo:</strong></label>
                 <select id="filtro-ano">
-                    <option value="">Selecione o Ano...</option>
+                    <option value="">Aguarde, carregando...</option>
                 </select>
             </div>
             <div>
@@ -67,7 +67,7 @@
                 <thead id="cabecalho-tabela">
                     <tr>
                         <th>Escola</th>
-                        <th>Resultados</th>
+                        <th>Carregando Informações...</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
@@ -86,7 +86,7 @@
         let todosResultados = [];
 
         function formatarValor(col, valor) {
-            if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
+            if (valor === null || valor === undefined || valor === '' || String(valor).trim() === '-') return '-';
             if (col === 'total_alun' || col === 'total_alunos') return String(valor);
             
             const str = String(valor).replace(',', '.');
@@ -105,15 +105,24 @@
         function carregarFiltros(dados) {
             const selectAno = document.getElementById('filtro-ano');
 
+            if (!dados || dados.length === 0) {
+                selectAno.innerHTML = '<option value="">Nenhum dado encontrado no banco.</option>';
+                return;
+            }
+
             dados.forEach(item => {
                 let anoItem = '2024';
-                if (item.ano) anoItem = String(item.ano);
-                else if (item.edicao_planilha) {
+                if (item.ano) {
+                    anoItem = String(item.ano);
+                } else if (item.edicao_planilha && typeof item.edicao_planilha === 'string') {
                     const match = item.edicao_planilha.match(/202[0-9]/);
                     if (match) anoItem = match[0];
                 }
+                
                 item.ano_calculado = anoItem;
-                item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
+                // Tratamento seguro para edição
+                const edicaoBase = item.edicao_planilha ? String(item.edicao_planilha) : `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
+                item.edicao_nome = edicaoBase;
                 item.escola_limpa = limparNomeEscola(item.escola);
             });
 
@@ -145,7 +154,7 @@
             const tabela = document.getElementById('tabela-resultados');
 
             if (!anoSelecionado && !edicaoSelecionada) {
-                cabecalho.innerHTML = '<tr><th>Escola</th><th>Resultados</th></tr>';
+                cabecalho.innerHTML = '<tr><th>Escola</th><th>Aguardando Seleção...</th></tr>';
                 tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
                 return;
             }
@@ -169,7 +178,8 @@
 
             filtrados.forEach(r => {
                 Object.keys(r).forEach(k => {
-                    if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined && r[k] !== '') {
+                    // Segurança adicional para ignorar colunas internas ou vazias
+                    if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined && String(r[k]).trim() !== '') {
                         colunasEncontradas.add(k);
                     }
                 });
@@ -193,46 +203,23 @@
                 return a.localeCompare(b);
             });
 
+            // Se por acaso nenhuma coluna válida sobrar (dados vazios), evita quebrar a tela
+            if (colunasFinais.length === 0) {
+                cabecalho.innerHTML = '<tr><th>Escola</th><th>Aviso</th></tr>';
+                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registros desta edição não possuem notas numéricas preenchidas.</td></tr>';
+                return;
+            }
+
             const mapaNomesLegiveis = {
-                'total_alun': 'Total Alun',
-                'participacao': '(%) de Par',
-                'acertos_prova': '(%) de Ace',
-                'evolucao': 'Evolução',
-                'port': 'PORT',
-                'mat': 'MAT',
-                'his': 'HIST',
-                'hist': 'HIST',
-                'geo': 'GEO',
-                'ing': 'ING',
-                'cie': 'CIE',
-                'ed_fin': 'ED FIN',
-                'fis': 'FÍS',
-                'qui': 'QUI',
-                'bio': 'BIO',
-                'art': 'ARTE',
-                'arte': 'ARTE',
-                'emp': 'EMPR',
-                'empr': 'EMPR',
-                'ora': 'ORA',
-                'oratoria': 'ORA',
-                'qui_apl': 'QUI APL',
-                'quim_apl': 'QUI APL',
-                'geo_pol': 'GEO POL',
-                'filo_soc': 'FILO SOC',
-                'fil_e_soc_mod': 'FILO SOC',
-                'bio_tec': 'BIO TEC',
-                'filo': 'FILO',
-                'soc': 'SOC',
-                'lid': 'LID',
-                'lide': 'LID',
-                'prog': 'PROG',
-                'tec_ino': 'TEC INO',
-                'tec_rob': 'TEC ROB',
-                'ing_if': 'ING IF',
-                'ing_it': 'ING IT',
-                'mid_dig': 'MID DIG',
-                'oe_port': 'OE PORT',
-                'oe_mat': 'OE MAT'
+                'total_alun': 'Total Alun', 'participacao': '(%) de Par', 'acertos_prova': '(%) de Ace',
+                'evolucao': 'Evolução', 'port': 'PORT', 'mat': 'MAT', 'his': 'HIST', 'hist': 'HIST',
+                'geo': 'GEO', 'ing': 'ING', 'cie': 'CIE', 'ed_fin': 'ED FIN', 'fis': 'FÍS', 'qui': 'QUI',
+                'bio': 'BIO', 'art': 'ARTE', 'arte': 'ARTE', 'emp': 'EMPR', 'empr': 'EMPR', 'ora': 'ORA',
+                'oratoria': 'ORA', 'qui_apl': 'QUI APL', 'quim_apl': 'QUI APL', 'geo_pol': 'GEO POL',
+                'filo_soc': 'FILO SOC', 'fil_e_soc_mod': 'FILO SOC', 'bio_tec': 'BIO TEC', 'filo': 'FILO',
+                'soc': 'SOC', 'lid': 'LID', 'lide': 'LID', 'prog': 'PROG', 'tec_ino': 'TEC INO',
+                'tec_rob': 'TEC ROB', 'ing_if': 'ING IF', 'ing_it': 'ING IT', 'mid_dig': 'MID DIG',
+                'oe_port': 'OE PORT', 'oe_mat': 'OE MAT'
             };
 
             cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
@@ -301,26 +288,29 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
-            const { data: resultados, error } = await supabaseClient
-                .from('dados_educacionais')
-                .select('*')
-                .range(0, 5000);
+            try {
+                const { data: resultados, error } = await supabaseClient
+                    .from('dados_educacionais')
+                    .select('*')
+                    .range(0, 5000);
 
-            if (error) {
-                console.error('Erro ao carregar dados:', error.message);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2">Erro ao carregar dados: ${error.message}</td></tr>`;
-            } else {
+                if (error) throw error;
+
                 todosResultados = resultados || [];
                 carregarFiltros(todosResultados);
                 renderizarTabela();
 
-                document.getElementById('filtro-ano').addEventListener('change', () => {
-                    atualizarOpcoesEdicao();
-                    renderizarTabela();
-                });
-
-                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+            } catch (err) {
+                console.error('Erro ao carregar dados:', err);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2" style="color:red; text-align:center; padding: 20px;">Falha de conexão com o banco de dados.</td></tr>`;
             }
+
+            document.getElementById('filtro-ano').addEventListener('change', () => {
+                atualizarOpcoesEdicao();
+                renderizarTabela();
+            });
+
+            document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
         });
     </script>
 </body>
