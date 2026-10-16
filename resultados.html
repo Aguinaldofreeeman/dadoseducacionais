@@ -103,13 +103,19 @@
             return pct.toFixed(1).replace('.', ',') + '%';
         }
 
+        function limparNomeEscola(nome) {
+            if (!nome) return 'N/D';
+            // Remove o sufixo com hífen e código numérico do final se existir (ex.: " - 33881")
+            return String(nome).replace(/\s*-\s*\d+$/, '').trim();
+        }
+
         function carregarFiltros(dados) {
             const selectAno = document.getElementById('filtro-ano');
 
             dados.forEach(item => {
                 item.ano_calculado = item.ano ? String(item.ano) : '2024';
                 item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
-                item.escola_exibicao = item.escola || 'N/D';
+                item.escola_limpa = limparNomeEscola(item.escola);
             });
 
             const anosUnicos = [...new Set(dados.map(item => item.ano_calculado).filter(Boolean))].sort();
@@ -146,19 +152,49 @@
             const filtrados = todosResultados.filter(r => {
                 const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
                 const bateEdicao = !edicaoSelecionada || r.edicao_nome === edicaoSelecionada;
-                const nomeEscola = (r.escola_exibicao || '').toLowerCase().trim();
+                const nomeEscola = (r.escola_limpa || '').toLowerCase().trim();
                 const eMetadado = nomeEscola.includes('filtros');
                 return bateAno && bateEdicao && !eMetadado;
             });
 
-            // Separa escolas da linha TOTAL
-            const listaEscolas = filtrados
+            // Agrupa as linhas por escola para evitar duplicidades visuais derivadas das séries
+            const mapaEscolas = {};
+
+            filtrados.forEach(r => {
+                const escolaKey = r.escola_limpa.toLowerCase();
+
+                if (!mapaEscolas[escolaKey]) {
+                    mapaEscolas[escolaKey] = { ...r, escola_exibicao: r.escola_limpa };
+                } else {
+                    // Consolida os campos que porventura estejam vazios em uma linha e preenchidos em outra
+                    const colunas = [
+                        'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 
+                        'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'emp', 'tec_rob', 'ing_it', 
+                        'art', 'mid_dig', 'lide', 'oratoria', 'geo_pol', 'fil_e_soc_mod', 'bio_tec', 'quim_apl'
+                    ];
+
+                    colunas.forEach(col => {
+                        const valExistente = mapaEscolas[escolaKey][col];
+                        const valNovo = r[col];
+                        if ((valExistente === null || valExistente === undefined || valExistente === '' || valExistente === 0) &&
+                            (valNovo !== null && valNovo !== undefined && valNovo !== '' && valNovo !== 0)) {
+                            mapaEscolas[escolaKey][col] = valNovo;
+                        }
+                    });
+                }
+            });
+
+            const listaAgrupada = Object.values(mapaEscolas);
+
+            // Separa a linha TOTAL para ficar no final
+            const listaEscolas = listaAgrupada
                 .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
                 .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
 
-            const linhaTotal = filtrados.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
+            const linhaTotal = listaAgrupada.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
 
             if (linhaTotal) {
+                linhaTotal.escola_exibicao = 'TOTAL';
                 listaEscolas.push(linhaTotal);
             }
 
@@ -219,7 +255,6 @@
                 document.getElementById('btn-admin').style.display = 'inline-block';
             }
 
-            // Consulta direta na tabela dados_educacionais que corresponde exatamente à planilha
             const { data: resultados, error } = await supabaseClient
                 .from('dados_educacionais')
                 .select('*')
