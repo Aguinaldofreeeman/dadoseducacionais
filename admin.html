@@ -3,286 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <title>Área Administrativa - Plataforma Educacional</title>
+    <title>Área Administrativa - Prova Paulista</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
-        header { background-color: #17365d; color: white; padding: 20px; text-align: center; }
-        main { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        button { padding: 10px 16px; background-color: #17365d; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        button:disabled { opacity: .6; cursor: wait; }
+        header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 22px; }
+        header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
+        main { padding: 30px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .btn { background-color: #17365d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; }
+        .btn-success { background-color: #16a34a; }
+        .btn-danger { background-color: #dc2626; }
+        .btn-secondary { background-color: #64748b; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .preview-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-top: 15px; font-size: 13px; max-height: 250px; overflow-y: auto; }
+        .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; font-weight: bold; }
+        .status-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .status-error { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Painel Administrativo</h1>
+        <div>
+            <h1>Área Administrativa</h1>
+            <p>Importação e Gestão de Planilhas Educacionais</p>
+        </div>
+        <div class="header-actions">
+            <a href="resultados.html" class="btn btn-secondary">Voltar aos Resultados</a>
+            <button id="btn-logout" class="btn btn-danger">Sair</button>
+        </div>
     </header>
+
     <main>
-        <h2>Gestão da Plataforma</h2>
-        <p id="status-carregamento">A verificar permissões de acesso...</p>
-        <div id="conteudo-admin" style="display: none;">
-            <p>Bem-vindo à área restrita de administração.</p>
-            <h3>Utilizadores Registados</h3>
-            <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin-bottom: 20px; text-align: left;">
-                <thead>
-                    <tr style="background-color: #17365d; color: white;">
-                        <th>E-mail</th>
-                        <th>Perfil (Role)</th>
-                        <th>Data de Criação</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-utilizadores">
-                    <tr><td colspan="3">A carregar utilizadores...</td></tr>
-                </tbody>
-            </table>
-
-            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
-
-            <h3>Importar Planilha Educacional (2024-2026)</h3>
-            <p>Selecione o ficheiro Excel (.xlsx) ou CSV para carregar os dados na plataforma.</p>
-
-            <div style="margin-bottom: 20px;">
-                <input type="file" id="input-planilha" accept=".xlsx, .xls, .csv" style="padding: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+        <div class="card">
+            <h2>Importar Nova Planilha (.xlsx)</h2>
+            <p>Selecione o ano letivo, informe o nome da edição e escolha a planilha oficial para gravar os dados no Supabase.</p>
+            
+            <div class="form-group">
+                <label for="ano-letivo">Ano Letivo:</label>
+                <select id="ano-letivo">
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
             </div>
 
-            <div id="preview-container" style="display: none; margin-top: 15px; padding: 15px; background: #e2e8f0; border-radius: 6px;">
-                <h4>Pré-visualização do Carregamento</h4>
-                <p id="status-preview"></p>
-                <p id="status-colunas" style="font-size: 13px; line-height: 1.5;"></p>
-                <button id="btn-confirmar-importacao" style="background-color: #2e7d32;">Confirmar e Gravar no Supabase</button>
+            <div class="form-group">
+                <label for="edicao-nome">Nome da Edição / Ficheiro:</label>
+                <input type="text" id="edicao-nome" placeholder="Ex: Prova_Paulista_2º_bim_2025.xlsx">
             </div>
 
-            <br><br>
-            <button id="btn-voltar" onclick="window.location.href='resultados.html'">Voltar aos Resultados</button>
+            <div class="form-group">
+                <label for="file-input">Selecione a Planilha XLSX:</label>
+                <input type="file" id="file-input" accept=".xlsx, .xls">
+            </div>
+
+            <div id="preview-area" style="display: none;">
+                <h3>Pré-visualização do Mapeamento</h3>
+                <div id="preview-info" class="preview-box"></div>
+                <br>
+                <button id="btn-gravar" class="btn btn-success">Confirmar e Gravar no Supabase</button>
+            </div>
+
+            <div id="status-message" class="status-msg"></div>
         </div>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
     const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    const TABELA_DESTINO = 'dados_educacionais';
+    let dadosParaEnviar = [];
 
-    const compactar = (t) => String(t ?? '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    const igual = (...nomes) => (k) => nomes.includes(k);
-
-    // Mapeamento alinhado estritamente com as colunas do schema do Supabase
-    const CAMPOS = {
-        escola:         (k) => k.includes('escola') || k.includes('unidade') || k === 'nmescola',
-        participacao:   (k) => k.includes('particip') || k.includes('partic'),
-        acertos_prova:  (k) => k.includes('acerto') || k.includes('acertos'),
-        evolucao:       (k) => k.includes('evolu'),
-        port:           igual('port', 'portugues', 'lp', 'linguaportuguesa'),
-        mat:            igual('mat', 'matematica'),
-        his:            (k) => k.includes('his') || k.includes('hist'),
-        geo:            igual('geo', 'geografia'),
-        bio:            igual('bio', 'biologia'),
-        qui:            igual('qui', 'quimica'),
-        ing:            igual('ing', 'ingles'),
-        cie:            igual('cie', 'ciencias'),
-        fis:            igual('fis', 'fisica'),
-        ed_fin:         igual('edfin'),
-        emp:            igual('emp', 'empr', 'empreendedorismo'),
-        art:            (k) => k.includes('artmidd') || k.includes('artmiddig') || k === 'art' || k === 'arte',
-        lide:           igual('lide', 'lid', 'lideranca'),
-        oratoria:       igual('oratoria', 'ora'),
-        geo_pol:        igual('geopol'),
-        fil_e_soc_mod:  (k) => (k.includes('fil') && k.includes('soc')) || k === 'filesoc' || k === 'filo' || k === 'soc',
-        bio_tec:        igual('biotec'),
-        quim_apl:       igual('quimapl', 'quiapl')
-    };
-
-    function lerPlanilha(arrayBuffer) {
-        const wb = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const matriz = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
-
-        let idx = matriz.findIndex((linha, i) =>
-            i < 15 && linha.some(c => {
-                const k = compactar(c);
-                return k.includes('escola') || k.includes('unidade');
-            })
-        );
-        if (idx < 0) idx = 0;
-
-        const cabecalhos = matriz[idx].map(h => String(h ?? '').trim());
-        const linhas = matriz.slice(idx + 1)
-            .filter(r => r.some(c => String(c ?? '').trim() !== ''))
-            .map(r => {
-                const obj = {};
-                cabecalhos.forEach((h, i) => {
-                    if (h && !(h in obj)) obj[h] = r[i] ?? '';
-                });
-                return obj;
-            });
-
-        return { linhas, cabecalhos };
-    }
-
-    function mapearCabecalhos(cabecalhos) {
-        const mapa = {};
-        for (const [campo, teste] of Object.entries(CAMPOS)) {
-            mapa[campo] = cabecalhos.find(h => h && teste(compactar(h))) || null;
-        }
-        return mapa;
-    }
-
-    window.alterarPerfil = async (userId, novaRole) => {
-        const { error } = await supabaseClient
-            .from('profiles')
-            .update({ role: novaRole })
-            .eq('id', userId);
-
-        if (error) {
-            alert('Erro ao atualizar perfil: ' + error.message);
-        } else {
-            alert('Perfil atualizado com sucesso!');
-        }
-    };
-
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Verificação de autenticação no Supabase Auth
+    async function verificarAutenticacao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
+            alert('Acesso restrito! Por favor, faça login para aceder à Área Administrativa.');
             window.location.href = 'index.html';
-            return;
+        }
+    }
+
+    // Botão de Logout
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!document.getElementById('edicao-nome').value) {
+            document.getElementById('edicao-nome').value = file.name;
         }
 
-        const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
-        if (!profile || profile.role !== 'admin') {
-            alert('Acesso negado: Apenas administradores podem aceder a esta página.');
-            window.location.href = 'resultados.html';
-            return;
-        }
-
-        document.getElementById('status-carregamento').style.display = 'none';
-        document.getElementById('conteudo-admin').style.display = 'block';
-
-        const { data: utilizadores, error: erroUtilizadores } = await supabaseClient
-            .from('profiles')
-            .select('id, email, role, created_at');
-
-        const tabela = document.getElementById('tabela-utilizadores');
-
-        if (erroUtilizadores) {
-            console.error('Erro ao carregar utilizadores:', erroUtilizadores.message);
-            tabela.innerHTML = '<tr><td colspan="3">Erro ao carregar lista de utilizadores.</td></tr>';
-        } else if (utilizadores && utilizadores.length > 0) {
-            tabela.innerHTML = utilizadores.map(u => `
-                <tr>
-                    <td>${u.email || 'N/D'}</td>
-                    <td>
-                        <select onchange="alterarPerfil('${u.id}', this.value)" ${u.id === session.user.id ? 'disabled' : ''}>
-                            <option value="usuario" ${u.role === 'usuario' ? 'selected' : ''}>usuario</option>
-                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
-                        </select>
-                    </td>
-                    <td>${new Date(u.created_at).toLocaleDateString('pt-PT')}</td>
-                </tr>
-            `).join('');
-        } else {
-            tabela.innerHTML = '<tr><td colspan="3">Nenhum utilizador encontrado.</td></tr>';
-        }
-
-        let dadosPlanilhaParaImportar = [];
-        let mapaColunas = {};
-
-        document.getElementById('input-planilha').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const { linhas, cabecalhos } = lerPlanilha(event.target.result);
-
-                if (linhas.length === 0) {
-                    alert('A planilha selecionada não contém dados.');
-                    return;
-                }
-
-                dadosPlanilhaParaImportar = linhas;
-                mapaColunas = mapearCabecalhos(cabecalhos);
-
-                const naoEncontradas = Object.entries(mapaColunas)
-                    .filter(([, h]) => h === null).map(([campo]) => campo.toUpperCase());
-                const encontradas = Object.entries(mapaColunas)
-                    .filter(([, h]) => h !== null).map(([campo, h]) => `${campo.toUpperCase()} ← "${h}"`);
-
-                document.getElementById('status-preview').innerText =
-                    `Ficheiro "${file.name}" lido com sucesso! Total de ${linhas.length} registos prontos para importação.`;
-
-                document.getElementById('status-colunas').innerHTML =
-                    `<b>Colunas mapeadas com sucesso:</b> ${encontradas.join(' | ')}<br><br>` +
-                    `<b style="color:#b91c1c;">Campos do banco sem correspondência na planilha (ficarão vazios):</b> ${naoEncontradas.length ? naoEncontradas.join(', ') : 'nenhuma'}`;
-
-                document.getElementById('preview-container').style.display = 'block';
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        document.getElementById('btn-confirmar-importacao').addEventListener('click', async () => {
-            if (!dadosPlanilhaParaImportar.length) {
-                alert('Nenhum dado para importar.');
+            if (jsonRows.length === 0) {
+                mostrarMensagem('A planilha selecionada está vazia.', 'error');
                 return;
             }
 
-            const btn = document.getElementById('btn-confirmar-importacao');
-            btn.disabled = true;
-            btn.innerText = 'A gravar no Supabase...';
+            prepararDados(jsonRows);
+        };
+        reader.readAsArrayBuffer(file);
+    });
 
-            const inputFicheiro = document.getElementById('input-planilha');
-            const nomeFicheiro = inputFicheiro.files[0]?.name || 'Importacao';
+    function normalizarChave(str) {
+        return String(str)
+            .toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/g, "");
+    }
 
-            const anoMatch = nomeFicheiro.match(/202[0-9]/);
-            const anoDetectado = anoMatch ? anoMatch[0] : '2025';
+    function prepararDados(rows) {
+        const ano = document.getElementById('ano-letivo').value;
+        const edicao = document.getElementById('edicao-nome').value.trim();
 
-            const payload = dadosPlanilhaParaImportar
-                .map(row => {
-                    const linha = { ano: anoDetectado, edicao_planilha: nomeFicheiro };
-                    for (const campo of Object.keys(CAMPOS)) {
-                        const cab = mapaColunas[campo];
-                        linha[campo] = cab ? String(row[cab] ?? '').trim() : '';
+        dadosParaEnviar = rows.map(row => {
+            const rowNormalizado = {};
+            Object.keys(row).forEach(k => {
+                rowNormalizado[normalizarChave(k)] = row[k];
+            });
+
+            const obterValor = (chaves) => {
+                for (let c of chaves) {
+                    const norm = normalizarChave(c);
+                    if (rowNormalizado[norm] !== undefined && rowNormalizado[norm] !== '') {
+                        return String(rowNormalizado[norm]).trim();
                     }
-                    return linha;
-                })
-                .filter(l => l.escola !== '');
+                }
+                return null;
+            };
 
-            const { error: erroDelete } = await supabaseClient
-                .from(TABELA_DESTINO)
-                .delete()
-                .eq('ano', anoDetectado)
-                .eq('edicao_planilha', nomeFicheiro);
+            return {
+                ano: ano,
+                edicao_planilha: edicao,
+                escola: obterValor(['ESCOLA', 'NM_ESCOLA', 'NOME DA ESCOLA', 'NOME ESCOLA']),
+                participacao: obterValor(['PARTICIPACAO', 'PARTICIPACAO_GERAL', '(%) Partic', '% PARTICIPACAO']),
+                acertos_prova: obterValor(['ACERTOS_PROVA', 'ACERTO_GERAL', 'ACERTOS', '(%) Acerto', '% ACERTOS']),
+                evolucao: obterValor(['EVOLUCAO', '*Evolução', 'EVOLUCAO_PERCENTUAL']),
+                port: obterValor(['PORT', 'PORTUGUES', 'LENGUA PORTUGUESA']),
+                mat: obterValor(['MAT', 'MATEMATICA']),
+                his: obterValor(['HIS', 'HISTORIA']),
+                geo: obterValor(['GEO', 'GEOGRAFIA']),
+                bio: obterValor(['BIO', 'BIOLOGIA']),
+                qui: obterValor(['QUI', 'QUIMICA']),
+                ing: obterValor(['ING', 'INGLES', 'LINGUA INGLESA']),
+                cie: obterValor(['CIE', 'CIENCIAS']),
+                fis: obterValor(['FIS', 'FISICA']),
+                ed_fin: obterValor(['ED FIN', 'ED_FIN', 'EDUCACAO FINANCEIRA']),
+                emp: obterValor(['EMP', 'EMPREENDEDORISMO']),
+                art: obterValor(['ART', 'ARTE', 'ARTES']),
+                lide: Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide')) ? rowNormalizado[Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide'))] : null,
+                oratoria: obterValor(['ORATORIA', 'ORATÓRIA']),
+                geo_pol: obterValor(['GEO POL', 'GEO_POL', 'GEOPOLITICA']),
+                fil_e_soc_mod: obterValor(['FIL/SOC', 'FIL_E_SOC_MOD', 'FILOSOFIA', 'SOCIOLOGIA']),
+                bio_tec: obterValor(['BIO TEC', 'BIO_TEC', 'BIOTECNOLOGIA']),
+                quim_apl: obterValor(['QUIM APL', 'QUIM_APL', 'QUIMICA APLICADA'])
+            };
+        });
 
-            if (erroDelete) {
-                console.warn('Não foi possível limpar importação anterior:', erroDelete.message);
-            }
+        const previewBox = document.getElementById('preview-info');
+        previewBox.innerHTML = `
+            <p><strong>Total de linhas processadas:</strong> ${dadosParaEnviar.length}</p>
+            <p><strong>Ano:</strong> ${ano} | <strong>Edição:</strong> ${edicao}</p>
+            <p><strong>Amostra do Primeiro Registro Mapeado:</strong></p>
+            <pre>${JSON.stringify(dadosParaEnviar[0], null, 2)}</pre>
+        `;
+        document.getElementById('preview-area').style.display = 'block';
+    }
 
-            const { error } = await supabaseClient
-                .from(TABELA_DESTINO)
-                .insert(payload);
+    document.getElementById('btn-gravar').addEventListener('click', async function() {
+        if (dadosParaEnviar.length === 0) return;
 
+        const btn = document.getElementById('btn-gravar');
+        btn.disabled = true;
+        btn.innerText = 'A gravar no Supabase...';
+
+        const { error } = await supabaseClient
+            .from('dados_educacionais')
+            .insert(dadosParaEnviar);
+
+        if (error) {
+            mostrarMensagem('Erro ao gravar dados no Supabase: ' + error.message, 'error');
             btn.disabled = false;
             btn.innerText = 'Confirmar e Gravar no Supabase';
-
-            if (error) {
-                alert('Erro ao gravar dados: ' + error.message);
-            } else {
-                alert(`Sucesso! ${payload.length} registos do ano ${anoDetectado} importados para o Supabase com sucesso.`);
-                document.getElementById('preview-container').style.display = 'none';
-                inputFicheiro.value = '';
-                dadosPlanilhaParaImportar = [];
-            }
-        });
+        } else {
+            mostrarMensagem('Dados importados com sucesso para o Supabase!', 'success');
+            btn.innerText = 'Gravação Concluída!';
+        }
     });
+
+    function mostrarMensagem(texto, tipo) {
+        const msgDiv = document.getElementById('status-message');
+        msgDiv.className = 'status-msg ' + (tipo === 'success' ? 'status-success' : 'status-error');
+        msgDiv.innerText = texto;
+        msgDiv.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', verificarAutenticacao);
 </script>
 </body>
 </html>
