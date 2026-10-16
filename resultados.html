@@ -14,7 +14,7 @@
         .filtros select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; min-width: 250px; }
         
         .tabela-container { 
-            overflow-x: scroll; 
+            overflow-x: auto; 
             width: 100%; 
             max-width: 100%;
             border: 1px solid #cbd5e1; 
@@ -67,7 +67,7 @@
                 <thead id="cabecalho-tabela">
                     <tr>
                         <th>Escola</th>
-                        <th>Carregando...</th>
+                        <th>Resultados</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
@@ -106,7 +106,13 @@
             const selectAno = document.getElementById('filtro-ano');
 
             dados.forEach(item => {
-                item.ano_calculado = item.ano ? String(item.ano) : '2024';
+                let anoItem = '2024';
+                if (item.ano) anoItem = String(item.ano);
+                else if (item.edicao_planilha) {
+                    const match = item.edicao_planilha.match(/202[0-9]/);
+                    if (match) anoItem = match[0];
+                }
+                item.ano_calculado = anoItem;
                 item.edicao_nome = item.edicao_planilha || `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
                 item.escola_limpa = limparNomeEscola(item.escola);
             });
@@ -169,7 +175,6 @@
                 });
             });
 
-            // Ordem exata alinhada com os cabeçalhos das planilhas
             const ordemDesejada = [
                 'total_alun', 'participacao', 'acertos_prova', 'evolucao', 
                 'port', 'mat', 'his', 'hist', 'geo', 'ing', 'cie', 'ed_fin', 
@@ -184,3 +189,139 @@
                 const idxB = ordemDesejada.indexOf(b);
                 if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                 if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            const mapaNomesLegiveis = {
+                'total_alun': 'Total Alun',
+                'participacao': '(%) de Par',
+                'acertos_prova': '(%) de Ace',
+                'evolucao': 'Evolução',
+                'port': 'PORT',
+                'mat': 'MAT',
+                'his': 'HIST',
+                'hist': 'HIST',
+                'geo': 'GEO',
+                'ing': 'ING',
+                'cie': 'CIE',
+                'ed_fin': 'ED FIN',
+                'fis': 'FÍS',
+                'qui': 'QUI',
+                'bio': 'BIO',
+                'art': 'ARTE',
+                'arte': 'ARTE',
+                'emp': 'EMPR',
+                'empr': 'EMPR',
+                'ora': 'ORA',
+                'oratoria': 'ORA',
+                'qui_apl': 'QUI APL',
+                'quim_apl': 'QUI APL',
+                'geo_pol': 'GEO POL',
+                'filo_soc': 'FILO SOC',
+                'fil_e_soc_mod': 'FILO SOC',
+                'bio_tec': 'BIO TEC',
+                'filo': 'FILO',
+                'soc': 'SOC',
+                'lid': 'LID',
+                'lide': 'LID',
+                'prog': 'PROG',
+                'tec_ino': 'TEC INO',
+                'tec_rob': 'TEC ROB',
+                'ing_if': 'ING IF',
+                'ing_it': 'ING IT',
+                'mid_dig': 'MID DIG',
+                'oe_port': 'OE PORT',
+                'oe_mat': 'OE MAT'
+            };
+
+            cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
+
+            const mapaEscolas = {};
+
+            filtrados.forEach(r => {
+                const escolaKey = r.escola_limpa.toLowerCase();
+
+                if (!mapaEscolas[escolaKey]) {
+                    mapaEscolas[escolaKey] = { ...r, escola_exibicao: r.escola_limpa };
+                } else {
+                    colunasFinais.forEach(col => {
+                        const valExistente = mapaEscolas[escolaKey][col];
+                        const valNovo = r[col];
+                        if ((valExistente === null || valExistente === undefined || valExistente === '' || valExistente === 0) &&
+                            (valNovo !== null && valNovo !== undefined && valNovo !== '' && valNovo !== 0)) {
+                            mapaEscolas[escolaKey][col] = valNovo;
+                        }
+                    });
+                }
+            });
+
+            const listaAgrupada = Object.values(mapaEscolas);
+
+            const listaEscolas = listaAgrupada
+                .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
+                .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
+
+            const linhaTotal = listaAgrupada.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
+
+            if (linhaTotal) {
+                linhaTotal.escola_exibicao = 'TOTAL';
+                listaEscolas.push(linhaTotal);
+            }
+
+            tabela.innerHTML = listaEscolas.map(r => {
+                const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
+                const classeLinha = isTotal ? 'class="linha-total"' : '';
+
+                const celulasIndicadores = colunasFinais.map(col => `<td>${formatarValor(col, r[col])}</td>`).join('');
+
+                return `
+                    <tr ${classeLinha}>
+                        <td><strong>${r.escola_exibicao}</strong></td>
+                        ${celulasIndicadores}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile && profile.role === 'admin') {
+                document.getElementById('btn-admin').style.display = 'inline-block';
+            }
+
+            const { data: resultados, error } = await supabaseClient
+                .from('dados_educacionais')
+                .select('*')
+                .range(0, 5000);
+
+            if (error) {
+                console.error('Erro ao carregar dados:', error.message);
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2">Erro ao carregar dados: ${error.message}</td></tr>`;
+            } else {
+                todosResultados = resultados || [];
+                carregarFiltros(todosResultados);
+                renderizarTabela();
+
+                document.getElementById('filtro-ano').addEventListener('change', () => {
+                    atualizarOpcoesEdicao();
+                    renderizarTabela();
+                });
+
+                document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
+            }
+        });
+    </script>
+</body>
+</html>
