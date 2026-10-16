@@ -12,7 +12,7 @@
         main { padding: 30px; max-width: 600px; margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
         
-        /* Formulario de Utilizador */
+        /* Formulário de Usuário */
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-header h3 { margin: 0; font-size: 18px; color: #17365d; font-weight: bold; }
         .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
@@ -33,10 +33,11 @@
         .btn-cancel { background: white; border: 1px solid #cbd5e1; color: #0d9488; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-save { background: #0d9488; border: none; color: white; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-save:hover { background: #0f766e; }
+        .btn-save:disabled { background: #94a3b8; cursor: not-allowed; }
         
-        .msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; }
-        .msg.success { background-color: #d1fae5; color: #065f46; display: block; }
-        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; }
+        .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; word-break: break-word; }
+        .msg.success { background-color: #d1fae5; color: #065f46; display: block; border: 1px solid #a7f3d0; }
+        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
     </style>
 </head>
 <body>
@@ -45,16 +46,16 @@
         <button id="btn-sair" class="btn-logout">Sair</button>
     </header>
     <main>
-        <!-- Card Novo Utilizador conforme imagem -->
+        <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
                 <h3>Novo usuário</h3>
-                <button class="close-btn">&times;</button>
+                <button class="close-btn" type="button" onclick="document.getElementById('form-novo-usuario').reset()">&times;</button>
             </div>
             <form id="form-novo-usuario">
                 <div class="form-group">
                     <label for="usr-nome">Nome</label>
-                    <input type="text" id="usr-nome" placeholder="Nome do utilizador" required>
+                    <input type="text" id="usr-nome" placeholder="Nome do usuário" required>
                 </div>
                 <div class="form-group">
                     <label for="usr-email">E-mail</label>
@@ -90,7 +91,7 @@
 
                 <div class="actions">
                     <button type="button" class="btn-cancel" onclick="document.getElementById('form-novo-usuario').reset()">Cancelar</button>
-                    <button type="submit" class="btn-save">Salvar</button>
+                    <button type="submit" id="btn-salvar" class="btn-save">Salvar</button>
                 </div>
             </form>
         </div>
@@ -114,6 +115,72 @@
     document.getElementById('btn-sair').addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
         window.location.href = 'index.html';
+    });
+
+    // Cadastro de Novo Usuário com Perfil Estendido
+    document.getElementById('form-novo-usuario').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgEl = document.getElementById('usr-msg');
+        const btnSalvar = document.getElementById('btn-salvar');
+        
+        msgEl.className = 'msg';
+        msgEl.style.display = 'none';
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = 'Salvando...';
+
+        const nome = document.getElementById('usr-nome').value.trim();
+        const email = document.getElementById('usr-email').value.trim();
+        const senha = document.getElementById('usr-senha').value.trim();
+        const funcao = document.getElementById('usr-funcao').value;
+        const escopo = document.getElementById('usr-escopo').value;
+        const ativo = document.getElementById('usr-ativo').checked;
+
+        try {
+            // Cliente temporário sem persistência para criar a conta no Auth sem deslogar o Admin
+            const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+                auth: { persistSession: false }
+            });
+
+            const { data: authData, error: authError } = await tempClient.auth.signUp({
+                email: email,
+                password: senha
+            });
+
+            if (authError) throw authError;
+
+            if (authData.user) {
+                // Verificar se o usuário já existia (identities vazio indica conta já existente)
+                if (authData.user.identities && authData.user.identities.length === 0) {
+                    throw new Error('Este e-mail já está cadastrado no sistema.');
+                }
+
+                // Inserir perfil estendido na tabela perfis_usuarios com a sessão ativa do Admin
+                const { error: profileError } = await supabaseClient
+                    .from('perfis_usuarios')
+                    .insert([{
+                        id: authData.user.id,
+                        nome: nome,
+                        email: email,
+                        funcao: funcao,
+                        escopo: escopo,
+                        ativo: ativo
+                    }]);
+
+                if (profileError) throw profileError;
+
+                msgEl.textContent = `Usuário ${nome} (${email}) cadastrado com sucesso!`;
+                msgEl.className = 'msg success';
+                document.getElementById('form-novo-usuario').reset();
+                document.getElementById('usr-ativo').checked = true;
+            }
+        } catch (err) {
+            console.error('Erro no cadastro:', err);
+            msgEl.textContent = `Erro ao cadastrar usuário: ${err.message || err}`;
+            msgEl.className = 'msg error';
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = 'Salvar';
+        }
     });
 </script>
 </body>
