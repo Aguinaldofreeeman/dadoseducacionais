@@ -1,349 +1,176 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados - Prova Paulista</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f8; color: #333; }
-        .header { background-color: #17365d; color: white; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn { background-color: #17365d; color: white; padding: 8px 12px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; cursor: pointer; font-size: 14px; }
-        .filtros { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #e2e8f0; padding: 15px; border-radius: 6px; }
-        .filtros div { display: flex; flex-direction: column; gap: 5px; }
-        .filtros select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; min-width: 250px; }
-
-        .tabela-container {
-            overflow-x: auto;
-            width: 100%;
-            max-width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            margin-top: 15px;
-            padding-bottom: 5px;
-        }
-
-        .tabela-container::-webkit-scrollbar { height: 12px; }
-        .tabela-container::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 6px; }
-        .tabela-container::-webkit-scrollbar-thumb { background: #17365d; border-radius: 6px; }
-        .tabela-container::-webkit-scrollbar-thumb:hover { background: #0f2440; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1200px; }
-        th { background-color: #17365d; color: white; text-align: left; padding: 10px 8px; white-space: nowrap; position: sticky; top: 0; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap; }
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 22px; }
+        header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
+        main { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .filters { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-weight: bold; font-size: 13px; }
+        .filter-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; min-width: 180px; }
+        .btn-admin { background-color: #17365d; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        th { background-color: #17365d; color: white; padding: 12px 10px; font-weight: 600; border-bottom: 2px solid #0f243f; white-space: nowrap; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
-        tr.linha-total { font-weight: bold; background-color: #cbd5e1 !important; border-top: 2px solid #17365d; }
+        tr:hover { background-color: #edf2f7; }
+        td:first-child, th:first-child { text-align: left; font-weight: 600; padding-left: 15px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2 style="margin: 0;">Resultados — Prova Paulista</h2>
-        <p style="margin: 5px 0 0 0; opacity: 0.9;">Plataforma de Consulta Educacional</p>
-    </div>
-
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0;">Resultados Educacionais Publicados</h3>
-            <a href="admin.html" id="btn-admin" class="btn" style="display: none;">Área Administrativa</a>
+    <header>
+        <div>
+            <h1>Resultados — Prova Paulista</h1>
+            <p>Plataforma de Consulta Educacional</p>
         </div>
-
-        <div class="filtros">
-            <div>
-                <label for="filtro-ano"><strong>Ano Letivo:</strong></label>
-                <select id="filtro-ano">
-                    <option value="">Aguarde, a carregar...</option>
-                </select>
-            </div>
-            <div>
-                <label for="filtro-edicao"><strong>Bimestre / Edição da Prova:</strong></label>
-                <select id="filtro-edicao">
-                    <option value="">Selecione a Edição...</option>
-                </select>
+        <a href="admin.html" class="btn-admin">Área Administrativa</a>
+    </header>
+    <main>
+        <div class="card">
+            <h2>Resultados Educacionais Publicados</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="select-ano">Ano Letivo:</label>
+                    <select id="select-ano"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="select-edicao">Bimestre / Edição da Prova:</label>
+                    <select id="select-edicao"></select>
+                </div>
             </div>
         </div>
 
-        <div class="tabela-container">
-            <table id="tabela-dinamica">
-                <thead id="cabecalho-tabela">
+        <div class="table-container">
+            <table>
+                <thead>
                     <tr>
                         <th>Escola</th>
-                        <th>A carregar informações...</th>
+                        <th>(%) Partic</th>
+                        <th>(%) Acerto</th>
+                        <th>*Evolução</th>
+                        <th>PORT</th>
+                        <th>MAT</th>
+                        <th>HIS</th>
+                        <th>GEO</th>
+                        <th>BIO</th>
+                        <th>QUI</th>
+                        <th>ING</th>
+                        <th>CIE</th>
+                        <th>FIS</th>
+                        <th>ED FIN</th>
+                        <th>GEO POL</th>
+                        <th>BIO TEC</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova acima para carregar os resultados.</td></tr>
+                    <tr><td colspan="16">A carregar dados...</td></tr>
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
-        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-        let todosResultados = [];
+    const formatarValor = (val) => {
+        if (val === null || val === undefined || String(val).trim() === '' || String(val).trim() === '-') return '-';
+        const v = String(val).trim();
+        if (v.includes('%')) return v;
+        const num = parseFloat(v.replace(',', '.'));
+        return !isNaN(num) ? `${v}%` : v;
+    };
 
-        const valorVazio = (v) => v === null || v === undefined || String(v).trim() === '' || String(v).trim() === '-';
+    async function carregarFiltros() {
+        const { data, error } = await supabaseClient
+            .from('dados_educacionais')
+            .select('ano, edicao_planilha');
 
-        function formatarValor(col, valor) {
-            if (valorVazio(valor)) return '-';
-            if (col === 'total_alun' || col === 'total_alunos') return String(valor);
-
-            const str = String(valor).replace(',', '.');
-            const num = parseFloat(str);
-            if (isNaN(num)) return valor;
-            if (num === 0) return '0%';
-            const pct = (Math.abs(num) <= 1 && num !== 0) ? num * 100 : num;
-            return pct.toFixed(1).replace('.', ',') + '%';
+        if (error || !data || data.length === 0) {
+            document.getElementById('tabela-resultados').innerHTML = '<tr><td colspan="16">Nenhum dado encontrado no banco.</td></tr>';
+            return;
         }
 
-        function limparNomeEscola(nome) {
-            if (!nome) return 'N/D';
-            return String(nome).replace(/\s*-\s*\d+$/, '').trim();
+        const anos = [...new Set(data.map(d => d.ano).filter(Boolean))].sort().reverse();
+        const selectAno = document.getElementById('select-ano');
+        selectAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+
+        const atualizarEdicoes = () => {
+            const anoSel = selectAno.value;
+            const edicoes = [...new Set(data.filter(d => d.ano === anoSel).map(d => d.edicao_planilha).filter(Boolean))];
+            const selectEdicao = document.getElementById('select-edicao');
+            selectEdicao.innerHTML = edicoes.map(e => `<option value="${e}">${e}</option>`).join('');
+            carregarTabela();
+        };
+
+        selectAno.addEventListener('change', atualizarEdicoes);
+        document.getElementById('select-edicao').addEventListener('change', carregarTabela);
+
+        atualizarEdicoes();
+    }
+
+    async function carregarTabela() {
+        const ano = document.getElementById('select-ano').value;
+        const edicao = document.getElementById('select-edicao').value;
+        const tbody = document.getElementById('tabela-resultados');
+
+        if (!ano || !edicao) {
+            tbody.innerHTML = '<tr><td colspan="16">Selecione o ano e a edição.</td></tr>';
+            return;
         }
 
-        function carregarFiltros(dados) {
-            const selectAno = document.getElementById('filtro-ano');
+        tbody.innerHTML = '<tr><td colspan="16">A carregar registos...</td></tr>';
 
-            if (!dados || dados.length === 0) {
-                selectAno.innerHTML = '<option value="">Nenhum dado encontrado na base de dados.</option>';
-                return;
-            }
+        const { data, error } = await supabaseClient
+            .from('dados_educacionais')
+            .select('*')
+            .eq('ano', ano)
+            .eq('edicao_planilha', edicao)
+            .order('escola', { ascending: true });
 
-            dados.forEach(item => {
-                let anoItem = '2024';
-                if (item.ano) {
-                    anoItem = String(item.ano);
-                } else if (item.edicao_planilha && typeof item.edicao_planilha === 'string') {
-                    const match = item.edicao_planilha.match(/202[0-9]/);
-                    if (match) anoItem = match[0];
-                }
-
-                item.ano_calculado = anoItem;
-                const edicaoBase = item.edicao_planilha ? String(item.edicao_planilha) : `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
-                item.edicao_nome = edicaoBase;
-                item.escola_limpa = limparNomeEscola(item.escola);
-            });
-
-            const anosUnicos = [...new Set(dados.map(item => item.ano_calculado).filter(Boolean))].sort();
-
-            selectAno.innerHTML = '<option value="">Selecione o Ano...</option>' +
-                anosUnicos.map(a => `<option value="${a}">${a}</option>`).join('');
-
-            atualizarOpcoesEdicao();
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="16">Erro ao carregar dados: ${error.message}</td></tr>`;
+            return;
         }
 
-        function atualizarOpcoesEdicao() {
-            const anoSel = document.getElementById('filtro-ano').value;
-            const selectEdicao = document.getElementById('filtro-edicao');
-
-            const edicoesFiltradas = [...new Set(todosResultados
-                .filter(r => !anoSel || r.ano_calculado === anoSel)
-                .map(r => r.edicao_nome)
-                .filter(Boolean))].sort();
-
-            selectEdicao.innerHTML = '<option value="">Selecione a Edição...</option>' +
-                edicoesFiltradas.map(e => `<option value="${e}">${e}</option>`).join('');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="16">Nenhum registo encontrado para este filtro.</td></tr>';
+            return;
         }
 
-        function renderizarTabela() {
-            const anoSelecionado = document.getElementById('filtro-ano').value;
-            const edicaoSelecionada = document.getElementById('filtro-edicao').value;
-            const cabecalho = document.getElementById('cabecalho-tabela');
-            const tabela = document.getElementById('tabela-resultados');
+        tbody.innerHTML = data.map(r => `
+            <tr>
+                <td>${r.escola || '-'}</td>
+                <td>${formatarValor(r.participacao)}</td>
+                <td>${formatarValor(r.acertos_prova)}</td>
+                <td>${formatarValor(r.evolucao)}</td>
+                <td>${formatarValor(r.port)}</td>
+                <td>${formatarValor(r.mat)}</td>
+                <td>${formatarValor(r.his)}</td>
+                <td>${formatarValor(r.geo)}</td>
+                <td>${formatarValor(r.bio)}</td>
+                <td>${formatarValor(r.qui)}</td>
+                <td>${formatarValor(r.ing)}</td>
+                <td>${formatarValor(r.cie)}</td>
+                <td>${formatarValor(r.fis)}</td>
+                <td>${formatarValor(r.ed_fin)}</td>
+                <td>${formatarValor(r.geo_pol)}</td>
+                <td>${formatarValor(r.bio_tec)}</td>
+            </tr>
+        `).join('');
+    }
 
-            if (!anoSelecionado && !edicaoSelecionada) {
-                cabecalho.innerHTML = '<tr><th>Escola</th><th>A aguardar seleção...</th></tr>';
-                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
-                return;
-            }
-
-            const filtrados = todosResultados.filter(r => {
-                const bateAno = !anoSelecionado || r.ano_calculado === anoSelecionado;
-                const bateEdicao = !edicaoSelecionada || r.edicao_nome === edicaoSelecionada;
-                const nomeEscola = (r.escola_limpa || '').toLowerCase().trim();
-                const eMetadado = nomeEscola.includes('filtros');
-                return bateAno && bateEdicao && !eMetadado;
-            });
-
-            if (filtrados.length === 0) {
-                cabecalho.innerHTML = '<tr><th>Escola</th><th>Resultados</th></tr>';
-                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Nenhum registo encontrado para a seleção efetuada.</td></tr>';
-                return;
-            }
-
-            const colunasIgnorar = ['id', 'created_at', 'ano', 'edicao_planilha', 'escola', 'escola_limpa', 'ano_calculado', 'edicao_nome'];
-
-            // Colunas principais: sempre aparecem, mesmo que vazias
-            const colunasEssenciais = ['total_alun', 'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo'];
-
-            // Todas as colunas que existem na tabela do Supabase (mesmo com valor nulo)
-            const colunasEncontradas = new Set();
-            filtrados.forEach(r => {
-                Object.keys(r).forEach(k => {
-                    if (!colunasIgnorar.includes(k)) colunasEncontradas.add(k);
-                });
-            });
-
-            const ordemDesejada = [
-                'total_alun', 'participacao', 'acertos_prova', 'evolucao',
-                'port', 'mat', 'his', 'hist', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis',
-                'ed_fin', 'emp', 'art', 'arte', 'lide', 'lid', 'oratoria', 'ora',
-                'geo_pol', 'fil_e_soc_mod', 'filo_soc', 'bio_tec', 'quim_apl', 'qui_apl',
-                'filo', 'soc', 'prog', 'tec_ino', 'tec_rob', 'ing_if', 'ing_it', 'mid_dig', 'oe_port', 'oe_mat'
-            ];
-
-            // Mostra as colunas principais + as demais que tenham ao menos um valor nesta edição
-            const colunasFinais = Array.from(colunasEncontradas)
-                .filter(col => colunasEssenciais.includes(col) || filtrados.some(r => !valorVazio(r[col])))
-                .sort((a, b) => {
-                    const idxA = ordemDesejada.indexOf(a);
-                    const idxB = ordemDesejada.indexOf(b);
-                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                    if (idxA !== -1) return -1;
-                    if (idxB !== -1) return 1;
-                    return a.localeCompare(b);
-                });
-
-            if (colunasFinais.length === 0) {
-                cabecalho.innerHTML = '<tr><th>Escola</th><th>Aviso</th></tr>';
-                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registos desta edição não possuem colunas de indicadores reconhecidas.</td></tr>';
-                return;
-            }
-
-            const mapaNomesLegiveis = {
-                'total_alun': 'Total Alun',
-                'participacao': '(%) Partic',
-                'acertos_prova': '(%) Acerto',
-                'evolucao': '*Evolução',
-                'port': 'PORT',
-                'mat': 'MAT',
-                'his': 'HIS',
-                'hist': 'HIS',
-                'geo': 'GEO',
-                'bio': 'BIO',
-                'qui': 'QUI',
-                'ing': 'ING',
-                'cie': 'CIE',
-                'fis': 'FIS',
-                'ed_fin': 'ED FIN',
-                'emp': 'EMP',
-                'art': 'ART MID DIG',
-                'arte': 'ART MID DIG',
-                'lide': 'LIDE',
-                'lid': 'LIDE',
-                'oratoria': 'ORATORIA',
-                'ora': 'ORATORIA',
-                'geo_pol': 'GEO POL',
-                'fil_e_soc_mod': 'FIL E SOC',
-                'filo_soc': 'FIL E SOC',
-                'bio_tec': 'BIO TEC',
-                'quim_apl': 'QUIM APL',
-                'qui_apl': 'QUIM APL',
-                'filo': 'FILO',
-                'soc': 'SOC',
-                'prog': 'PROG',
-                'tec_ino': 'TEC INO',
-                'tec_rob': 'TEC ROB',
-                'ing_if': 'ING IF',
-                'ing_it': 'ING IT',
-                'mid_dig': 'MID DIG',
-                'oe_port': 'OE PORT',
-                'oe_mat': 'OE MAT'
-            };
-
-            cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
-
-            const mapaEscolas = {};
-
-            filtrados.forEach(r => {
-                const escolaKey = r.escola_limpa.toLowerCase();
-
-                if (!mapaEscolas[escolaKey]) {
-                    mapaEscolas[escolaKey] = { ...r, escola_exibicao: r.escola_limpa };
-                } else {
-                    colunasFinais.forEach(col => {
-                        const valExistente = mapaEscolas[escolaKey][col];
-                        const valNovo = r[col];
-                        if ((valExistente === null || valExistente === undefined || valExistente === '' || valExistente === 0) &&
-                            (valNovo !== null && valNovo !== undefined && valNovo !== '' && valNovo !== 0)) {
-                            mapaEscolas[escolaKey][col] = valNovo;
-                        }
-                    });
-                }
-            });
-
-            const listaAgrupada = Object.values(mapaEscolas);
-
-            const listaEscolas = listaAgrupada
-                .filter(e => (e.escola_exibicao || '').trim().toLowerCase() !== 'total')
-                .sort((a, b) => (a.escola_exibicao || '').localeCompare(b.escola_exibicao || ''));
-
-            const linhaTotal = listaAgrupada.find(e => (e.escola_exibicao || '').trim().toLowerCase() === 'total');
-
-            if (linhaTotal) {
-                linhaTotal.escola_exibicao = 'TOTAL';
-                listaEscolas.push(linhaTotal);
-            }
-
-            tabela.innerHTML = listaEscolas.map(r => {
-                const isTotal = (r.escola_exibicao || '').trim().toLowerCase() === 'total';
-                const classeLinha = isTotal ? 'class="linha-total"' : '';
-
-                const celulasIndicadores = colunasFinais.map(col => `<td>${formatarValor(col, r[col])}</td>`).join('');
-
-                return `
-                    <tr ${classeLinha}>
-                        <td><strong>${r.escola_exibicao}</strong></td>
-                        ${celulasIndicadores}
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profile && profile.role === 'admin') {
-                document.getElementById('btn-admin').style.display = 'inline-block';
-            }
-
-            try {
-                const { data: resultados, error } = await supabaseClient
-                    .from('dados_educacionais')
-                    .select('*')
-                    .range(0, 5000);
-
-                if (error) throw error;
-
-                todosResultados = resultados || [];
-                carregarFiltros(todosResultados);
-                renderizarTabela();
-
-            } catch (err) {
-                console.error('Erro ao carregar dados:', err);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2" style="color:red; text-align:center; padding: 20px;">Falha de conexão com a base de dados.</td></tr>`;
-            }
-
-            document.getElementById('filtro-ano').addEventListener('change', () => {
-                atualizarOpcoesEdicao();
-                renderizarTabela();
-            });
-
-            document.getElementById('filtro-edicao').addEventListener('change', renderizarTabela);
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', carregarFiltros);
+</script>
 </body>
 </html>
