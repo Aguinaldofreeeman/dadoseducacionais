@@ -118,10 +118,10 @@
     }
 
     async function carregarFiltros() {
+        // Consulta direta à visão SQL edicoes_disponiveis
         const { data, error } = await supabaseClient
-            .from('dados_educacionais')
-            .select('ano, edicao_planilha')
-            .range(0, 9999);
+            .from('edicoes_disponiveis')
+            .select('ano, edicao_planilha');
 
         if (error || !data || data.length === 0) {
             document.getElementById('tabela-resultados').innerHTML = '<tr><td>Nenhum dado encontrado no banco.</td></tr>';
