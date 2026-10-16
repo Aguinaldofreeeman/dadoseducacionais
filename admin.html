@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,6 +10,7 @@
         header { background-color: #17365d; color: white; padding: 20px; text-align: center; }
         main { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         button { padding: 10px 16px; background-color: #17365d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:disabled { opacity: .6; cursor: wait; }
     </style>
 </head>
 <body>
@@ -23,50 +23,39 @@
         <div id="conteudo-admin" style="display: none;">
             <p>Bem-vindo à área restrita de administração.</p>
             <h3>Utilizadores Registados</h3>
-<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin-bottom: 20px; text-align: left;">
-    <thead>
-        <tr style="background-color: #17365d; color: white;">
-            <th>E-mail</th>
-            <th>Perfil (Role)</th>
-            <th>Data de Criação</th>
-        </tr>
-    </thead>
-    <tbody id="tabela-utilizadores">
-        <tr><td colspan="3">A carregar utilizadores...</td></tr>
-    </tbody>
-</table>
+            <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin-bottom: 20px; text-align: left;">
+                <thead>
+                    <tr style="background-color: #17365d; color: white;">
+                        <th>E-mail</th>
+                        <th>Perfil (Role)</th>
+                        <th>Data de Criação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-utilizadores">
+                    <tr><td colspan="3">A carregar utilizadores...</td></tr>
+                </tbody>
+            </table>
 
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
 
-<hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
+            <h3>Importar Planilha Educacional (2024-2026)</h3>
+            <p>Selecione o ficheiro Excel (.xlsx) ou CSV para carregar os dados na plataforma.</p>
 
-<h3>Importar Planilha Educacional (2024-2026)</h3>
-<p>Selecione o ficheiro Excel (.xlsx) ou CSV para carregar os dados na plataforma.</p>
+            <div style="margin-bottom: 20px;">
+                <input type="file" id="input-planilha" accept=".xlsx, .xls, .csv" style="padding: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
 
-<div style="margin-bottom: 20px;">
-    <input type="file" id="input-planilha" accept=".xlsx, .xls, .csv" style="padding: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
-</div>
+            <div id="preview-container" style="display: none; margin-top: 15px; padding: 15px; background: #e2e8f0; border-radius: 6px;">
+                <h4>Pré-visualização do Carregamento</h4>
+                <p id="status-preview"></p>
+                <p id="status-colunas" style="font-size: 13px; line-height: 1.5;"></p>
+                <button id="btn-confirmar-importacao" style="background-color: #2e7d32;">Confirmar e Gravar no Supabase</button>
+            </div>
 
-<div id="preview-container" style="display: none; margin-top: 15px; padding: 15px; background: #e2e8f0; border-radius: 6px;">
-    <h4>Pré-visualização do Carregamento</h4>
-    <p id="status-preview"></p>
-    <button id="btn-confirmar-importacao" style="background-color: #2e7d32;">Confirmar e Gravar no Supabase</button>
-</div>
-
-
-
-
-
-            
-
-
-
-
-
-            
+            <br><br>
             <button id="btn-voltar" onclick="window.location.href='resultados.html'">Voltar aos Resultados</button>
         </div>
     </main>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -74,7 +63,83 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    // Função global para atualizar o perfil do utilizador
+    // Nome da tabela onde os dados são gravados (confira se é o mesmo que o resultados.html lê)
+    const TABELA_DESTINO = 'dados_educacionais';
+
+    // Remove acentos, espaços, símbolos e põe em minúsculas: "(%) Participação" -> "participacao"
+    const compactar = (t) => String(t ?? '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const igual = (...nomes) => (k) => nomes.includes(k);
+
+    // Para cada coluna do banco: como reconhecer o cabeçalho na planilha
+    const CAMPOS = {
+        escola:         (k) => k.includes('escola') || k.includes('unidade') || k === 'nmescola',
+        participacao:   (k) => k.includes('particip'),
+        acertos_prova:  (k) => k.includes('acerto'),
+        evolucao:       (k) => k.includes('evolu'),
+        port:           igual('port', 'portugues', 'lp', 'linguaportuguesa'),
+        mat:            igual('mat', 'matematica'),
+        his:            igual('his', 'historia'),
+        geo:            igual('geo', 'geografia'),
+        bio:            igual('bio', 'biologia'),
+        qui:            igual('qui', 'quimica'),
+        ing:            igual('ing', 'ingles'),
+        cie:            igual('cie', 'ciencias'),
+        fis:            igual('fis', 'fisica'),
+        ed_fin:         igual('edfin'),
+        emp:            igual('emp'),
+        tec_rob:        igual('tecrob'),
+        ing_it:         igual('ingit'),
+        art:            igual('art', 'arte'),
+        mid_dig:        igual('middig'),
+        lide:           igual('lide'),
+        oratoria:       igual('oratoria'),
+        geo_pol:        igual('geopol'),
+        fil_e_soc_mod:  igual('filesocmod'),
+        bio_tec:        igual('biotec'),
+        quim_apl:       igual('quimapl')
+    };
+
+    // Lê a planilha, encontra a linha de cabeçalho (mesmo que não seja a 1ª) e devolve { linhas, cabecalhos }
+    function lerPlanilha(arrayBuffer) {
+        const wb = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        // raw:false => usa o texto como aparece no Excel (ex.: "51,1%")
+        const matriz = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+        let idx = matriz.findIndex((linha, i) =>
+            i < 15 && linha.some(c => {
+                const k = compactar(c);
+                return k.includes('escola') || k.includes('unidade');
+            })
+        );
+        if (idx < 0) idx = 0;
+
+        const cabecalhos = matriz[idx].map(h => String(h ?? '').trim());
+        const linhas = matriz.slice(idx + 1)
+            .filter(r => r.some(c => String(c ?? '').trim() !== ''))
+            .map(r => {
+                const obj = {};
+                cabecalhos.forEach((h, i) => {
+                    if (h && !(h in obj)) obj[h] = r[i] ?? '';
+                });
+                return obj;
+            });
+
+        return { linhas, cabecalhos };
+    }
+
+    // Descobre qual cabeçalho da planilha corresponde a cada coluna do banco
+    function mapearCabecalhos(cabecalhos) {
+        const mapa = {};
+        for (const [campo, teste] of Object.entries(CAMPOS)) {
+            mapa[campo] = cabecalhos.find(h => h && teste(compactar(h))) || null;
+        }
+        return mapa;
+    }
+
     window.alterarPerfil = async (userId, novaRole) => {
         const { error } = await supabaseClient
             .from('profiles')
@@ -96,146 +161,6 @@
             return;
         }
 
-
-        let dadosPlanilhaParaImportar = [];
-
-// Escuta a seleção do ficheiro no input
-document.getElementById('input-planilha')?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, { type: 'array', raw: true });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-
-
-
-// Escuta o clique no botão de confirmação e grava os dados no Supabase
-document.getElementById('btn-confirmar-importacao')?.addEventListener('click', async () => {
-    if (!dadosPlanilhaParaImportar || dadosPlanilhaParaImportar.length === 0) {
-        alert('Nenhum dado para importar.');
-        return;
-    }
-
-    const btn = document.getElementById('btn-confirmar-importacao');
-    btn.disabled = true;
-    btn.innerText = 'A gravar no Supabase...';
-
-    const inputFicheiro = document.getElementById('input-planilha');
-    const nomeFicheiro = inputFicheiro.files[0]?.name || 'Importacao';
-
-    // Extrai dinamicamente o ano (ex: 2024, 2025, 2026) a partir do nome do ficheiro
-    const anoMatch = nomeFicheiro.match(/202[0-9]/);
-    const anoDetectado = anoMatch ? anoMatch[0] : '2024';
-
-    // Helper para normalizar textos (remove acentos, espaços extras e converte para minúsculas)
-    const normalizar = (texto) => {
-        return String(texto || '')
-            .trim()
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-    };
-
-    // Mapeia os dados da planilha para as colunas da tabela
-    const payload = dadosPlanilhaParaImportar.map(row => {
-        const keys = Object.keys(row);
-
-        const getVal = (keyName) => {
-            const keyClean = normalizar(keyName);
-
-            const foundKey = keys.find(k => {
-                const kClean = normalizar(k);
-
-                if (keyClean === 'escola') {
-                    return kClean.includes('escola') || kClean.includes('unidade') || kClean.includes('nm_escola');
-                }
-                return kClean === keyClean;
-            });
-
-            return foundKey && row[foundKey] !== undefined && row[foundKey] !== null ? String(row[foundKey]).trim() : '';
-        };
-
-        return {
-            ano: anoDetectado,
-            edicao_planilha: nomeFicheiro,
-            escola: getVal('Escola'),
-            participacao: getVal('(%) Participação'),
-            acertos_prova: getVal('(%) Acertos Prova'),
-            evolucao: getVal('*Evolução'),
-            port: getVal('PORT'),
-            mat: getVal('MAT'),
-            his: getVal('HIS'),
-            geo: getVal('GEO'),
-            bio: getVal('BIO'),
-            qui: getVal('QUI'),
-            ing: getVal('ING'),
-            cie: getVal('CIE'),
-            fis: getVal('FIS'),
-            ed_fin: getVal('ED FIN'),
-            emp: getVal('EMP'),
-            tec_rob: getVal('TEC ROB'),
-            ing_it: getVal('ING IT'),
-            art: getVal('ART'),
-            mid_dig: getVal('MID DIG'),
-            lide: getVal('LIDE'),
-            oratoria: getVal('ORATORIA'),
-            geo_pol: getVal('GEO POL'),
-            fil_e_soc_mod: getVal('FIL E SOC MOD'),
-            bio_tec: getVal('BIO TEC'),
-            quim_apl: getVal('QUIM APL')
-        };
-    });
-
-    const { error } = await supabaseClient
-        .from('dados_educacionais')
-        .insert(payload);
-
-    btn.disabled = false;
-    btn.innerText = 'Confirmar e Gravar no Supabase';
-
-    if (error) {
-        alert('Erro ao gravar dados: ' + error.message);
-    } else {
-        alert(`Sucesso! ${payload.length} registos do ano ${anoDetectado} importados para o Supabase com sucesso.`);
-        document.getElementById('preview-container').style.display = 'none';
-        inputFicheiro.value = '';
-    }
-});
-
-
-
-
-        
-
-        
-        
-        
-        // Converte a folha para JSON preservando os valores originais
-        const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-
-        if (jsonRows.length === 0) {
-            alert('A planilha selecionada não contém dados.');
-            return;
-        }
-
-        dadosPlanilhaParaImportar = jsonRows;
-        
-        // Exibe o painel de pré-visualização
-        document.getElementById('status-preview').innerText = 
-            `Ficheiro "${file.name}" lido com sucesso! Total de ${jsonRows.length} registos prontos para importação.`;
-        document.getElementById('preview-container').style.display = 'block';
-    };
-    reader.readAsArrayBuffer(file);
-});
-
-
-
-        
-
         // 2. Consulta o perfil na tabela profiles
         const { data: profile } = await supabaseClient
             .from('profiles')
@@ -254,7 +179,7 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
         document.getElementById('status-carregamento').style.display = 'none';
         document.getElementById('conteudo-admin').style.display = 'block';
 
-        // 5. Consulta todos os perfis registados incluindo o ID
+        // 5. Lista de utilizadores
         const { data: utilizadores, error: erroUtilizadores } = await supabaseClient
             .from('profiles')
             .select('id, email, role, created_at');
@@ -280,10 +205,107 @@ document.getElementById('btn-confirmar-importacao')?.addEventListener('click', a
         } else {
             tabela.innerHTML = '<tr><td colspan="3">Nenhum utilizador encontrado.</td></tr>';
         }
+
+        // ================= IMPORTAÇÃO DA PLANILHA =================
+        let dadosPlanilhaParaImportar = [];
+        let mapaColunas = {};
+
+        // Ao selecionar o ficheiro
+        document.getElementById('input-planilha').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const { linhas, cabecalhos } = lerPlanilha(event.target.result);
+
+                if (linhas.length === 0) {
+                    alert('A planilha selecionada não contém dados.');
+                    return;
+                }
+
+                dadosPlanilhaParaImportar = linhas;
+                mapaColunas = mapearCabecalhos(cabecalhos);
+
+                console.log('Cabeçalhos lidos:', cabecalhos);
+                console.log('Mapeamento:', mapaColunas);
+
+                const naoEncontradas = Object.entries(mapaColunas)
+                    .filter(([, h]) => h === null).map(([campo]) => campo.toUpperCase());
+                const encontradas = Object.entries(mapaColunas)
+                    .filter(([, h]) => h !== null).map(([campo, h]) => `${campo.toUpperCase()} ← "${h}"`);
+
+                document.getElementById('status-preview').innerText =
+                    `Ficheiro "${file.name}" lido com sucesso! Total de ${linhas.length} registos prontos para importação.`;
+
+                document.getElementById('status-colunas').innerHTML =
+                    `<b>Colunas reconhecidas:</b> ${encontradas.join(' | ')}<br>` +
+                    `<b style="color:#b91c1c;">Colunas NÃO encontradas na planilha:</b> ${naoEncontradas.length ? naoEncontradas.join(', ') : 'nenhuma'}<br>` +
+                    `<b>Cabeçalhos da planilha:</b> ${cabecalhos.filter(Boolean).join(' | ')}`;
+
+                document.getElementById('preview-container').style.display = 'block';
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Ao clicar em confirmar
+        document.getElementById('btn-confirmar-importacao').addEventListener('click', async () => {
+            if (!dadosPlanilhaParaImportar.length) {
+                alert('Nenhum dado para importar.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-confirmar-importacao');
+            btn.disabled = true;
+            btn.innerText = 'A gravar no Supabase...';
+
+            const inputFicheiro = document.getElementById('input-planilha');
+            const nomeFicheiro = inputFicheiro.files[0]?.name || 'Importacao';
+
+            // Extrai o ano (2020-2029) do nome do ficheiro
+            const anoMatch = nomeFicheiro.match(/202[0-9]/);
+            const anoDetectado = anoMatch ? anoMatch[0] : '2024';
+
+            const payload = dadosPlanilhaParaImportar
+                .map(row => {
+                    const linha = { ano: anoDetectado, edicao_planilha: nomeFicheiro };
+                    for (const campo of Object.keys(CAMPOS)) {
+                        const cab = mapaColunas[campo];
+                        linha[campo] = cab ? String(row[cab] ?? '').trim() : '';
+                    }
+                    return linha;
+                })
+                .filter(l => l.escola !== '');
+
+            // Apaga importação anterior do mesmo ficheiro/ano para não duplicar
+            const { error: erroDelete } = await supabaseClient
+                .from(TABELA_DESTINO)
+                .delete()
+                .eq('ano', anoDetectado)
+                .eq('edicao_planilha', nomeFicheiro);
+
+            if (erroDelete) {
+                console.warn('Não foi possível limpar importação anterior:', erroDelete.message);
+            }
+
+            const { error } = await supabaseClient
+                .from(TABELA_DESTINO)
+                .insert(payload);
+
+            btn.disabled = false;
+            btn.innerText = 'Confirmar e Gravar no Supabase';
+
+            if (error) {
+                alert('Erro ao gravar dados: ' + error.message);
+            } else {
+                alert(`Sucesso! ${payload.length} registos do ano ${anoDetectado} importados para o Supabase com sucesso.`);
+                document.getElementById('preview-container').style.display = 'none';
+                inputFicheiro.value = '';
+                dadosPlanilhaParaImportar = [];
+            }
+        });
     });
 </script>
 
-
-    
 </body>
 </html>
