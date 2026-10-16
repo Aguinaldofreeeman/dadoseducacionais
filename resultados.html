@@ -83,13 +83,21 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    const formatarValor = (val) => {
+    // Formata qualquer valor numerico ou decimal bruto para percentual legivel (ex: 0.557 -> 55,7%)
+    function formatarPercentual(val) {
         if (val === null || val === undefined || String(val).trim() === '' || String(val).trim() === '-') return '-';
-        const v = String(val).trim();
-        if (v.includes('%')) return v;
-        const num = parseFloat(v.replace(',', '.'));
-        return !isNaN(num) ? `${v}%` : v;
-    };
+        let str = String(val).trim().replace(',', '.');
+        if (str.endsWith('%')) {
+            str = str.slice(0, -1).trim();
+        }
+        let num = parseFloat(str);
+        if (isNaN(num)) return val;
+        // Se for decimal bruto entre 0 e 1 (ex: 0.5570588), converte para percentual
+        if (num > 0 && num <= 1) {
+            num = num * 100;
+        }
+        return num.toFixed(1).replace('.', ',') + '%';
+    }
 
     async function carregarFiltros() {
         const { data, error } = await supabaseClient
@@ -148,24 +156,55 @@
             return;
         }
 
-        tbody.innerHTML = data.map(r => `
+        // Agrupa os registos por escola para exibir cada escola em uma única linha limpa
+        const escolasAgrupadas = {};
+        data.forEach(r => {
+            const nomeEscola = r.escola ? r.escola.trim() : 'ESCOLA SEM NOME';
+            if (!escolasAgrupadas[nomeEscola]) {
+                escolasAgrupadas[nomeEscola] = [];
+            }
+            escolasAgrupadas[nomeEscola].push(r);
+        });
+
+        const camposDisciplinas = ['participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'geo_pol', 'bio_tec'];
+
+        const linhasConsolidadas = Object.keys(escolasAgrupadas).sort().map(nomeEscola => {
+            const registros = escolasAgrupadas[nomeEscola];
+            const escolaObj = { escola: nomeEscola };
+
+            camposDisciplinas.forEach(campo => {
+                const valoresValidos = registros
+                    .map(r => r[campo])
+                    .filter(v => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-');
+
+                if (valoresValidos.length === 0) {
+                    escolaObj[campo] = '-';
+                } else {
+                    escolaObj[campo] = formatarPercentual(valoresValidos[0]);
+                }
+            });
+
+            return escolaObj;
+        });
+
+        tbody.innerHTML = linhasConsolidadas.map(r => `
             <tr>
-                <td>${r.escola || '-'}</td>
-                <td>${formatarValor(r.participacao)}</td>
-                <td>${formatarValor(r.acertos_prova)}</td>
-                <td>${formatarValor(r.evolucao)}</td>
-                <td>${formatarValor(r.port)}</td>
-                <td>${formatarValor(r.mat)}</td>
-                <td>${formatarValor(r.his)}</td>
-                <td>${formatarValor(r.geo)}</td>
-                <td>${formatarValor(r.bio)}</td>
-                <td>${formatarValor(r.qui)}</td>
-                <td>${formatarValor(r.ing)}</td>
-                <td>${formatarValor(r.cie)}</td>
-                <td>${formatarValor(r.fis)}</td>
-                <td>${formatarValor(r.ed_fin)}</td>
-                <td>${formatarValor(r.geo_pol)}</td>
-                <td>${formatarValor(r.bio_tec)}</td>
+                <td>${r.escola}</td>
+                <td>${r.participacao}</td>
+                <td>${r.acertos_prova}</td>
+                <td>${r.evolucao}</td>
+                <td>${r.port}</td>
+                <td>${r.mat}</td>
+                <td>${r.his}</td>
+                <td>${r.geo}</td>
+                <td>${r.bio}</td>
+                <td>${r.qui}</td>
+                <td>${r.ing}</td>
+                <td>${r.cie}</td>
+                <td>${r.fis}</td>
+                <td>${r.ed_fin}</td>
+                <td>${r.geo_pol}</td>
+                <td>${r.bio_tec}</td>
             </tr>
         `).join('');
     }
