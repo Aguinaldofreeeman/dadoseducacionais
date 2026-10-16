@@ -98,13 +98,15 @@
             return item.nome_escola_original || item.escola_nome || item.escola || 'N/D';
         }
 
-        // Extrai o nome da edição/planilha dinamicamente
+        // Extrai ou converte o identificador de edição para um nome legível
         function obterEdicao(item) {
             if (item.edicao_planilha && item.edicao_planilha !== 'null') return item.edicao_planilha;
             if (item.edicao && item.edicao !== 'null') return item.edicao;
-            const keys = Object.keys(item);
-            const keyEdicao = keys.find(k => k.toLowerCase().includes('edicao') || k.toLowerCase().includes('planilha'));
-            return keyEdicao ? item[keyEdicao] : '';
+            if (item.importacao_id) {
+                const anoStr = item.ano ? String(item.ano) : '2024';
+                return `Prova_Paulista_Edicao_${anoStr}`;
+            }
+            return 'Edição Padrão';
         }
 
         // Formata os valores decimais ou numéricos para percentagem
