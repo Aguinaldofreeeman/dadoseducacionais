@@ -38,20 +38,20 @@
     </header>
 
     <main>
-        <!-- CARD 1: CADASTRAR NOVO USUÁRIO -->
+        <!-- CARD 1: CADASTRAR NOVO UTILIZADOR -->
         <div class="card">
-            <h2>Cadastrar Novo Usuário</h2>
-            <p>Crie contas de acesso para outros usuários da plataforma.</p>
+            <h2>Cadastrar Novo Utilizador</h2>
+            <p>Crie contas de acesso para outros utilizadores da plataforma.</p>
             <form id="form-novo-usuario">
                 <div class="form-group">
-                    <label for="novo-email">E-mail do Usuário:</label>
-                    <input type="email" id="novo-email" placeholder="usuario@escola.sp.gov.br" required>
+                    <label for="novo-email">E-mail do Utilizador:</label>
+                    <input type="email" id="novo-email" placeholder="utilizador@escola.sp.gov.br" required>
                 </div>
                 <div class="form-group">
-                    <label for="nova-senha">Senha Temporária:</label>
+                    <label for="nova-senha">Palavra-passe Temporária:</label>
                     <input type="password" id="nova-senha" placeholder="Mínimo de 6 caracteres" minlength="6" required>
                 </div>
-                <button type="submit" class="btn btn-success">Cadastrar Usuário</button>
+                <button type="submit" class="btn btn-success">Cadastrar Utilizador</button>
             </form>
             <div id="status-usuario" class="status-msg"></div>
         </div>
@@ -71,7 +71,7 @@
             </div>
 
             <div class="form-group">
-                <label for="edicao-nome">Nome da Edição / Arquivo:</label>
+                <label for="edicao-nome">Nome da Edição / Ficheiro:</label>
                 <input type="text" id="edicao-nome" placeholder="Ex: Prova_Paulista_1º_bim_2026.xlsx">
             </div>
 
@@ -104,7 +104,7 @@
     async function verificarAutenticacao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
-            alert('Acesso restrito! Por favor, faça login para acessar a Área Administrativa.');
+            alert('Acesso restrito! Por favor, faça login para aceder à Área Administrativa.');
             window.location.href = 'index.html';
         }
     }
@@ -115,7 +115,7 @@
         window.location.href = 'index.html';
     });
 
-    // Cadastro de Usuários
+    // Cadastro de Utilizadores
     document.getElementById('form-novo-usuario').addEventListener('submit', async function(e) {
         e.preventDefault();
         const email = document.getElementById('novo-email').value.trim();
@@ -131,17 +131,17 @@
 
         if (error) {
             msgDiv.className = 'status-msg status-error';
-            msgDiv.innerText = 'Erro ao cadastrar usuário: ' + error.message;
+            msgDiv.innerText = 'Erro ao cadastrar utilizador: ' + error.message;
             msgDiv.style.display = 'block';
         } else {
             msgDiv.className = 'status-msg status-success';
-            msgDiv.innerText = 'Usuário ' + email + ' cadastrado com sucesso!';
+            msgDiv.innerText = 'Utilizador ' + email + ' cadastrado com sucesso!';
             msgDiv.style.display = 'block';
             document.getElementById('form-novo-usuario').reset();
         }
     });
 
-    // Leitura do Arquivo XLSX
+    // Leitura do Ficheiro XLSX
     document.getElementById('file-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -198,27 +198,27 @@
             return {
                 ano: ano,
                 edicao_planilha: edicao,
-                escola: obterValor(['ESCOLA', 'NM_ESCOLA', 'NOME DA ESCOLA', 'NOME ESCOLA']),
-                participacao: obterValor(['PARTICIPACAO', 'PARTICIPACAO_GERAL', '(%) Partic', '% PARTICIPACAO']),
-                acertos_prova: obterValor(['ACERTOS_PROVA', 'ACERTO_GERAL', 'ACERTOS', '(%) Acerto', '% ACERTOS']),
+                escola: obterValor(['ESCOLA', 'ESCOLAS', 'NM_ESCOLA', 'NOME DA ESCOLA', 'NOME ESCOLA']),
+                participacao: obterValor(['PARTICIPACAO', 'PARTICIPACAO_GERAL', '(%) Partic', '% PARTICIPACAO', '(%) DE PARTICIPACAO', 'PARTICIPACAO (%)']),
+                acertos_prova: obterValor(['ACERTOS_PROVA', 'ACERTO_GERAL', 'ACERTOS', '(%) Acerto', '% ACERTOS', '(%) DE ACERTOS']),
                 evolucao: obterValor(['EVOLUCAO', '*Evolução', 'EVOLUCAO_PERCENTUAL']),
-                port: obterValor(['PORT', 'PORTUGUES', 'LENGUA PORTUGUESA']),
+                port: obterValor(['PORT', 'PORTUGUES', 'LINGUA PORTUGUESA', 'LENGUA PORTUGUESA']),
                 mat: obterValor(['MAT', 'MATEMATICA']),
-                his: obterValor(['HIS', 'HISTORIA']),
+                his: obterValor(['HIS', 'HISTORIA', 'HIST']),
                 geo: obterValor(['GEO', 'GEOGRAFIA']),
                 bio: obterValor(['BIO', 'BIOLOGIA']),
                 qui: obterValor(['QUI', 'QUIMICA']),
                 ing: obterValor(['ING', 'INGLES', 'LINGUA INGLESA']),
                 cie: obterValor(['CIE', 'CIENCIAS']),
                 fis: obterValor(['FIS', 'FISICA']),
-                ed_fin: obterValor(['ED FIN', 'ED_FIN', 'EDUCACAO FINANCEIRA']),
+                ed_fin: obterValor(['ED FIN', 'ED_FIN', 'EDUCACAO FINANCEIRA', 'FIN']),
                 emp: obterValor(['EMP', 'EMPREENDEDORISMO']),
                 art: obterValor(['ART', 'ARTE', 'ARTES']),
                 lide: Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide')) ? rowNormalizado[Array.from(Object.keys(rowNormalizado)).find(k => k.includes('lide'))] : null,
                 oratoria: obterValor(['ORATORIA', 'ORATÓRIA']),
                 geo_pol: obterValor(['GEO POL', 'GEO_POL', 'GEOPOLITICA']),
-                fil_e_soc_mod: obterValor(['FIL/SOC', 'FIL_E_SOC_MOD', 'FILOSOFIA', 'SOCIOLOGIA']),
-                bio_tec: obterValor(['BIO TEC', 'BIO_TEC', 'BIOTECNOLOGIA']),
+                fil_e_soc_mod: obterValor(['FIL/SOC', 'FIL_E_SOC_MOD', 'FILOSOFIA', 'SOCIOLOGIA', 'FILO', 'SOC']),
+                bio_tec: obterValor(['BIO TEC', 'BIO_TEC', 'BIOTECNOLOGIA', 'TEC']),
                 quim_apl: obterValor(['QUIM APL', 'QUIM_APL', 'QUIMICA APLICADA'])
             };
         });
@@ -238,7 +238,7 @@
 
         const btn = document.getElementById('btn-gravar');
         btn.disabled = true;
-        btn.innerText = 'Gravando no Supabase...';
+        btn.innerText = 'A gravar no Supabase...';
 
         const { error } = await supabaseClient
             .from('dados_educacionais')
