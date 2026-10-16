@@ -93,12 +93,10 @@
 
         let todosResultados = [];
 
-        // Extrai o nome legível da escola
         function obterNomeEscola(item) {
             return item.nome_escola_original || item.escola_nome || item.escola || 'N/D';
         }
 
-        // Extrai ou converte o identificador de edição para um nome legível
         function obterEdicao(item) {
             if (item.edicao_planilha && item.edicao_planilha !== 'null') return item.edicao_planilha;
             if (item.edicao && item.edicao !== 'null') return item.edicao;
@@ -109,7 +107,6 @@
             return 'Edição Padrão';
         }
 
-        // Formata os valores decimais ou numéricos para percentagem
         function formatarPercentual(valor) {
             if (valor === null || valor === undefined || valor === '' || valor === '-') return '-';
             const str = String(valor).replace(',', '.');
@@ -166,51 +163,70 @@
                 return bateAno && bateEdicao;
             });
 
-            const escolasVistas = new Set();
-            const linhasDeduplicadas = [];
+            // Agrupa os componentes/disciplinas por escola para preencher a linha completa
+            const mapaEscolas = {};
 
             filtrados.forEach(r => {
-                const chave = `${r.escola_exibicao.toLowerCase()}_${r.edicao_nome}`;
-                if (!escolasVistas.has(chave)) {
-                    escolasVistas.add(chave);
-                    linhasDeduplicadas.push(r);
+                const escola = r.escola_exibicao;
+                if (!mapaEscolas[escola]) {
+                    mapaEscolas[escola] = {
+                        escola: escola,
+                        participacao: null,
+                        acertos: null,
+                        evolucao: null,
+                        componentes: {}
+                    };
+                }
+
+                const val = r.valor_original !== null && r.valor_original !== undefined ? r.valor_original : r.valor_numerico;
+
+                if (r.participacao !== undefined && r.participacao !== null) mapaEscolas[escola].participacao = r.participacao;
+                if (r.acertos_prova !== undefined && r.acertos_prova !== null) mapaEscolas[escola].acertos = r.acertos_prova;
+                if (r.evolucao !== undefined && r.evolucao !== null) mapaEscolas[escola].evolucao = r.evolucao;
+
+                const comp = (r.sigla_componente_original || r.componente || '').trim().toUpperCase();
+                if (comp) {
+                    mapaEscolas[escola].componentes[comp] = val;
+                } else if (mapaEscolas[escola].participacao === null) {
+                    mapaEscolas[escola].participacao = val;
                 }
             });
 
-            linhasDeduplicadas.sort((a, b) => a.escola_exibicao.localeCompare(b.escola_exibicao));
+            const listaEscolas = Object.values(mapaEscolas).sort((a, b) => a.escola.localeCompare(b.escola));
 
-            if (linhasDeduplicadas.length > 0) {
-                tabela.innerHTML = linhasDeduplicadas.map(r => {
-                    const isTotal = r.escola_exibicao.toLowerCase() === 'total';
+            if (listaEscolas.length > 0) {
+                tabela.innerHTML = listaEscolas.map(e => {
+                    const isTotal = e.escola.toLowerCase() === 'total';
                     const classeLinha = isTotal ? 'class="linha-total"' : '';
+                    const c = e.componentes;
                     
                     return `
                         <tr ${classeLinha}>
-                            <td><strong>${r.escola_exibicao}</strong></td>
-                            <td>${formatarPercentual(r.valor_original || r.valor_numerico || r.participacao)}</td>
-                            <td>${formatarPercentual(r.acertos_prova)}</td>
-                            <td>${formatarPercentual(r.evolucao)}</td>
-                            <td>${formatarPercentual(r.port)}</td>
-                            <td>${formatarPercentual(r.mat)}</td>
-                            <td>${formatarPercentual(r.his)}</td>
-                            <td>${formatarPercentual(r.geo)}</td>
-                            <td>${formatarPercentual(r.bio)}</td>
-                            <td>${formatarPercentual(r.qui)}</td>
-                            <td>${formatarPercentual(r.ing)}</td>
-                            <td>${formatarPercentual(r.cie)}</td>
-                            <td>${formatarPercentual(r.fis)}</td>
-                            <td>${formatarPercentual(r.ed_fin)}</td>
-                            <td>${formatarPercentual(r.emp)}</td>
-                            <td>${formatarPercentual(r.tec_rob)}</td>
-                            <td>${formatarPercentual(r.ing_it)}</td>
-                            <td>${formatarPercentual(r.art)}</td>
-                            <td>${formatarPercentual(r.mid_dig)}</td>
-                            <td>${formatarPercentual(r.lide)}</td>
-                            <td>${formatarPercentual(r.oratoria)}</td>
-                            <td>${formatarPercentual(r.geo_pol)}</td>
-                            <td>${formatarPercentual(r.fil_e_soc_mod)}</td>
-                            <td>${formatarPercentual(r.bio_tec)}</td>
-                            <td>${formatarPercentual(r.quim_apl)}</td>
+                            <td><strong>${e.escola}</strong></td>
+                            <td>${formatarPercentual(e.participacao)}</td>
+                            <td>${formatarPercentual(e.acertos)}</td>
+                            <td>${formatarPercentual(e.evolucao)}</td>
+                            <td>${formatarPercentual(c['PORT'] || c['PORTUGUES'] || c['LP'])}</td>
+                            <td>${formatarPercentual(c['MAT'] || c['MATEMATICA'])}</td>
+                            <td>${formatarPercentual(c['HIS'] || c['HISTORIA'])}</td>
+                            <td>${formatarPercentual(c['GEO'] || c['GEOGRAFIA'])}</td>
+                            <td>${formatarPercentual(c['BIO'] || c['BIOLOGIA'])}</td>
+                            <td>${formatarPercentual(c['QUI'] || c['QUIMICA'])}</td>
+                            <td>${formatarPercentual(c['ING'] || c['INGLES'])}</td>
+                            <td>${formatarPercentual(c['CIE'] || c['CIENCIAS'])}</td>
+                            <td>${formatarPercentual(c['FIS'] || c['FISICA'])}</td>
+                            <td>${formatarPercentual(c['ED FIN'] || c['EDUCACAO FINANCEIRA'])}</td>
+                            <td>${formatarPercentual(c['EMP'] || c['EMPREENDEDORISMO'])}</td>
+                            <td>${formatarPercentual(c['TEC ROB'] || c['TECNOLOGIA'])}</td>
+                            <td>${formatarPercentual(c['ING IT'])}</td>
+                            <td>${formatarPercentual(c['ART'] || c['ARTE'])}</td>
+                            <td>${formatarPercentual(c['MID DIG'])}</td>
+                            <td>${formatarPercentual(c['LIDE'])}</td>
+                            <td>${formatarPercentual(c['ORATORIA'])}</td>
+                            <td>${formatarPercentual(c['GEO POL'])}</td>
+                            <td>${formatarPercentual(c['FIL E SOC MOD'] || c['FILOSOFIA'])}</td>
+                            <td>${formatarPercentual(c['BIO TEC'])}</td>
+                            <td>${formatarPercentual(c['QUIM APL'])}</td>
                         </tr>
                     `;
                 }).join('');
