@@ -51,7 +51,7 @@
             <div>
                 <label for="filtro-ano"><strong>Ano Letivo:</strong></label>
                 <select id="filtro-ano">
-                    <option value="">Aguarde, carregando...</option>
+                    <option value="">Aguarde, a carregar...</option>
                 </select>
             </div>
             <div>
@@ -67,7 +67,7 @@
                 <thead id="cabecalho-tabela">
                     <tr>
                         <th>Escola</th>
-                        <th>Carregando Informações...</th>
+                        <th>A carregar informações...</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
@@ -106,7 +106,7 @@
             const selectAno = document.getElementById('filtro-ano');
 
             if (!dados || dados.length === 0) {
-                selectAno.innerHTML = '<option value="">Nenhum dado encontrado no banco.</option>';
+                selectAno.innerHTML = '<option value="">Nenhum dado encontrado na base de dados.</option>';
                 return;
             }
 
@@ -120,7 +120,6 @@
                 }
                 
                 item.ano_calculado = anoItem;
-                // Tratamento seguro para edição
                 const edicaoBase = item.edicao_planilha ? String(item.edicao_planilha) : `Prova_Paulista_1º_bim_${item.ano_calculado}.xlsx`;
                 item.edicao_nome = edicaoBase;
                 item.escola_limpa = limparNomeEscola(item.escola);
@@ -154,7 +153,7 @@
             const tabela = document.getElementById('tabela-resultados');
 
             if (!anoSelecionado && !edicaoSelecionada) {
-                cabecalho.innerHTML = '<tr><th>Escola</th><th>Aguardando Seleção...</th></tr>';
+                cabecalho.innerHTML = '<tr><th>Escola</th><th>A aguardar seleção...</th></tr>';
                 tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Por favor, selecione o Ano Letivo e/ou a Edição da Prova nos seletores acima para carregar os resultados.</td></tr>';
                 return;
             }
@@ -178,20 +177,19 @@
 
             filtrados.forEach(r => {
                 Object.keys(r).forEach(k => {
-                    // Segurança adicional para ignorar colunas internas ou vazias
                     if (!colunasIgnorar.includes(k) && r[k] !== null && r[k] !== undefined && String(r[k]).trim() !== '') {
                         colunasEncontradas.add(k);
                     }
                 });
             });
 
+            // Ordem exata de colunas alinhada 1:1 com a planilha Excel
             const ordemDesejada = [
                 'total_alun', 'participacao', 'acertos_prova', 'evolucao', 
-                'port', 'mat', 'his', 'hist', 'geo', 'ing', 'cie', 'ed_fin', 
-                'fis', 'qui', 'bio', 'art', 'arte', 'emp', 'empr', 'ora', 'oratoria', 
-                'qui_apl', 'quim_apl', 'geo_pol', 'filo_soc', 'fil_e_soc_mod', 'bio_tec', 
-                'filo', 'soc', 'lid', 'lide', 'prog', 'tec_ino', 'tec_rob', 'ing_if', 'ing_it', 
-                'mid_dig', 'oe_port', 'oe_mat'
+                'port', 'mat', 'his', 'hist', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 
+                'ed_fin', 'emp', 'art', 'arte', 'lide', 'lid', 'oratoria', 'ora', 
+                'geo_pol', 'fil_e_soc_mod', 'filo_soc', 'bio_tec', 'quim_apl', 'qui_apl',
+                'filo', 'soc', 'prog', 'tec_ino', 'tec_rob', 'ing_if', 'ing_it', 'mid_dig', 'oe_port', 'oe_mat'
             ];
             
             const colunasFinais = Array.from(colunasEncontradas).sort((a, b) => {
@@ -203,23 +201,52 @@
                 return a.localeCompare(b);
             });
 
-            // Se por acaso nenhuma coluna válida sobrar (dados vazios), evita quebrar a tela
             if (colunasFinais.length === 0) {
                 cabecalho.innerHTML = '<tr><th>Escola</th><th>Aviso</th></tr>';
-                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registros desta edição não possuem notas numéricas preenchidas.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Os registos desta edição não possuem notas numéricas preenchidas.</td></tr>';
                 return;
             }
 
+            // Mapeamento de rótulos fiéis às siglas e nomes da planilha oficial
             const mapaNomesLegiveis = {
-                'total_alun': 'Total Alun', 'participacao': '(%) de Par', 'acertos_prova': '(%) de Ace',
-                'evolucao': 'Evolução', 'port': 'PORT', 'mat': 'MAT', 'his': 'HIST', 'hist': 'HIST',
-                'geo': 'GEO', 'ing': 'ING', 'cie': 'CIE', 'ed_fin': 'ED FIN', 'fis': 'FÍS', 'qui': 'QUI',
-                'bio': 'BIO', 'art': 'ARTE', 'arte': 'ARTE', 'emp': 'EMPR', 'empr': 'EMPR', 'ora': 'ORA',
-                'oratoria': 'ORA', 'qui_apl': 'QUI APL', 'quim_apl': 'QUI APL', 'geo_pol': 'GEO POL',
-                'filo_soc': 'FILO SOC', 'fil_e_soc_mod': 'FILO SOC', 'bio_tec': 'BIO TEC', 'filo': 'FILO',
-                'soc': 'SOC', 'lid': 'LID', 'lide': 'LID', 'prog': 'PROG', 'tec_ino': 'TEC INO',
-                'tec_rob': 'TEC ROB', 'ing_if': 'ING IF', 'ing_it': 'ING IT', 'mid_dig': 'MID DIG',
-                'oe_port': 'OE PORT', 'oe_mat': 'OE MAT'
+                'total_alun': 'Total Alun',
+                'participacao': '(%) Partic',
+                'acertos_prova': '(%) Acerto',
+                'evolucao': '*Evolução',
+                'port': 'PORT',
+                'mat': 'MAT',
+                'his': 'HIS',
+                'hist': 'HIS',
+                'geo': 'GEO',
+                'bio': 'BIO',
+                'qui': 'QUI',
+                'ing': 'ING',
+                'cie': 'CIE',
+                'fis': 'FIS',
+                'ed_fin': 'ED FIN',
+                'emp': 'EMP',
+                'art': 'ART MID D',
+                'arte': 'ART MID D',
+                'lide': 'LIDE',
+                'lid': 'LIDE',
+                'oratoria': 'ORATORIA',
+                'ora': 'ORATORIA',
+                'geo_pol': 'GEO POL',
+                'fil_e_soc_mod': 'FIL E SOC',
+                'filo_soc': 'FIL E SOC',
+                'bio_tec': 'BIO TEC',
+                'quim_apl': 'QUIM APL',
+                'qui_apl': 'QUIM APL',
+                'filo': 'FILO',
+                'soc': 'SOC',
+                'prog': 'PROG',
+                'tec_ino': 'TEC INO',
+                'tec_rob': 'TEC ROB',
+                'ing_if': 'ING IF',
+                'ing_it': 'ING IT',
+                'mid_dig': 'MID DIG',
+                'oe_port': 'OE PORT',
+                'oe_mat': 'OE MAT'
             };
 
             cabecalho.innerHTML = `<tr><th>Escola</th>${colunasFinais.map(col => `<th>${mapaNomesLegiveis[col] || col.toUpperCase()}</th>`).join('')}</tr>`;
@@ -302,7 +329,7 @@
 
             } catch (err) {
                 console.error('Erro ao carregar dados:', err);
-                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2" style="color:red; text-align:center; padding: 20px;">Falha de conexão com o banco de dados.</td></tr>`;
+                document.getElementById('tabela-resultados').innerHTML = `<tr><td colspan="2" style="color:red; text-align:center; padding: 20px;">Falha de conexão com a base de dados.</td></tr>`;
             }
 
             document.getElementById('filtro-ano').addEventListener('change', () => {
