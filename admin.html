@@ -90,7 +90,7 @@
         emp:            (k) => k.includes('emp'),
         tec_rob:        igual('tecrob'),
         ing_it:         igual('ingit'),
-        art:            (k) => k.includes('art'), // Captura "ART", "ARTE", "ART MID D", "ART MID DIG"
+       art: igual('art', 'arte', 'artmidd', 'artmiddig'), // Captura "ART", "ARTE", "ART MID D", "ART MID DIG"
         mid_dig:        igual('middig'),
         lide:           (k) => k.includes('lid'),
         oratoria:       (k) => k.includes('ora'),
