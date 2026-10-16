@@ -120,7 +120,8 @@
     async function carregarFiltros() {
         const { data, error } = await supabaseClient
             .from('dados_educacionais')
-            .select('ano, edicao_planilha');
+            .select('ano, edicao_planilha')
+            .range(0, 9999);
 
         if (error || !data || data.length === 0) {
             document.getElementById('tabela-resultados').innerHTML = '<tr><td>Nenhum dado encontrado no banco.</td></tr>';
@@ -164,7 +165,8 @@
             .select('*')
             .eq('ano', ano)
             .eq('edicao_planilha', edicao)
-            .order('escola', { ascending: true });
+            .order('escola', { ascending: true })
+            .range(0, 9999);
 
         if (error) {
             tbody.innerHTML = `<tr><td>Erro ao carregar dados: ${error.message}</td></tr>`;
