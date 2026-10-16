@@ -10,13 +10,13 @@
         header h1 { margin: 0; font-size: 22px; }
         header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
         main { padding: 30px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
         .btn { background-color: #17365d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; }
         .btn-success { background-color: #16a34a; }
         .btn-danger { background-color: #dc2626; }
         .btn-secondary { background-color: #64748b; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         .preview-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-top: 15px; font-size: 13px; max-height: 250px; overflow-y: auto; }
         .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; font-weight: bold; }
@@ -38,6 +38,25 @@
     </header>
 
     <main>
+        <!-- CARD 1: CADASTRAR NOVO UTILIZADOR -->
+        <div class="card">
+            <h2>Cadastrar Novo Utilizador</h2>
+            <p>Crie contas de acesso para outros utilizadores da plataforma.</p>
+            <form id="form-novo-usuario">
+                <div class="form-group">
+                    <label for="novo-email">E-mail do Utilizador:</label>
+                    <input type="email" id="novo-email" placeholder="utilizador@escola.sp.gov.br" required>
+                </div>
+                <div class="form-group">
+                    <label for="nova-senha">Palavra-passe Temporária:</label>
+                    <input type="password" id="nova-senha" placeholder="Mínimo de 6 caracteres" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-success">Cadastrar Utilizador</button>
+            </form>
+            <div id="status-usuario" class="status-msg"></div>
+        </div>
+
+        <!-- CARD 2: IMPORTAR PLANILHAS -->
         <div class="card">
             <h2>Importar Nova Planilha (.xlsx)</h2>
             <p>Selecione o ano letivo, informe o nome da edição e escolha a planilha oficial para gravar os dados no Supabase.</p>
@@ -80,7 +99,7 @@
 
     let dadosParaEnviar = [];
 
-    // Verificação de autenticação no Supabase Auth
+    // Verificação de autenticação
     async function verificarAutenticacao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
@@ -95,6 +114,33 @@
         window.location.href = 'index.html';
     });
 
+    // Cadastro de Utilizadores
+    document.getElementById('form-novo-usuario').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('novo-email').value.trim();
+        const password = document.getElementById('nova-senha').value;
+        const msgDiv = document.getElementById('status-usuario');
+
+        msgDiv.style.display = 'none';
+
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            msgDiv.className = 'status-msg status-error';
+            msgDiv.innerText = 'Erro ao cadastrar utilizador: ' + error.message;
+            msgDiv.style.display = 'block';
+        } else {
+            msgDiv.className = 'status-msg status-success';
+            msgDiv.innerText = 'Utilizador ' + email + ' cadastrado com sucesso!';
+            msgDiv.style.display = 'block';
+            document.getElementById('form-novo-usuario').reset();
+        }
+    });
+
+    // Leitura do Ficheiro XLSX
     document.getElementById('file-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
