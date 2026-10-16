@@ -9,20 +9,22 @@
         header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 22px; }
         header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
-        main { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        main { padding: 30px; max-width: 100%; margin: 0 auto; box-sizing: border-box; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
         .filters { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .filter-group { display: flex; flex-direction: column; gap: 6px; }
         .filter-group label { font-weight: bold; font-size: 13px; }
         .filter-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; min-width: 180px; }
         .btn-admin { background-color: #17365d; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
-        .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; }
+        table { width: 100%; min-width: 1800px; border-collapse: collapse; font-size: 13px; text-align: center; }
         th { background-color: #17365d; color: white; padding: 12px 10px; font-weight: 600; border-bottom: 2px solid #0f243f; white-space: nowrap; }
         td { padding: 10px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
         tr:hover { background-color: #edf2f7; }
-        td:first-child, th:first-child { text-align: left; font-weight: 600; padding-left: 15px; }
+        td:first-child, th:first-child { text-align: left; font-weight: 600; padding-left: 15px; position: sticky; left: 0; background-color: #fff; z-index: 1; }
+        tr:nth-child(even) td:first-child { background-color: #f8fafc; }
+        th:first-child { background-color: #17365d; z-index: 2; }
     </style>
 </head>
 <body>
@@ -66,12 +68,18 @@
                         <th>CIE</th>
                         <th>FIS</th>
                         <th>ED FIN</th>
+                        <th>EMP</th>
+                        <th>ART</th>
+                        <th>LIDE</th>
+                        <th>ORATÓRIA</th>
                         <th>GEO POL</th>
+                        <th>FIL/SOC</th>
                         <th>BIO TEC</th>
+                        <th>QUIM APL</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="16">A carregar dados...</td></tr>
+                    <tr><td colspan="22">A carregar dados...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -83,7 +91,6 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    // Formata qualquer valor numerico ou decimal bruto para percentual legivel (ex: 0.557 -> 55,7%)
     function formatarPercentual(val) {
         if (val === null || val === undefined || String(val).trim() === '' || String(val).trim() === '-') return '-';
         let str = String(val).trim().replace(',', '.');
@@ -92,7 +99,6 @@
         }
         let num = parseFloat(str);
         if (isNaN(num)) return val;
-        // Se for decimal bruto entre 0 e 1 (ex: 0.5570588), converte para percentual
         if (num > 0 && num <= 1) {
             num = num * 100;
         }
@@ -105,7 +111,7 @@
             .select('ano, edicao_planilha');
 
         if (error || !data || data.length === 0) {
-            document.getElementById('tabela-resultados').innerHTML = '<tr><td colspan="16">Nenhum dado encontrado no banco.</td></tr>';
+            document.getElementById('tabela-resultados').innerHTML = '<tr><td colspan="22">Nenhum dado encontrado no banco.</td></tr>';
             return;
         }
 
@@ -133,11 +139,11 @@
         const tbody = document.getElementById('tabela-resultados');
 
         if (!ano || !edicao) {
-            tbody.innerHTML = '<tr><td colspan="16">Selecione o ano e a edição.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="22">Selecione o ano e a edição.</td></tr>';
             return;
         }
 
-        tbody.innerHTML = '<tr><td colspan="16">A carregar registos...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="22">A carregar registos...</td></tr>';
 
         const { data, error } = await supabaseClient
             .from('dados_educacionais')
@@ -147,16 +153,15 @@
             .order('escola', { ascending: true });
 
         if (error) {
-            tbody.innerHTML = `<tr><td colspan="16">Erro ao carregar dados: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="22">Erro ao carregar dados: ${error.message}</td></tr>`;
             return;
         }
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="16">Nenhum registo encontrado para este filtro.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="22">Nenhum registo encontrado para este filtro.</td></tr>';
             return;
         }
 
-        // Agrupa os registos por escola para exibir cada escola em uma única linha limpa
         const escolasAgrupadas = {};
         data.forEach(r => {
             const nomeEscola = r.escola ? r.escola.trim() : 'ESCOLA SEM NOME';
@@ -166,7 +171,12 @@
             escolasAgrupadas[nomeEscola].push(r);
         });
 
-        const camposDisciplinas = ['participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'geo_pol', 'bio_tec'];
+        const camposDisciplinas = [
+            'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 
+            'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 
+            'ed_fin', 'emp', 'art', 'lide', 'oratoria', 'geo_pol', 
+            'fil_e_soc_mod', 'bio_tec', 'quim_apl'
+        ];
 
         const linhasConsolidadas = Object.keys(escolasAgrupadas).sort().map(nomeEscola => {
             const registros = escolasAgrupadas[nomeEscola];
@@ -203,8 +213,14 @@
                 <td>${r.cie}</td>
                 <td>${r.fis}</td>
                 <td>${r.ed_fin}</td>
+                <td>${r.emp}</td>
+                <td>${r.art}</td>
+                <td>${r.lide}</td>
+                <td>${r.oratoria}</td>
                 <td>${r.geo_pol}</td>
+                <td>${r.fil_e_soc_mod}</td>
                 <td>${r.bio_tec}</td>
+                <td>${r.quim_apl}</td>
             </tr>
         `).join('');
     }
