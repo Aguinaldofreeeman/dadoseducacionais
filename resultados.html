@@ -17,7 +17,7 @@
         .filter-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; min-width: 200px; }
         .btn-admin { background-color: #17365d; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
         .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; }
-        table { width: 100%; min-width: 1800px; border-collapse: collapse; font-size: 13px; text-align: center; }
+        table { width: 100%; min-width: 1850px; border-collapse: collapse; font-size: 13px; text-align: center; }
         th { background-color: #17365d; color: white; padding: 12px 10px; font-weight: 600; border-bottom: 2px solid #0f243f; white-space: nowrap; }
         td { padding: 10px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
@@ -81,13 +81,14 @@
                         <th>LIDE</th>
                         <th>ORATÓRIA</th>
                         <th>GEO POL</th>
-                        <th>FIL/SOC</th>
-                        <th>BIO TEC</th>
+                        <th>FILO</th>
+                        <th>SOC</th>
+                        <th>TEC</th>
                         <th>QUIM APL</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados">
-                    <tr><td colspan="22">A carregar dados...</td></tr>
+                    <tr><td colspan="23">Carregando dados...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -119,7 +120,7 @@
             .select('ano, edicao_planilha');
 
         if (error || !data || data.length === 0) {
-            document.getElementById('tabela-resultados').innerHTML = '<tr><td colspan="22">Nenhum dado encontrado no banco.</td></tr>';
+            document.getElementById('tabela-resultados').innerHTML = '<tr><td colspan="23">Nenhum dado encontrado no banco.</td></tr>';
             return;
         }
 
@@ -148,11 +149,11 @@
         const tbody = document.getElementById('tabela-resultados');
 
         if (!ano || !edicao) {
-            tbody.innerHTML = '<tr><td colspan="22">Selecione o ano e a edição.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="23">Selecione o ano e a edição.</td></tr>';
             return;
         }
 
-        tbody.innerHTML = '<tr><td colspan="22">A carregar registos...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="23">Carregando registros...</td></tr>';
 
         const { data, error } = await supabaseClient
             .from('dados_educacionais')
@@ -162,22 +163,22 @@
             .order('escola', { ascending: true });
 
         if (error) {
-            tbody.innerHTML = `<tr><td colspan="22">Erro ao carregar dados: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="23">Erro ao carregar dados: ${error.message}</td></tr>`;
             return;
         }
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="22">Nenhum registo encontrado para este filtro.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="23">Nenhum registro encontrado para este filtro.</td></tr>';
             return;
         }
 
-        // 1. Filtrar e remover linhas de metadados da planilha (ex: "Filtros aplicados:")
+        // 1. Filtrar e remover linhas de metadados da planilha
         const linhasValidas = data.filter(r => {
             const esc = (r.escola || '').toUpperCase();
             return !esc.includes('FILTROS APLICADOS') && !esc.includes('CD_DIRETORIA') && !esc.includes('NM_DIRETORIA');
         });
 
-        // 2. Atualizar o dropdown de escolas com as opções disponíveis na edição
+        // 2. Atualizar o dropdown de escolas
         const selectEscola = document.getElementById('select-escola');
         const escolaSelecionada = selectEscola.value;
 
@@ -189,7 +190,7 @@
         selectEscola.innerHTML = '<option value="">Todas as Escolas</option>' +
             listaEscolas.map(e => `<option value="${e}" ${e === escolaSelecionada ? 'selected' : ''}>${e}</option>`).join('');
 
-        // 3. Agrupar os registos por escola
+        // 3. Agrupar os registros por escola
         const escolasAgrupadas = {};
         linhasValidas.forEach(r => {
             const nomeEscola = r.escola ? r.escola.trim() : 'ESCOLA SEM NOME';
@@ -208,10 +209,10 @@
             'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 
             'his', 'geo', 'bio', 'qui', 'ing', 'cie', 'fis', 
             'ed_fin', 'emp', 'art', 'lide', 'oratoria', 'geo_pol', 
-            'fil_e_soc_mod', 'bio_tec', 'quim_apl'
+            'filo', 'soc', 'bio_tec', 'quim_apl'
         ];
 
-        // 4. Separar escolas normais da linha Total para colocar o Total sempre no fim
+        // 4. Ordenar para colocar a linha Total no final
         const nomesEncontrados = Object.keys(escolasAgrupadas);
         const escolasNormais = nomesEncontrados.filter(e => !e.toUpperCase().startsWith('TOTAL')).sort();
         const escolasTotal = nomesEncontrados.filter(e => e.toUpperCase().startsWith('TOTAL'));
@@ -223,7 +224,12 @@
 
             camposDisciplinas.forEach(campo => {
                 const valoresValidos = registros
-                    .map(r => r[campo])
+                    .map(r => {
+                        // Compatibilidade de nomes de colunas do banco
+                        if (campo === 'filo') return r.filo || r.fil_e_soc_mod;
+                        if (campo === 'soc') return r.soc;
+                        return r[campo];
+                    })
                     .filter(v => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-');
 
                 if (valoresValidos.length === 0) {
@@ -257,7 +263,8 @@
                 <td>${r.lide}</td>
                 <td>${r.oratoria}</td>
                 <td>${r.geo_pol}</td>
-                <td>${r.fil_e_soc_mod}</td>
+                <td>${r.filo}</td>
+                <td>${r.soc}</td>
                 <td>${r.bio_tec}</td>
                 <td>${r.quim_apl}</td>
             </tr>
