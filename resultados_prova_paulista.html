@@ -125,6 +125,21 @@
         return true;
     }
 
+    // A visão consolidada (uma linha por escola/edição) é usada quando existe no banco.
+    // Sem ela, a consulta cai na tabela bruta e a consolidação acontece no navegador.
+    let fonteDadosCache = null;
+
+    async function detectarFonteDados() {
+        if (fonteDadosCache) return fonteDadosCache;
+        const { error } = await supabaseClient
+            .from('vw_resultados_consolidados')
+            .select('ano')
+            .limit(1);
+
+        fonteDadosCache = error ? 'dados_educacionais' : 'vw_resultados_consolidados';
+        return fonteDadosCache;
+    }
+
     async function carregarFiltros() {
         const { data, error } = await supabaseClient
             .from('edicoes_disponiveis')
@@ -195,7 +210,9 @@
         tbody.innerHTML = '<tr><td>Carregando registros...</td></tr>';
 
         // Com ano selecionado filtra pelo ano; com "Todos os anos" busca todas as edições
-        let query = supabaseClient.from('dados_educacionais').select('*');
+        // Usa a visão consolidada quando ela existe (evita o limite de 1000 linhas do PostgREST)
+        const fonte = await detectarFonteDados();
+        let query = supabaseClient.from(fonte).select('*');
         if (ano) {
             query = query.eq('ano', ano);
         }
