@@ -115,6 +115,16 @@
         return num.toFixed(1).replace('.', ',') + '%';
     }
 
+    // Proteção de rota não autenticada
+    async function verificarSessao() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
+
     async function carregarFiltros() {
         const { data, error } = await supabaseClient
             .from('edicoes_disponiveis')
@@ -125,23 +135,41 @@
             return;
         }
 
-        const anos = [...new Set(data.map(d => d.ano).filter(Boolean))].sort().reverse();
+        // Anos disponíveis (normalizados para texto, do mais recente para o mais antigo)
+        const anos = [...new Set(data.map(d => d.ano).filter(a => a !== null && a !== undefined).map(a => String(a)))]
+            .sort((a, b) => b.localeCompare(a, 'pt-BR', { numeric: true }));
+
         const selectAno = document.getElementById('select-ano');
-        selectAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+        selectAno.innerHTML = '<option value="">Todos os anos</option>' +
+            anos.map(a => `<option value="${a}">${a}</option>`).join('');
+
+        // Começa no ano mais recente, mantendo o comportamento anterior
+        if (anos.length > 0) {
+            selectAno.value = anos[0];
+        }
 
         const atualizarEdicoes = () => {
             const anoSel = selectAno.value;
-            let edicoes = [...new Set(data.filter(d => d.ano === anoSel).map(d => d.edicao_planilha).filter(Boolean))];
+            let edicoes = [...new Set(data
+                .filter(d => !anoSel || String(d.ano) === anoSel)
+                .map(d => d.edicao_planilha)
+                .filter(Boolean))];
             
             // 1. Ordenar as edições sequencialmente (1º bim, 2º bim, 3º bim, etc.)
             edicoes.sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' }));
 
             // 2. Montar as opções removendo a extensão .xlsx ou .xls do texto visível
             const selectEdicao = document.getElementById('select-edicao');
+            const edicaoAtual = selectEdicao.value;
             selectEdicao.innerHTML = edicoes.map(e => {
                 const nomeExibicao = e.replace(/\.xlsx?$/i, '');
                 return `<option value="${e}">${nomeExibicao}</option>`;
             }).join('');
+
+            // Mantém a edição selecionada quando ela continuar disponível
+            if (edicaoAtual && edicoes.includes(edicaoAtual)) {
+                selectEdicao.value = edicaoAtual;
+            }
 
             carregarTabela();
         };
@@ -166,10 +194,12 @@
 
         tbody.innerHTML = '<tr><td>Carregando registros...</td></tr>';
 
-        const { data, error } = await supabaseClient
-            .from('dados_educacionais')
-            .select('*')
-            .eq('ano', ano)
+        // Com ano selecionado filtra pelo ano; com "Todos os anos" busca todas as edições
+        let query = supabaseClient.from('dados_educacionais').select('*');
+        if (ano) {
+            query = query.eq('ano', ano);
+        }
+        const { data, error } = await query
             .eq('edicao_planilha', edicao)
             .order('escola', { ascending: true })
             .range(0, 9999);
@@ -230,24 +260,44 @@
         const escolasTotal = nomesEncontrados.filter(e => e.toUpperCase().startsWith('TOTAL'));
         const ordemFinal = [...escolasNormais, ...escolasTotal];
 
+        // Consolida os registros duplicados da mesma escola: usa a linha mais completa
+        // e, para cada coluna, completa com o primeiro registro que tenha valor
+        const valorDe = (registro, campo) => {
+            if (!registro) return null;
+            if (campo === 'filo') return registro.filo || registro.fil_e_soc_mod;
+            return registro[campo];
+        };
+
+        const temValor = (valor) => valor !== null && valor !== undefined &&
+            String(valor).trim() !== '' && String(valor).trim() !== '-';
+
+        const completude = (registro) => camposDisciplinas.reduce((acc, campo) =>
+            acc + (temValor(valorDe(registro, campo)) ? 1 : 0), 0);
+
         const linhasConsolidadas = ordemFinal.map(nomeEscola => {
             const registros = escolasAgrupadas[nomeEscola];
+            const principal = [...registros].sort((a, b) => {
+                const diferenca = completude(b) - completude(a);
+                if (diferenca !== 0) return diferenca;
+                return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+            })[0];
+
             const escolaObj = { escola: nomeEscola, ehTotal: nomeEscola.toUpperCase().startsWith('TOTAL') };
 
             camposDisciplinas.forEach(campo => {
-                const valoresValidos = registros
-                    .map(r => {
-                        if (campo === 'filo') return r.filo || r.fil_e_soc_mod;
-                        if (campo === 'soc') return r.soc;
-                        return r[campo];
-                    })
-                    .filter(v => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-');
+                let valor = valorDe(principal, campo);
 
-                if (valoresValidos.length === 0) {
-                    escolaObj[campo] = '-';
-                } else {
-                    escolaObj[campo] = formatarPercentual(valoresValidos[0]);
+                if (!temValor(valor)) {
+                    for (const registro of registros) {
+                        const alternativo = valorDe(registro, campo);
+                        if (temValor(alternativo)) {
+                            valor = alternativo;
+                            break;
+                        }
+                    }
                 }
+
+                escolaObj[campo] = temValor(valor) ? formatarPercentual(valor) : '-';
             });
 
             return escolaObj;
@@ -273,7 +323,12 @@
         `).join('');
     }
 
-    document.addEventListener('DOMContentLoaded', carregarFiltros);
+    document.addEventListener('DOMContentLoaded', async () => {
+        const autenticado = await verificarSessao();
+        if (autenticado) {
+            carregarFiltros();
+        }
+    });
 </script>
 </body>
 </html>
