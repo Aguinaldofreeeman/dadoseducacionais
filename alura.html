@@ -1,1 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Alura - Prova Paulista</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 22px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
+        .btn-nav:hover { background-color: #0f766e; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        main { padding: 30px; max-width: 1100px; margin: 0 auto; }
+        
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
 
+        /* Grid de Resumo de Indicadores */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 25px; }
+        .metric-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; }
+        .metric-card h4 { margin: 0 0 8px 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
+        .metric-card .value { font-size: 24px; font-weight: bold; color: #17365d; }
+
+        /* Filtros */
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+        .filter-group label { font-size: 13px; font-weight: bold; color: #475569; }
+        .filter-group input, .filter-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+
+        /* Tabela de Resultados */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f1f5f9; color: #475569; font-weight: bold; white-space: nowrap; }
+        tr:hover { background-color: #f8fafc; }
+        .text-right { text-align: right; }
+        .badge-pct { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; background-color: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Prova Paulista — Indicadores Alura</h1>
+        <div class="header-actions">
+            <a href="index.html" class="btn-nav">Início</a>
+            <button id="btn-sair" class="btn-logout">Sair</button>
+        </div>
+    </header>
+    <main>
+        <!-- Resumo Geral -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h4>Matrículas Ativas</h4>
+                <div class="value" id="tot-matriculas">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Acessos no Período</h4>
+                <div class="value" id="tot-acessos">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Cursos Concluídos</h4>
+                <div class="value" id="tot-cursos">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Projetos Enviados</h4>
+                <div class="value" id="tot-projetos">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Exercícios Realizados</h4>
+                <div class="value" id="tot-exercicios">-</div>
+            </div>
+        </div>
+
+        <!-- Card da Tabela de Resultados -->
+        <div class="card">
+            <h2>Resultados por Unidade Escolar</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filtro-busca">Buscar Escola</label>
+                    <input type="text" id="filtro-busca" placeholder="Digite o nome da escola..." oninput="filtrarResultados()">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Escola</th>
+                            <th class="text-right">Matrículas</th>
+                            <th class="text-right">Acessos</th>
+                            <th class="text-right">% Acessos</th>
+                            <th class="text-right">Cursos Concluídos</th>
+                            <th class="text-right">Projetos Enviados</th>
+                            <th class="text-right">Exercícios Realizados</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-resultados">
+                        <tr><td colspan="7">Carregando dados da Alura...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://hygvdaixsqogcmcolnyx.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+    let dadosAlura = [];
+
+    // Proteção de rota não autenticada
+    async function verificarSessao() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+        } else {
+            carregarDadosAlura();
+        }
+    }
+    verificarSessao();
+
+    document.getElementById('btn-sair').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+
+    // Carregar Dados da Alura
+    async function carregarDadosAlura() {
+        const tbody = document.getElementById('lista-resultados');
+        try {
+            // Tentativa de consulta na tabela resultados_alura do Supabase
+            const { data, error } = await supabaseClient
+                .from('resultados_alura')
+                .select('*')
+                .order('escola', { ascending: true });
+
+            if (error || !data || data.length === 0) {
+                // Caso a tabela ainda não esteja populada no banco, exibe mensagem informativa
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+                return;
+            }
+
+            dadosAlura = data;
+            renderizarTabela(dadosAlura);
+            atualizarResumo(dadosAlura);
+        } catch (err) {
+            console.error('Erro ao carregar dados:', err);
+            tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderizarTabela(lista) {
+        const tbody = document.getElementById('lista-resultados');
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhuma escola encontrada.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = lista.map(item => `
+            <tr>
+                <td><strong>${item.escola || '-'}</strong></td>
+                <td class="text-right">${item.matriculas_ativas ?? 0}</td>
+                <td class="text-right">${item.acessos_periodo ?? 0}</td>
+                <td class="text-right"><span class="badge-pct">${item.pct_acessos ? item.pct_acessos + '%' : '-'}</span></td>
+                <td class="text-right">${item.cursos_concluidos ?? 0}</td>
+                <td class="text-right">${item.projetos_enviados ?? 0}</td>
+                <td class="text-right">${item.exercicios_realizados ?? 0}</td>
+            </tr>
+        `).join('');
+    }
+
+    function atualizarResumo(lista) {
+        const totMatriculas = lista.reduce((acc, curr) => acc + (curr.matriculas_ativas || 0), 0);
+        const totAcessos = lista.reduce((acc, curr) => acc + (curr.acessos_periodo || 0), 0);
+        const totCursos = lista.reduce((acc, curr) => acc + (curr.cursos_concluidos || 0), 0);
+        const totProjetos = lista.reduce((acc, curr) => acc + (curr.projetos_enviados || 0), 0);
+        const totExercicios = lista.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0);
+
+        document.getElementById('tot-matriculas').textContent = totMatriculas.toLocaleString('pt-BR');
+        document.getElementById('tot-acessos').textContent = totAcessos.toLocaleString('pt-BR');
+        document.getElementById('tot-cursos').textContent = totCursos.toLocaleString('pt-BR');
+        document.getElementById('tot-projetos').textContent = totProjetos.toLocaleString('pt-BR');
+        document.getElementById('tot-exercicios').textContent = totExercicios.toLocaleString('pt-BR');
+    }
+
+    window.filtrarResultados = function() {
+        const termo = document.getElementById('filtro-busca').value.toLowerCase();
+        const filtrados = dadosAlura.filter(item => item.escola && item.escola.toLowerCase().includes(termo));
+        renderizarTabela(filtrados);
+    };
+</script>
+</body>
+</html>
