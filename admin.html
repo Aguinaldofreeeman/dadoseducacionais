@@ -67,6 +67,39 @@
         <button id="btn-sair" class="btn-logout">Sair</button>
     </header>
     <main>
+
+
+
+
+        <!-- Card de Importação de Dados -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Oficial - Alura</h3>
+            </div>
+            <div class="form-group">
+                <label for="import-ano">Ano Letivo Referente à Planilha</label>
+                <select id="import-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Selecione o ano correspondente para que o sistema não misture os históricos.</span>
+            </div>
+            <div class="form-group">
+                <label for="import-file">Arquivo Excel da Alura (.xlsx)</label>
+                <input type="file" id="import-file" accept=".xlsx, .xls">
+            </div>
+            
+            <div id="import-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;">
+                <!-- Área de pré-visualização aparecerá aqui -->
+            </div>
+
+            <div class="actions">
+                <button type="button" id="btn-ler-planilha" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="btn-confirmar-importacao" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
