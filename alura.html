@@ -78,8 +78,14 @@
             
             <div class="filters">
                 <div class="filter-group">
+                    <label for="filtro-ano">Ano Letivo</label>
+                    <select id="filtro-ano" onchange="aplicarFiltros()">
+                        <option value="">Todos os anos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label for="filtro-busca">Buscar Escola</label>
-                    <input type="text" id="filtro-busca" placeholder="Digite o nome da escola..." oninput="filtrarResultados()">
+                    <input type="text" id="filtro-busca" placeholder="Digite o nome da escola..." oninput="aplicarFiltros()">
                 </div>
             </div>
 
@@ -143,8 +149,8 @@
             }
 
             dadosAlura = data;
-            renderizarTabela(dadosAlura);
-            atualizarResumo(dadosAlura);
+            popularFiltroAnos();
+            aplicarFiltros();
         } catch (err) {
             console.error('Erro ao carregar dados:', err);
             tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
@@ -192,11 +198,14 @@
     }
 
     function atualizarResumo(lista) {
-        const totMatriculas = lista.reduce((acc, curr) => acc + (curr.matriculas_ativas || 0), 0);
-        const totAcessos = lista.reduce((acc, curr) => acc + (curr.alunos_com_acessos_no_periodo || 0), 0);
-        const totCursos = lista.reduce((acc, curr) => acc + (curr.cursos_concluidos || 0), 0);
-        const totProjetos = lista.reduce((acc, curr) => acc + (curr.projetos_enviados || 0), 0);
-        const totExercicios = lista.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0);
+        // A linha "Total" ja e o subtotal da planilha: nao pode ser somada junto das escolas
+        const escolas = lista.filter(item => !item.escola || item.escola.trim().toLowerCase() !== 'total');
+
+        const totMatriculas = escolas.reduce((acc, curr) => acc + (curr.matriculas_ativas || 0), 0);
+        const totAcessos = escolas.reduce((acc, curr) => acc + (curr.alunos_com_acessos_no_periodo || 0), 0);
+        const totCursos = escolas.reduce((acc, curr) => acc + (curr.cursos_concluidos || 0), 0);
+        const totProjetos = escolas.reduce((acc, curr) => acc + (curr.projetos_enviados || 0), 0);
+        const totExercicios = escolas.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0);
 
         document.getElementById('tot-matriculas').textContent = totMatriculas.toLocaleString('pt-BR');
         document.getElementById('tot-acessos').textContent = totAcessos.toLocaleString('pt-BR');
@@ -205,10 +214,44 @@
         document.getElementById('tot-exercicios').textContent = totExercicios.toLocaleString('pt-BR');
     }
 
-    window.filtrarResultados = function() {
-        const termo = document.getElementById('filtro-busca').value.toLowerCase();
-        const filtrados = dadosAlura.filter(item => item.escola && item.escola.toLowerCase().includes(termo));
+    // Preenche o seletor de anos com os anos disponiveis no banco
+    function popularFiltroAnos() {
+        const selectAno = document.getElementById('filtro-ano');
+        const anoSelecionado = selectAno.value;
+
+        const anos = [...new Set(dadosAlura.map(item => item.ano).filter(ano => ano !== null && ano !== undefined))]
+            .sort((a, b) => b - a);
+
+        selectAno.innerHTML = '<option value="">Todos os anos</option>';
+        anos.forEach(ano => {
+            const option = document.createElement('option');
+            option.value = ano;
+            option.textContent = ano;
+            selectAno.appendChild(option);
+        });
+
+        if (anoSelecionado && anos.includes(parseInt(anoSelecionado))) {
+            selectAno.value = anoSelecionado;
+        }
+    }
+
+    // Aplica os filtros de ano e de busca, e atualiza tabela e indicadores
+    window.aplicarFiltros = function() {
+        const anoSelecionado = document.getElementById('filtro-ano').value;
+        const termo = document.getElementById('filtro-busca').value.trim().toLowerCase();
+
+        const filtrados = dadosAlura.filter(item => {
+            const anoValido = !anoSelecionado || String(item.ano) === anoSelecionado;
+            const nomeValido = !termo || (item.escola && item.escola.toLowerCase().includes(termo));
+            return anoValido && nomeValido;
+        });
+
         renderizarTabela(filtrados);
+        atualizarResumo(filtrados);
+    };
+
+    window.filtrarResultados = function() {
+        aplicarFiltros();
     };
 </script>
 </body>
