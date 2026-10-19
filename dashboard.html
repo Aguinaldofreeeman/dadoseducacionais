@@ -161,6 +161,7 @@
                         <tr>
                             <th class="num">#</th>
                             <th>Escola</th>
+                            <th>Edição</th>
                             <th class="num">Alunos</th>
                             <th class="num">Participação</th>
                             <th class="num">Acertos</th>
@@ -173,7 +174,7 @@
                             <th>Situação</th>
                         </tr>
                     </thead>
-                    <tbody><tr><td colspan="12">Carregando...</td></tr></tbody>
+                    <tbody><tr><td colspan="13">Carregando...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -265,14 +266,31 @@
         return isNaN(n) ? null : n;
     }
 
+    // Normaliza taxas: a base tem dois formatos (0.9836 e "99,2%") conforme a edição
+    function taxa(v) {
+        if (v === null || v === undefined || v === '') return null;
+        let texto = String(v).trim();
+        if (texto === '-') return null;
+
+        const temPercentual = texto.includes('%');
+        texto = texto.replace(/%/g, '').replace(/\s/g, '').replace(',', '.');
+
+        const n = parseFloat(texto);
+        if (isNaN(n)) return null;
+
+        if (temPercentual) return n / 100;
+        return n > 1 ? n / 100 : n;
+    }
+
     function pct(v, casas = 1) {
-        const n = num(v);
+        const n = taxa(v);
         if (n === null) return '-';
         return (n * 100).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }) + '%';
     }
 
+    // Média de uma taxa (0-1) em porcentagem
     function media(lista, campo) {
-        const valores = lista.map(r => num(r[campo])).filter(v => v !== null);
+        const valores = lista.map(r => taxa(r[campo])).filter(v => v !== null);
         if (!valores.length) return null;
         return valores.reduce((a, b) => a + b, 0) / valores.length;
     }
@@ -385,7 +403,19 @@
 
     // ---------- indicadores ----------
     function renderKpis(escolas) {
-        const alunos = escolas.reduce((a, r) => a + (num(r.total_alunos) || 0), 0);
+        // Escopo da seleção: edições distinctas e escolas distintas
+        const edicoes = [...new Set(escolas.map(r => r.edicao_planilha).filter(Boolean))];
+        const escolasDistintas = [...new Set(escolas.map(r => String(r.escola || '').trim().toLowerCase()))].length;
+
+        // Alunos: com várias edições selecionadas, mostra a média por edição (evita somar em duplicidade)
+        const alunosPorEdicao = {};
+        escolas.forEach(r => {
+            const k = r.edicao_planilha || 'geral';
+            alunosPorEdicao[k] = (alunosPorEdicao[k] || 0) + (num(r.total_alunos) || 0);
+        });
+        const totais = Object.values(alunosPorEdicao);
+        const alunos = totais.length ? totais.reduce((a, b) => a + b, 0) / totais.length : 0;
+
         const part = media(escolas, 'participacao');
         const acert = media(escolas, 'acertos_prova');
 
@@ -397,11 +427,17 @@
         const maisForte = medias[0];
         const maisFraca = medias[medias.length - 1];
 
-        const participantes = escolas.filter(r => (num(r.participacao) || 0) >= 0.8).length;
+        const participantes = [...new Set(escolas
+            .filter(r => (taxa(r.participacao) || 0) >= 0.8)
+            .map(r => String(r.escola || '').trim().toLowerCase()))].length;
+
+        const escopo = edicoes.length === 1
+            ? 'edição ' + rotuloEdicao(edicoes[0])
+            : edicoes.length + ' edições selecionadas';
 
         const cards = [
-            { classe: '', rotulo: 'Escolas avaliadas', valor: escolas.length.toLocaleString('pt-BR'), detalhe: participantes + ' com participação acima de 80%' },
-            { classe: 'blue', rotulo: 'Alunos na prova', valor: alunos.toLocaleString('pt-BR'), detalhe: 'soma de Total Alunos' },
+            { classe: '', rotulo: 'Escolas avaliadas', valor: escolasDistintas.toLocaleString('pt-BR'), detalhe: participantes + ' com participação acima de 80%' },
+            { classe: 'blue', rotulo: 'Alunos na prova', valor: Math.round(alunos).toLocaleString('pt-BR'), detalhe: edicoes.length > 1 ? 'média por edição (' + escopo + ')' : escopo },
             { classe: 'teal', rotulo: 'Participação média', valor: pct(part), detalhe: 'percentual de alunos que realizaram a prova' },
             { classe: 'amber', rotulo: 'Acerto médio', valor: pct(acert), detalhe: 'percentual de acertos na prova' },
             { classe: 'rose', rotulo: 'Disciplina mais forte', valor: maisForte ? pct(maisForte.media) : '-', detalhe: maisForte ? maisForte.titulo : '-' },
@@ -423,8 +459,8 @@
 
     function graficoRanking(escolas) {
         const dados = [...escolas]
-            .filter(r => num(r.acertos_prova) !== null)
-            .sort((a, b) => num(b.acertos_prova) - num(a.acertos_prova))
+            .filter(r => taxa(r.acertos_prova) !== null)
+            .sort((a, b) => taxa(b.acertos_prova) - taxa(a.acertos_prova))
             .slice(0, 10);
 
         criarGrafico('chart-ranking', {
@@ -433,9 +469,9 @@
                 labels: dados.map(d => d.escola),
                 datasets: [{
                     label: '% de acertos',
-                    data: dados.map(d => num(d.acertos_prova) * 100),
+                    data: dados.map(d => taxa(d.acertos_prova) * 100),
                     backgroundColor: dados.map(d => {
-                        const p = num(d.participacao) || 0;
+                        const p = taxa(d.participacao) || 0;
                         return p >= 0.8 ? '#0d9488' : '#d97706';
                     }),
                     borderRadius: 4
@@ -466,10 +502,10 @@
 
     function graficoDispersao(escolas) {
         const pontos = escolas
-            .filter(r => num(r.participacao) !== null && num(r.acertos_prova) !== null)
+            .filter(r => taxa(r.participacao) !== null && taxa(r.acertos_prova) !== null)
             .map(r => ({
-                x: num(r.participacao) * 100,
-                y: num(r.acertos_prova) * 100,
+                x: taxa(r.participacao) * 100,
+                y: taxa(r.acertos_prova) * 100,
                 escola: r.escola
             }));
 
@@ -603,8 +639,8 @@
 
     function graficoAlura() {
         const dados = [...dadosAlura]
-            .filter(r => !ehTotal(r.escola) && num(r.indice_de_acessos_no_periodo) !== null)
-            .sort((a, b) => num(b.indice_de_acessos_no_periodo) - num(a.indice_de_acessos_no_periodo))
+            .filter(r => !ehTotal(r.escola) && taxa(r.indice_de_acessos_no_periodo) !== null)
+            .sort((a, b) => taxa(b.indice_de_acessos_no_periodo) - taxa(a.indice_de_acessos_no_periodo))
             .slice(0, 10);
 
         criarGrafico('chart-alura', {
@@ -650,13 +686,13 @@
         const pontos = escolasDaSelecao()
             .filter(r => {
                 const chave = String(r.escola || '').trim().toLowerCase();
-                return mapaAlura[chave] && num(r.acertos_prova) !== null;
+                return mapaAlura[chave] && taxa(r.acertos_prova) !== null;
             })
             .map(r => {
                 const alura = mapaAlura[String(r.escola || '').trim().toLowerCase()];
                 return {
                     x: num(alura.alunos_com_acessos_no_periodo) || 0,
-                    y: num(r.acertos_prova) * 100,
+                    y: taxa(r.acertos_prova) * 100,
                     escola: r.escola
                 };
             });
@@ -703,7 +739,7 @@
 
         const ordenadas = [...escolas]
             .filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca))
-            .sort((a, b) => (num(b.acertos_prova) ?? -1) - (num(a.acertos_prova) ?? -1));
+            .sort((a, b) => (taxa(b.acertos_prova) ?? -1) - (taxa(a.acertos_prova) ?? -1));
 
         const total = escolas.length;
         const partMedia = media(escolas, 'participacao') ?? 0;
@@ -711,8 +747,8 @@
 
         const corpo = ordenadas.map((r, i) => {
             const pos = ordenadas.findIndex(x => x === r) + 1;
-            const participacao = num(r.participacao);
-            const acertos = num(r.acertos_prova);
+            const participacao = taxa(r.participacao);
+            const acertos = taxa(r.acertos_prova);
             const alura = mapaAlura[String(r.escola || '').trim().toLowerCase()];
 
             let situacao = '<span class="tag cinza">-</span>';
@@ -728,6 +764,7 @@
             return '<tr>' +
                 '<td class="num"><span class="pos ' + classe + '">' + pos + '</span></td>' +
                 '<td>' + (r.escola || '-') + '</td>' +
+                '<td style="font-size:12px;color:#64748b;">' + rotuloEdicao(r.edicao_planilha) + '</td>' +
                 '<td class="num">' + (num(r.total_alunos) !== null ? num(r.total_alunos).toLocaleString('pt-BR') : '-') + '</td>' +
                 '<td class="num">' + pct(participacao) + '</td>' +
                 '<td class="num">' + pct(acertos) + '</td>' +
@@ -744,7 +781,7 @@
         const tbody = document.querySelector('#tabela-ranking tbody');
         tbody.innerHTML = ordenadas.length
             ? corpo
-            : '<tr><td colspan="12" style="text-align:center; padding:20px; color:#64748b;">Nenhuma escola encontrada para o filtro selecionado.</td></tr>';
+            : '<tr><td colspan="13" style="text-align:center; padding:20px; color:#64748b;">Nenhuma escola encontrada para o filtro selecionado.</td></tr>';
     }
 
     // ---------- dicionário de dados ----------
