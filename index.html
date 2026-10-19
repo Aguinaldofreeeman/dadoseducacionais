@@ -165,6 +165,7 @@
 
             verificarSessao();
         } catch (err) {
+            msgEl.style.display = 'block';
             msgEl.textContent = 'Erro ao realizar login: ' + (err.message || 'Credenciais inválidas.');
             msgEl.className = 'msg error';
         } finally {

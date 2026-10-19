@@ -450,6 +450,7 @@
 
                 if (profileError) throw profileError;
 
+                msgEl.style.display = 'block';
                 msgEl.textContent = `Usuário ${nome} (${email}) cadastrado com sucesso!`;
                 msgEl.className = 'msg success';
                 document.getElementById('form-novo-usuario').reset();
@@ -459,6 +460,7 @@
             }
         } catch (err) {
             console.error('Erro no cadastro:', err);
+            msgEl.style.display = 'block';
             msgEl.textContent = `Erro ao cadastrar usuário: ${err.message || err}`;
             msgEl.className = 'msg error';
         } finally {
