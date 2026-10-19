@@ -4,11 +4,19 @@
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
+-- BLOCO 0 (opcional): guardar o número de alunos por escola
+-- A planilha oficial tem a coluna "Total Alunos". Sem esta coluna, o
+-- importador ignora esse valor. Com ela, o dado passa a ser gravado.
+-- ---------------------------------------------------------------------------
+-- alter table public.dados_educacionais
+--     add column if not exists total_alunos numeric;
+
+
+-- ---------------------------------------------------------------------------
 -- BLOCO 1 (opcional mas recomendado): visão consolidada dos resultados
 -- Uma linha por (ano, edição, escola), com a linha mais completa da escola.
 -- Evita o limite de 1000 linhas do PostgREST e deixa a página mais rápida.
--- ---------------------------------------------------------------------------
-create or replace view public.vw_resultados_consolidados
+-- ---------------------------------------------------------------------------create or replace view public.vw_resultados_consolidados
 with (security_invoker = true)
 as
 with pontuadas as (
