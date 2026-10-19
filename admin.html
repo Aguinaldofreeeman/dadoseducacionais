@@ -551,13 +551,40 @@
         btnConfirmar.textContent = 'Importando...';
 
         try {
+            const anoImportacao = parseInt(document.getElementById('import-ano').value);
+
+            // Remove os dados anteriores do mesmo ano para evitar duplicidade
+            let aviso = '';
+            if (!isNaN(anoImportacao)) {
+                const { data: existentes } = await supabaseClient
+                    .from('resultados_alura')
+                    .select('id')
+                    .eq('ano', anoImportacao);
+                const qtdExistentes = existentes ? existentes.length : 0;
+
+                const { data: removidos, error: erroDelete } = await supabaseClient
+                    .from('resultados_alura')
+                    .delete()
+                    .eq('ano', anoImportacao)
+                    .select();
+
+                if (erroDelete) {
+                    console.error('Erro ao limpar dados do ano:', erroDelete);
+                    aviso = ` Atenção: não foi possível remover os dados anteriores de ${anoImportacao} (${erroDelete.message}). Verifique as permissões da tabela.`;
+                } else if (qtdExistentes > 0 && (!removidos || removidos.length === 0)) {
+                    aviso = ` Atenção: os ${qtdExistentes} registro(s) anterior(es) de ${anoImportacao} não foram removidos (permissão de exclusão negada). Reimportar o mesmo ano pode gerar duplicatas.`;
+                } else {
+                    aviso = ` ${removidos ? removidos.length : 0} registro(s) anterior(es) de ${anoImportacao} foram substituídos.`;
+                }
+            }
+
             const { data, error } = await supabaseClient
                 .from('resultados_alura')
                 .insert(dadosPlanilhaProcessados);
 
             if (error) throw error;
 
-            previewEl.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosPlanilhaProcessados.length} registros foram gravados na tabela resultados_alura.</span>`;
+            previewEl.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosPlanilhaProcessados.length} registros foram gravados na tabela resultados_alura.${aviso}</span>`;
             document.getElementById('import-file').value = '';
             dadosPlanilhaProcessados = [];
         } catch (err) {

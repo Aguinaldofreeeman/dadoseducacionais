@@ -172,8 +172,8 @@
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
                     <td><strong>${item.escola || '-'}</strong></td>
                     <td class="text-right">${item.matriculas_ativas ?? 0}</td>
-                    <td class="text-right">${item.acessos_periodo ?? 0}</td>
-                    <td class="text-right"><span class="badge-pct">${item.pct_acessos ? item.pct_acessos + '%' : '-'}</span></td>
+                    <td class="text-right">${item.alunos_com_acessos_no_periodo ?? 0}</td>
+                    <td class="text-right"><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
                     <td class="text-right">${item.cursos_concluidos ?? 0}</td>
                     <td class="text-right">${item.projetos_enviados ?? 0}</td>
                     <td class="text-right">${item.exercicios_realizados ?? 0}</td>
@@ -182,9 +182,18 @@
         }).join('');
     }
 
+    // Converte o indice de acessos (razao entre 0 e 1) em percentual
+    function formatarPercentual(valor) {
+        if (valor === null || valor === undefined || valor === '') return '-';
+        const numero = Number(valor);
+        if (isNaN(numero)) return '-';
+        const percentual = numero <= 1 ? numero * 100 : numero;
+        return percentual.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    }
+
     function atualizarResumo(lista) {
         const totMatriculas = lista.reduce((acc, curr) => acc + (curr.matriculas_ativas || 0), 0);
-        const totAcessos = lista.reduce((acc, curr) => acc + (curr.acessos_periodo || 0), 0);
+        const totAcessos = lista.reduce((acc, curr) => acc + (curr.alunos_com_acessos_no_periodo || 0), 0);
         const totCursos = lista.reduce((acc, curr) => acc + (curr.cursos_concluidos || 0), 0);
         const totProjetos = lista.reduce((acc, curr) => acc + (curr.projetos_enviados || 0), 0);
         const totExercicios = lista.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0);
