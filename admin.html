@@ -764,7 +764,7 @@
         return numero > 1 ? numero / 100 : numero;
     }
 
-    document.getElementById('pp-ler').addEventListener('click', () => {
+    document.getElementById('pp-ler').addEventListener('click', async () => {
         const arquivoInput = document.getElementById('pp-file');
         const previewEl = document.getElementById('pp-preview');
         const btnConfirmar = document.getElementById('pp-confirmar');
@@ -792,7 +792,7 @@
         const leitor = new FileReader();
 
         // Descobre quais colunas opcionais existem no banco antes de mapear
-        ppDetectarColunasOpcionais();
+        await ppDetectarColunasOpcionais();
 
         leitor.onload = function(e) {
             try {
