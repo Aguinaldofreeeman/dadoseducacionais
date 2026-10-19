@@ -636,20 +636,20 @@
 
     // Nomes alternativos de cada coluna (após normalizar: minúsculo, sem acento, só a-z0-9)
     const PP_ALIASES = {
-        escola: ['escola', 'nome_da_escola', 'unidade_escolar', 'ue', 'codigo_escola', 'nm_ue', 'nome_ue', 'nm_unidade', 'nm_escola', 'cd_ue'],
+        escola: ['escola', 'escolas', 'nome_da_escola', 'unidade_escolar', 'ue', 'codigo_escola', 'nm_ue', 'nome_ue', 'nm_unidade', 'nm_escola', 'cd_ue'],
         participacao: ['participacao', 'percentual_de_participacao', 'participacao_alunos', 'partic'],
         acertos_prova: ['acertos_prova', 'acertos', 'percentual_de_acertos', 'acertos_da_prova', 'acerto'],
         evolucao: ['evolucao', 'evol'],
         port: ['port', 'portugues', 'lingua_portuguesa'],
         mat: ['mat', 'matematica'],
-        his: ['his', 'historia'],
+        his: ['his', 'hist', 'historia'],
         geo: ['geo', 'geografia'],
         bio: ['bio', 'biologia'],
         qui: ['qui', 'quimica'],
         ing: ['ing', 'ingles'],
         cie: ['cie', 'ciencias'],
         fis: ['fis', 'fisica'],
-        ed_fin: ['ed_fin', 'edfin', 'educacao_financeira'],
+        ed_fin: ['ed_fin', 'edfin', 'fin', 'educacao_financeira'],
         emp: ['emp', 'empreendedorismo'],
         tec_rob: ['tec_rob', 'robotica', 'tecnologia_robotica'],
         ing_it: ['ing_it', 'ingles_instrumental', 'instrumental'],
@@ -661,9 +661,14 @@
         fil_e_soc_mod: ['fil_e_soc_mod', 'filosofia_e_sociologia'],
         filo: ['filo', 'filosofia'],
         soc: ['soc', 'sociologia'],
-        bio_tec: ['bio_tec', 'biotec'],
-        quim_apl: ['quim_apl', 'quimica_aplicada']
+        bio_tec: ['bio_tec', 'biotec', 'tec'],
+        quim_apl: ['quim_apl', 'quimica_aplicada'],
+        total_alunos: ['total_alunos', 'total_de_alunos', 'alunos']
     };
+
+    // Colunas que só são usadas se existirem no banco (evita erro na gravação)
+    const PP_COLUNAS_OPCIONAIS = ['total_alunos'];
+    let ppColunasDisponiveis = PP_COLUNAS.slice();
 
     // Linhas de metadados da planilha (não são escolas)
     const PP_METADADOS = ['FILTROS APLICADOS', 'CD_DIRETORIA', 'NM_DIRETORIA'];
@@ -682,13 +687,29 @@
             .replace(/^_+|_+$/g, '');
     }
 
+    // Verifica quais colunas opcionais existem no banco (ex.: total_alunos)
+    async function ppDetectarColunasOpcionais() {
+        const { error } = await supabaseClient
+            .from('dados_educacionais')
+            .select(PP_COLUNAS_OPCIONAIS.join(','))
+            .limit(1);
+
+        ppColunasDisponiveis = error
+            ? PP_COLUNAS.filter(c => !PP_COLUNAS_OPCIONAIS.includes(c))
+            : PP_COLUNAS.slice();
+
+        return ppColunasDisponiveis;
+    }
+
     // Descobre para qual coluna do banco a coluna da planilha corresponde
     function ppDescobrirColuna(cabecalho) {
+        const colunas = ppColunasDisponiveis;
+
         // 1) Correspondência exata com o nome da coluna do banco
-        if (PP_COLUNAS.includes(cabecalho)) return cabecalho;
+        if (colunas.includes(cabecalho)) return cabecalho;
 
         // 2) Alias conhecidos
-        for (const coluna of PP_COLUNAS) {
+        for (const coluna of colunas) {
             const lista = PP_ALIASES[coluna] || [];
             if (lista.includes(cabecalho)) return coluna;
 
@@ -697,7 +718,7 @@
         }
 
         // 4) Alias aparece como palavra inteira dentro do cabeçalho (ex.: media_de_portugues)
-        for (const coluna of PP_COLUNAS) {
+        for (const coluna of colunas) {
             const lista = PP_ALIASES[coluna] || [];
             for (const alias of lista) {
                 if (alias.length < 3) continue;
@@ -712,6 +733,12 @@
     // Converte o valor da planilha (ex.: "98,4%") para o formato gravado no banco (0.984)
     function ppConverterValor(valor, coluna) {
         if (valor === null || valor === undefined) return null;
+
+        // Contagem de alunos: mantém o número inteiro
+        if (coluna === 'total_alunos') {
+            const inteiro = parseInt(String(valor).replace(/\./g, '').replace(',', '.'), 10);
+            return isNaN(inteiro) ? null : inteiro;
+        }
 
         if (typeof valor === 'number') {
             if (coluna === 'evolucao') return valor;
@@ -763,6 +790,9 @@
 
         const arquivo = arquivoInput.files[0];
         const leitor = new FileReader();
+
+        // Descobre quais colunas opcionais existem no banco antes de mapear
+        ppDetectarColunasOpcionais();
 
         leitor.onload = function(e) {
             try {
