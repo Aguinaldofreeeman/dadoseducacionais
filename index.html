@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Dados Educacionais - Prova Paulista</title>
+    <title>Plataforma de Dados Educacionais</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
         header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
@@ -11,12 +11,15 @@
         .header-actions { display: flex; align-items: center; gap: 12px; }
         .btn-admin-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: none; }
         .btn-admin-nav:hover { background-color: #0f766e; }
-        .btn-alura-nav { background-color: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: none; }
-        .btn-alura-nav:hover { background-color: #0369a1; }
         .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        main { padding: 40px 20px; max-width: 600px; margin: 0 auto; }
+        
+        main { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
         .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; }
+        .card h2 { margin-top: 0; color: #17365d; font-size: 22px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .user-welcome { font-size: 16px; color: #334155; margin-bottom: 25px; }
+
+        /* Formulário de Login */
+        .login-container { max-width: 450px; margin: 0 auto; }
         .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 13px; font-weight: bold; color: #475569; }
         .form-group input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
@@ -25,17 +28,22 @@
         .btn-submit:hover { background-color: #0f2744; }
         .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; }
         .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
-        .user-welcome { font-size: 16px; color: #334155; margin-bottom: 20px; }
-        .nav-link-card { display: inline-block; margin-top: 15px; background-color: #0284c7; color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .nav-link-card:hover { background-color: #0369a1; }
+
+        /* Grade de Módulos / Indicadores */
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .module-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+        .module-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .module-card h3 { margin: 0 0 10px 0; color: #17365d; font-size: 18px; }
+        .module-card p { margin: 0 0 18px 0; font-size: 13px; color: #64748b; line-height: 1.5; }
+        .btn-module { display: inline-block; text-align: center; background-color: #0284c7; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
+        .btn-module:hover { background-color: #0369a1; }
+        .badge-disabled { display: inline-block; text-align: center; background-color: #94a3b8; color: white; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Prova Paulista — Dados Educacionais</h1>
+        <h1>Plataforma de Dados Educacionais</h1>
         <div class="header-actions">
-            <!-- Botão de Acesso aos Resultados da Alura -->
-            <a id="btn-alura" href="alura.html" class="btn-alura-nav">Indicadores Alura</a>
             <!-- Botão da Área Administrativa (Exibido apenas para ADM) -->
             <a id="btn-area-admin" href="admin.html" class="btn-admin-nav">Área Administrativa</a>
             <button id="btn-sair" class="btn-logout" style="display: none;">Sair</button>
@@ -43,7 +51,7 @@
     </header>
     <main>
         <!-- Form de Login (para não autenticados) -->
-        <div id="card-login" class="card">
+        <div id="card-login" class="card login-container">
             <h2>Acessar o Sistema</h2>
             <form id="form-login">
                 <div class="form-group">
@@ -59,11 +67,39 @@
             </form>
         </div>
 
-        <!-- Painel de Boas-Vindas (para usuários logados) -->
+        <!-- Painel de Módulos (para usuários logados) -->
         <div id="card-painel" class="card" style="display: none;">
             <div id="boas-vindas" class="user-welcome"></div>
-            <p>Selecione uma opção de consulta no menu para visualizar os relatórios e indicadores educacionais:</p>
-            <a href="alura.html" class="nav-link-card">Acessar Indicadores Alura &rarr;</a>
+            <h2>Painel de Indicadores</h2>
+            
+            <div class="modules-grid">
+                <!-- Módulo 1: Prova Paulista -->
+                <div class="module-card">
+                    <div>
+                        <h3>Prova Paulista</h3>
+                        <p>Acompanhamento de desempenho, proficiências e participação por unidade escolar e turma.</p>
+                    </div>
+                    <a href="provapaulista.html" class="btn-module">Acessar Prova Paulista &rarr;</a>
+                </div>
+
+                <!-- Módulo 2: Alura -->
+                <div class="module-card">
+                    <div>
+                        <h3>Plataforma Alura</h3>
+                        <p>Indicadores de engajamento, matrículas ativas, acessos e cursos concluídos.</p>
+                    </div>
+                    <a href="alura.html" class="btn-module">Acessar Alura &rarr;</a>
+                </div>
+
+                <!-- Módulo 3: SARESP -->
+                <div class="module-card">
+                    <div>
+                        <h3>SARESP</h3>
+                        <p>Resultados históricos e consolidados do Sistema de Avaliação do Rendimento Escolar.</p>
+                    </div>
+                    <span class="badge-disabled">Em breve</span>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -75,7 +111,6 @@
 
     const cardLogin = document.getElementById('card-login');
     const cardPainel = document.getElementById('card-painel');
-    const btnAlura = document.getElementById('btn-alura');
     const btnAreaAdmin = document.getElementById('btn-area-admin');
     const btnSair = document.getElementById('btn-sair');
     const boasVindasEl = document.getElementById('boas-vindas');
@@ -85,43 +120,36 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
 
         if (session) {
-            // Consulta as permissões do usuário logado na tabela perfis_usuarios
             const { data: perfil } = await supabaseClient
                 .from('perfis_usuarios')
                 .select('nome, funcao, escopo, ativo')
                 .eq('id', session.user.id)
                 .single();
 
-            // Exibe telas padrão de usuário autenticado
             cardLogin.style.display = 'none';
             cardPainel.style.display = 'block';
             btnSair.style.display = 'inline-block';
-            btnAlura.style.display = 'inline-block';
 
             const nomeUsuario = (perfil && perfil.nome) ? perfil.nome : session.user.email;
             const funcaoUsuario = (perfil && perfil.funcao) ? ` (${perfil.funcao})` : '';
-            boasVindasEl.textContent = `Olá, ${nomeUsuario}${funcaoUsuario}!`;
+            boasVindasEl.textContent = `Olá, ${nomeUsuario}${funcaoUsuario}! Selecione um dos módulos abaixo para visualizar os relatórios:`;
 
-            // Oculta totalmente o botão da Área Administrativa para USER
-            // Exibe APENAS se for administrador ativo (ADM ou ADMIN)
             if (perfil && perfil.ativo && (perfil.escopo === 'ADM' || perfil.escopo === 'ADMIN')) {
                 btnAreaAdmin.style.display = 'inline-block';
             } else {
                 btnAreaAdmin.style.display = 'none';
             }
         } else {
-            // Caso não esteja logado, oculta os botões e exibe o formulário de login
             cardLogin.style.display = 'block';
             cardPainel.style.display = 'none';
             btnSair.style.display = 'none';
-            btnAlura.style.display = 'none';
             btnAreaAdmin.style.display = 'none';
         }
     }
 
     verificarSessao();
 
-    // Login de Usuário
+    // Login
     document.getElementById('form-login').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value.trim();
