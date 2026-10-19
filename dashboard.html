@@ -112,7 +112,7 @@
             </div>
         </div>
 
-        <div id="msg-erro" class="msg error"></div>
+        <div id="msg-erro" class="msg"></div>
 
         <!-- Indicadores -->
         <div class="kpi-grid" id="kpi-grid">
@@ -344,6 +344,8 @@
         ]);
 
         if (pp.error) {
+            const msgErro = document.getElementById('msg-erro');
+            msgErro.className = 'msg error';
             msgErro.textContent = 'Erro ao carregar os resultados: ' + pp.error.message;
             return;
         }
@@ -401,20 +403,47 @@
         return dadosFiltrados().filter(d => !ehTotal(d.escola));
     }
 
+    // Quando mais de uma edição está selecionada, consolida por escola (média entre edições)
+    function escolasAgregadas() {
+        const linhas = escolasDaSelecao();
+        const mapa = {};
+
+        linhas.forEach(r => {
+            const chave = String(r.escola || '').trim().toLowerCase();
+            if (!mapa[chave]) mapa[chave] = { escola: r.escola, registros: [] };
+            mapa[chave].registros.push(r);
+        });
+
+        return Object.values(mapa).map(grupo => {
+            const base = {
+                escola: grupo.escola,
+                qtdEdicoes: grupo.registros.length,
+                edicao_planilha: grupo.registros.length > 1
+                    ? grupo.registros.length + ' edições'
+                    : grupo.registros[0].edicao_planilha
+            };
+
+            ['participacao', 'acertos_prova', 'port', 'mat', 'his', 'geo', 'cie'].forEach(c => {
+                base[c] = media(grupo.registros, c);
+            });
+
+            const alunos = grupo.registros.map(r => num(r.total_alunos)).filter(v => v !== null);
+            base.total_alunos = alunos.length
+                ? Math.round(alunos.reduce((a, b) => a + b, 0) / alunos.length)
+                : null;
+
+            return base;
+        });
+    }
+
     // ---------- indicadores ----------
     function renderKpis(escolas) {
-        // Escopo da seleção: edições distinctas e escolas distintas
-        const edicoes = [...new Set(escolas.map(r => r.edicao_planilha).filter(Boolean))];
-        const escolasDistintas = [...new Set(escolas.map(r => String(r.escola || '').trim().toLowerCase()))].length;
+        // Escolas já consolidadas (1 linha por escola na seleção)
+        const edicoes = [...new Set(dadosFiltrados().map(r => r.edicao_planilha).filter(Boolean))];
+        const escolasDistintas = escolas.length;
 
-        // Alunos: com várias edições selecionadas, mostra a média por edição (evita somar em duplicidade)
-        const alunosPorEdicao = {};
-        escolas.forEach(r => {
-            const k = r.edicao_planilha || 'geral';
-            alunosPorEdicao[k] = (alunosPorEdicao[k] || 0) + (num(r.total_alunos) || 0);
-        });
-        const totais = Object.values(alunosPorEdicao);
-        const alunos = totais.length ? totais.reduce((a, b) => a + b, 0) / totais.length : 0;
+        // Alunos: uma vez por escola (já consolidado entre edições)
+        const alunos = escolas.reduce((a, r) => a + (num(r.total_alunos) || 0), 0);
 
         const part = media(escolas, 'participacao');
         const acert = media(escolas, 'acertos_prova');
@@ -427,17 +456,15 @@
         const maisForte = medias[0];
         const maisFraca = medias[medias.length - 1];
 
-        const participantes = [...new Set(escolas
-            .filter(r => (taxa(r.participacao) || 0) >= 0.8)
-            .map(r => String(r.escola || '').trim().toLowerCase()))].length;
+        const participantes = escolas.filter(r => (taxa(r.participacao) || 0) >= 0.8).length;
 
         const escopo = edicoes.length === 1
             ? 'edição ' + rotuloEdicao(edicoes[0])
-            : edicoes.length + ' edições selecionadas';
+            : edicoes.length + ' edições consolidadas';
 
         const cards = [
             { classe: '', rotulo: 'Escolas avaliadas', valor: escolasDistintas.toLocaleString('pt-BR'), detalhe: participantes + ' com participação acima de 80%' },
-            { classe: 'blue', rotulo: 'Alunos na prova', valor: Math.round(alunos).toLocaleString('pt-BR'), detalhe: edicoes.length > 1 ? 'média por edição (' + escopo + ')' : escopo },
+            { classe: 'blue', rotulo: 'Alunos na prova', valor: alunos.toLocaleString('pt-BR'), detalhe: escopo },
             { classe: 'teal', rotulo: 'Participação média', valor: pct(part), detalhe: 'percentual de alunos que realizaram a prova' },
             { classe: 'amber', rotulo: 'Acerto médio', valor: pct(acert), detalhe: 'percentual de acertos na prova' },
             { classe: 'rose', rotulo: 'Disciplina mais forte', valor: maisForte ? pct(maisForte.media) : '-', detalhe: maisForte ? maisForte.titulo : '-' },
@@ -675,7 +702,7 @@
         });
     }
 
-    function graficoCruze() {
+    function graficoCruze(escolas) {
         const mapaAlura = {};
         dadosAlura.forEach(r => {
             if (ehTotal(r.escola)) return;
@@ -683,7 +710,7 @@
             if (!mapaAlura[chave]) mapaAlura[chave] = r;
         });
 
-        const pontos = escolasDaSelecao()
+        const pontos = (escolas || escolasAgregadas())
             .filter(r => {
                 const chave = String(r.escola || '').trim().toLowerCase();
                 return mapaAlura[chave] && taxa(r.acertos_prova) !== null;
@@ -745,8 +772,8 @@
         const partMedia = media(escolas, 'participacao') ?? 0;
         const acertMedia = media(escolas, 'acertos_prova') ?? 0;
 
-        const corpo = ordenadas.map((r, i) => {
-            const pos = ordenadas.findIndex(x => x === r) + 1;
+        const corpo = ordenadas.map((r) => {
+            const pos = ordenadas.findIndex(x => x.escola === r.escola) + 1;
             const participacao = taxa(r.participacao);
             const acertos = taxa(r.acertos_prova);
             const alura = mapaAlura[String(r.escola || '').trim().toLowerCase()];
@@ -764,7 +791,7 @@
             return '<tr>' +
                 '<td class="num"><span class="pos ' + classe + '">' + pos + '</span></td>' +
                 '<td>' + (r.escola || '-') + '</td>' +
-                '<td style="font-size:12px;color:#64748b;">' + rotuloEdicao(r.edicao_planilha) + '</td>' +
+                '<td style="font-size:12px;color:#64748b;">' + (r.qtdEdicoes > 1 ? r.edicao_planilha : rotuloEdicao(r.edicao_planilha)) + '</td>' +
                 '<td class="num">' + (num(r.total_alunos) !== null ? num(r.total_alunos).toLocaleString('pt-BR') : '-') + '</td>' +
                 '<td class="num">' + pct(participacao) + '</td>' +
                 '<td class="num">' + pct(acertos) + '</td>' +
@@ -863,7 +890,7 @@
 
     // ---------- orquestração ----------
     function aplicarFiltros() {
-        const escolas = escolasDaSelecao();
+        const escolas = escolasAgregadas();
         renderKpis(escolas);
         renderTabela(escolas);
         graficoRanking(escolas);
@@ -871,7 +898,7 @@
         graficoDisciplinas(escolas);
         graficoEvolucao();
         graficoAlura();
-        graficoCruze();
+        graficoCruze(escolas);
     }
 
     (async () => {
