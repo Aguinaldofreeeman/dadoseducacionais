@@ -468,6 +468,107 @@
             btnSalvar.textContent = 'Salvar';
         }
     });
+// Lógica para leitura e pré-visualização da planilha da Alura
+    let dadosPlanilhaProcessados = [];
+
+    document.getElementById('btn-ler-planilha').addEventListener('click', () => {
+        const anoSelect = document.getElementById('import-ano').value;
+        const fileInput = document.getElementById('import-file');
+        const previewEl = document.getElementById('import-preview');
+        const btnConfirmar = document.getElementById('btn-confirmar-importacao');
+
+        previewEl.style.display = 'none';
+        btnConfirmar.disabled = true;
+        dadosPlanilhaProcessados = [];
+
+        if (!anoSelect) {
+            alert('Por favor, selecione o ano referente à planilha antes de prosseguir.');
+            return;
+        }
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('Por favor, selecione um arquivo Excel (.xlsx).');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+                if (jsonRows.length === 0) {
+                    throw new Error('A planilha selecionada está vazia.');
+                }
+
+                // Normaliza os cabeçalhos para o padrão da tabela no Supabase
+                dadosPlanilhaProcessados = jsonRows.map(row => {
+                    let item = { ano: parseInt(anoSelect) };
+                    
+                    Object.keys(row).forEach(key => {
+                        const colClean = key.trim().toLowerCase()
+                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[^a-z0-9]/g, "_")
+                            .replace(/_+/g, "_");
+
+                        // Mapeia o nome da escola
+                        if (colClean === 'escola' || colClean === 'nome_da_escola') {
+                            item.escola = row[key];
+                        } else {
+                            item[colClean] = row[key];
+                        }
+                    });
+                    return item;
+                });
+
+                previewEl.innerHTML = `<strong>Sucesso:</strong> Leitura concluída. <strong>${dadosPlanilhaProcessados.length}</strong> registros encontrados na aba "${firstSheetName}" para o ano <strong>${anoSelect}</strong>.`;
+                previewEl.style.display = 'block';
+                btnConfirmar.disabled = false;
+
+            } catch (err) {
+                console.error('Erro na leitura:', err);
+                previewEl.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`;
+                previewEl.style.display = 'block';
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+
+    // Envio dos dados para o Supabase
+    document.getElementById('btn-confirmar-importacao').addEventListener('click', async () => {
+        const previewEl = document.getElementById('import-preview');
+        const btnConfirmar = document.getElementById('btn-confirmar-importacao');
+
+        if (dadosPlanilhaProcessados.length === 0) return;
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Importando...';
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('resultados_alura')
+                .insert(dadosPlanilhaProcessados);
+
+            if (error) throw error;
+
+            previewEl.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosPlanilhaProcessados.length} registros foram gravados na tabela resultados_alura.</span>`;
+            document.getElementById('import-file').value = '';
+            dadosPlanilhaProcessados = [];
+        } catch (err) {
+            console.error('Erro no salvamento:', err);
+            previewEl.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}</span>`;
+            btnConfirmar.disabled = false;
+        } finally {
+            btnConfirmar.textContent = '2. Confirmar Importação';
+        }
+    });
+    
 </script>
 </body>
 </html>
