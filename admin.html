@@ -204,14 +204,28 @@
 
     let usuariosLocais = [];
 
-    // Proteção de rota não autenticada
+    // Proteção de rota: exige sessão ativa e perfil de Administrador (ADM)
     async function verificarSessao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.href = 'index.html';
-        } else {
-            carregarUsuarios();
+            return;
         }
+
+        const { data: perfil, error } = await supabaseClient
+            .from('perfis_usuarios')
+            .select('escopo, ativo')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error || !perfil || !perfil.ativo || (perfil.escopo !== 'ADM' && perfil.escopo !== 'ADMIN')) {
+            alert('Acesso negado: esta área é restrita a administradores ativos.');
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+            return;
+        }
+
+        carregarUsuarios();
     }
     verificarSessao();
 
@@ -282,7 +296,7 @@
         document.getElementById('modal-editar').classList.remove('active');
     };
 
-    // Salvar Alterações da Edição (Perfil e Redefinição de Senha)
+    // Salvar Alterações da Edição
     document.getElementById('form-editar-usuario').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('edit-id').value;
@@ -300,7 +314,6 @@
         btnSalvar.textContent = 'Salvando...';
 
         try {
-            // Atualizar perfil estendido na tabela perfis_usuarios
             const { error: profileError } = await supabaseClient
                 .from('perfis_usuarios')
                 .update({
@@ -313,7 +326,6 @@
 
             if (profileError) throw profileError;
 
-            // Se uma nova senha for preenchida
             if (novaSenha !== '') {
                 if (novaSenha.length < 6) {
                     throw new Error('A nova senha deve possuir pelo menos 6 caracteres.');
