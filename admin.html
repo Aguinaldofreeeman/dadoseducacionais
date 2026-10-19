@@ -90,11 +90,11 @@
                     <label for="usr-funcao">Função</label>
                     <select id="usr-funcao">
                         <option value="">Sem função definida</option>
+                        <option value="Dirigente">Dirigente</option>
                         <option value="PEC">PEC</option>
-                        <option value="Coordenador">Coordenador</option>
-                        <option value="Diretor">Diretor</option>
+                        <option value="CEC">CEC</option>
+                        <option value="Supervisor">Supervisor</option>
                         <option value="Professor">Professor</option>
-                        <option value="Analista">Analista Educacional</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -167,11 +167,11 @@
                     <label for="edit-funcao">Função</label>
                     <select id="edit-funcao">
                         <option value="">Sem função definida</option>
+                        <option value="Dirigente">Dirigente</option>
                         <option value="PEC">PEC</option>
-                        <option value="Coordenador">Coordenador</option>
-                        <option value="Diretor">Diretor</option>
+                        <option value="CEC">CEC</option>
+                        <option value="Supervisor">Supervisor</option>
                         <option value="Professor">Professor</option>
-                        <option value="Analista">Analista Educacional</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -319,7 +319,6 @@
                     throw new Error('A nova senha deve possuir pelo menos 6 caracteres.');
                 }
 
-                // Envia solicitação de redefinição de senha para o e-mail do usuário
                 const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email);
                 if (resetError) throw resetError;
             }
