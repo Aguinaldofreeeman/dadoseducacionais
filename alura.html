@@ -155,7 +155,7 @@
     function renderizarTabela(lista) {
         const tbody = document.getElementById('lista-resultados');
         if (lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
             return;
         }
 
@@ -170,27 +170,16 @@
             const ehTotal = item.escola && item.escola.trim().toLowerCase() === 'total';
             return `
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
-                    <td>${item.ano}</td>
                     <td><strong>${item.escola || '-'}</strong></td>
-                    <td class="text-right">${item.matriculas_ativas ?? '-'}</td>
-                    <td class="text-right">${item.alunos_com_acessos_no_periodo ?? '-'}</td>
-                    <td class="text-right">${item.indice_de_acessos_no_periodo ? item.indice_de_acessos_no_periodo + '%' : '-'}</td>
+                    <td class="text-right">${item.matriculas_ativas ?? 0}</td>
+                    <td class="text-right">${item.acessos_periodo ?? 0}</td>
+                    <td class="text-right"><span class="badge-pct">${item.pct_acessos ? item.pct_acessos + '%' : '-'}</span></td>
+                    <td class="text-right">${item.cursos_concluidos ?? 0}</td>
+                    <td class="text-right">${item.projetos_enviados ?? 0}</td>
+                    <td class="text-right">${item.exercicios_realizados ?? 0}</td>
                 </tr>
             `;
         }).join('');
-    }
-
-        tbody.innerHTML = lista.map(item => `
-            <tr>
-                <td><strong>${item.escola || '-'}</strong></td>
-                <td class="text-right">${item.matriculas_ativas ?? 0}</td>
-                <td class="text-right">${item.acessos_periodo ?? 0}</td>
-                <td class="text-right"><span class="badge-pct">${item.pct_acessos ? item.pct_acessos + '%' : '-'}</span></td>
-                <td class="text-right">${item.cursos_concluidos ?? 0}</td>
-                <td class="text-right">${item.projetos_enviados ?? 0}</td>
-                <td class="text-right">${item.exercicios_realizados ?? 0}</td>
-            </tr>
-        `).join('');
     }
 
     function atualizarResumo(lista) {
