@@ -187,8 +187,8 @@
         const thead = document.getElementById('cabecalho-tabela');
         const tbody = document.getElementById('tabela-resultados');
 
-        if (!ano || !edicao) {
-            tbody.innerHTML = '<tr><td>Selecione o ano e a edição.</td></tr>';
+        if (!edicao) {
+            tbody.innerHTML = '<tr><td>Selecione a edição da prova.</td></tr>';
             return;
         }
 
