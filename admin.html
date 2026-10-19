@@ -100,6 +100,35 @@
                 <button type="button" id="btn-confirmar-importacao" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Prova Paulista -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Oficial - Prova Paulista</h3>
+            </div>
+            <div class="form-group">
+                <label for="pp-ano">Ano Letivo Referente à Planilha</label>
+                <select id="pp-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">A edição da prova é identificada pelo nome do arquivo (ex.: Prova_Paulista_1º_bim_2026.xlsx). Reimportar o mesmo arquivo substitui os dados anteriores da edição.</span>
+            </div>
+            <div class="form-group">
+                <label for="pp-file">Arquivo Excel da Prova Paulista (.xlsx)</label>
+                <input type="file" id="pp-file" accept=".xlsx, .xls">
+            </div>
+
+            <div id="pp-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;">
+                <!-- Área de pré-visualização aparecerá aqui -->
+            </div>
+
+            <div class="actions">
+                <button type="button" id="pp-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="pp-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
@@ -595,7 +624,343 @@
             btnConfirmar.textContent = '2. Confirmar Importação';
         }
     });
-    
+
+    // =========================================================================
+    // Importador da Planilha Oficial da Prova Paulista
+    // =========================================================================
+    const PP_COLUNAS = [
+        'escola', 'participacao', 'acertos_prova', 'evolucao', 'port', 'mat', 'his', 'geo',
+        'bio', 'qui', 'ing', 'cie', 'fis', 'ed_fin', 'emp', 'tec_rob', 'ing_it', 'art',
+        'mid_dig', 'lide', 'oratoria', 'geo_pol', 'fil_e_soc_mod', 'filo', 'soc', 'bio_tec', 'quim_apl'
+    ];
+
+    // Nomes alternativos de cada coluna (após normalizar: minúsculo, sem acento, só a-z0-9)
+    const PP_ALIASES = {
+        escola: ['escola', 'nome_da_escola', 'unidade_escolar', 'ue', 'codigo_escola', 'nm_ue', 'nome_ue', 'nm_unidade', 'nm_escola', 'cd_ue'],
+        participacao: ['participacao', 'percentual_de_participacao', 'participacao_alunos', 'partic'],
+        acertos_prova: ['acertos_prova', 'acertos', 'percentual_de_acertos', 'acertos_da_prova', 'acerto'],
+        evolucao: ['evolucao', 'evol'],
+        port: ['port', 'portugues', 'lingua_portuguesa'],
+        mat: ['mat', 'matematica'],
+        his: ['his', 'historia'],
+        geo: ['geo', 'geografia'],
+        bio: ['bio', 'biologia'],
+        qui: ['qui', 'quimica'],
+        ing: ['ing', 'ingles'],
+        cie: ['cie', 'ciencias'],
+        fis: ['fis', 'fisica'],
+        ed_fin: ['ed_fin', 'edfin', 'educacao_financeira'],
+        emp: ['emp', 'empreendedorismo'],
+        tec_rob: ['tec_rob', 'robotica', 'tecnologia_robotica'],
+        ing_it: ['ing_it', 'ingles_instrumental', 'instrumental'],
+        art: ['art', 'artes'],
+        mid_dig: ['mid_dig', 'midia_digital', 'informatica'],
+        lide: ['lide', 'lideranca'],
+        oratoria: ['oratoria'],
+        geo_pol: ['geo_pol', 'geografia_politica'],
+        fil_e_soc_mod: ['fil_e_soc_mod', 'filosofia_e_sociologia'],
+        filo: ['filo', 'filosofia'],
+        soc: ['soc', 'sociologia'],
+        bio_tec: ['bio_tec', 'biotec'],
+        quim_apl: ['quim_apl', 'quimica_aplicada']
+    };
+
+    // Linhas de metadados da planilha (não são escolas)
+    const PP_METADADOS = ['FILTROS APLICADOS', 'CD_DIRETORIA', 'NM_DIRETORIA'];
+
+    let ppRegistros = [];
+    let ppMapeamento = {};
+    let ppNaoMapeados = [];
+    let ppEdicao = '';
+    let ppAno = '';
+
+    function ppNormalizar(texto) {
+        return String(texto || '').trim().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '');
+    }
+
+    // Descobre para qual coluna do banco a coluna da planilha corresponde
+    function ppDescobrirColuna(cabecalho) {
+        // 1) Correspondência exata com o nome da coluna do banco
+        if (PP_COLUNAS.includes(cabecalho)) return cabecalho;
+
+        // 2) Alias conhecidos
+        for (const coluna of PP_COLUNAS) {
+            const lista = PP_ALIASES[coluna] || [];
+            if (lista.includes(cabecalho)) return coluna;
+
+            // 3) Cabeçalho começa com o nome da coluna (ex.: port_2026)
+            if (coluna.length >= 3 && cabecalho.startsWith(coluna + '_')) return coluna;
+        }
+
+        // 4) Alias aparece como palavra inteira dentro do cabeçalho (ex.: media_de_portugues)
+        for (const coluna of PP_COLUNAS) {
+            const lista = PP_ALIASES[coluna] || [];
+            for (const alias of lista) {
+                if (alias.length < 3) continue;
+                const padrao = new RegExp('(^|_)' + alias + '(_|$)');
+                if (padrao.test(cabecalho)) return coluna;
+            }
+        }
+
+        return null;
+    }
+
+    // Converte o valor da planilha (ex.: "98,4%") para o formato gravado no banco (0.984)
+    function ppConverterValor(valor, coluna) {
+        if (valor === null || valor === undefined) return null;
+
+        if (typeof valor === 'number') {
+            if (coluna === 'evolucao') return valor;
+            return valor > 1 ? valor / 100 : valor;
+        }
+
+        let texto = String(valor).trim();
+        if (texto === '' || texto === '-') return null;
+
+        const temPercentual = texto.includes('%');
+        texto = texto.replace(/%/g, '').replace(/\s/g, '');
+
+        // 1.234,56 -> 1234.56
+        texto = texto.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+
+        const numero = parseFloat(texto);
+        if (isNaN(numero)) return null;
+
+        // A evolução é uma variação em pontos percentuais: mantém o valor original
+        if (coluna === 'evolucao') return numero;
+
+        if (temPercentual) return numero / 100;
+        return numero > 1 ? numero / 100 : numero;
+    }
+
+    document.getElementById('pp-ler').addEventListener('click', () => {
+        const arquivoInput = document.getElementById('pp-file');
+        const previewEl = document.getElementById('pp-preview');
+        const btnConfirmar = document.getElementById('pp-confirmar');
+        const anoSel = document.getElementById('pp-ano').value;
+
+        previewEl.style.display = 'none';
+        btnConfirmar.disabled = true;
+        ppRegistros = [];
+        ppMapeamento = {};
+        ppNaoMapeados = [];
+        ppEdicao = '';
+        ppAno = anoSel;
+
+        if (!anoSel) {
+            alert('Por favor, selecione o ano referente à planilha antes de prosseguir.');
+            return;
+        }
+
+        if (!arquivoInput.files || arquivoInput.files.length === 0) {
+            alert('Por favor, selecione um arquivo Excel (.xlsx).');
+            return;
+        }
+
+        const arquivo = arquivoInput.files[0];
+        const leitor = new FileReader();
+
+        leitor.onload = function(e) {
+            try {
+                const dados = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(dados, { type: 'array' });
+                const nomeAba = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[nomeAba];
+                const linhas = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+                if (!linhas || linhas.length === 0) {
+                    throw new Error('A planilha selecionada está vazia.');
+                }
+
+                // A edição da prova é identificada pelo nome do arquivo
+                ppEdicao = arquivo.name;
+
+                // Monta o mapeamento entre as colunas da planilha e as do banco
+                const cabecalhos = Object.keys(linhas[0]);
+                const destinosUsados = new Set();
+
+                cabecalhos.forEach(cab => {
+                    const normalizado = ppNormalizar(cab);
+                    if (!normalizado) return;
+
+                    let destino = ppDescobrirColuna(normalizado);
+                    if (destino && destinosUsados.has(destino)) destino = null;
+
+                    if (destino) {
+                        ppMapeamento[cab] = destino;
+                        destinosUsados.add(destino);
+                    } else {
+                        ppNaoMapeados.push(cab);
+                    }
+                });
+
+                const chaveEscola = Object.keys(ppMapeamento).find(k => ppMapeamento[k] === 'escola');
+                if (!chaveEscola) {
+                    throw new Error('Não foi possível identificar a coluna de escola na planilha. Verifique o cabeçalho da aba "'
+                        + nomeAba + '".');
+                }
+
+                // Converte as linhas da planilha em registros prontos para o banco
+                let ignoradas = 0;
+                ppRegistros = [];
+
+                linhas.forEach(linha => {
+                    const nomeEscola = String(linha[chaveEscola] || '').trim();
+                    if (!nomeEscola) return;
+
+                    if (PP_METADADOS.some(m => nomeEscola.toUpperCase().includes(m))) {
+                        ignoradas++;
+                        return;
+                    }
+
+                    const registro = {
+                        ano: ppAno,
+                        edicao_planilha: ppEdicao,
+                        escola: nomeEscola
+                    };
+
+                    Object.entries(ppMapeamento).forEach(([cab, destino]) => {
+                        if (destino === 'escola') return;
+                        const valor = ppConverterValor(linha[cab], destino);
+                        if (valor !== null) registro[destino] = valor;
+                    });
+
+                    ppRegistros.push(registro);
+                });
+
+                if (ppRegistros.length === 0) {
+                    throw new Error('Nenhum registro válido foi encontrado na planilha.');
+                }
+
+                // Avisa quando o nome do arquivo sugere um ano diferente do selecionado
+                const anoDoArquivo = (arquivo.name.match(/(20\d{2})/) || [])[1];
+                const avisoAno = anoDoArquivo && anoDoArquivo !== ppAno
+                    ? `<p style="color:#b45309; font-weight:bold;">Atenção: o nome do arquivo indica o ano ${anoDoArquivo}, mas o ano selecionado é ${ppAno}. Os dados serão gravados em ${ppAno}.</p>`
+                    : '';
+
+                const mapaHtml = Object.entries(ppMapeamento).map(([cab, dest]) =>
+                    `<tr><td>${cab}</td><td>${dest}</td></tr>`).join('');
+
+                const naoMapeadosHtml = ppNaoMapeados.length
+                    ? `<p style="color:#b45309; font-weight:bold;">Colunas ignoradas (sem correspondência no banco): ${ppNaoMapeados.join(', ')}</p>`
+                    : '';
+
+                previewEl.innerHTML = `
+                    ${avisoAno}
+                    <p><strong>Planilha:</strong> ${arquivo.name} &mdash; aba "${nomeAba}"</p>
+                    <p><strong>Edição:</strong> ${ppEdicao} &nbsp;|&nbsp; <strong>Ano:</strong> ${ppAno}</p>
+                    <p><strong>Registros a gravar:</strong> ${ppRegistros.length}${ignoradas ? ` (${ignoradas} linha(s) de metadados ignoradas)` : ''}</p>
+                    ${naoMapeadosHtml}
+                    <details>
+                        <summary style="cursor:pointer;">Mapeamento de colunas (${Object.keys(ppMapeamento).length})</summary>
+                        <table>
+                            <thead><tr><th>Coluna da planilha</th><th>Coluna no banco</th></tr></thead>
+                            <tbody>${mapaHtml}</tbody>
+                        </table>
+                    </details>
+                    <p style="margin-top:10px;"><strong>Amostra (3 primeiras linhas):</strong></p>
+                    <table>
+                        <thead><tr><th>Escola</th><th>Participação</th><th>Acertos</th><th>Português</th><th>Matemática</th></tr></thead>
+                        <tbody>
+                            ${ppRegistros.slice(0, 3).map(r => `<tr>
+                                <td>${r.escola}</td>
+                                <td>${r.participacao ?? '-'}</td>
+                                <td>${r.acertos_prova ?? '-'}</td>
+                                <td>${r.port ?? '-'}</td>
+                                <td>${r.mat ?? '-'}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+                previewEl.style.display = 'block';
+                btnConfirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura da planilha:', err);
+                previewEl.innerHTML = `<span style="color:#dc2626;">Erro ao ler o arquivo: ${err.message}</span>`;
+                previewEl.style.display = 'block';
+            }
+        };
+
+        leitor.onerror = function() {
+            previewEl.innerHTML = '<span style="color:#dc2626;">Não foi possível ler o arquivo.</span>';
+            previewEl.style.display = 'block';
+        };
+
+        leitor.readAsArrayBuffer(arquivo);
+    });
+
+    document.getElementById('pp-confirmar').addEventListener('click', async () => {
+        const previewEl = document.getElementById('pp-preview');
+        const btnConfirmar = document.getElementById('pp-confirmar');
+
+        if (ppRegistros.length === 0) return;
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Importando...';
+
+        try {
+            // 1) Remove os dados anteriores da mesma edição (importação idempotente)
+            let aviso = '';
+            const { data: existentes } = await supabaseClient
+                .from('dados_educacionais')
+                .select('id')
+                .eq('ano', ppAno)
+                .eq('edicao_planilha', ppEdicao);
+            const qtdExistentes = existentes ? existentes.length : 0;
+
+            const { data: removidos, error: erroDelete } = await supabaseClient
+                .from('dados_educacionais')
+                .delete()
+                .eq('ano', ppAno)
+                .eq('edicao_planilha', ppEdicao)
+                .select('id');
+
+            if (erroDelete) {
+                console.error('Erro ao limpar dados da edição:', erroDelete);
+                aviso = ` Atenção: não foi possível remover os ${qtdExistentes} registro(s) anterior(es) desta edição (${erroDelete.message}). Verifique as permissões da tabela.`;
+            } else if (qtdExistentes > 0 && (!removidos || removidos.length === 0)) {
+                aviso = ` Atenção: os ${qtdExistentes} registro(s) anterior(es) desta edição não foram removidos (permissão de exclusão negada). Reimportar a mesma edição pode gerar duplicatas.`;
+            }
+
+            // 2) Grava os novos registros em lotes
+            const TAMANHO_LOTE = 250;
+            for (let i = 0; i < ppRegistros.length; i += TAMANHO_LOTE) {
+                const lote = ppRegistros.slice(i, i + TAMANHO_LOTE);
+                const { error } = await supabaseClient.from('dados_educacionais').insert(lote);
+                if (error) throw error;
+            }
+
+            // 3) Registra a edição na lista de edições disponíveis
+            const { data: edicoes } = await supabaseClient
+                .from('edicoes_disponiveis')
+                .select('ano, edicao_planilha');
+            const jaExiste = edicoes && edicoes.some(e =>
+                String(e.ano) === String(ppAno) && e.edicao_planilha === ppEdicao);
+
+            if (!jaExiste) {
+                const { error: erroEdicao } = await supabaseClient
+                    .from('edicoes_disponiveis')
+                    .insert({ ano: ppAno, edicao_planilha: ppEdicao });
+                if (erroEdicao) throw erroEdicao;
+            }
+
+            previewEl.innerHTML = `<span style="color:green;"><strong>Importação concluída!</strong> ${ppRegistros.length} registros gravados em "${ppEdicao}" (${ppAno}).${aviso}</span>`;
+            document.getElementById('pp-file').value = '';
+            ppRegistros = [];
+            btnConfirmar.textContent = '2. Confirmar Importação';
+            btnConfirmar.disabled = true;
+        } catch (err) {
+            console.error('Erro na importação:', err);
+            previewEl.innerHTML = `<span style="color:#dc2626;">Erro ao gravar no banco: ${err.message}</span>`;
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '2. Confirmar Importação';
+        }
+    });
+
 </script>
 </body>
 </html>
