@@ -164,8 +164,12 @@
                 <div class="chart-box"><canvas id="chart-disciplinas"></canvas></div>
             </div>
             <div class="card">
-                <h3>Evolução do desempenho por edição</h3>
+                <h3>Evolução do acerto médio por edição</h3>
                 <div class="chart-box"><canvas id="chart-evolucao"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Evolução da participação média por edição</h3>
+                <div class="chart-box"><canvas id="chart-evolucao-participacao"></canvas></div>
             </div>
         </div>
 
@@ -672,37 +676,61 @@
             };
         });
 
+        const labels = medias.map(m => rotuloEdicao(m.edicao));
+
+        // Gráfico 1 — acerto médio (escala própria, foco na variação do desempenho)
         criarGrafico('chart-evolucao', {
             type: 'line',
             data: {
-                labels: medias.map(m => rotuloEdicao(m.edicao)),
-                datasets: [
-                    {
-                        label: 'Acerto médio',
-                        data: medias.map(m => m.acertos === null ? null : m.acertos * 100),
-                        borderColor: '#17365d',
-                        backgroundColor: 'rgba(23,54,93,0.12)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4
-                    },
-                    {
-                        label: 'Participação média',
-                        data: medias.map(m => m.participacao === null ? null : m.participacao * 100),
-                        borderColor: '#0d9488',
-                        backgroundColor: 'rgba(13,148,136,0.10)',
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4
-                    }
-                ]
+                labels,
+                datasets: [{
+                    label: 'Acerto médio',
+                    data: medias.map(m => m.acertos === null ? null : m.acertos * 100),
+                    borderColor: '#17365d',
+                    backgroundColor: 'rgba(23,54,93,0.12)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 4
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => 'Acerto médio: ' + ctx.parsed.y.toFixed(1) + '%' } }
+                },
                 scales: {
-                    y: { title: { display: true, text: '%' }, ticks: { callback: v => v + '%' } },
+                    y: { title: { display: true, text: 'Acerto médio (%)' }, ticks: { callback: v => v + '%' } },
+                    x: { ticks: { font: { size: 9 }, maxRotation: 45 } }
+                }
+            }
+        });
+
+        // Gráfico 2 — participação média (escala própria, foco na adesão)
+        criarGrafico('chart-evolucao-participacao', {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Participação média',
+                    data: medias.map(m => m.participacao === null ? null : m.participacao * 100),
+                    borderColor: '#0d9488',
+                    backgroundColor: 'rgba(13,148,136,0.10)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => 'Participação média: ' + ctx.parsed.y.toFixed(1) + '%' } }
+                },
+                scales: {
+                    y: { title: { display: true, text: 'Participação média (%)' }, ticks: { callback: v => v + '%' } },
                     x: { ticks: { font: { size: 9 }, maxRotation: 45 } }
                 }
             }
