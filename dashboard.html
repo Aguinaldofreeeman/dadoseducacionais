@@ -75,6 +75,11 @@
         .tag.vermelho { background: #fee2e2; color: #991b1b; }
         .tag.cinza { background: #f1f5f9; color: #475569; }
         .table-wrap { max-height: 460px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .nota-ranking { font-size: 13px; color: #475569; margin: 0 0 10px 0; line-height: 1.5; }
+        .nota-ranking strong { color: #17365d; }
+        .legenda-situacao { font-size: 12.5px; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; line-height: 2.1; }
+        .legenda-situacao strong { color: #17365d; }
+        .legenda-situacao .tag { margin: 0 6px 0 14px; }
 
         .analises { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
         .analise { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; }
@@ -175,16 +180,24 @@
 
         <div class="card">
             <h2>Ranking das escolas — Prova Paulista</h2>
+            <p class="nota-ranking" id="nota-ranking"></p>
+            <div class="legenda-situacao">
+                <strong>Situação</strong> (comparada com a média da rede na seleção):
+                <span class="tag verde">Referência</span> participa e acerta acima da média
+                <span class="tag cinza">Alta, pouca participação</span> acerta acima da média, mas participa menos
+                <span class="tag ambar">Prioridade pedagógica</span> participa acima da média, mas acerta menos
+                <span class="tag vermelho">Acesso e resultado</span> abaixo da média nos dois
+            </div>
             <div class="table-wrap">
                 <table id="tabela-ranking">
                     <thead>
                         <tr>
                             <th class="num">#</th>
                             <th>Escola</th>
-                            <th>Edição</th>
-                            <th class="num">Alunos</th>
-                            <th class="num">Participação</th>
-                            <th class="num">Acertos</th>
+                            <th class="num" id="th-edicoes">Edições</th>
+                            <th class="num" id="th-alunos">Alunos</th>
+                            <th class="num" id="th-participacao">Participação</th>
+                            <th class="num" id="th-acertos">Acertos</th>
                             <th class="num">Português</th>
                             <th class="num">Matemática</th>
                             <th class="num">História</th>
@@ -486,6 +499,25 @@
     function renderTabelaProva(escolas) {
         const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
 
+        const ano = document.getElementById('filtro-ano').value;
+        const edicao = document.getElementById('filtro-edicao').value;
+        const edicoesSel = [...new Set(linhasProva().map(r => r.edicao_planilha).filter(Boolean))];
+        const consolidando = edicoesSel.length > 1;
+
+        // Títulos dos cabeçalhos deixam explícito quando o valor é média
+        document.getElementById('th-edicoes').textContent = consolidando ? 'Edições consolidadas' : 'Edição';
+        document.getElementById('th-alunos').textContent = consolidando ? 'Alunos (média)' : 'Alunos';
+        document.getElementById('th-participacao').textContent = consolidando ? 'Participação (média)' : 'Participação';
+        document.getElementById('th-acertos').textContent = consolidando ? 'Acertos (média)' : 'Acertos';
+
+        const escopo = ano
+            ? (edicao ? rotuloEdicao(edicao) : 'ano ' + ano + ' (' + edicoesSel.length + ' edições)')
+            : 'todos os anos (' + edicoesSel.length + ' edições)';
+
+        document.getElementById('nota-ranking').innerHTML = consolidando
+            ? 'Ordenado por <strong>% de acertos</strong> (maior primeiro). Cada linha é <strong>a média da escola nas ' + edicoesSel.length + ' edições selecionadas</strong> — escopo: ' + escopo + '. A coluna <strong>Situação</strong> compara cada escola com a média da rede neste mesmo recorte.'
+            : 'Ordenado por <strong>% de acertos</strong> (maior primeiro). Escopo: ' + escopo + '. A coluna <strong>Situação</strong> compara cada escola com a média da rede neste mesmo recorte.';
+
         const ordenadas = [...escolas]
             .filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca))
             .sort((a, b) => (taxa(b.acertos_prova) ?? -1) - (taxa(a.acertos_prova) ?? -1));
@@ -512,7 +544,7 @@
             return '<tr>' +
                 '<td class="num"><span class="pos ' + classe + '">' + pos + '</span></td>' +
                 '<td>' + (r.escola || '-') + '</td>' +
-                '<td style="font-size:12px;color:#64748b;">' + (r.qtdEdicoes > 1 ? r.edicao_planilha : rotuloEdicao(r.edicao_planilha)) + '</td>' +
+                '<td style="font-size:12px;color:#64748b;">' + (r.qtdEdicoes > 1 ? r.qtdEdicoes + ' edições' : rotuloEdicao(r.edicao_planilha)) + '</td>' +
                 '<td class="num">' + (num(r.total_alunos) !== null ? num(r.total_alunos).toLocaleString('pt-BR') : '-') + '</td>' +
                 '<td class="num">' + pct(participacao) + '</td>' +
                 '<td class="num">' + pct(acertos) + '</td>' +
