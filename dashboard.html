@@ -351,7 +351,10 @@
         }
 
         dadosPP = pp.data || [];
-        dadosAlura = alura.data || [];
+
+        // A linha "Total" da Alura é descartada na origem: é um subtotal da planilha
+        // e não uma escola — usá-la em agregações contaria os alunos em dobro.
+        dadosAlura = (alura.data || []).filter(r => !ehTotal(r.escola));
 
         montarFiltros();
         aplicarFiltros();
