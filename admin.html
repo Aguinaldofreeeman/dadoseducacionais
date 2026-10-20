@@ -500,10 +500,22 @@
 // Lógica para leitura e pré-visualização da planilha da Alura
     // Ajusta nomes de colunas que divergem entre a planilha oficial e o banco
     function ajustarColunaAlura(coluna) {
-        if (coluna === 'total_de_acertos_ate_2_tentativa') return 'total_de_acertos_ate_2a_tentativa';
+        if (coluna === 'total_de_acertos_ate_2_tentativa') return 'total_de_acertos_ate_a_2_tentativa';
         if (coluna === 'indice_de_exercicios_corretos_ate_2_tentativa') return 'indice_de_exercicios_corretos_ate_2a_tentativa';
         if (coluna === 'nome_da_escola') return 'escola';
         return coluna;
+    }
+
+    // Encontra a coluna equivalente no banco ignorando variações de grafia
+    // (a planilha traz "ate_2_tentativa" e o banco "ate_a_2_tentativa" / "ate_2a_tentativa")
+    function encontrarColunaAlura(coluna, colunasBanco) {
+        const direta = ajustarColunaAlura(coluna);
+        if (!colunasBanco) return direta;
+        if (colunasBanco.indexOf(direta) >= 0) return direta;
+
+        const chave = (c) => c.replace(/_a_/g, '_').replace(/2a/g, '2');
+        const equivalente = colunasBanco.find(c => chave(c) === chave(direta));
+        return equivalente || direta;
     }
 
     let dadosPlanilhaProcessados = [];
@@ -560,7 +572,7 @@
                             .replace(/_+/g, "_");
 
                         // Ajusta nomes que divergem entre a planilha e o banco
-                        const colBanco = ajustarColunaAlura(colClean);
+                        const colBanco = encontrarColunaAlura(colClean, colunasBanco);
 
                         // Descarta colunas que não existem na tabela (evita falha na gravação)
                         if (colunasBanco && colBanco !== 'ano' && colBanco.indexOf('escola') < 0 && colunasBanco.indexOf(colBanco) < 0) {
