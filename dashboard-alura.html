@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Alura - Plataforma de Dados Educacionais</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #17365d; color: white; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        header h1 { margin: 0; font-size: 21px; }
+        header p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.85; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
+        .btn-nav:hover { background-color: #0f766e; }
+        .btn-nav.azul { background-color: #0284c7; }
+        .btn-nav.azul:hover { background-color: #0369a1; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+
+        main { padding: 24px; max-width: 1400px; margin: 0 auto; box-sizing: border-box; }
+
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card h2 { margin-top: 0; color: #17365d; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .card h3 { margin-top: 0; color: #17365d; font-size: 16px; }
+
+        .secao-titulo { display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; }
+        .secao-titulo .barra { width: 6px; height: 34px; border-radius: 3px; background: #17365d; }
+        .secao-titulo.alura .barra { background: #0284c7; }
+        .secao-titulo h2 { margin: 0; font-size: 20px; color: #17365d; }
+        .secao-titulo p { margin: 2px 0 0 0; font-size: 13px; color: #64748b; }
+
+        .fonte-tag { display: inline-block; font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 10px; background: #e2e8f0; color: #475569; margin-left: 8px; vertical-align: middle; }
+        .fonte-tag.alura { background: #dbeafe; color: #1e40af; }
+
+        .filters { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+        .filter-group label { font-size: 13px; font-weight: bold; color: #475569; }
+        .filter-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff; }
+        .filter-group .help { font-size: 12px; color: #64748b; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .kpi { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #17365d; border-radius: 8px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .kpi.teal { border-left-color: #0d9488; }
+        .kpi.blue { border-left-color: #0284c7; }
+        .kpi.amber { border-left-color: #d97706; }
+        .kpi.rose { border-left-color: #e11d48; }
+        .kpi h4 { margin: 0 0 6px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+        .kpi .valor { font-size: 24px; font-weight: bold; color: #17365d; line-height: 1.1; }
+        .kpi .detalhe { font-size: 12px; color: #64748b; margin-top: 5px; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 20px; }
+        .chart-box { position: relative; height: 330px; }
+        .chart-box.alto { height: 380px; }
+
+        /* Destaque do indicador principal (Alura) */
+        .destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .destaque-item { background: linear-gradient(135deg, #17365d 0%, #1d4e89 100%); color: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 14px rgba(23,54,93,0.22); }
+        .destaque-item.alura { background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%); box-shadow: 0 4px 14px rgba(2,132,199,0.22); }
+        .destaque-ano { display: inline-block; background: rgba(255,255,255,0.18); border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .destaque-titulo { font-size: 13px; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.9; margin-bottom: 6px; }
+        .destaque-valor { font-size: 34px; font-weight: bold; line-height: 1.1; margin-bottom: 10px; }
+        .destaque-detalhe { font-size: 12.5px; opacity: 0.92; line-height: 1.5; }
+        .destaque-detalhe strong { font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: bold; position: sticky; top: 0; }
+        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+        tr:hover td { background-color: #f8fafc; }
+        .pos { display: inline-block; min-width: 26px; text-align: center; background: #e2e8f0; border-radius: 4px; padding: 2px 6px; font-weight: bold; color: #475569; }
+        .pos.top { background: #d1fae5; color: #065f46; }
+        .pos.bottom { background: #fee2e2; color: #991b1b; }
+        .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+        .tag.verde { background: #d1fae5; color: #065f46; }
+        .tag.ambar { background: #fef3c7; color: #92400e; }
+        .tag.vermelho { background: #fee2e2; color: #991b1b; }
+        .tag.cinza { background: #f1f5f9; color: #475569; }
+        .table-wrap { max-height: 460px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
+
+        .analises { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        .analise { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; }
+        .analise .num { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #17365d; color: #fff; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; margin-bottom: 8px; }
+        .analise h4 { margin: 0 0 8px 0; color: #17365d; font-size: 15px; }
+        .analise p { margin: 0 0 8px 0; font-size: 13px; color: #475569; line-height: 1.5; }
+        .analise .dica { font-size: 12px; color: #0d9488; font-weight: bold; }
+
+        details.dicionario summary { cursor: pointer; font-weight: bold; color: #17365d; }
+        .dic-tabela { margin-top: 12px; font-size: 13px; }
+        .dic-tabela code { background: #f1f5f9; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+        .tipo { color: #0d9488; font-weight: bold; }
+
+        .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; }
+        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
+
+        .rodape { text-align: center; color: #94a3b8; font-size: 12px; padding: 10px 0 30px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Dashboard Alura</h1>
+            <p>Engajamento digital dos alunos por unidade escolar</p>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="btn-nav">Início</a>
+            <a href="dashboard.html" class="btn-nav azul">Dashboard Prova Paulista</a>
+            <a href="alura.html" class="btn-nav">Módulo Alura</a>
+            <button id="btn-sair" class="btn-logout">Sair</button>
+        </div>
+    </header>
+    <main>
+        <!-- ================= PLATAFORMA ALURA ================= -->
+        <div class="secao-titulo alura">
+            <span class="barra"></span>
+            <div>
+                <h2>Plataforma Alura <span class="fonte-tag alura">Fonte: resultados_alura</span></h2>
+                <p>Engajamento digital dos alunos por unidade escolar</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Filtros</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filtro-ano-alura">Ano Letivo</label>
+                    <select id="filtro-ano-alura"><option value="">Todos os anos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtro-busca-alura">Buscar escola</label>
+                    <input type="text" id="filtro-busca-alura" placeholder="Digite o nome da escola..." style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div class="filter-group">
+                    <span class="help">Indicadores de uso da plataforma, independentes dos resultados da prova.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="destaques" id="alura-destaque"></div>
+
+        <div class="kpi-grid" id="kpi-alura">
+            <div class="kpi blue"><h4>Escolas na plataforma</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi"><h4>Matrículas ativas</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi teal"><h4>Alunos com acesso</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi amber"><h4>Índice de acesso</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi rose"><h4>Projetos enviados</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card">
+                <h3 id="titulo-indicador-alura">Indicador principal do ano</h3>
+                <div class="chart-box"><canvas id="chart-alura-indicador"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Engajamento digital por escola (Top 10)</h3>
+                <div class="chart-box"><canvas id="chart-alura"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Evolução do engajamento por ano</h3>
+                <div class="chart-box"><canvas id="chart-alura-evolucao"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Escolas — Plataforma Alura</h2>
+            <div class="table-wrap">
+                <table id="tabela-alura">
+                    <thead>
+                        <tr>
+                            <th class="num">#</th>
+                            <th>Escola</th>
+                            <th class="num">Matrículas</th>
+                            <th class="num">Alunos com acesso</th>
+                            <th class="num">% Acesso</th>
+                            <th class="num" id="th-indicador-alura">Indicador principal</th>
+                            <th class="num">Projetos</th>
+                            <th class="num">Cursos Concluídos</th>
+                            <th class="num">Exercícios</th>
+                        </tr>
+                    </thead>
+                    <tbody><tr><td colspan="9">Carregando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <p class="rodape">Fonte: Supabase · Tabela resultados_alura · Deploy automático via GitHub/Vercel</p>
+    </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
+<script>
+    // =============================================================
+    // Dashboard da Plataforma Alura
+    // =============================================================
+    let dadosAlura = [];
+    let graficos = {};
+
+    function num(v) {
+        if (v === null || v === undefined || v === '') return null;
+        const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+    }
+
+    // Normaliza taxas: a base da Prova Paulista tem dois formatos (0.9836 e "99,2%")
+    function taxa(v) {
+        if (v === null || v === undefined || v === '') return null;
+        let texto = String(v).trim();
+        if (texto === '-') return null;
+
+        const temPercentual = texto.includes('%');
+        texto = texto.replace(/%/g, '').replace(/\s/g, '').replace(',', '.');
+
+        const n = parseFloat(texto);
+        if (isNaN(n)) return null;
+
+        if (temPercentual) return n / 100;
+        return n > 1 ? n / 100 : n;
+    }
+
+    function pct(v, casas = 1) {
+        const n = taxa(v);
+        if (n === null) return '-';
+        return (n * 100).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }) + '%';
+    }
+
+    function media(lista, campo) {
+        const valores = lista.map(r => taxa(r[campo])).filter(v => v !== null);
+        if (!valores.length) return null;
+        return valores.reduce((a, b) => a + b, 0) / valores.length;
+    }
+
+    function mediaNum(lista, campo) {
+        const valores = lista.map(r => num(r[campo])).filter(v => v !== null);
+        if (!valores.length) return null;
+        return valores.reduce((a, b) => a + b, 0) / valores.length;
+    }
+
+    function somaNum(lista, campo) {
+        return lista.reduce((acc, r) => acc + (num(r[campo]) || 0), 0);
+    }
+
+    function possuiCampo(lista, campo) {
+        return lista.some(r => r[campo] !== null && r[campo] !== undefined);
+    }
+
+    function ehTotal(escola) {
+        return String(escola || '').trim().toUpperCase().startsWith('TOTAL');
+    }
+
+    function chaveEdicao(nome) {
+        const ano = (String(nome).match(/(20\d{2})/) || [])[1] || '0000';
+        const bim = (String(nome).match(/(\d)\s*º?\s*_?bim/i) || [])[1] || '0';
+        return ano + '-' + String(bim).padStart(2, '0');
+    }
+
+    function rotuloEdicao(nome) {
+        const ano = (String(nome).match(/(20\d{2})/) || [])[1] || '';
+        const bim = (String(nome).match(/(\d)\s*º?\s*_?bim/i) || [])[1] || '';
+        return ano + (bim ? ' · ' + bim + 'º bim' : '');
+    }
+
+    // ---------- proteção de rota ----------
+    async function verificarSessao() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
+
+    document.getElementById('btn-sair').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+
+    // ---------- carga de dados ----------
+    async function carregarDados() {
+        const msgErro = document.getElementById('msg-erro');
+
+        const { data, error } = await supabaseClient
+            .from('resultados_alura')
+            .select('*')
+            .limit(5000);
+
+        if (error) {
+            msgErro.className = 'msg error';
+            msgErro.textContent = 'Erro ao carregar os dados da Alura: ' + error.message;
+            return;
+        }
+
+        // A linha "Total" da Alura é descartada na origem: é um subtotal da planilha, não uma escola
+        dadosAlura = (data || []).filter(r => !ehTotal(r.escola));
+
+        montarFiltrosAlura();
+        aplicarFiltrosAlura();
+        montarDicionario();
+    }
+
+    function criarGrafico(id, config) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        if (graficos[id]) graficos[id].destroy();
+        graficos[id] = new Chart(canvas.getContext('2d'), config);
+    }
+
+    // ===================== ALURA =====================
+    // Indicador principal de cada ano letivo (o que a rede usa para avaliar o ano)
+    const INDICADOR_PRINCIPAL = {
+        '2026': { campo: 'media_das_avaliacoes_mensais', titulo: 'Média das Avaliações Mensais', tipo: 'nota' },
+        '2025': { campo: 'indice_de_exercicios_corretos_ate_2a_tentativa', titulo: 'Índice de Exercícios Corretos até 2ª tentativa', tipo: 'indice' },
+        '2024': { campo: 'indice_de_projetos_enviados', titulo: 'Índice de Projetos Enviados', tipo: 'percentual' }
+    };
+
+    function formatarIndicador(valor, tipo) {
+        if (valor === null || valor === undefined) return '-';
+        if (tipo === 'percentual') return pct(valor);
+        const n = num(valor);
+        if (n === null) return '-';
+        return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Resumo do indicador principal de um ano
+    function destaqueDoAno(ano) {
+        const def = INDICADOR_PRINCIPAL[String(ano)];
+        if (!def) return null;
+
+        const linhas = dadosAlura.filter(r => String(r.ano) === String(ano) && !ehTotal(r.escola));
+        const valores = linhas
+            .map(r => ({ escola: r.escola, valor: num(r[def.campo]) }))
+            .filter(v => v.valor !== null);
+
+        if (!valores.length) return null;
+
+        const media = valores.reduce((a, b) => a + b.valor, 0) / valores.length;
+        const ordenadas = [...valores].sort((a, b) => b.valor - a.valor);
+
+        return {
+            ano: String(ano),
+            def,
+            media,
+            melhor: ordenadas[0],
+            pior: ordenadas[ordenadas.length - 1],
+            acima: valores.filter(v => v.valor >= media).length,
+            total: valores.length,
+            todas: ordenadas
+        };
+    }
+
+    function renderDestaqueAlura() {
+        const anoSel = document.getElementById('filtro-ano-alura').value;
+        const anos = (anoSel ? [anoSel] : Object.keys(INDICADOR_PRINCIPAL))
+            .filter(a => dadosAlura.some(r => String(r.ano) === String(a)))
+            .sort((a, b) => b.localeCompare(a));
+
+        const itens = anos.map(a => destaqueDoAno(a)).filter(Boolean);
+
+        document.getElementById('alura-destaque').innerHTML = itens.map(d =>
+            '<div class="destaque-item alura">' +
+                '<span class="destaque-ano">Indicador principal · ' + d.ano + '</span>' +
+                '<div class="destaque-titulo">' + d.def.titulo + '</div>' +
+                '<div class="destaque-valor">' + formatarIndicador(d.media, d.def.tipo) + '</div>' +
+                '<div class="destaque-detalhe">Média da rede em <strong>' + d.total + '</strong> escolas · <strong>' + d.acima + '</strong> acima da média</div>' +
+                '<div class="destaque-detalhe">Melhor: <strong>' + d.melhor.escola + '</strong> (' + formatarIndicador(d.melhor.valor, d.def.tipo) + ')</div>' +
+                '<div class="destaque-detalhe">Menor: ' + d.pior.escola + ' (' + formatarIndicador(d.pior.valor, d.def.tipo) + ')</div>' +
+            '</div>'
+        ).join('');
+    }
+
+    // Gráfico do indicador principal (Top 10 do ano selecionado)
+    function graficoIndicadorAlura() {
+        const anoSel = document.getElementById('filtro-ano-alura').value;
+        const anosDisponiveis = Object.keys(INDICADOR_PRINCIPAL)
+            .filter(a => dadosAlura.some(r => String(r.ano) === String(a)))
+            .sort((a, b) => b.localeCompare(a));
+
+        const ano = anoSel || anosDisponiveis[0];
+        const d = destaqueDoAno(ano);
+        const titulo = document.getElementById('titulo-indicador-alura');
+
+        if (!d) {
+            titulo.textContent = 'Indicador principal do ano';
+            criarGrafico('chart-alura-indicador', {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            return;
+        }
+
+        titulo.textContent = d.def.titulo + ' — ' + d.ano + ' (Top 10)';
+
+        const top = d.todas.slice(0, 10);
+        const medias = d.media;
+
+        criarGrafico('chart-alura-indicador', {
+            type: 'bar',
+            data: {
+                labels: top.map(v => v.escola),
+                datasets: [{
+                    label: d.def.titulo,
+                    data: top.map(v => d.def.tipo === 'percentual' ? taxa(v.valor) * 100 : v.valor),
+                    backgroundColor: top.map(v => v.valor >= medias ? '#0d9488' : '#d97706'),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => d.def.titulo + ': ' + formatarIndicador(ctx.raw, d.def.tipo === 'percentual' ? 'percentual' : 'indice')
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: d.def.titulo },
+                        ticks: { callback: (v) => d.def.tipo === 'percentual' ? v + '%' : v }
+                    },
+                    y: { ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    function montarFiltrosAlura() {
+        const selectAno = document.getElementById('filtro-ano-alura');
+        const anos = [...new Set(dadosAlura.map(d => d.ano).filter(a => a !== null && a !== undefined).map(a => String(a)))]
+            .sort((a, b) => b.localeCompare(a));
+
+        selectAno.innerHTML = '<option value="">Todos os anos</option>' +
+            anos.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+    }
+
+    document.getElementById('filtro-ano-alura').addEventListener('change', aplicarFiltrosAlura);
+    document.getElementById('filtro-busca-alura').addEventListener('input', aplicarFiltrosAlura);
+
+    function linhasAlura() {
+        const ano = document.getElementById('filtro-ano-alura').value;
+        return dadosAlura.filter(d => !ano || String(d.ano) === ano);
+    }
+
+    // Consolida por escola (média entre os anos, quando há mais de um)
+    function escolasAlura() {
+        const mapa = {};
+        linhasAlura().forEach(r => {
+            const chave = String(r.escola || '').trim().toLowerCase();
+            if (!mapa[chave]) mapa[chave] = { escola: r.escola, registros: [] };
+            mapa[chave].registros.push(r);
+        });
+
+        return Object.values(mapa).map(grupo => {
+            const media = (campo) => {
+                const valores = grupo.registros.map(r => num(r[campo])).filter(v => v !== null);
+                if (!valores.length) return null;
+                return valores.reduce((a, b) => a + b, 0) / valores.length;
+            };
+
+            return {
+                escola: grupo.escola,
+                qtdAnos: grupo.registros.length,
+                matriculas_ativas: media('matriculas_ativas'),
+                alunos_com_acessos_no_periodo: media('alunos_com_acessos_no_periodo'),
+                indice_de_acessos_no_periodo: taxa(media('indice_de_acessos_no_periodo')),
+                projetos_enviados: media('projetos_enviados'),
+                cursos_concluidos: media('cursos_concluidos'),
+                exercicios_realizados: media('exercicios_realizados')
+            };
+        });
+    }
+
+    function renderKpisAlura(escolas) {
+        const busca = document.getElementById('filtro-busca-alura').value.trim().toLowerCase();
+        const filtradas = escolas.filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca));
+
+        const soma = (campo) => filtradas.reduce((a, r) => a + (r[campo] || 0), 0);
+        const possui = (campo) => filtradas.some(r => r[campo] !== null && r[campo] !== undefined);
+        const exibir = (campo) => possui(campo) ? Math.round(soma(campo)).toLocaleString('pt-BR') : '-';
+
+        const indiceMedio = mediaNum(filtradas.map(r => ({ v: r.indice_de_acessos_no_periodo })), 'v');
+        const anos = [...new Set(linhasAlura().map(r => r.ano))];
+        const consolida = anos.length > 1;
+        const notaConsolidacao = consolida ? 'média por escola (' + anos.length + ' anos)' : 'ano ' + (anos[0] || '');
+
+        const cards = [
+            { classe: 'blue', rotulo: 'Escolas na plataforma', valor: filtradas.length.toLocaleString('pt-BR'), detalhe: notaConsolidacao },
+            { classe: '', rotulo: 'Matrículas ativas', valor: exibir('matriculas_ativas'), detalhe: consolida ? notaConsolidacao : 'alunos matriculados na plataforma' },
+            { classe: 'teal', rotulo: 'Alunos com acesso', valor: exibir('alunos_com_acessos_no_periodo'), detalhe: consolida ? notaConsolidacao : 'acessaram a plataforma no período' },
+            { classe: 'amber', rotulo: 'Índice de acesso', valor: indiceMedio !== null ? pct(indiceMedio) : '-', detalhe: 'média de acesso no período' },
+            { classe: 'rose', rotulo: 'Projetos enviados', valor: exibir('projetos_enviados'), detalhe: consolida ? notaConsolidacao : 'projetos enviados pelos alunos' }
+        ];
+
+        document.getElementById('kpi-alura').innerHTML = cards.map(c =>
+            '<div class="kpi ' + c.classe + '"><h4>' + c.rotulo + '</h4><div class="valor">' + c.valor + '</div><div class="detalhe">' + c.detalhe + '</div></div>'
+        ).join('');
+    }
+
+    function renderTabelaAlura(escolas) {
+        const busca = document.getElementById('filtro-busca-alura').value.trim().toLowerCase();
+        const anoSel = document.getElementById('filtro-ano-alura').value;
+        const def = anoSel ? INDICADOR_PRINCIPAL[anoSel] : null;
+
+        // Título da coluna conforme o ano selecionado
+        const thIndicador = document.getElementById('th-indicador-alura');
+        thIndicador.textContent = def ? def.titulo : 'Indicador principal';
+
+        const filtradas = [...escolas]
+            .filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca))
+            .sort((a, b) => (b.alunos_com_acessos_no_periodo || 0) - (a.alunos_com_acessos_no_periodo || 0));
+
+        const anoParaIndicador = anoSel || (Object.keys(INDICADOR_PRINCIPAL)
+            .filter(a => dadosAlura.some(r => String(r.ano) === String(a)))
+            .sort((a, b) => b.localeCompare(a))[0] || '');
+        const defIndicador = INDICADOR_PRINCIPAL[anoParaIndicador];
+
+        const valorIndicador = (escola) => {
+            if (!defIndicador) return '-';
+            const linha = dadosAlura.find(r => String(r.ano) === anoParaIndicador &&
+                String(r.escola || '').trim().toLowerCase() === String(escola || '').trim().toLowerCase());
+            if (!linha) return '-';
+            return formatarIndicador(num(linha[defIndicador.campo]), defIndicador.tipo);
+        };
+
+        const corpo = filtradas.map((r, i) => {
+            const pos = i + 1;
+            const classe = pos <= 10 ? 'top' : '';
+            const valor = (campo) => {
+                if (r[campo] === null || r[campo] === undefined) return '-';
+                const n = num(r[campo]);
+                if (n === null) return '-';
+                return Math.round(n).toLocaleString('pt-BR');
+            };
+
+            return '<tr>' +
+                '<td class="num"><span class="pos ' + classe + '">' + pos + '</span></td>' +
+                '<td>' + (r.escola || '-') + '</td>' +
+                '<td class="num">' + valor('matriculas_ativas') + '</td>' +
+                '<td class="num">' + valor('alunos_com_acessos_no_periodo') + '</td>' +
+                '<td class="num">' + (r.indice_de_acessos_no_periodo !== null ? pct(r.indice_de_acessos_no_periodo, 0) : '-') + '</td>' +
+                '<td class="num">' + valorIndicador(r.escola) + '</td>' +
+                '<td class="num">' + valor('projetos_enviados') + '</td>' +
+                '<td class="num">' + valor('cursos_concluidos') + '</td>' +
+                '<td class="num">' + valor('exercicios_realizados') + '</td>' +
+                '</tr>';
+        }).join('');
+
+        const tbody = document.querySelector('#tabela-alura tbody');
+        tbody.innerHTML = filtradas.length
+            ? corpo
+            : '<tr><td colspan="9" style="text-align:center; padding:20px; color:#64748b;">Nenhuma escola encontrada para o filtro selecionado.</td></tr>';
+    }
+
+    function graficoAlura(escolas) {
+        const dados = [...escolas]
+            .filter(r => r.indice_de_acessos_no_periodo !== null)
+            .sort((a, b) => b.indice_de_acessos_no_periodo - a.indice_de_acessos_no_periodo)
+            .slice(0, 10);
+
+        criarGrafico('chart-alura', {
+            type: 'bar',
+            data: {
+                labels: dados.map(d => d.escola),
+                datasets: [
+                    {
+                        label: 'Alunos com acesso',
+                        data: dados.map(d => Math.round(d.alunos_com_acessos_no_periodo || 0)),
+                        backgroundColor: '#0284c7',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Matrículas ativas',
+                        data: dados.map(d => Math.round(d.matriculas_ativas || 0)),
+                        backgroundColor: '#cbd5e1',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { title: { display: true, text: 'Alunos' } },
+                    y: { ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    function graficoAluraEvolucao() {
+        const anos = [...new Set(dadosAlura.map(d => d.ano).filter(a => a !== null && a !== undefined))]
+            .sort((a, b) => String(a).localeCompare(String(b)));
+
+        const porAno = anos.map(ano => {
+            const linhas = dadosAlura.filter(d => String(d.ano) === String(ano));
+            return {
+                ano,
+                matriculas: mediaNum(linhas, 'matriculas_ativas'),
+                acessos: mediaNum(linhas, 'alunos_com_acessos_no_periodo'),
+                indice: taxa(mediaNum(linhas, 'indice_de_acessos_no_periodo'))
+            };
+        });
+
+        criarGrafico('chart-alura-evolucao', {
+            type: 'line',
+            data: {
+                labels: porAno.map(a => a.ano),
+                datasets: [
+                    {
+                        label: 'Matrículas ativas (média por escola)',
+                        data: porAno.map(a => a.matriculas),
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2,132,199,0.10)',
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Alunos com acesso (média por escola)',
+                        data: porAno.map(a => a.acessos),
+                        borderColor: '#0d9488',
+                        backgroundColor: 'rgba(13,148,136,0.10)',
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Índice de acesso (%)',
+                        data: porAno.map(a => a.indice === null ? null : a.indice * 100),
+                        borderColor: '#d97706',
+                        borderDash: [6, 4],
+                        tension: 0.3,
+                        fill: false,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: { position: 'left', title: { display: true, text: 'Alunos (média)' } },
+                    y1: { position: 'right', title: { display: true, text: '%' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: v => v + '%' } },
+                    x: { ticks: { font: { size: 11 } } }
+                }
+            }
+        });
+    }
+
+    function aplicarFiltrosAlura() {
+        const escolas = escolasAlura();
+        renderDestaqueAlura();
+        renderKpisAlura(escolas);
+        renderTabelaAlura(escolas);
+        graficoIndicadorAlura();
+        graficoAlura(escolas);
+        graficoAluraEvolucao();
+    }
+
+    // ===================== DICIONÁRIO =====================
+    const DICIONARIO = [
+        {
+            tabela: 'resultados_alura (Plataforma Alura)',
+            descricao: 'Fonte desta página. 153 linhas (3 anos x 51 escolas, já sem a linha de Total).',
+            colunas: [
+                ['id', 'uuid'], ['ano', 'integer'], ['escola', 'text'],
+                ['matriculas_ativas', 'numeric'], ['alunos_com_acessos_no_periodo', 'numeric'],
+                ['indice_de_acessos_no_periodo', 'numeric'], ['cursos_concluidos', 'numeric'],
+                ['exercicios_realizados', 'numeric'], ['projetos_enviados', 'numeric'],
+                ['indice_de_projetos_enviados', 'numeric'], ['unidades_concluidas', 'numeric'],
+                ['total_de_exercicios_realizados', 'numeric'],
+                ['quantidade_media_de_tentativas_por_exercicio', 'numeric'],
+                ['total_de_acertos_ate_a_2_tentativa', 'numeric'],
+                ['indice_de_exercicios_corretos_ate_2a_tentativa', 'numeric'],
+                ['media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram', 'numeric'],
+                ['media_das_avaliacoes_mensais', 'numeric'],
+                ['indice_de_realizacao_das_avaliacoes_mensais', 'numeric'],
+                ['media_nas_questoes_discursivas', 'numeric'], ['created_at', 'timestamptz']
+            ]
+        },
+        {
+            tabela: 'perfis_usuarios',
+            descricao: 'Perfis de acesso da plataforma (escopo ADM/USER, função, ativo).',
+            colunas: [
+                ['id', 'uuid'], ['nome', 'text'], ['email', 'text'], ['perfil', 'text'],
+                ['funcao', 'text'], ['escopo', 'text'], ['ativo', 'boolean'],
+                ['criado_em', 'timestamptz'], ['atualizado_em', 'timestamptz'], ['created_at', 'timestamptz']
+            ]
+        }
+    ];
+
+    function montarDicionario() {
+        const html = DICIONARIO.map(t => {
+            const cols = t.colunas.map(c =>
+                '<tr><td><code>' + c[0] + '</code></td><td class="tipo">' + c[1] + '</td></tr>').join('');
+            return '<h3 style="margin:18px 0 4px 0; color:#17365d;">' + t.tabela + '</h3>' +
+                '<p style="font-size:13px;color:#475569;margin:0 0 8px 0;">' + t.descricao + '</p>' +
+                '<table class="dic-tabela"><thead><tr><th>Coluna</th><th>Tipo</th></tr></thead><tbody>' + cols + '</tbody></table>';
+        }).join('');
+
+        document.getElementById('dicionario').innerHTML = html;
+    }
+
+    // ---------- inicialização ----------
+    (async () => {
+        if (await verificarSessao()) {
+            await carregarDados();
+        }
+    })();
+
+</script>
+</body>
+</html>
