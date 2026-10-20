@@ -496,7 +496,8 @@
         return dadosPP.filter(d =>
             (!ano || d.ano === ano) &&
             (!edicao || d.edicao_planilha === edicao) &&
-            !ehTotal(d.escola)
+            !ehTotal(d.escola) &&
+            String(d.escola || '').trim() !== ''
         );
     }
 

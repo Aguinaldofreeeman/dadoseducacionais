@@ -234,6 +234,7 @@
         // 1. Filtrar e remover linhas de metadados da planilha
         const linhasValidas = data.filter(r => {
             const esc = (r.escola || '').toUpperCase();
+            if (esc.trim() === '') return false;
             return !esc.includes('FILTROS APLICADOS') && !esc.includes('CD_DIRETORIA') && !esc.includes('NM_DIRETORIA');
         });
 
