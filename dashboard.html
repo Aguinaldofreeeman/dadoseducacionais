@@ -837,13 +837,15 @@
 
         const indiceMedio = mediaNum(filtradas.map(r => ({ v: r.indice_de_acessos_no_periodo })), 'v');
         const anos = [...new Set(linhasAlura().map(r => r.ano))];
+        const consolida = anos.length > 1;
+        const notaConsolidacao = consolida ? 'média por escola (' + anos.length + ' anos)' : 'ano ' + (anos[0] || '');
 
         const cards = [
-            { classe: 'blue', rotulo: 'Escolas na plataforma', valor: filtradas.length.toLocaleString('pt-BR'), detalhe: anos.length > 1 ? anos.length + ' anos consolidados' : 'ano ' + (anos[0] || '') },
-            { classe: '', rotulo: 'Matrículas ativas', valor: exibir('matriculas_ativas'), detalhe: 'alunos matriculados na plataforma' },
-            { classe: 'teal', rotulo: 'Alunos com acesso', valor: exibir('alunos_com_acessos_no_periodo'), detalhe: 'acessaram a plataforma no período' },
+            { classe: 'blue', rotulo: 'Escolas na plataforma', valor: filtradas.length.toLocaleString('pt-BR'), detalhe: notaConsolidacao },
+            { classe: '', rotulo: 'Matrículas ativas', valor: exibir('matriculas_ativas'), detalhe: consolida ? notaConsolidacao : 'alunos matriculados na plataforma' },
+            { classe: 'teal', rotulo: 'Alunos com acesso', valor: exibir('alunos_com_acessos_no_periodo'), detalhe: consolida ? notaConsolidacao : 'acessaram a plataforma no período' },
             { classe: 'amber', rotulo: 'Índice de acesso', valor: indiceMedio !== null ? pct(indiceMedio) : '-', detalhe: 'média de acesso no período' },
-            { classe: 'rose', rotulo: 'Projetos enviados', valor: exibir('projetos_enviados'), detalhe: 'projetos enviados pelos alunos' }
+            { classe: 'rose', rotulo: 'Projetos enviados', valor: exibir('projetos_enviados'), detalhe: consolida ? notaConsolidacao : 'projetos enviados pelos alunos' }
         ];
 
         document.getElementById('kpi-alura').innerHTML = cards.map(c =>
