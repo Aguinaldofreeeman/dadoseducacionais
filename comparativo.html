@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativo Alura x Prova Paulista - Plataforma de Dados Educacionais</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #4c1d95; color: white; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        header h1 { margin: 0; font-size: 21px; }
+        header p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.85; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
+        .btn-nav:hover { background-color: #0f766e; }
+        .btn-nav.roxo { background-color: #7c3aed; }
+        .btn-nav.roxo:hover { background-color: #6d28d9; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+
+        main { padding: 24px; max-width: 1400px; margin: 0 auto; box-sizing: border-box; }
+
+        .aviso-fonte { background: #f5f3ff; border: 1px solid #ddd6fe; border-left: 4px solid #7c3aed; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #4c1d95; margin-bottom: 20px; }
+        .aviso-fonte strong { color: #5b21b6; }
+
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card h2 { margin-top: 0; color: #4c1d95; font-size: 18px; border-bottom: 2px solid #ede9fe; padding-bottom: 10px; }
+        .card h3 { margin-top: 0; color: #4c1d95; font-size: 16px; }
+
+        .filters { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+        .filter-group label { font-size: 13px; font-weight: bold; color: #475569; }
+        .filter-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff; }
+        .filter-group .help { font-size: 12px; color: #64748b; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .kpi { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #7c3aed; border-radius: 8px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .kpi.blue { border-left-color: #0284c7; }
+        .kpi.teal { border-left-color: #0d9488; }
+        .kpi.amber { border-left-color: #d97706; }
+        .kpi.rose { border-left-color: #e11d48; }
+        .kpi h4 { margin: 0 0 6px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+        .kpi .valor { font-size: 24px; font-weight: bold; color: #4c1d95; line-height: 1.1; }
+        .kpi .detalhe { font-size: 12px; color: #64748b; margin-top: 5px; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 20px; }
+        .chart-box { position: relative; height: 340px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: bold; position: sticky; top: 0; }
+        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+        tr:hover td { background-color: #f8fafc; }
+        .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+        .tag.verde { background: #d1fae5; color: #065f46; }
+        .tag.ambar { background: #fef3c7; color: #92400e; }
+        .tag.vermelho { background: #fee2e2; color: #991b1b; }
+        .tag.cinza { background: #f1f5f9; color: #475569; }
+        .table-wrap { max-height: 520px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
+
+        .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; }
+        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
+        .rodape { text-align: center; color: #94a3b8; font-size: 12px; padding: 10px 0 30px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Comparativo: Alura × Prova Paulista</h1>
+            <p>Engajamento na plataforma digital × desempenho dos alunos</p>
+        </div>
+        <div class="header-actions">
+            <a href="dashboard.html" class="btn-nav roxo">Dashboard</a>
+            <a href="index.html" class="btn-nav">Início</a>
+            <button id="btn-sair" class="btn-logout">Sair</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="aviso-fonte">
+            <strong>Página de análise cruzada.</strong> As duas fontes são independentes:
+            <strong>Plataforma Alura</strong> (engajamento digital, por ano letivo) e
+            <strong>Prova Paulista</strong> (desempenho escolar, por bimestre).
+            Este cruzamento responde: <em>o uso da plataforma acompanha o resultado dos alunos?</em>
+        </div>
+
+        <div id="msg-erro" class="msg"></div>
+
+        <div class="card">
+            <h2>Filtros do comparativo</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filtro-ano">Ano Letivo</label>
+                    <select id="filtro-ano"><option value="">Todos os anos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtro-edicao">Bimestre / Edição da Prova</label>
+                    <select id="filtro-edicao"></select>
+                </div>
+                <div class="filter-group">
+                    <span class="help">A Alura é anual e a Prova Paulista é por bimestre. O cruzamento usa o mesmo ano letivo nas duas fontes.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi"><h4>Escolas comparadas</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi teal"><h4>Correlação com desempenho</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi blue"><h4>Acerto médio · alto engajamento</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi rose"><h4>Acerto médio · baixo engajamento</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+            <div class="kpi amber"><h4>Diferença entre grupos</h4><div class="valor">-</div><div class="detalhe">-</div></div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card">
+                <h3 id="titulo-scatter1">Indicador principal da Alura × acertos na prova</h3>
+                <div class="chart-box"><canvas id="chart-scatter1"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Alunos com acesso à Alura × acertos na prova</h3>
+                <div class="chart-box"><canvas id="chart-scatter2"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Desempenho médio por faixa de engajamento</h3>
+                <div class="chart-box"><canvas id="chart-faixas"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Top 15 escolas por desempenho (cor = engajamento)</h3>
+                <div class="chart-box"><canvas id="chart-ranking"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparativo por escola</h2>
+            <div class="table-wrap">
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th class="num">#</th>
+                            <th>Escola</th>
+                            <th class="num">Alunos com acesso</th>
+                            <th class="num" id="th-indicador">Indicador principal</th>
+                            <th class="num">Acertos</th>
+                            <th class="num">Participação</th>
+                            <th class="num">Português</th>
+                            <th class="num">Matemática</th>
+                            <th>Leitura</th>
+                        </tr>
+                    </thead>
+                    <tbody><tr><td colspan="9">Carregando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <p class="rodape">Fontes: resultados_alura (Alura) + vw_resultados_consolidados (Prova Paulista) · Supabase · Deploy automático via GitHub/Vercel</p>
+    </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
+<script>
+    // =============================================================
+    // Comparativo Alura x Prova Paulista
+    // =============================================================
+    const INDICADOR_PRINCIPAL = {
+        '2026': { campo: 'media_das_avaliacoes_mensais', titulo: 'Média das Avaliações Mensais', tipo: 'nota' },
+        '2025': { campo: 'indice_de_exercicios_corretos_ate_2a_tentativa', titulo: 'Índice de Exercícios Corretos até 2ª tentativa', tipo: 'indice' },
+        '2024': { campo: 'indice_de_projetos_enviados', titulo: 'Índice de Projetos Enviados', tipo: 'percentual' }
+    };
+
+    let dadosPP = [];
+    let dadosAlura = [];
+    let graficos = {};
+
+    function num(v) {
+        if (v === null || v === undefined || v === '') return null;
+        const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+    }
+
+    function taxa(v) {
+        if (v === null || v === undefined || v === '') return null;
+        let texto = String(v).trim();
+        if (texto === '-') return null;
+        const temPercentual = texto.includes('%');
+        texto = texto.replace(/%/g, '').replace(/\s/g, '').replace(',', '.');
+        const n = parseFloat(texto);
+        if (isNaN(n)) return null;
+        if (temPercentual) return n / 100;
+        return n > 1 ? n / 100 : n;
+    }
+
+    function pct(v, casas = 1) {
+        const n = taxa(v);
+        if (n === null) return '-';
+        return (n * 100).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }) + '%';
+    }
+
+    function media(lista, campo) {
+        const valores = lista.map(r => taxa(r[campo])).filter(v => v !== null);
+        if (!valores.length) return null;
+        return valores.reduce((a, b) => a + b, 0) / valores.length;
+    }
+
+    function ehTotal(escola) {
+        return String(escola || '').trim().toUpperCase().startsWith('TOTAL');
+    }
+
+    function chaveEdicao(nome) {
+        const ano = (String(nome).match(/(20\d{2})/) || [])[1] || '0000';
+        const bim = (String(nome).match(/(\d)\s*º?\s*_?bim/i) || [])[1] || '0';
+        return ano + '-' + String(bim).padStart(2, '0');
+    }
+
+    function rotuloEdicao(nome) {
+        const ano = (String(nome).match(/(20\d{2})/) || [])[1] || '';
+        const bim = (String(nome).match(/(\d)\s*º?\s*_?bim/i) || [])[1] || '';
+        return ano + (bim ? ' · ' + bim + 'º bim' : '');
+    }
+
+    function formatarIndicador(valor, tipo) {
+        if (valor === null || valor === undefined) return '-';
+        if (tipo === 'percentual') return pct(valor);
+        const n = num(valor);
+        if (n === null) return '-';
+        return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Correlação de Pearson
+    function correlacao(xs, ys) {
+        const pares = xs.map((x, i) => [x, ys[i]]).filter(p => p[0] !== null && p[1] !== null);
+        if (pares.length < 3) return null;
+        const mx = pares.reduce((a, p) => a + p[0], 0) / pares.length;
+        const my = pares.reduce((a, p) => a + p[1], 0) / pares.length;
+        let num1 = 0, den1 = 0, den2 = 0;
+        pares.forEach(p => {
+            const dx = p[0] - mx, dy = p[1] - my;
+            num1 += dx * dy; den1 += dx * dx; den2 += dy * dy;
+        });
+        if (!den1 || !den2) return null;
+        return num1 / Math.sqrt(den1 * den2);
+    }
+
+    async function verificarSessao() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
+
+    document.getElementById('btn-sair').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+
+    async function carregarDados() {
+        const msgErro = document.getElementById('msg-erro');
+        const [pp, alura] = await Promise.all([
+            supabaseClient.from('vw_resultados_consolidados').select('*').limit(5000),
+            supabaseClient.from('resultados_alura').select('*').limit(5000)
+        ]);
+
+        if (pp.error || alura.error) {
+            msgErro.className = 'msg error';
+            msgErro.textContent = 'Erro ao carregar dados: ' + ((pp.error || alura.error) || {}).message;
+            return;
+        }
+
+        dadosPP = pp.data || [];
+        dadosAlura = (alura.data || []).filter(r => !ehTotal(r.escola));
+
+        montarFiltros();
+        aplicarFiltros();
+    }
+
+    function montarFiltros() {
+        const selectAno = document.getElementById('filtro-ano');
+        const anos = [...new Set(dadosPP.map(d => d.ano).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+
+        selectAno.innerHTML = '<option value="">Todos os anos</option>' +
+            anos.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+
+        if (anos.length) selectAno.value = anos[0];
+        atualizarEdicoes(selectAno.value);
+    }
+
+    function atualizarEdicoes(anoSel) {
+        const selectEdicao = document.getElementById('filtro-edicao');
+        const edicoes = [...new Set(dadosPP
+            .filter(d => !anoSel || d.ano === anoSel)
+            .map(d => d.edicao_planilha)
+            .filter(Boolean))]
+            .sort((a, b) => chaveEdicao(a).localeCompare(chaveEdicao(b)));
+
+        selectEdicao.innerHTML = '<option value="">Média do ano</option>' +
+            edicoes.map(e => '<option value="' + e + '">' + rotuloEdicao(e) + '</option>').join('');
+    }
+
+    document.getElementById('filtro-ano').addEventListener('change', function () {
+        atualizarEdicoes(this.value);
+        aplicarFiltros();
+    });
+    document.getElementById('filtro-edicao').addEventListener('change', aplicarFiltros);
+
+    // Consolida a Prova Paulista por escola (média das edições do ano ou edição específica)
+    function escolasProva() {
+        const ano = document.getElementById('filtro-ano').value;
+        const edicao = document.getElementById('filtro-edicao').value;
+
+        const linhas = dadosPP.filter(d =>
+            (!ano || d.ano === ano) &&
+            (!edicao || d.edicao_planilha === edicao) &&
+            !ehTotal(d.escola)
+        );
+
+        const mapa = {};
+        linhas.forEach(r => {
+            const chave = String(r.escola || '').trim().toLowerCase();
+            if (!mapa[chave]) mapa[chave] = { escola: r.escola, registros: [] };
+            mapa[chave].registros.push(r);
+        });
+
+        return Object.values(mapa).map(grupo => {
+            const base = { escola: grupo.escola, qtdEdicoes: grupo.registros.length };
+            ['acertos_prova', 'participacao', 'port', 'mat'].forEach(c => {
+                base[c] = media(grupo.registros, c);
+            });
+            return base;
+        });
+    }
+
+    // Dados da Alura do ano selecionado
+    function aluraDoAno() {
+        const ano = document.getElementById('filtro-ano').value;
+        const linhas = dadosAlura.filter(r => !ano || String(r.ano) === ano);
+        const mapa = {};
+        linhas.forEach(r => {
+            const chave = String(r.escola || '').trim().toLowerCase();
+            if (!mapa[chave]) mapa[chave] = r;
+        });
+        return mapa;
+    }
+
+    // Cruzamento por escola
+    function cruzar() {
+        const provas = escolasProva();
+        const alura = aluraDoAno();
+
+        const anoSel = document.getElementById('filtro-ano').value;
+        const anosDisponiveis = Object.keys(INDICADOR_PRINCIPAL)
+            .filter(a => dadosAlura.some(r => String(r.ano) === String(a)))
+            .sort((a, b) => b.localeCompare(a));
+        const ano = anoSel || anosDisponiveis[0] || '';
+        const def = INDICADOR_PRINCIPAL[ano] || null;
+
+        return provas.map(p => {
+            const a = alura[String(p.escola || '').trim().toLowerCase()];
+            return {
+                escola: p.escola,
+                acertos: p.acertos_prova,
+                participacao: p.participacao,
+                port: p.port,
+                mat: p.mat,
+                qtdEdicoes: p.qtdEdicoes,
+                acessos: a ? num(a.alunos_com_acessos_no_periodo) : null,
+                matriculas: a ? num(a.matriculas_ativas) : null,
+                indiceAcesso: a ? taxa(a.indice_de_acessos_no_periodo) : null,
+                indicador: (a && def) ? num(a[def.campo]) : null,
+                anoAlura: a ? String(a.ano) : null
+            };
+        });
+    }
+
+    function renderKpis(dados) {
+        const comAlura = dados.filter(d => d.acessos !== null);
+        const correl = correlacao(comAlura.map(d => d.indicador), comAlura.map(d => d.acertos));
+        const correlAcessos = correlacao(comAlura.map(d => d.acessos), comAlura.map(d => d.acertos));
+
+        // divide em dois grupos pela mediana do indicador principal
+        const indicadores = comAlura.map(d => d.indicador).filter(v => v !== null).sort((a, b) => a - b);
+        const mediana = indicadores.length ? indicadores[Math.floor(indicadores.length / 2)] : null;
+
+        const alto = mediana !== null ? comAlura.filter(d => d.indicador !== null && d.indicador >= mediana) : [];
+        const baixo = mediana !== null ? comAlura.filter(d => d.indicador !== null && d.indicador < mediana) : [];
+
+        const mediaAlto = media(alto.map(d => ({ v: d.acertos })), 'v');
+        const mediaBaixo = media(baixo.map(d => ({ v: d.acertos })), 'v');
+        const dif = (mediaAlto !== null && mediaBaixo !== null) ? (mediaAlto - mediaBaixo) : null;
+
+        const descricaoCorrel = (c) => {
+            if (c === null) return 'dados insuficientes';
+            const forca = Math.abs(c) >= 0.5 ? 'forte' : (Math.abs(c) >= 0.3 ? 'moderada' : 'fraca');
+            const sinal = c >= 0 ? 'positiva' : 'negativa';
+            return 'correlação ' + forca + ' e ' + sinal;
+        };
+
+        const cards = [
+            { classe: '', rotulo: 'Escolas comparadas', valor: comAlura.length.toLocaleString('pt-BR'), detalhe: dados.length + ' escolas com resultado da prova' },
+            { classe: 'teal', rotulo: 'Correlação com desempenho', valor: correl !== null ? correl.toFixed(2).replace('.', ',') : '-', detalhe: descricaoCorrel(correl) + ' (indicador principal × acertos)' },
+            { classe: 'blue', rotulo: 'Acerto médio · alto engajamento', valor: mediaAlto !== null ? pct(mediaAlto) : '-', detalhe: alto.length + ' escolas acima da mediana' },
+            { classe: 'rose', rotulo: 'Acerto médio · baixo engajamento', valor: mediaBaixo !== null ? pct(mediaBaixo) : '-', detalhe: baixo.length + ' escolas abaixo da mediana' },
+            { classe: 'amber', rotulo: 'Diferença entre grupos', valor: dif !== null ? (dif >= 0 ? '+' : '') + (dif * 100).toFixed(1).replace('.', ',') + ' p.p.' : '-', detalhe: correlAcessos !== null ? 'correlação acessos × acertos: ' + correlAcessos.toFixed(2).replace('.', ',') : '-' }
+        ];
+
+        document.getElementById('kpi-grid').innerHTML = cards.map(c =>
+            '<div class="kpi ' + c.classe + '"><h4>' + c.rotulo + '</h4><div class="valor">' + c.valor + '</div><div class="detalhe">' + c.detalhe + '</div></div>'
+        ).join('');
+    }
+
+    function criarGrafico(id, config) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        if (graficos[id]) graficos[id].destroy();
+        graficos[id] = new Chart(canvas.getContext('2d'), config);
+    }
+
+    function graficoScatter1(dados) {
+        const ano = document.getElementById('filtro-ano').value;
+        const def = INDICADOR_PRINCIPAL[ano];
+        const titulo = document.getElementById('titulo-scatter1');
+        titulo.textContent = def
+            ? def.titulo + ' × acertos na prova'
+            : 'Selecione um ano para ver o indicador principal × acertos';
+
+        const pontos = dados
+            .filter(d => d.indicador !== null && d.acertos !== null)
+            .map(d => ({ x: d.indicador, y: d.acertos * 100, escola: d.escola }));
+
+        const tipo = def ? def.tipo : 'indice';
+
+        criarGrafico('chart-scatter1', {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: def ? def.titulo : 'Indicador',
+                    data: pontos,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#7c3aed',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ctx.raw.escola + ' — ' + (def ? def.titulo + ': ' + formatarIndicador(ctx.raw.x, tipo) : '') + ' | Acertos: ' + ctx.raw.y.toFixed(1) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: def ? def.titulo : 'Indicador' } },
+                    y: { title: { display: true, text: 'Acertos na prova (%)' }, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+    }
+
+    function graficoScatter2(dados) {
+        const pontos = dados
+            .filter(d => d.acessos !== null && d.acertos !== null)
+            .map(d => ({ x: d.acessos, y: d.acertos * 100, escola: d.escola }));
+
+        criarGrafico('chart-scatter2', {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Escolas',
+                    data: pontos,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#0284c7',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ctx.raw.escola + ' — ' + ctx.raw.x + ' acessos | Acertos: ' + ctx.raw.y.toFixed(1) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Alunos com acesso à Alura no período' } },
+                    y: { title: { display: true, text: 'Acertos na prova (%)' }, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+    }
+
+    function graficoFaixas(dados) {
+        const comAcesso = dados.filter(d => d.acessos !== null && d.acertos !== null);
+
+        const faixas = [
+            { rotulo: 'Sem acesso', teste: d => d.acessos === 0 },
+            { rotulo: 'Acesso baixo (<50%)', teste: d => d.acessos !== null && d.acessos < d.matriculas * 0.5 },
+            { rotulo: 'Acesso médio (50-90%)', teste: d => d.acessos !== null && d.acessos >= d.matriculas * 0.5 && d.acessos < d.matriculas * 0.9 },
+            { rotulo: 'Acesso alto (>90%)', teste: d => d.acessos !== null && d.acessos >= d.matriculas * 0.9 }
+        ];
+
+        const dados_ = faixas.map(f => {
+            const itens = comAcesso.filter(f.teste);
+            return { rotulo: f.rotulo, media: media(itens.map(d => ({ v: d.acertos })), 'v'), n: itens.length };
+        });
+
+        criarGrafico('chart-faixas', {
+            type: 'bar',
+            data: {
+                labels: dados_.map(d => d.rotulo + ' (n=' + d.n + ')'),
+                datasets: [{
+                    label: 'Acerto médio',
+                    data: dados_.map(d => d.media === null ? null : d.media * 100),
+                    backgroundColor: ['#e11d48', '#d97706', '#0284c7', '#0d9488'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => 'Acerto médio: ' + ctx.parsed.y.toFixed(1) + '%' } }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 }, maxRotation: 20 } },
+                    y: { title: { display: true, text: 'Acerto médio (%)' }, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+    }
+
+    function graficoRanking(dados) {
+        const top = [...dados]
+            .filter(d => d.acertos !== null)
+            .sort((a, b) => b.acertos - a.acertos)
+            .slice(0, 15);
+
+        const acessos = top.map(d => d.acessos || 0);
+        const max = Math.max(...acessos, 1);
+        const min = Math.min(...acessos, 0);
+
+        criarGrafico('chart-ranking', {
+            type: 'bar',
+            data: {
+                labels: top.map(d => d.escola),
+                datasets: [{
+                    label: '% de acertos',
+                    data: top.map(d => d.acertos * 100),
+                    backgroundColor: top.map(d => {
+                        if (d.acessos === null) return '#cbd5e1';
+                        const t = (d.acessos - min) / ((max - min) || 1);
+                        return t > 0.66 ? '#0d9488' : (t > 0.33 ? '#0284c7' : '#d97706');
+                    }),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const linha = top[ctx.dataIndex];
+                                return 'Acertos: ' + ctx.parsed.x.toFixed(1) + '% | Acessos Alura: ' + (linha.acessos === null ? 'sem dado' : linha.acessos);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: '% de acertos' }, ticks: { callback: v => v + '%' } },
+                    y: { ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    function renderTabela(dados) {
+        const ano = document.getElementById('filtro-ano').value;
+        const def = INDICADOR_PRINCIPAL[ano];
+        document.getElementById('th-indicador').textContent = def ? def.titulo : 'Indicador principal';
+
+        const ordenadas = [...dados]
+            .filter(d => d.acertos !== null)
+            .sort((a, b) => b.acertos - a.acertos);
+
+        const mediaAcertos = media(ordenadas, 'acertos') || 0;
+
+        const corpo = ordenadas.map((d, i) => {
+            let leitura = '<span class="tag cinza">sem dado</span>';
+            if (d.acessos !== null && d.acertos !== null) {
+                if (d.acertos >= mediaAcertos && (d.indiceAcesso || 0) >= 0.9) leitura = '<span class="tag verde">Engajamento e resultado</span>';
+                else if (d.acertos < mediaAcertos && (d.indiceAcesso || 0) >= 0.9) leitura = '<span class="tag ambar">Usa a plataforma, resultado abaixo</span>';
+                else if (d.acertos >= mediaAcertos) leitura = '<span class="tag cinza">Bom resultado, pouco uso</span>';
+                else leitura = '<span class="tag vermelho">Atenção: uso e resultado</span>';
+            }
+
+            return '<tr>' +
+                '<td class="num">' + (i + 1) + '</td>' +
+                '<td>' + (d.escola || '-') + '</td>' +
+                '<td class="num">' + (d.acessos !== null ? d.acessos.toLocaleString('pt-BR') : '-') + '</td>' +
+                '<td class="num">' + (def && d.indicador !== null ? formatarIndicador(d.indicador, def.tipo) : '-') + '</td>' +
+                '<td class="num">' + pct(d.acertos) + '</td>' +
+                '<td class="num">' + pct(d.participacao) + '</td>' +
+                '<td class="num">' + pct(d.port) + '</td>' +
+                '<td class="num">' + pct(d.mat) + '</td>' +
+                '<td>' + leitura + '</td>' +
+                '</tr>';
+        }).join('');
+
+        const tbody = document.querySelector('#tabela tbody');
+        tbody.innerHTML = ordenadas.length
+            ? corpo
+            : '<tr><td colspan="9" style="text-align:center; padding:20px; color:#64748b;">Sem dados para o filtro selecionado.</td></tr>';
+    }
+
+    function aplicarFiltros() {
+        const dados = cruzar();
+        renderKpis(dados);
+        renderTabela(dados);
+        graficoScatter1(dados);
+        graficoScatter2(dados);
+        graficoFaixas(dados);
+        graficoRanking(dados);
+    }
+
+    (async () => {
+        if (await verificarSessao()) {
+            await carregarDados();
+        }
+    })();
+</script>
+</body>
+</html>
