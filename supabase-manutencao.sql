@@ -1,6 +1,13 @@
 -- ============================================================================
 --  PLATAFORMA DE DADOS EDUCACIONAIS - Manutenção do banco (Supabase SQL Editor)
 --  Rode os blocos na ordem. Todos são idempotentes (podem rodar várias vezes).
+--
+--  STATUS (20/10/2026): Blocos 0, 1, 3 e 4 JÁ APLICADOS neste projeto.
+--    - Visão vw_resultados_consolidados criada (520 linhas)
+--    - Dedupe: dados_educacionais 5.720 -> 520 | resultados_alura 153 -> 51 (por ano)
+--    - Políticas: DELETE e INSERT só para ADM
+--    - Coluna total_alunos criada
+--  Execute este arquivo novamente apenas se recriar o banco do zero.
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
