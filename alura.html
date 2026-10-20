@@ -179,12 +179,12 @@
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
                     <td>${item.ano ?? '-'}</td>
                     <td><strong>${item.escola || '-'}</strong></td>
-                    <td class="text-right">${item.matriculas_ativas ?? 0}</td>
-                    <td class="text-right">${item.alunos_com_acessos_no_periodo ?? 0}</td>
+                    <td class="text-right">${item.matriculas_ativas ?? '-'}</td>
+                    <td class="text-right">${item.alunos_com_acessos_no_periodo ?? '-'}</td>
                     <td class="text-right"><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
-                    <td class="text-right">${item.cursos_concluidos ?? 0}</td>
-                    <td class="text-right">${item.projetos_enviados ?? 0}</td>
-                    <td class="text-right">${item.exercicios_realizados ?? 0}</td>
+                    <td class="text-right">${item.cursos_concluidos ?? '-'}</td>
+                    <td class="text-right">${item.projetos_enviados ?? '-'}</td>
+                    <td class="text-right">${item.exercicios_realizados ?? '-'}</td>
                 </tr>
             `;
         }).join('');
