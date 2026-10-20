@@ -35,7 +35,6 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 |---|---|---|
 | `index.html` | público | Login e painel de módulos |
 | `dashboard.html` | autenticado | **Seção 1: Prova Paulista** (KPIs, ranking, dispersão, disciplinas, evolução) e **Seção 2: Plataforma Alura** (KPIs, indicador principal por ano, engajamento, evolução) — analyzes **totalmente separadas** |
-| `comparativo.html` | autenticado | **Análise cruzada** Alura × Prova Paulista (correlação, faixas de engajamento, leitura por escola) |
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
@@ -105,8 +104,7 @@ Cada ano tem **um** indicador de avaliação — os demais nem existem na planil
 | 2024 | Índice de Projetos Enviados | `indice_de_projetos_enviados` | percentual (ex.: 20,0%) |
 
 O dashboard destaca o indicador do ano selecionado em cards (média da rede, melhor e menor escola)
-e em um gráfico Top 10. Essa configuração fica em `INDICADOR_PRINCIPAL` no `dashboard.html`
-e no `comparativo.html`.
+e em um gráfico Top 10. Essa configuração fica em `INDICADOR_PRINCIPAL` no `dashboard.html`.
 
 ## 5. Importação de planilhas (Área Administrativa)
 
@@ -161,9 +159,8 @@ Os blocos de dedupe já foram aplicados em 20/10/2026 (5.720 → 520 linhas na P
 3. **Perfil de competências** — 24 colunas de disciplinas revelam onde a rede falha
    (hoje: Português ~57% × Matemática ~46%).
 
-Bônus (página `comparativo.html`): cruzar o engajamento na Alura com o resultado da prova —
-a correlação atual é 0,38 (moderada e positiva) e as escolas de alto engajamento têm
-~3,9 p.p. a mais de acerto.
+> As duas fontes (Prova Paulista e Plataforma Alura) são analisadas **separadamente** por
+> desenho: cada uma tem seus próprios filtros, indicadores e gráficos, sem cruzamento.
 
 ## 9. Desenvolvimento local
 
