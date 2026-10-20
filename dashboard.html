@@ -667,10 +667,36 @@
         });
     }
 
+    // Consolida a Alura por escola (média entre os anos disponíveis)
+    function aluraAgregada() {
+        const mapa = {};
+        dadosAlura.forEach(r => {
+            const chave = String(r.escola || '').trim().toLowerCase();
+            if (!mapa[chave]) mapa[chave] = { escola: r.escola, registros: [] };
+            mapa[chave].registros.push(r);
+        });
+
+        return Object.values(mapa).map(grupo => {
+            const media = (campo) => {
+                const valores = grupo.registros.map(r => num(r[campo])).filter(v => v !== null);
+                if (!valores.length) return null;
+                return valores.reduce((a, b) => a + b, 0) / valores.length;
+            };
+
+            return {
+                escola: grupo.escola,
+                qtdAnos: grupo.registros.length,
+                matriculas_ativas: media('matriculas_ativas'),
+                alunos_com_acessos_no_periodo: media('alunos_com_acessos_no_periodo'),
+                indice_de_acessos_no_periodo: taxa(media('indice_de_acessos_no_periodo'))
+            };
+        });
+    }
+
     function graficoAlura() {
-        const dados = [...dadosAlura]
-            .filter(r => !ehTotal(r.escola) && taxa(r.indice_de_acessos_no_periodo) !== null)
-            .sort((a, b) => taxa(b.indice_de_acessos_no_periodo) - taxa(a.indice_de_acessos_no_periodo))
+        const dados = aluraAgregada()
+            .filter(r => r.indice_de_acessos_no_periodo !== null)
+            .sort((a, b) => b.indice_de_acessos_no_periodo - a.indice_de_acessos_no_periodo)
             .slice(0, 10);
 
         criarGrafico('chart-alura', {
@@ -707,8 +733,7 @@
 
     function graficoCruze(escolas) {
         const mapaAlura = {};
-        dadosAlura.forEach(r => {
-            if (ehTotal(r.escola)) return;
+        aluraAgregada().forEach(r => {
             const chave = String(r.escola || '').trim().toLowerCase();
             if (!mapaAlura[chave]) mapaAlura[chave] = r;
         });
@@ -762,9 +787,9 @@
     function renderTabela(escolas) {
         const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
         const mapaAlura = {};
-        dadosAlura.forEach(r => {
+        aluraAgregada().forEach(r => {
             const chave = String(r.escola || '').trim().toLowerCase();
-            if (!ehTotal(r.escola) && !mapaAlura[chave]) mapaAlura[chave] = r;
+            if (!mapaAlura[chave]) mapaAlura[chave] = r;
         });
 
         const ordenadas = [...escolas]
