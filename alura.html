@@ -93,6 +93,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Ano</th>
                             <th>Escola</th>
                             <th class="text-right">Matrículas</th>
                             <th class="text-right">Acessos</th>
@@ -103,7 +104,7 @@
                         </tr>
                     </thead>
                     <tbody id="lista-resultados">
-                        <tr><td colspan="7">Carregando dados da Alura...</td></tr>
+                        <tr><td colspan="8">Carregando dados da Alura...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -176,6 +177,7 @@
             const ehTotal = item.escola && item.escola.trim().toLowerCase() === 'total';
             return `
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
+                    <td>${item.ano ?? '-'}</td>
                     <td><strong>${item.escola || '-'}</strong></td>
                     <td class="text-right">${item.matriculas_ativas ?? 0}</td>
                     <td class="text-right">${item.alunos_com_acessos_no_periodo ?? 0}</td>
@@ -201,17 +203,16 @@
         // A linha "Total" ja e o subtotal da planilha: nao pode ser somada junto das escolas
         const escolas = lista.filter(item => !item.escola || item.escola.trim().toLowerCase() !== 'total');
 
-        const totMatriculas = escolas.reduce((acc, curr) => acc + (curr.matriculas_ativas || 0), 0);
-        const totAcessos = escolas.reduce((acc, curr) => acc + (curr.alunos_com_acessos_no_periodo || 0), 0);
-        const totCursos = escolas.reduce((acc, curr) => acc + (curr.cursos_concluidos || 0), 0);
-        const totProjetos = escolas.reduce((acc, curr) => acc + (curr.projetos_enviados || 0), 0);
-        const totExercicios = escolas.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0);
+        // Algumas planilhas (2025/2026) nao possuem todas as colunas: nesse caso mostra "-" em vez de 0
+        const possuiCampo = (campo) => escolas.some(r => r[campo] !== null && r[campo] !== undefined);
+        const somar = (campo) => escolas.reduce((acc, curr) => acc + (curr[campo] || 0), 0);
+        const exibir = (campo) => possuiCampo(campo) ? somar(campo).toLocaleString('pt-BR') : '-';
 
-        document.getElementById('tot-matriculas').textContent = totMatriculas.toLocaleString('pt-BR');
-        document.getElementById('tot-acessos').textContent = totAcessos.toLocaleString('pt-BR');
-        document.getElementById('tot-cursos').textContent = totCursos.toLocaleString('pt-BR');
-        document.getElementById('tot-projetos').textContent = totProjetos.toLocaleString('pt-BR');
-        document.getElementById('tot-exercicios').textContent = totExercicios.toLocaleString('pt-BR');
+        document.getElementById('tot-matriculas').textContent = exibir('matriculas_ativas');
+        document.getElementById('tot-acessos').textContent = exibir('alunos_com_acessos_no_periodo');
+        document.getElementById('tot-cursos').textContent = exibir('cursos_concluidos');
+        document.getElementById('tot-projetos').textContent = exibir('projetos_enviados');
+        document.getElementById('tot-exercicios').textContent = exibir('exercicios_realizados');
     }
 
     // Preenche o seletor de anos com os anos disponiveis no banco
