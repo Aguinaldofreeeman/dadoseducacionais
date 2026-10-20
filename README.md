@@ -34,7 +34,8 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | Arquivo | Acesso | Função |
 |---|---|---|
 | `index.html` | público | Login e painel de módulos |
-| `dashboard.html` | autenticado | **Seção 1: Prova Paulista** (KPIs, ranking, dispersão, disciplinas, evolução) e **Seção 2: Plataforma Alura** (KPIs, indicador principal por ano, engajamento, evolução) — analyzes **totalmente separadas** |
+| `dashboard.html` | autenticado | **Dashboard da Prova Paulista**: KPIs, ranking, dispersão participação × desempenho, perfil de competências e evolução por edição |
+| `dashboard-alura.html` | autenticado | **Dashboard da Plataforma Alura**: indicador principal de cada ano, engajamento por escola e evolução do uso da plataforma |
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
@@ -160,7 +161,9 @@ Os blocos de dedupe já foram aplicados em 20/10/2026 (5.720 → 520 linhas na P
    (hoje: Português ~57% × Matemática ~46%).
 
 > As duas fontes (Prova Paulista e Plataforma Alura) são analisadas **separadamente** por
-> desenho: cada uma tem seus próprios filtros, indicadores e gráficos, sem cruzamento.
+> desenho: cada uma tem dashboard, filtros, indicadores e gráficos próprios, sem cruzamento.
+> O acesso rápido está nos botões do topo direito das páginas `resultados_prova_paulista.html`
+> ("Dashboard Prova Paulista") e `alura.html` ("Dashboard Alura").
 
 ## 9. Desenvolvimento local
 
