@@ -498,6 +498,14 @@
         }
     });
 // Lógica para leitura e pré-visualização da planilha da Alura
+    // Ajusta nomes de colunas que divergem entre a planilha oficial e o banco
+    function ajustarColunaAlura(coluna) {
+        if (coluna === 'total_de_acertos_ate_2_tentativa') return 'total_de_acertos_ate_2a_tentativa';
+        if (coluna === 'indice_de_exercicios_corretos_ate_2_tentativa') return 'indice_de_exercicios_corretos_ate_2a_tentativa';
+        if (coluna === 'nome_da_escola') return 'escola';
+        return coluna;
+    }
+
     let dadosPlanilhaProcessados = [];
 
     document.getElementById('btn-ler-planilha').addEventListener('click', () => {
@@ -523,7 +531,7 @@
         const file = fileInput.files[0];
         const reader = new FileReader();
 
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
@@ -535,7 +543,13 @@
                     throw new Error('A planilha selecionada está vazia.');
                 }
 
+                // Colunas do banco que existem de fato (evita erro de gravação por coluna divergente)
+                const { data: amostraAlura } = await supabaseClient.from('resultados_alura').select('*').limit(1);
+                const colunasBanco = (amostraAlura && amostraAlura[0]) ? Object.keys(amostraAlura[0]) : null;
+
                 // Normaliza os cabeçalhos para o padrão da tabela no Supabase
+                const colunasIgnoradas = [];
+
                 dadosPlanilhaProcessados = jsonRows.map(row => {
                     let item = { ano: parseInt(anoSelect) };
                     
@@ -545,17 +559,30 @@
                             .replace(/[^a-z0-9]/g, "_")
                             .replace(/_+/g, "_");
 
+                        // Ajusta nomes que divergem entre a planilha e o banco
+                        const colBanco = ajustarColunaAlura(colClean);
+
+                        // Descarta colunas que não existem na tabela (evita falha na gravação)
+                        if (colunasBanco && colBanco !== 'ano' && colBanco.indexOf('escola') < 0 && colunasBanco.indexOf(colBanco) < 0) {
+                            if (colunasIgnoradas.indexOf(colBanco) < 0) colunasIgnoradas.push(colBanco);
+                            return;
+                        }
+
                         // Mapeia o nome da escola
-                        if (colClean === 'escola' || colClean === 'nome_da_escola') {
+                        if (colBanco === 'escola') {
                             item.escola = row[key];
                         } else {
-                            item[colClean] = row[key];
+                            item[colBanco] = row[key];
                         }
                     });
                     return item;
                 });
 
-                previewEl.innerHTML = `<strong>Sucesso:</strong> Leitura concluída. <strong>${dadosPlanilhaProcessados.length}</strong> registros encontrados na aba "${firstSheetName}" para o ano <strong>${anoSelect}</strong>.`;
+                const avisoIgnoradas = colunasIgnoradas.length
+                    ? ` <span style="color:#b45309;">Colunas ignoradas (não existem no banco): ${colunasIgnoradas.join(', ')}.</span>`
+                    : '';
+
+                previewEl.innerHTML = `<strong>Sucesso:</strong> Leitura concluída. <strong>${dadosPlanilhaProcessados.length}</strong> registros encontrados na aba "${firstSheetName}" para o ano <strong>${anoSelect}</strong>.${avisoIgnoradas}`;
                 previewEl.style.display = 'block';
                 btnConfirmar.disabled = false;
 
