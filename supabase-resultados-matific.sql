@@ -35,4 +35,3 @@ create policy "Delete apenas ADM em resultados_matific" on public.resultados_mat
   );
 
 grant select, insert, delete on public.resultados_matific to authenticated;
-notify pgrst, 'reload schema';
