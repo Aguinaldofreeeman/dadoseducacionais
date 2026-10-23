@@ -1,0 +1,515 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Painel Prova Paulista e Alura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra de filtros, 5 cards-resumo, ranking em barras, duas linhas do tempo lado a lado, tabela filtrável. Tema claro único (pedido do usuário). */
+:root{
+  color-scheme:light;
+  --bg:#f2f5f9; --surface:#ffffff; --ink:#13263d; --ink2:#4a5b70; --muted:#78879a;
+  --line:#dfe5ec; --grid:#edf0f4; --track:#eef2f6;
+  --pp:#2a78d6; --alu:#eb6834; --rede:#5b6b80; --ctx:#cdd5df;
+  --good:#17754a; --good-bg:#e5f3ec; --bad:#b3302f; --bad-bg:#fbe9e8; --flat:#5a6677; --flat-bg:#eaeef3;
+  --accent:#1d4f91; --accent-bg:#e7eef8;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45;padding-inline:clamp(16px,3vw,32px);padding-block:20px 40px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{font:inherit;font-size:14px;font-weight:500;padding:9px 16px;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;background:none;color:var(--ink2);cursor:pointer}
+.tabs button:hover{color:var(--ink)}.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.dz{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:#f8fafc;cursor:pointer;color:var(--ink2)}
+.dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-bg)}.dz b{color:var(--ink);font-size:15px}.dz span{font-size:12.5px}
+.dz input{position:absolute;opacity:0;width:1px;height:1px}.dz:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:not-allowed}.btn.ghost{background:var(--surface);color:var(--accent)}.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{margin:12px 0;padding:10px 12px;border-radius:8px;background:var(--flat-bg);color:var(--ink)}
+.note.ok{background:var(--good-bg);color:#0f4f31}.note.bad{background:var(--bad-bg);color:#7d1f1e}
+.warns{margin:12px 0 0;padding-left:20px;color:var(--ink2);font-size:13px}.warns li{margin:3px 0}
+.how{margin:8px 0 0;padding-left:20px;color:var(--ink2);line-height:1.6;max-width:80ch}.how li{margin:4px 0}
+h1{font-size:clamp(20px,2.4vw,26px);font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:15px;font-weight:600;margin:0}
+.sub{color:var(--ink2);margin:2px 0 0}
+.head{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:flex-end}
+.stamp{color:var(--muted);font-size:12px}
+.bar-ctl{display:flex;flex-wrap:wrap;gap:12px 24px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.ctl{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ctl>label,.lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--grid)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+button:focus-visible,select:focus-visible,input:focus-visible,.brow:focus-visible,th button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .k{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card .v{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.card .v small{font-size:14px;font-weight:500;color:var(--ink2);margin-left:3px}
+.card .n{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.card .m{font-size:12px;color:var(--ink2)}
+.card .row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink2);border-top:1px solid var(--grid);padding-top:7px;margin-top:auto}
+.card .row b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill.up{background:var(--good-bg);color:var(--good)} .pill.down{background:var(--bad-bg);color:var(--bad)}
+.pill.flat{background:var(--flat-bg);color:var(--flat)} .pill.nd{background:transparent;color:var(--muted);font-weight:500}
+.sit{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;background:var(--track)}
+.sit span{display:block;min-width:0}
+.sit .up{background:var(--good)} .sit .down{background:var(--bad)} .sit .flat{background:#a3aebb}
+.sitnum{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px}
+.sitnum b{font-size:20px;font-weight:700;margin-right:3px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.ph{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;align-items:flex-start;margin-bottom:12px}
+.ph p{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+.bars{display:flex;flex-direction:column;gap:3px;max-height:620px;overflow:auto;padding-right:6px}
+.brow{display:grid;grid-template-columns:26px minmax(110px,250px) 1fr 58px;gap:8px;align-items:center;padding:3px 6px;border-radius:6px;cursor:pointer;background:none;border:0;font:inherit;color:inherit;text-align:left;width:100%}
+.brow:hover{background:var(--grid)} .brow.sel{background:var(--accent-bg)}
+.brow .r{color:var(--muted);font-size:11.5px;text-align:right}
+.brow .nm{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow .tr{position:relative;height:14px;background:var(--track);border-radius:3px}
+.brow .fl{position:absolute;inset:0 auto 0 0;border-radius:3px 4px 4px 3px;background:var(--c)}
+.brow.sel .fl{outline:2px solid var(--accent);outline-offset:1px}
+.brow .av{position:absolute;top:-3px;bottom:-3px;border-left:1.5px dashed var(--ink2);opacity:.7}
+.brow .vl{font-size:12.5px;font-weight:600;text-align:right}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink2);align-items:center}
+.legend i{display:inline-block;width:14px;height:0;border-top:2.5px solid var(--c);vertical-align:middle;margin-right:5px}
+.legend i.d{border-top-style:dashed}.legend i.dv{width:0;height:12px;border-top:0;border-left:1.5px dashed var(--ink2)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:12px}
+select,input[type=search]{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0;max-width:100%}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--sans);fill:var(--ink2);font-size:11.5px}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:8px 10px;border-radius:7px;max-width:260px;box-shadow:0 4px 14px rgba(19,38,61,.25);line-height:1.4}
+.tip b{font-weight:600}.tip .t{opacity:.75}
+.tools{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.tw{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:640px}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}
+th:nth-child(2),td:nth-child(2){text-align:left;white-space:normal;min-width:230px}
+th:first-child,td:first-child{text-align:right;color:var(--muted);width:44px}
+thead th{position:sticky;top:0;background:#f7f9fb;z-index:2;font-size:11.5px;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--line);padding:0}
+thead tr.g th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;padding:6px 10px;border-bottom:0}
+th button{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:9px 10px;text-align:inherit}
+th button:hover{background:var(--grid)}
+th[aria-sort="ascending"] button::after{content:" ▲";font-size:9px} th[aria-sort="descending"] button::after{content:" ▼";font-size:9px}
+tbody tr{cursor:pointer} tbody tr:hover{background:#f6f8fb} tbody tr.sel{background:var(--accent-bg)}
+td.hl{font-weight:600}
+.dl{font-size:12px}.dl.up{color:var(--good)}.dl.down{color:var(--bad)}.dl.flat{color:var(--flat)}
+.pv th,.pv td{text-align:left!important;color:var(--ink)!important;width:auto!important;white-space:nowrap}.pv th{color:var(--ink2)!important}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.foot{color:var(--muted);font-size:12px;line-height:1.55}
+@media (max-width:560px){.brow{grid-template-columns:22px minmax(80px,1fr) 1.1fr 50px;gap:6px}.card .v{font-size:26px}}
+@media (prefers-reduced-motion:no-preference){.fl{transition:width .25s ease}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1>Prova Paulista e Avaliação Alura · Regional 2026</h1>
+      <p class="sub" id="sub">Análise por escola, 1º ao 3º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.</p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs" aria-label="Seções"><button role="tab" aria-selected="true" data-t="painel">Painel</button><button role="tab" aria-selected="false" data-t="dados">Atualizar dados</button></nav>
+
+<div id="tabPainel" class="stack">
+  <section class="bar-ctl" aria-label="Filtros do painel">
+    <div class="ctl"><span class="lbl" id="l1">Período</span>
+      <div class="seg" role="group" aria-labelledby="l1" id="segPeriod">
+        <button data-v="0">1º Bim</button><button data-v="1">2º Bim</button><button data-v="2">3º Bim</button><button data-v="3">Acumulado</button></div></div>
+    <div class="ctl"><span class="lbl" id="l2">Indicador do ranking</span>
+      <div class="seg" role="group" aria-labelledby="l2" id="segInd">
+        <button data-v="pp">Prova Paulista (TEC)</button><button data-v="alu">Alura (média 0–10)</button></div></div>
+    <div class="ctl"><span class="lbl" id="l3">Recorte de escolas</span>
+      <div class="seg" role="group" aria-labelledby="l3" id="segCut">
+        <button data-v="all">Todas</button><button data-v="top">15 melhores</button><button data-v="bot">Prioritárias (15 piores)</button></div></div>
+  </section>
+
+  <section class="cards" id="cards" aria-label="Resumo"></section>
+
+  <section class="panel">
+    <div class="ph">
+      <div><h2 id="barTitle">Ranking por escola</h2><p id="barSub"></p></div>
+      <div class="legend" id="barLegend"></div>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph">
+      <div><h2>Evolução ao longo do ano</h2><p>Cada linha cinza é uma escola. Escolha uma escola para destacá-la contra a média da rede, ou clique numa barra ou linha da tabela.</p></div>
+      <div class="ctl"><label for="selSchool">Escola em foco</label><select id="selSchool"></select></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="ph" style="margin-bottom:6px"><div><h2 style="font-size:14px">Prova Paulista por bimestre</h2></div>
+          <div class="seg" role="group" aria-label="Medida da Prova Paulista" id="segPPM">
+            <button data-v="tec">TEC</button><button data-v="acertos">% Acertos</button><button data-v="part">% Participação</button></div></div>
+        <div class="legend" id="lg1" style="margin-bottom:6px"></div>
+        <div class="chart" id="chPP"></div>
+      </div>
+      <div>
+        <div class="ph" style="margin-bottom:6px"><div><h2 style="font-size:14px">Alura por avaliação mensal</h2><p>Duas avaliações por bimestre, nota de 0 a 10.</p></div></div>
+        <div class="legend" id="lg2" style="margin-bottom:6px"></div>
+        <div class="chart" id="chAlu"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="ph">
+      <div><h2>Tabela por escola</h2><p id="tblSub"></p></div>
+      <div class="tools">
+        <div class="ctl"><label for="q">Escola</label><input type="search" id="q" placeholder="Buscar pelo nome ou código"></div>
+        <div class="ctl"><label for="st">Status</label>
+          <select id="st"><option value="all">Todos</option><option value="up">Avanço</option><option value="down">Queda</option><option value="flat">Estável</option><option value="nd">Sem comparativo</option></select></div>
+      </div>
+    </div>
+    <div class="tw"><table id="tbl"></table></div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<section id="tabDados" class="stack" hidden>
+  <div class="panel">
+    <div class="ph"><div><h2>Atualizar com uma nova planilha</h2><p id="srcNow"></p></div>
+      <button class="btn ghost" id="btnReset" hidden>Voltar aos dados originais</button></div>
+    <label class="dz" id="dz" for="file"><b>Escolha o arquivo .xlsx ou arraste até aqui</b><span>O arquivo é lido no seu navegador e não é enviado para nenhum servidor.</span>
+      <input type="file" id="file" accept=".xlsx,.xls,.xlsm"></label>
+    <div id="upStatus" aria-live="polite"></div>
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn" id="btnApply" disabled>Aplicar ao painel</button></div>
+  </div>
+  <div class="panel">
+    <h2>Como preparar o arquivo do 4º bimestre</h2>
+    <ol class="how">
+      <li>Use a mesma planilha de hoje e acrescente os dados novos ao lado dos que já existem.</li>
+      <li>Na aba <b>Dados</b>, a linha 1 deve ter uma coluna "Escolas PP 4 BIM" seguida de "Total Alunos", "(%) Participação", "(%) Acertos" e "TEC". A linha "Total" é opcional.</li>
+      <li>Na aba <b>Avaliações</b>, acrescente os blocos "1ª AVALIAÇÃO - 4º BIM" e "2ª AVALIAÇÃO - 4º BIM". Cada um tem as colunas Escola, média entre quem não zerou, média das avaliações e índice de realização, como nos bimestres anteriores.</li>
+      <li>Os nomes das escolas precisam ser iguais nas duas abas. As demais abas são ignoradas.</li>
+      <li>Depois de aplicar, o painel passa a mostrar o 4º bimestre nos filtros, cards, gráficos e tabela. Os dados ficam salvos neste navegador até você voltar aos originais.</li>
+    </ol>
+  </div>
+</section>
+<div class="tip" id="tip" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+const DATA={"s":[{"n":"17 DE SETEMBRO - 33881","pp":[{"alunos":239,"part":0.9836639439906651,"acertos":0.5400629904446699,"tec":0.5782608695652174},{"alunos":229,"part":0.9805234327449787,"acertos":0.5057349665924277,"tec":0.4166666666666667},{"alunos":232,"part":0.98,"acertos":0.552,"tec":0.404}],"alu":[2.53,3.74,5.15,2.55,1.54,4.59],"idx":[0.451,0.622,0.828,0.485,0.311,0.802]},{"n":"ALCYR DA ROSA LIMA PROF - 33406","pp":[{"alunos":607,"part":0.945307372566178,"acertos":0.4409341594607476,"tec":0.5502824858757062},{"alunos":582,"part":0.9562077801071511,"acertos":0.4073268216540927,"tec":0.39763313609467454},{"alunos":611,"part":0.885,"acertos":0.427,"tec":0.349}],"alu":[4.74,6.02,5.35,2.26,5.25,0],"idx":[0.833,0.88,0.755,0.391,0.803,null]},{"n":"AMELIA LOPES ANDERS PROFA - 914198","pp":[{"alunos":756,"part":0.9257081774452165,"acertos":0.43611807613403236,"tec":0.49148936170212765},{"alunos":730,"part":0.9241662008570897,"acertos":0.3875468719163213,"tec":0.306951871657754},{"alunos":741,"part":0.947,"acertos":0.433,"tec":0.344}],"alu":[3.8,3.8,3.2,2.6,2.82,1.55],"idx":[0.797,0.78,0.61,0.631,0.65,0.36]},{"n":"ANTONIO AUGUSTO NETTO - 33832","pp":[{"alunos":649,"part":0.9356031128404669,"acertos":0.4462687228573961,"tec":0.5234042553191489},{"alunos":654,"part":0.9341491841491841,"acertos":0.4392919964819701,"tec":0.4},{"alunos":675,"part":0.882,"acertos":0.479,"tec":0.362}],"alu":[3.55,3.28,3.55,3.92,5.06,5.47],"idx":[0.654,0.677,0.646,0.746,0.82,0.913]},{"n":"ANTONIO DAUN - 33467","pp":[{"alunos":86,"part":0.9901960784313726,"acertos":0.4832373356963521,"tec":0.49583333333333335},{"alunos":81,"part":0.9947460595446584,"acertos":0.51953125,"tec":0.35454545454545455},{"alunos":76,"part":1,"acertos":0.514,"tec":0.444}],"alu":[5.12,4.86,4.56,4.39,4.99,4.77],"idx":[0.925,0.95,0.813,0.763,0.914,0.778]},{"n":"ANTONIO DE BAPTISTA PROF - 33561","pp":[{"alunos":367,"part":0.9595113438045375,"acertos":0.423471615720524,"tec":0.5494736842105263},{"alunos":376,"part":0.9100034614053306,"acertos":0.4137607799025122,"tec":0.3725},{"alunos":380,"part":0.892,"acertos":0.539,"tec":0.37}],"alu":[3.4,5.76,5.83,4.14,6.46,1.83],"idx":[0.615,0.804,0.797,0.507,0.8,0.196]},{"n":"ANTONIO REGINATO PROF - 43242","pp":[{"alunos":840,"part":0.974956133354602,"acertos":0.5322021016456282,"tec":0.5986013986013986},{"alunos":862,"part":0.9756790903348074,"acertos":0.5244903921059465,"tec":0.4361111111111111},{"alunos":864,"part":0.961,"acertos":0.589,"tec":0.441}],"alu":[4.5,4.78,4.72,4.19,4.9,2.09],"idx":[0.833,0.861,0.783,0.767,0.843,0.433]},{"n":"BALTAZAR DE GODOY MOREIRA PROF - 33856","pp":[{"alunos":735,"part":0.9494391716997411,"acertos":0.4503606040117196,"tec":0.5126984126984127},{"alunos":723,"part":0.9291338582677166,"acertos":0.39839609071742427,"tec":0.32903225806451614},{"alunos":723,"part":0.927,"acertos":0.473,"tec":0.332}],"alu":[0.32,3.13,5.11,0.98,2.06,5.01],"idx":[0.042,0.477,0.699,0.116,0.249,0.667]},{"n":"BENITO MARTINELLI PROF - 903693","pp":[{"alunos":641,"part":0.9117765273311897,"acertos":0.4173988502006725,"tec":0.5125},{"alunos":644,"part":0.9056335163717714,"acertos":0.38181659731148826,"tec":0.3298245614035088},{"alunos":624,"part":0.932,"acertos":0.435,"tec":0.367}],"alu":[1.56,1.52,4.21,0.29,2.85,0.8],"idx":[0.313,0.313,0.798,0.077,0.609,0.183]},{"n":"BICUDO MONSENHOR - 33753","pp":[{"alunos":616,"part":0.9704116638078902,"acertos":0.49995762173157604,"tec":0.5772151898734177},{"alunos":593,"part":0.9591061452513967,"acertos":0.46024176555395363,"tec":0.37155555555555553},{"alunos":580,"part":0.965,"acertos":0.503,"tec":0.37}],"alu":[4.28,5.06,5.67,4.93,5.9,5.65],"idx":[0.794,0.876,0.874,0.778,0.881,0.814]},{"n":"CASTRO ALVES - 33613","pp":[{"alunos":243,"part":0.9772727272727273,"acertos":0.6159248112360737,"tec":0.707936507936508},{"alunos":238,"part":0.9790919952210275,"acertos":0.5763440860215053,"tec":0.5278688524590164},{"alunos":232,"part":0.968,"acertos":0.633,"tec":0.52}],"alu":[6.38,4.94,6.18,5.52,6.73,5.96],"idx":[0.945,0.672,0.86,0.834,0.945,0.843]},{"n":"CULTURA E LIBERDADE - 33625","pp":[{"alunos":1215,"part":0.9583510412239694,"acertos":0.4845479037249794,"tec":0.5774744027303754},{"alunos":1187,"part":0.9588668555240794,"acertos":0.44246581724162026,"tec":0.4263888888888889},{"alunos":1172,"part":0.954,"acertos":0.471,"tec":0.397}],"alu":[4.08,5.18,5.04,2.87,3.99,0],"idx":[0.766,0.863,0.819,0.605,0.807,null]},{"n":"DIRCE BELLUZZO DE CAMPOS PROFA - 33558","pp":[{"alunos":333,"part":0.9650939777522056,"acertos":0.4731226584134224,"tec":0.6044444444444445},{"alunos":336,"part":0.9653446284174046,"acertos":0.42542826987091015,"tec":0.32134831460674157},{"alunos":331,"part":0.913,"acertos":0.47,"tec":0.379}],"alu":[4.56,4.01,4.06,3.93,4.84,3.58],"idx":[0.819,0.837,0.67,0.721,0.825,0.526]},{"n":"EDSON VIANEI ALVES PROF - 923000","pp":[{"alunos":215,"part":0.9968294229549778,"acertos":0.5537014563106796,"tec":0.6305555555555555},{"alunos":209,"part":0.9986842105263158,"acertos":0.4922742786224015,"tec":0.4647887323943662},{"alunos":202,"part":0.996,"acertos":0.558,"tec":0.435}],"alu":[5.59,5.71,5.31,5.51,4.82,7.94],"idx":[0.922,0.87,0.877,0.877,0.922,0.967]},{"n":"EDUARDO DE SOUZA PORTO CEL - 33522","pp":[{"alunos":200,"part":1,"acertos":0.48799182422074605,"tec":0.5413793103448276},{"alunos":205,"part":0.983502538071066,"acertos":0.44450757575757577,"tec":0.3689655172413793},{"alunos":202,"part":0.976,"acertos":0.491,"tec":0.393}],"alu":[1.76,5.59,6.12,6.9,6.97,6.7],"idx":[0.273,0.93,0.881,0.979,0.917,0.972]},{"n":"EMICO MATSUMOTO GEOGRAFA - 446920","pp":[{"alunos":215,"part":0.9907038512616202,"acertos":0.5351739565550127,"tec":0.5757009345794393},{"alunos":213,"part":0.9906166219839142,"acertos":0.5010071090047393,"tec":0.47735849056603774},{"alunos":208,"part":1,"acertos":0.551,"tec":0.426}],"alu":[5.16,5.87,6.24,6.02,6.94,6.37],"idx":[0.906,0.877,0.844,0.844,0.986,0.913]},{"n":"ERMELINDA CLARICE SANCHES PROFA - 33479","pp":[{"alunos":376,"part":0.989224887035106,"acertos":0.4300462675229611,"tec":0.4774193548387097},{"alunos":365,"part":0.9720229555236729,"acertos":0.40623753399818674,"tec":0.3339130434782609},{"alunos":369,"part":0.977,"acertos":0.434,"tec":0.39}],"alu":[4.19,4.52,2.9,2.06,3.46,1.31],"idx":[0.788,0.87,0.611,0.378,0.689,0.25]},{"n":"GABRIEL MONTEIRO DA SILVA - 33674","pp":[{"alunos":288,"part":1,"acertos":0.5957548814504882,"tec":0.63875},{"alunos":277,"part":0.9928934010152284,"acertos":0.5547727272727273,"tec":0.5202614379084968},{"alunos":278,"part":0.986,"acertos":0.596,"tec":0.546}],"alu":[5.85,6.34,5.4,4.93,4.78,4.65],"idx":[0.899,0.958,0.84,0.913,0.931,0.868]},{"n":"GRACIEMA BAGANHA RIBEIRO - 33534","pp":[{"alunos":324,"part":0.986223662884927,"acertos":0.4635566188197767,"tec":0.5017857142857143},{"alunos":318,"part":0.9979184013322231,"acertos":0.46094853683148335,"tec":0.3775700934579439},{"alunos":311,"part":0.953,"acertos":0.488,"tec":0.413}],"alu":[3.83,4.43,4.16,2.45,3.97,3.19],"idx":[0.635,0.781,0.685,0.504,0.78,0.664]},{"n":"HATSUE TOYOTA - 903673","pp":[{"alunos":415,"part":0.9527586206896552,"acertos":0.489136649514008,"tec":0.5606060606060606},{"alunos":409,"part":0.9524475524475524,"acertos":0.43647172236503856,"tec":0.38564102564102565},{"alunos":392,"part":0.97,"acertos":0.511,"tec":0.355}],"alu":[5.43,5.91,5.77,4.61,6.88,4.93],"idx":[0.878,0.903,0.888,0.724,0.938,0.632]},{"n":"HILMAR MACHADO DE OLIVEIRA - 33492","pp":[{"alunos":419,"part":0.9462566014290152,"acertos":0.43313613314263427,"tec":0.48125},{"alunos":406,"part":0.9249024707412223,"acertos":0.6301120351914221,"tec":0.5608695652173913},{"alunos":381,"part":0.902,"acertos":0.528,"tec":0.445}],"alu":[4.06,6.22,7.41,7.71,7.19,7.13],"idx":[0.814,0.951,0.931,0.961,0.923,1]},{"n":"IZIDORO DAUN - 33455","pp":[{"alunos":251,"part":0.9735638027452974,"acertos":0.5184301246353752,"tec":0.6158730158730159},{"alunos":240,"part":0.9734953064605191,"acertos":0.5158401813544914,"tec":0.31746031746031744},{"alunos":241,"part":0.968,"acertos":0.489,"tec":0.344}],"alu":[0.09,4.02,7.09,7.11,5.77,0],"idx":[0.016,0.656,0.859,0.938,0.873,null]},{"n":"JARDIM ALCIR RAINERI - 474629","pp":[{"alunos":577,"part":0.978937934125028,"acertos":0.460718255858799,"tec":0.6320987654320988},{"alunos":578,"part":0.9130144605116797,"acertos":0.4271356783919598,"tec":0.39751552795031053},{"alunos":569,"part":0.966,"acertos":0.474,"tec":0.424}],"alu":[5.64,5.69,5.74,5.57,6.02,6.67],"idx":[0.776,0.833,0.808,0.771,0.788,0.844]},{"n":"JARDIM SANTA ANTONIETA - 462688","pp":[{"alunos":281,"part":0.9733606557377049,"acertos":0.5061308840413318,"tec":0.500763358778626},{"alunos":262,"part":0.9797149122807017,"acertos":0.49912280701754386,"tec":0.4241935483870968},{"alunos":254,"part":0.976,"acertos":0.527,"tec":0.374}],"alu":[6.58,5.96,4.49,6.5,7.05,7.06],"idx":[0.878,0.859,0.87,0.819,0.885,0.897]},{"n":"JOAO WALFREDO ROTHERMUND PADRE - 907650","pp":[{"alunos":286,"part":0.9702085402184707,"acertos":0.42392823333183066,"tec":0.4461538461538462},{"alunos":284,"part":0.9625,"acertos":0.4209780621572212,"tec":0.2971830985915493},{"alunos":264,"part":0.942,"acertos":0.498,"tec":0.367}],"alu":[3.41,3.91,3.13,3,5.51,5.28],"idx":[0.728,0.834,0.675,0.682,0.775,0.743]},{"n":"JOSE ALFREDO DE ALMEIDA - 43254","pp":[{"alunos":439,"part":0.9577707555300201,"acertos":0.4186595440710603,"tec":0.4611764705882353},{"alunos":434,"part":0.9672727272727273,"acertos":0.3776873171352245,"tec":0.3435897435897436},{"alunos":419,"part":0.958,"acertos":0.432,"tec":0.35}],"alu":[0.29,3.14,3.04,0,1.59,1.55],"idx":[0.071,0.69,0.548,null,0.373,0.357]},{"n":"JOSE AUGUSTO BARTHOLO - 33686","pp":[{"alunos":77,"part":0.9941060903732809,"acertos":0.5109208457102918,"tec":0.5393939393939394},{"alunos":76,"part":0.9560878243512974,"acertos":0.48937728937728936,"tec":0.29333333333333333},{"alunos":76,"part":0.978,"acertos":0.52,"tec":0.342}],"alu":[3.44,4.16,3.61,3.1,4.39,4.27],"idx":[0.742,0.871,0.71,0.903,0.968,1]},{"n":"JOSE BONIFACIO DO COUTO - 33376","pp":[{"alunos":269,"part":0.9593137254901961,"acertos":0.42399838936984097,"tec":0.4868421052631579},{"alunos":271,"part":0.9859789684526791,"acertos":0.4120615445505368,"tec":0.3822784810126582},{"alunos":264,"part":0.967,"acertos":0.526,"tec":0.405}],"alu":[4.74,6.92,7.89,7.24,6.62,6.74],"idx":[0.878,0.866,0.939,0.915,0.8,0.813]},{"n":"JOSE CARLOS MONTEIRO - 26414","pp":[{"alunos":373,"part":0.9524982406755805,"acertos":0.43325181615478675,"tec":0.5547826086956522},{"alunos":361,"part":0.9321148825065274,"acertos":0.40965762149226076,"tec":0.37117117117117115},{"alunos":353,"part":0.965,"acertos":0.466,"tec":0.417}],"alu":[4.04,6.37,7.42,4.28,5.75,4.54],"idx":[0.796,0.982,0.929,0.602,0.841,0.741]},{"n":"LOURENCO DE ALMEIDA SENNE DR - 33704","pp":[{"alunos":279,"part":0.9953940634595702,"acertos":0.610347943967465,"tec":0.6485714285714286},{"alunos":273,"part":0.990073145245559,"acertos":0.5759242144177449,"tec":0.5161764705882353},{"alunos":267,"part":0.996,"acertos":0.625,"tec":0.488}],"alu":[5.75,6.24,6.09,4.55,4.67,4.6],"idx":[0.918,0.95,0.907,0.857,0.888,0.806]},{"n":"LYDIA YVONE GOMES MARQUES PROFA - 33388","pp":[{"alunos":311,"part":0.9342327150084317,"acertos":0.42893334498121777,"tec":0.5212121212121212},{"alunos":314,"part":0.9088983050847458,"acertos":0.4289431186075722,"tec":0.4},{"alunos":306,"part":0.889,"acertos":0.503,"tec":0.533}],"alu":[2.98,4.36,3.63,4.31,3.46,5.05],"idx":[0.643,0.754,0.651,0.683,0.543,0.74]},{"n":"MARIA CECILIA FERRAZ DE FREITAS PROFA - 47855","pp":[{"alunos":719,"part":0.9158468025298665,"acertos":0.49622391778262226,"tec":0.5148648648648648},{"alunos":698,"part":0.8867748554374184,"acertos":0.49603430688844014,"tec":0.36527777777777776},{"alunos":666,"part":0.883,"acertos":0.458,"tec":0.393}],"alu":[4.08,6.07,3.98,0,6.02,0],"idx":[0.474,0.75,0.48,null,0.744,null]},{"n":"MARIA IZABEL SAMPAIO VIDAL - 33819","pp":[{"alunos":664,"part":0.9485132708042306,"acertos":0.4372840431289289,"tec":0.4705202312138728},{"alunos":665,"part":0.8404149212048674,"acertos":0.4172332942555686,"tec":0.33658536585365856},{"alunos":655,"part":0.964,"acertos":0.452,"tec":0.344}],"alu":[3.83,4.66,3.91,3.31,3.69,4.04],"idx":[0.889,0.967,0.822,0.822,0.933,0.938]},{"n":"MAURICIO MILANI - 47703","pp":[{"alunos":454,"part":0.9484022280856054,"acertos":0.4428008181899031,"tec":0.5175438596491229},{"alunos":448,"part":0.9456849728424864,"acertos":0.3952480528532897,"tec":0.32456140350877194},{"alunos":437,"part":0.974,"acertos":0.429,"tec":0.356}],"alu":[5.37,6.47,6.45,6.98,6.5,5.82],"idx":[0.943,0.975,0.893,0.943,0.867,0.817]},{"n":"NASIB CURY - 917990","pp":[{"alunos":240,"part":0.9797619047619047,"acertos":0.4645925609691019,"tec":0.5271186440677966},{"alunos":227,"part":0.969735182849937,"acertos":0.42142045454545457,"tec":0.3522935779816514},{"alunos":229,"part":0.993,"acertos":0.459,"tec":0.365}],"alu":[4.05,4.2,4.12,5.09,6.31,6.25],"idx":[0.803,0.794,0.837,0.811,0.874,0.852]},{"n":"NELSON CABRINI PROF - 33698","pp":[{"alunos":363,"part":0.9137614678899083,"acertos":0.46010679461383686,"tec":0.47692307692307695},{"alunos":346,"part":0.803054032889585,"acertos":0.4265290297567122,"tec":0.3595505617977528},{"alunos":335,"part":0.89,"acertos":0.501,"tec":0.361}],"alu":[5.29,4.14,5.51,4.16,4.08,0],"idx":[0.804,0.92,0.795,0.661,0.732,null]},{"n":"NELY CARBONIERI DE ANDRADE PROFA - 33424","pp":[{"alunos":369,"part":0.9852452969383991,"acertos":0.48676491130046096,"tec":0.6463768115942029},{"alunos":351,"part":0.9836829836829837,"acertos":0.4475598610857247,"tec":0.39555555555555555},{"alunos":342,"part":0.982,"acertos":0.48,"tec":0.417}],"alu":[5.87,5.21,4.45,0.05,4.95,2.64],"idx":[0.898,0.867,0.695,0.007,0.613,0.382]},{"n":"NEUZA MARIA MARANA FEIJAO PROFA - 33777","pp":[{"alunos":235,"part":0.9614485981308412,"acertos":0.49154446546830655,"tec":0.5240506329113924},{"alunos":231,"part":0.9791418355184743,"acertos":0.48307873090481784,"tec":0.3684210526315789},{"alunos":237,"part":0.945,"acertos":0.532,"tec":0.371}],"alu":[0.04,5.18,5.52,2.52,3.36,4.67],"idx":[0.012,0.975,0.975,0.531,0.741,0.815]},{"n":"NORMA MONICO TRUZZI PROFA - 33443","pp":[{"alunos":162,"part":1,"acertos":0.45652524600742056,"tec":0.49615384615384617},{"alunos":152,"part":0.988256549232159,"acertos":0.5183549783549783,"tec":0.39183673469387753},{"alunos":152,"part":0.971,"acertos":0.595,"tec":0.587}],"alu":[5.51,6.51,5.53,4.81,4.87,5.92],"idx":[0.943,0.992,0.975,0.951,0.973,1]},{"n":"ORACINA CORREA DE MORAES RODINE PROFA - 43655","pp":[{"alunos":655,"part":0.9398222940226171,"acertos":0.4197118179553193,"tec":0.46556016597510375},{"alunos":629,"part":0.9177994902293968,"acertos":0.3914463521207574,"tec":0.31797235023041476},{"alunos":613,"part":0.937,"acertos":0.444,"tec":0.349}],"alu":[1.89,6.11,7.2,5.87,8.38,2.54],"idx":[0.372,0.899,0.858,0.696,0.922,0.303]},{"n":"RAFAEL PAES DE BARROS DOUTOR - 33510","pp":[{"alunos":256,"part":0.9256933542647828,"acertos":0.4114338757234902,"tec":0.48405797101449277},{"alunos":249,"part":0.9061822125813449,"acertos":0.3615188995491851,"tec":0.3582089552238806},{"alunos":245,"part":0.96,"acertos":0.411,"tec":0.493}],"alu":[3.34,4.69,4.51,3.66,6.18,6.16],"idx":[0.642,0.764,0.679,0.481,0.808,0.827]},{"n":"REIKO UEMURA TSUNOKAWA PROFA - 907662","pp":[{"alunos":460,"part":0.9606145251396648,"acertos":0.4593381294964029,"tec":0.5073825503355704},{"alunos":443,"part":0.8129748684979544,"acertos":0.4350996946290641,"tec":0.365034965034965},{"alunos":441,"part":0.905,"acertos":0.493,"tec":0.387}],"alu":[3.91,4.01,4.26,4.48,4.51,5.76],"idx":[0.724,0.832,0.796,0.811,0.803,0.79]},{"n":"RUTH MAMEDE DE GODOY PROFA - 33637","pp":[{"alunos":139,"part":0.9949494949494949,"acertos":0.4767841366447433,"tec":0.5419354838709678},{"alunos":140,"part":0.982089552238806,"acertos":0.3957843137254902,"tec":0.3096774193548387},{"alunos":135,"part":0.966,"acertos":0.593,"tec":0.4}],"alu":[3.73,5.33,6.64,6.52,5.56,6.18],"idx":[0.574,0.833,0.815,0.963,0.906,0.83]},{"n":"SEBASTIAO MONACO VEREADOR - 44568","pp":[{"alunos":944,"part":0.9243895671476138,"acertos":0.42771796906583615,"tec":0.5041237113402062},{"alunos":956,"part":0.9168387718573592,"acertos":0.42707479546369015,"tec":0.3464646464646465},{"alunos":951,"part":0.871,"acertos":0.489,"tec":0.351}],"alu":[4,7.07,6.62,6.98,5.8,5.43],"idx":[0.683,0.892,0.78,0.801,0.725,0.604]},{"n":"SYLVIA RIBEIRO DE CARVALHO PROFA - 47843","pp":[{"alunos":370,"part":0.9665021156558533,"acertos":0.4614734767151255,"tec":0.4483333333333333},{"alunos":371,"part":0.9638723254998246,"acertos":0.4166286616383091,"tec":0.353125},{"alunos":369,"part":0.965,"acertos":0.518,"tec":0.452}],"alu":[0.23,4.38,4.11,4.25,6.38,5.54],"idx":[0.035,0.823,0.772,0.669,0.832,0.757]},{"n":"VITU GIORGI DONA - 33790","pp":[{"alunos":252,"part":0.9621131270010672,"acertos":0.46175475136683153,"tec":0.5372093023255814},{"alunos":245,"part":0.9475409836065574,"acertos":0.4251755807671529,"tec":0.35802469135802467},{"alunos":240,"part":0.967,"acertos":0.47,"tec":0.342}],"alu":[4.07,4.67,4.34,3.13,4.64,2.23],"idx":[0.855,0.873,0.765,0.67,0.782,0.427]},{"n":"WALDEMAR MONIZ DA ROCHA BARROS DR - 33765","pp":[{"alunos":320,"part":0.9597855227882037,"acertos":0.5110276098676687,"tec":0.5803921568627451},{"alunos":313,"part":0.974851394604481,"acertos":0.4785655737704918,"tec":0.4304635761589404},{"alunos":306,"part":0.969,"acertos":0.516,"tec":0.397}],"alu":[5.81,4.83,5.18,4.08,4.37,3.18],"idx":[0.873,0.831,0.838,0.796,0.818,0.561]},{"n":"WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679","pp":[{"alunos":226,"part":0.971190781049936,"acertos":0.5442192406508707,"tec":0.604},{"alunos":218,"part":0.9645484949832775,"acertos":0.49904306220095696,"tec":0.46170212765957447},{"alunos":207,"part":0.935,"acertos":0.574,"tec":0.423}],"alu":[5.27,5.05,4.92,4.2,5.01,4.59],"idx":[0.869,0.905,0.784,0.847,0.871,0.848]}],"tot":{"tec":[0.5422580104009395,0.38582050838665055,0.397],"acertos":[0.47631778288580084,0.4536934677288555,0.499],"part":[0.956390977443609,0.9400220915542797,0.94],"alunos":[20805,20450,20200]},"nb":3};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let BIM=[],PERIOD=[];
+const small=new Set(['DA','DE','DO','DAS','DOS','E']);
+const ABBR={PROF:'Prof.',PROFA:'Profa.',DR:'Dr.',DRA:'Dra.',DONA:'Dona',JD:'Jd.'};
+function pretty(n){return n.toLowerCase().split(' ').map((w,i)=>{const u=w.toUpperCase();if(ABBR[u])return ABBR[u];if(small.has(u)&&i>0)return w;return w.charAt(0).toUpperCase()+w.slice(1)}).join(' ')}
+const mean=a=>{const v=a.filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((p,c)=>p+c,0)/v.length:null};
+let S=[],TOT={},NB=3,N=0,COLS=[],CUR=null,SRC={name:'planilha original'};
+function build(D){
+  CUR=D;NB=D.nb||D.s[0].pp.length;N=D.s.length;
+  S=D.s.map(r=>{const m=r.n.match(/^(.*) - (\d+)$/);
+    return {id:r.n,name:pretty(m?m[1]:r.n),code:m?m[2]:'',pp:r.pp,a:r.alu.map((v,i)=>(v==null||(v===0&&r.idx[i]==null))?null:v)}});
+  TOT=D.tot;
+  BIM=Array.from({length:NB},(_,i)=>`${i+1}º Bim`);
+  PERIOD=[...Array.from({length:NB},(_,i)=>`${i+1}º bimestre`),'acumulado do ano'];
+  COLS=[{k:'rank',t:'#',v:r=>r.rank},{k:'name',t:'Escola',v:r=>r.s.name},
+    {k:'val',t:'Resultado',v:r=>r.v},{k:'d',t:'Variação',v:r=>r.d},{k:'st',t:'Status',v:r=>({up:3,flat:2,down:1,nd:0})[r.st]},
+    ...BIM.map((_,i)=>({k:'p'+i,t:BIM[i],g:'pp',v:r=>r.s.pp[i].tec})),
+    ...BIM.map((_,i)=>({k:'a'+i,t:BIM[i],g:'alu',v:r=>val(r.s,'alu',i)}))];
+}
+const fmtP=(v,d=1)=>v==null?'—':(v*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
+const fmtN=(v,d=2)=>v==null?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtV=(ind,v)=>ind==='pp'?fmtP(v):fmtN(v);
+const fmtD=(ind,d)=>{if(d==null)return '—';const s=d>0?'+':d<0?'−':'';const a=Math.abs(d);
+  return s+(ind==='pp'?(a*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' pp':a.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}))};
+const THR={pp:0.005,alu:0.1}, COL={pp:'var(--pp)',alu:'var(--alu)'}, IND={pp:'Prova Paulista (TEC)',alu:'Alura (média)'};
+
+const st={period:2,ind:'pp',cut:'all',sel:null,ppm:'tec',q:'',stat:'all',sort:{k:'rank',d:1}};
+
+function val(s,ind,p){
+  if(ind==='pp')return p<NB?s.pp[p].tec:mean(s.pp.map(x=>x.tec));
+  return p<NB?mean([s.a[2*p],s.a[2*p+1]]):mean(s.a);
+}
+function lastB(ind){for(let b=NB-1;b>=0;b--){if(S.some(s=>val(s,ind,b)!=null))return b}return 0}
+function delta(s,ind,p){
+  if(p===0)return null;
+  let a,b; if(p===NB){a=val(s,ind,lastB(ind));b=val(s,ind,0);}else{a=val(s,ind,p);b=val(s,ind,p-1);}
+  return a==null||b==null?null:a-b;
+}
+const status=(ind,d)=>d==null?'nd':d>THR[ind]?'up':d<-THR[ind]?'down':'flat';
+const LBL={up:'Avanço',down:'Queda',flat:'Estável',nd:'Sem comparativo'}, ICO={up:'▲',down:'▼',flat:'●',nd:''};
+const pill=k=>`<span class="pill ${k}">${ICO[k]?ICO[k]+' ':''}${LBL[k]}</span>`;
+function redeVal(ind,p){
+  if(ind==='pp')return p<NB?TOT.tec[p]:mean(TOT.tec);
+  return mean(S.map(s=>val(s,'alu',p)));
+}
+function redeDelta(ind,p){
+  if(p===0)return null;
+  const a=p===NB?redeVal(ind,lastB(ind)):redeVal(ind,p), b=p===NB?redeVal(ind,0):redeVal(ind,p-1);
+  return a==null||b==null?null:a-b;
+}
+function ranking(ind,p){
+  const l=S.map(s=>({s,v:val(s,ind,p),d:delta(s,ind,p)})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v);
+  l.forEach((x,i)=>{x.rank=i+1;x.st=status(ind,x.d)});return l;
+}
+function view(){ // lista após recorte
+  const full=ranking(st.ind,st.period);
+  let l=full; if(st.cut==='top')l=full.slice(0,15); if(st.cut==='bot')l=full.slice(-15).reverse();
+  return {full,list:l};
+}
+const tipEl=$('#tip');
+function showTip(html,e){tipEl.innerHTML=html;tipEl.hidden=false;const w=tipEl.offsetWidth,h=tipEl.offsetHeight;
+  let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=Math.max(8,y)+'px'}
+const hideTip=()=>{tipEl.hidden=true};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- cards ---------- */
+function renderCards(){
+  const p=st.period, {full}=view(), ind=st.ind;
+  const dtxt=(i,d,p)=>{if(d==null)return '<span class="m">Primeira medição do ano</span>';const k=status(i,d);
+    return `<span class="pill ${k}">${ICO[k]} ${fmtD(i,d)}</span> <span class="m">${p===NB?BIM[lastB(i)].toLowerCase()+' vs 1º bim':'vs '+BIM[p-1].toLowerCase()}</span>`};
+  const ppV=redeVal('pp',p), aluV=redeVal('alu',p);
+  const ppb=BIM.map((_,i)=>`<span>${i+1}º <b>${fmtP(TOT.tec[i])}</b></span>`).join('');
+  const alb=BIM.map((_,i)=>`<span>${i+1}º <b>${fmtN(redeVal('alu',i))}</b></span>`).join('');
+  const cnt={up:0,down:0,flat:0,nd:0};full.forEach(x=>cnt[x.st]++);
+  const tot=full.length, pc=k=>tot?(cnt[k]/tot*100):0;
+  const wd=full.filter(x=>x.d!=null).sort((a,b)=>b.d-a.d);
+  const b=wd[0], w=wd[wd.length-1];
+  const sc=(x,tag)=>!x?'<div class="m" style="font-size:13px">O 1º bimestre é o ponto de partida. Escolha o 2º bimestre, o 3º ou o acumulado para ver o avanço.</div>':`<div class="n">${esc(x.s.name)}</div><div class="v" style="font-size:24px">${fmtD(ind,x.d)}</div><div class="m">${pill(x.st)} de ${fmtV(ind,val(x.s,ind,p===NB?0:p-1))} para ${fmtV(ind,val(x.s,ind,p===NB?lastB(ind):p))}</div><div class="row"><span>${tag}</span><span>Cód. <b>${x.s.code}</b></span></div>`;
+  const ppPart=p<NB?TOT.part[p]:mean(TOT.part), ppAc=p<NB?TOT.acertos[p]:mean(TOT.acertos);
+  $('#cards').innerHTML=`
+   <article class="card"><div class="k"><span class="dot" style="background:var(--pp)"></span>Prova Paulista · TEC</div>
+     <div class="v">${fmtP(ppV)}</div><div>${dtxt('pp',redeDelta('pp',p),p)}</div>
+     <div class="row"><span>Acertos <b>${fmtP(ppAc)}</b></span><span>Participação <b>${fmtP(ppPart)}</b></span></div>
+     <div class="row" style="margin-top:0;border-top:0;padding-top:0">${ppb}</div></article>
+   <article class="card"><div class="k"><span class="dot" style="background:var(--alu)"></span>Avaliação Alura · média</div>
+     <div class="v">${fmtN(aluV)}<small>de 10</small></div><div>${dtxt('alu',redeDelta('alu',p),p)}</div>
+     <div class="row">${alb}</div></article>
+   <article class="card"><div class="k">Situação · ${ind==='pp'?'Prova Paulista':'Alura'}</div>
+     ${p===0?'<div class="m" style="font-size:13px">O 1º bimestre é o ponto de partida. Escolha o 2º bimestre, o 3º ou o acumulado para ver avanço e queda.</div>':`
+     <div class="sitnum"><span style="color:var(--good)"><b>${cnt.up}</b>avanço</span><span style="color:var(--bad)"><b>${cnt.down}</b>queda</span><span style="color:var(--flat)"><b>${cnt.flat}</b>estável</span></div>
+     <div class="sit" role="img" aria-label="${cnt.up} em avanço, ${cnt.down} em queda, ${cnt.flat} estáveis"><span class="up" style="width:${pc('up')}%"></span><span class="down" style="width:${pc('down')}%"></span><span class="flat" style="width:${pc('flat')}%"></span></div>
+     <div class="m">${tot} escolas, ${p===NB?BIM[lastB(ind)].toLowerCase()+' contra 1º bim':BIM[p]+' contra '+BIM[p-1].toLowerCase()}. Estável: variação menor que ${ind==='pp'?'0,5 pp':'0,10 ponto'}.</div>`}</article>
+   <article class="card"><div class="k">Maior avanço · ${PERIOD[p]}</div>${sc(b,'Maior alta do período')}</article>
+   <article class="card"><div class="k">Menor avanço · ${PERIOD[p]}</div>${sc(w,'Menor alta ou maior queda')}</article>`;
+}
+
+/* ---------- barras ---------- */
+function renderBars(){
+  const {full,list}=view(), ind=st.ind, p=st.period;
+  const max=Math.max(...full.map(x=>x.v)), dom=ind==='pp'?Math.ceil(max*10)/10:Math.ceil(max);
+  const av=redeVal(ind,p);
+  $('#barTitle').textContent=`${IND[ind]} por escola · ${PERIOD[p]}`;
+  $('#barSub').textContent={all:`${list.length} escolas, da maior para a menor.`,top:'As 15 escolas com maior resultado, da primeira para a décima quinta.',bot:'Escolas prioritárias: as 15 com menor resultado, da última colocada para cima.'}[st.cut]+' Clique numa barra para ver a evolução da escola.';
+  $('#barLegend').innerHTML=`<span><i style="--c:${COL[ind]}"></i>${IND[ind]}</span><span><i class="dv"></i>Média da rede ${fmtV(ind,av)}</span>`;
+  $('#bars').innerHTML=list.map(x=>`<button class="brow${st.sel===x.s.id?' sel':''}" data-id="${esc(x.s.id)}" aria-label="${esc(x.s.name)}, ${fmtV(ind,x.v)}">
+    <span class="r">${x.rank}</span><span class="nm" title="${esc(x.s.name)}">${esc(x.s.name)}</span>
+    <span class="tr"><span class="fl" style="width:${x.v/dom*100}%;--c:${COL[ind]}"></span><span class="av" style="left:${av/dom*100}%"></span></span>
+    <span class="vl">${fmtV(ind,x.v)}</span></button>`).join('');
+}
+$('#bars').addEventListener('click',e=>{const b=e.target.closest('.brow');if(b)focus(b.dataset.id)});
+$('#bars').addEventListener('mousemove',e=>{const b=e.target.closest('.brow');if(!b)return hideTip();
+  const s=S.find(x=>x.id===b.dataset.id),ind=st.ind,p=st.period,d=delta(s,ind,p),k=status(ind,d);
+  showTip(`<b>${esc(s.name)}</b><br><span class="t">Cód. ${s.code}</span><br>${IND[ind]}: <b>${fmtV(ind,val(s,ind,p))}</b><br>${d==null?'Sem comparativo':LBL[k]+' '+fmtD(ind,d)}`,e)});
+$('#bars').addEventListener('mouseleave',hideTip);
+
+/* ---------- linhas ---------- */
+function niceDomain(vals,fixed){
+  if(fixed)return fixed;
+  const v=vals.filter(x=>x!=null),lo0=Math.min(...v),hi0=Math.max(...v),R=hi0-lo0||0.1;
+  const steps=[0.01,0.02,0.05,0.1,0.2,0.25,0.5,1,2];let step=steps.find(s=>R/s<=6)||2;
+  return {lo:Math.floor(lo0/step)*step,hi:Math.ceil(hi0/step)*step,step};
+}
+function drawLine(el,cfg){
+  const W=Math.max(300,el.clientWidth||600),H=300,m={l:46,r:16,t:16,b:cfg.groups?54:36};
+  const n=cfg.labels.length,iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const all=[...cfg.ctx.flat(),...cfg.rede,...(cfg.sel||[])];
+  const d=niceDomain(all,cfg.fixed);
+  const X=i=>m.l+16+(n>1?i*(iw-32)/(n-1):(iw-32)/2),Y=v=>m.t+ih-(v-d.lo)/(d.hi-d.lo)*ih;
+  const path=a=>{let s='',pen=false;a.forEach((v,i)=>{if(v==null){pen=false;return}s+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});return s};
+  let g='';
+  for(let t=d.lo;t<=d.hi+d.step/2;t+=d.step){const y=Y(t);g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${m.l-8}" y="${y+4}" text-anchor="end">${cfg.tick(t)}</text>`}
+  cfg.labels.forEach((l,i)=>{g+=`<text x="${X(i)}" y="${m.t+ih+18}" text-anchor="middle">${l}</text>`});
+  if(cfg.groups){cfg.groups.forEach((gr,gi)=>{const x1=X(gi*2),x2=X(gi*2+1);g+=`<text x="${(x1+x2)/2}" y="${m.t+ih+38}" text-anchor="middle" style="font-weight:600;fill:var(--ink)">${gr}</text>`;
+    if(gi>0){const xs=(X(gi*2-1)+x1)/2;g+=`<line x1="${xs}" x2="${xs}" y1="${m.t}" y2="${m.t+ih+42}" stroke="var(--line)" stroke-dasharray="3 3"/>`}})}
+  cfg.ctx.forEach(a=>{g+=`<path d="${path(a)}" fill="none" stroke="var(--ctx)" stroke-width="1" opacity=".75"/>`});
+  const draw=(a,color,w,dash,lab,pos)=>{let o=`<path d="${path(a)}" fill="none" stroke="${color}" stroke-width="${w}" ${dash?'stroke-dasharray="6 4"':''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    a.forEach((v,i)=>{if(v==null)return;o+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${color}" stroke="var(--surface)" stroke-width="2"/>`;
+      if(lab)o+=`<text x="${X(i)}" y="${Y(v)+pos}" text-anchor="middle" style="font-weight:600;fill:var(--ink);stroke:var(--surface);stroke-width:3.5px;paint-order:stroke">${cfg.fmt(v)}</text>`});return o};
+  g+=draw(cfg.rede,'var(--rede)',2,true,!cfg.sel,-10);
+  if(cfg.sel)g+=draw(cfg.sel,cfg.color,3,false,true,-10);
+  g+=`<line id="xh" y1="${m.t}" y2="${m.t+ih}" stroke="var(--ink2)" stroke-width="1" opacity="0"/><rect x="${m.l-10}" y="${m.t}" width="${iw+20}" height="${ih+10}" fill="transparent" id="ov"/>`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${cfg.aria}">${g}</svg>`;
+  const ov=el.querySelector('#ov'),xh=el.querySelector('#xh');
+  const at=e=>{const r=el.querySelector('svg').getBoundingClientRect(),x=e.clientX-r.left;let bi=0,bd=1e9;for(let i=0;i<n;i++){const dd=Math.abs(X(i)-x);if(dd<bd){bd=dd;bi=i}}return bi};
+  ov.addEventListener('mousemove',e=>{const i=at(e);xh.setAttribute('x1',X(i));xh.setAttribute('x2',X(i));xh.setAttribute('opacity','.5');
+    showTip(`<b>${cfg.tipLabel(i)}</b><br><span style="display:inline-block;width:10px;border-top:2px dashed #cfd8e3;margin-right:6px"></span>Média da rede: <b>${cfg.fmt(cfg.rede[i])}</b>${cfg.sel?`<br><span style="display:inline-block;width:10px;border-top:3px solid ${cfg.color==='var(--pp)'?'#6aa6ee':'#f59a73'};margin-right:6px"></span>${esc(cfg.selName)}: <b>${cfg.fmt(cfg.sel[i])}</b>`:''}`,e)});
+  ov.addEventListener('mouseleave',()=>{xh.setAttribute('opacity','0');hideTip()});
+}
+function renderLines(){
+  const s=S.find(x=>x.id===st.sel),m=st.ppm;
+  const mlabel={tec:'TEC',acertos:'% de acertos',part:'% de participação'}[m];
+  const redePP=m==='tec'?TOT.tec:m==='acertos'?TOT.acertos:TOT.part;
+  const lg=(c,sel,name)=>`<span><i class="d" style="--c:var(--rede)"></i>Média da rede</span>${sel?`<span><i style="--c:${c}"></i>${esc(name)}</span>`:''}<span><i style="--c:var(--ctx)"></i>Demais escolas</span>`;
+  $('#lg1').innerHTML=lg(COL.pp,s,s&&s.name);$('#lg2').innerHTML=lg(COL.alu,s,s&&s.name);
+  drawLine($('#chPP'),{labels:BIM,ctx:S.map(x=>x.pp.map(q=>q[m])),rede:redePP,sel:s?s.pp.map(q=>q[m]):null,color:COL.pp,selName:s&&s.name,
+    fmt:v=>fmtP(v),tick:v=>Math.round(v*100)+'%',aria:`Prova Paulista, ${mlabel}, por bimestre`,tipLabel:i=>`${BIM[i]} · ${mlabel}`});
+  const AL=BIM.flatMap(()=>['Av. 1','Av. 2']);
+  drawLine($('#chAlu'),{labels:AL,groups:BIM,ctx:S.map(x=>x.a),rede:AL.map((_,i)=>mean(S.map(x=>x.a[i]))),sel:s?s.a:null,color:COL.alu,selName:s&&s.name,
+    fixed:{lo:0,hi:10,step:2},fmt:v=>fmtN(v,2),tick:v=>v,aria:'Alura, nota por avaliação mensal',tipLabel:i=>`${AL[i]} do ${BIM[i>>1].toLowerCase()}`});
+}
+
+/* ---------- tabela ---------- */
+function renderTable(){
+  const {full}=view(),{list}=view(),ind=st.ind;
+  const q=st.q.trim().toLowerCase();
+  let rows=list.filter(r=>(!q||r.s.name.toLowerCase().includes(q)||r.s.code.includes(q)||r.s.id.toLowerCase().includes(q))&&(st.stat==='all'||r.st===st.stat));
+  const c=COLS.find(c=>c.k===st.sort.k);
+  if(st.sort.k==='rank'&&st.cut==='bot')rows=rows.slice().sort((a,b)=>b.rank-a.rank*1)&&rows.slice().sort((a,b)=>(b.rank-a.rank)*st.sort.d);
+  else rows=rows.slice().sort((a,b)=>{const x=c.v(a),y=c.v(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;
+    return (typeof x==='string'?x.localeCompare(y,'pt-BR'):x-y)*st.sort.d});
+  $('#tblSub').textContent=`${rows.length} de ${N} escolas. Resultado, variação e status seguem o indicador (${IND[ind]}) e o período (${PERIOD[st.period]}) escolhidos acima.`;
+  const sortAttr=k=>st.sort.k===k?(st.sort.d>0?'ascending':'descending'):'none';
+  const th=c=>`<th aria-sort="${sortAttr(c.k)}"><button data-k="${c.k}">${c.t}</button></th>`;
+  const head=`<thead><tr class="g"><th></th><th></th><th colspan="3">${IND[ind]} · ${PERIOD[st.period]}</th><th colspan="${NB}">Prova Paulista (TEC)</th><th colspan="${NB}">Alura (média)</th></tr><tr>${COLS.map(th).join('')}</tr></thead>`;
+  const body=rows.map(r=>`<tr data-id="${esc(r.s.id)}" class="${st.sel===r.s.id?'sel':''}"><td>${r.rank}</td>
+    <td>${esc(r.s.name)} <span style="color:var(--muted);font-size:12px">${r.s.code}</span></td>
+    <td class="hl">${fmtV(ind,r.v)}</td><td class="dl ${r.st}">${fmtD(ind,r.d)}</td><td>${pill(r.st)}</td>
+    ${BIM.map((_,i)=>`<td>${fmtP(r.s.pp[i].tec)}</td>`).join('')}${BIM.map((_,i)=>`<td>${fmtN(val(r.s,'alu',i))}</td>`).join('')}</tr>`).join('');
+  $('#tbl').innerHTML=head+`<tbody>${body}</tbody>`+(rows.length?'':'');
+  if(!rows.length)$('#tbl').insertAdjacentHTML('beforeend',`<tbody><tr><td colspan="${5+2*NB}" class="empty">Nenhuma escola com esses filtros.</td></tr></tbody>`);
+}
+$('#tbl').addEventListener('click',e=>{const b=e.target.closest('th button');if(b){const k=b.dataset.k;
+    st.sort=st.sort.k===k?{k,d:-st.sort.d}:{k,d:(k==='name'||k==='rank')?1:-1};return renderTable()}
+  const tr=e.target.closest('tbody tr[data-id]');if(tr)focus(tr.dataset.id)});
+
+/* ---------- estado ---------- */
+function focus(id){st.sel=st.sel===id?null:id;$('#selSchool').value=st.sel||'';renderBars();renderLines();renderTable();
+  if(st.sel)$('#chPP').scrollIntoView({block:'nearest',behavior:'smooth'})}
+function setSeg(sel,key,fn){const seg=$(sel);const sync=()=>$$(sel+' button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v)===String(st[key])));
+  seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const v=b.dataset.v;st[key]=isNaN(+v)?v:+v;sync();fn()});sync();return sync}
+function all(){renderCards();renderBars();renderTable()}
+const syncPeriod=setSeg('#segPeriod','period',()=>{st.sort={k:'rank',d:1};all()});
+setSeg('#segInd','ind',()=>{st.sort={k:'rank',d:1};all()});
+setSeg('#segCut','cut',()=>{st.sort={k:'rank',d:1};all()});
+setSeg('#segPPM','ppm',renderLines);
+$('#q').addEventListener('input',e=>{st.q=e.target.value;renderTable()});
+$('#st').addEventListener('change',e=>{st.stat=e.target.value;renderTable()});
+$('#selSchool').addEventListener('change',e=>{st.sel=e.target.value||null;renderBars();renderLines();renderTable()});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(renderLines,120)});
+function fmtAt(t){try{return new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}catch(e){return ''}}
+function applyData(D){
+  build(D);
+  $('#segPeriod').innerHTML=BIM.map((b,i)=>`<button data-v="${i}">${b}</button>`).join('')+`<button data-v="${NB}">Acumulado</button>`;
+  Object.assign(st,{period:lastB('pp'),sel:null,sort:{k:'rank',d:1},q:'',stat:'all'});$('#q').value='';$('#st').value='all';
+  syncPeriod();
+  $('#selSchool').innerHTML='<option value="">Todas (média da rede)</option>'+S.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(s=>`<option value="${esc(s.id)}">${esc(s.name)} (${s.code})</option>`).join('');
+  const le=(()=>{for(let e=2*NB-1;e>=0;e--){if(S.some(s=>s.a[e]!=null))return e}return -1})();
+  const miss=le<0?0:S.filter(s=>s.a[le]==null).length;
+  const src=SRC.at?`arquivo "${esc(SRC.name)}" (carregado em ${fmtAt(SRC.at)})`:'planilha original';
+  $('#stamp').textContent=`${N} escolas · ${NB} bimestres · ${TOT.alunos[0]!=null?TOT.alunos[0].toLocaleString('pt-BR')+' alunos na 1ª Prova Paulista':''}`;
+  $('#foot').innerHTML=`Fonte: ${src}. Os totais da Prova Paulista na rede vêm da linha "Total" da planilha, quando ela existe. A média da Alura é a média simples das escolas. ${le>=0&&miss?`A avaliação ${le%2+1} do ${(le>>1)+1}º bimestre ainda não foi lançada em ${miss} escolas e fica fora das médias. `:''}A Alura é a série de avaliações mensais da aba "Avaliações".`;
+  $('#srcNow').textContent=SRC.at?`Dados em uso: arquivo ${SRC.name}, carregado em ${fmtAt(SRC.at)} (${NB} bimestres, ${N} escolas).`:`Dados em uso: planilha original (${NB} bimestres, ${N} escolas).`;
+  $('#btnReset').hidden=!SRC.at;
+  $('#sub').textContent=`Análise por escola, 1º ao ${NB}º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.`;
+  all();renderLines();
+}
+
+/* ---------- aba: atualizar dados ---------- */
+const norm=s=>String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const num=v=>{if(v==null||v==='')return null;if(typeof v==='number')return isFinite(v)?v:null;let t=String(v).trim();const pc=t.includes('%');
+  t=t.replace('%','').replace(/\s/g,'').replace(/\.(?=\d{3}\b)/g,'').replace(',','.');const x=parseFloat(t);return isNaN(x)?null:(pc?x/100:x)};
+function parseWorkbook(wb){
+  const warn=[];
+  const nameD=wb.SheetNames.find(n=>norm(n)==='dados'), nameA=wb.SheetNames.find(n=>/^avaliacoes?$/.test(norm(n)));
+  if(!nameD)throw new Error('Não encontrei a aba "Dados". As abas do arquivo são: '+wb.SheetNames.join(', ')+'.');
+  const rd=XLSX.utils.sheet_to_json(wb.Sheets[nameD],{header:1,defval:null,raw:true});
+  const blocks=[];(rd[0]||[]).forEach((h,c)=>{const m=norm(h).match(/^escolas?\s*pp\s*(\d)/);if(m)blocks.push({b:+m[1]-1,c})});
+  if(!blocks.length)throw new Error('Na aba "Dados", a primeira linha precisa ter colunas como "Escolas PP 1 BIM", "Escolas PP 2 BIM" e assim por diante.');
+  const nbP=Math.max(...blocks.map(x=>x.b))+1;
+  const map=new Map(),tot={tec:Array(nbP).fill(null),acertos:Array(nbP).fill(null),part:Array(nbP).fill(null),alunos:Array(nbP).fill(null)};
+  let scaled=false;const frac=v=>{let x=num(v);if(x!=null&&x>1.5){x/=100;scaled=true}return x};
+  const blank=()=>({alunos:null,part:null,acertos:null,tec:null});
+  for(let r=1;r<rd.length;r++){const row=rd[r]||[];
+    for(const {b,c} of blocks){const nm=row[c];if(nm==null||String(nm).trim()==='')continue;const key=String(nm).trim();
+      const rec={alunos:num(row[c+1]),part:frac(row[c+2]),acertos:frac(row[c+3]),tec:frac(row[c+4])};
+      if(norm(key)==='total'){tot.alunos[b]=rec.alunos;tot.part[b]=rec.part;tot.acertos[b]=rec.acertos;tot.tec[b]=rec.tec;continue}
+      if(!map.has(key))map.set(key,{n:key,pp:Array.from({length:nbP},blank),alu:[],idx:[]});
+      map.get(key).pp[b]=rec}}
+  if(!map.size)throw new Error('Não encontrei nenhuma escola na aba "Dados".');
+  if(scaled)warn.push('Alguns percentuais da Prova Paulista estavam em escala de 0 a 100 e foram convertidos para 0 a 1.');
+  const evals=[];let nbA=0,keepAlu=false,unmatched=new Set();
+  const ra=nameA?XLSX.utils.sheet_to_json(wb.Sheets[nameA],{header:1,defval:null,raw:true}):[];
+  if(nameA){const t0=ra[0]||[],t1=ra[1]||[];
+    t1.forEach((h,c)=>{if(norm(h)!=='escola')return;
+      for(let k=c;k<=c+4;k++){const m=norm(t0[k]).match(/(\d)\D*avalia\D*(\d)\D*bim/);if(m){evals.push({e:(+m[2]-1)*2+(+m[1]-1),c,bim:+m[2]});nbA=Math.max(nbA,+m[2]);break}}})}
+  if(!evals.length){keepAlu=true;warn.push(nameA?'Não reconheci os títulos da aba "Avaliações" (esperado: "1ª AVALIAÇÃO - 1º BIM"). A Alura foi mantida como estava.':'O arquivo não tem a aba "Avaliações". A Alura foi mantida como estava.')}
+  const NBn=Math.max(nbP,nbA,1);
+  for(const s of map.values()){while(s.pp.length<NBn)s.pp.push(blank());s.alu=Array(2*NBn).fill(null);s.idx=Array(2*NBn).fill(null)}
+  for(const {e,c} of evals){for(let r=2;r<ra.length;r++){const row=ra[r]||[],nm=row[c];if(nm==null||String(nm).trim()===''||norm(nm)==='total')continue;
+    const s=map.get(String(nm).trim());if(!s){unmatched.add(String(nm).trim());continue}s.alu[e]=num(row[c+2]);s.idx[e]=num(row[c+3])}}
+  if(keepAlu&&CUR){const old=new Map(CUR.s.map(s=>[s.n,s]));let kept=0;for(const s of map.values()){const o=old.get(s.n);if(o){o.alu.forEach((v,i)=>{if(i<s.alu.length){s.alu[i]=v;s.idx[i]=o.idx[i]}});kept++}}}
+  if(unmatched.size)warn.push(`${unmatched.size} nome(s) da aba "Avaliações" não existem na aba "Dados" e foram ignorados (ex.: ${[...unmatched].slice(0,2).join('; ')}).`);
+  const arr=[...map.values()];
+  for(const k of ['tec','acertos','part','alunos']){while(tot[k].length<NBn)tot[k].push(null);
+    for(let b=0;b<NBn;b++){if(tot[k][b]==null){const v=arr.map(s=>s.pp[b][k]).filter(x=>x!=null);if(v.length)tot[k][b]=k==='alunos'?v.reduce((p,c)=>p+c,0):v.reduce((p,c)=>p+c,0)/v.length}}}
+  const stats={nb:NBn,pp:Array.from({length:NBn},(_,b)=>arr.filter(s=>s.pp[b].tec!=null).length),
+    alu:Array.from({length:2*NBn},(_,e)=>arr.filter(s=>s.alu[e]!=null&&!(s.alu[e]===0&&s.idx[e]==null)).length)};
+  return {D:{s:arr,tot,nb:NBn},warn,stats};
+}
+let pending=null;
+const up=$('#upStatus');
+function showErr(msg){pending=null;$('#btnApply').disabled=true;up.innerHTML=`<div class="note bad" role="alert"><b>Não consegui ler o arquivo.</b> ${esc(msg)}</div>`}
+async function handleFile(f){
+  if(!f)return;
+  if(typeof XLSX==='undefined')return showErr('O leitor de planilhas não carregou. Verifique a conexão e abra o painel de novo.');
+  up.innerHTML='<div class="note">Lendo o arquivo…</div>';
+  try{
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+    const r=parseWorkbook(wb);pending={...r,name:f.name};
+    const old=new Set(CUR.s.map(s=>s.n)),cur=new Set(r.D.s.map(s=>s.n));
+    const added=[...cur].filter(x=>!old.has(x)),gone=[...old].filter(x=>!cur.has(x));
+    const rows=Array.from({length:r.stats.nb},(_,b)=>`<tr><td>${b+1}º bimestre${b>=NB?' <span class="pill up">novo</span>':''}</td><td>${r.stats.pp[b]} de ${r.D.s.length}</td><td>${r.stats.alu[2*b]} de ${r.D.s.length}</td><td>${r.stats.alu[2*b+1]} de ${r.D.s.length}</td></tr>`).join('');
+    const w=[...r.warn];if(added.length)w.push(`${added.length} escola(s) nova(s) em relação aos dados atuais.`);if(gone.length)w.push(`${gone.length} escola(s) dos dados atuais não estão no arquivo (ex.: ${gone.slice(0,2).map(x=>pretty(x)).join('; ')}).`);
+    up.innerHTML=`<div class="note ok"><b>Arquivo lido: ${esc(f.name)}.</b> ${r.D.s.length} escolas e ${r.stats.nb} bimestres encontrados. Confira abaixo e clique em Aplicar ao painel.</div>
+      <div class="tw" style="max-height:none"><table class="pv" style="min-width:0"><thead><tr><th style="padding:9px 10px">Bimestre</th><th style="padding:9px 10px">Prova Paulista (TEC)</th><th style="padding:9px 10px">Alura, avaliação 1</th><th style="padding:9px 10px">Alura, avaliação 2</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${w.length?`<ul class="warns">${w.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}`;
+    $('#btnApply').disabled=false;
+  }catch(err){showErr(err.message||String(err))}
+}
+$('#file').addEventListener('change',e=>{handleFile(e.target.files[0]);e.target.value=''});
+const dz=$('#dz');
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
+function showTab(t){$$('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.t===t)));$('#tabPainel').hidden=t!=='painel';$('#tabDados').hidden=t!=='dados';if(t==='painel')renderLines()}
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.t)});
+$('#btnApply').addEventListener('click',()=>{if(!pending)return;
+  SRC={name:pending.name,at:Date.now()};
+  try{localStorage.setItem('ppalu:v1',JSON.stringify({D:pending.D,name:SRC.name,at:SRC.at}))}catch(e){}
+  showTab('painel');applyData(pending.D);pending=null;$('#btnApply').disabled=true;
+  up.innerHTML='<div class="note ok"><b>Dados aplicados.</b> O painel já mostra o arquivo novo. Os dados ficam salvos neste navegador.</div>'});
+$('#btnReset').addEventListener('click',()=>{try{localStorage.removeItem('ppalu:v1')}catch(e){}
+  SRC={name:'planilha original'};pending=null;$('#btnApply').disabled=true;showTab('painel');applyData(DATA);
+  up.innerHTML='<div class="note ok">Dados originais restaurados.</div>'});
+
+let start=DATA;
+try{const sv=JSON.parse(localStorage.getItem('ppalu:v1')||'null');if(sv&&sv.D&&Array.isArray(sv.D.s)&&sv.D.s.length&&sv.D.tot){start=sv.D;SRC={name:sv.name,at:sv.at}}}catch(e){}
+try{applyData(start)}catch(e){SRC={name:'planilha original'};applyData(DATA)}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+// Protecao de rota nao autenticada (padrao das demais paginas da plataforma)
+(async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) window.location.href = 'index.html';
+})();
+</script>
+
+</body></html>
