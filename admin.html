@@ -132,6 +132,31 @@
                 <button type="button" id="pp-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Matific -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Oficial - Matific</h3>
+            </div>
+            <div class="form-group">
+                <label for="matific-ano">Ano Letivo Referente à Planilha</label>
+                <select id="matific-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Reimportar o mesmo ano substitui os resultados anteriores do Matific.</span>
+            </div>
+            <div class="form-group">
+                <label for="matific-file">Arquivo Excel do Matific (.xlsx)</label>
+                <input type="file" id="matific-file" accept=".xlsx, .xls">
+            </div>
+            <div id="matific-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="matific-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="matific-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
@@ -665,6 +690,86 @@
         } finally {
             btnConfirmar.textContent = '2. Confirmar Importação';
         }
+    });
+
+    // =========================================================================
+    // Importador da Planilha Oficial do Matific
+    // =========================================================================
+    let dadosMatificProcessados = [];
+    const normalizarMatific = valor => String(valor || '').trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    const numeroMatific = valor => {
+        if (valor == null || valor === '') return null;
+        if (typeof valor === 'number') return Number.isFinite(valor) ? valor : null;
+        const n = parseFloat(String(valor).replace('%', '').replace(/\./g, '').replace(',', '.'));
+        return Number.isFinite(n) ? (String(valor).includes('%') ? n / 100 : n) : null;
+    };
+    const campoMatific = {
+        escola: 'escola', total_matriculas: 'total_matriculas', alunos_ativos_no_periodo: 'alunos_ativos_no_periodo',
+        alunos_ativos: 'alunos_ativos_no_periodo', percentual_alunos_ativos_no_periodo: 'percentual_alunos_ativos_no_periodo',
+        total_de_atividades_iniciadas: 'total_de_atividades_iniciadas', total_de_atividades_concluidas: 'total_de_atividades_concluidas',
+        indice_de_atividades_concluidas_por_aluno: 'indice_de_atividades_concluidas_por_aluno'
+    };
+
+    document.getElementById('matific-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('matific-ano').value);
+        const file = document.getElementById('matific-file').files[0];
+        const preview = document.getElementById('matific-preview');
+        const confirmar = document.getElementById('matific-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true; dadosMatificProcessados = [];
+        if (!ano) return alert('Selecione o ano referente à planilha do Matific.');
+        if (!file) return alert('Selecione o arquivo Excel do Matific.');
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const aba = wb.Sheets[wb.SheetNames[0]];
+                const linhas = XLSX.utils.sheet_to_json(aba, { defval: null, raw: true });
+                dadosMatificProcessados = linhas.map(linha => {
+                    const item = { ano };
+                    Object.entries(linha).forEach(([cabecalho, valor]) => {
+                        const chave = normalizarMatific(cabecalho);
+                        const campo = String(cabecalho).includes('%') && chave === 'alunos_ativos_no_periodo'
+                            ? 'percentual_alunos_ativos_no_periodo'
+                            : campoMatific[chave];
+                        if (!campo) return;
+                        item[campo] = campo === 'escola' ? String(valor || '').trim() : numeroMatific(valor);
+                    });
+                    return item;
+                }).filter(x => x.escola && !/^total$/i.test(x.escola) && !/^filtros aplicados/i.test(x.escola));
+                if (!dadosMatificProcessados.length) throw new Error('Não foram encontradas linhas de escolas. Confira os cabeçalhos da exportação do Matific.');
+                const obrigatorios = ['total_matriculas', 'alunos_ativos_no_periodo', 'percentual_alunos_ativos_no_periodo', 'total_de_atividades_iniciadas', 'total_de_atividades_concluidas', 'indice_de_atividades_concluidas_por_aluno'];
+                const faltando = obrigatorios.filter(c => dadosMatificProcessados.every(x => x[c] == null));
+                if (faltando.length) throw new Error('Colunas não identificadas: ' + faltando.join(', ') + '.');
+                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosMatificProcessados.length} escolas encontradas na aba "${wb.SheetNames[0]}" para ${ano}.`;
+                preview.style.display = 'block'; confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura Matific:', err);
+                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`; preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('matific-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('matific-preview');
+        const confirmar = document.getElementById('matific-confirmar');
+        if (!dadosMatificProcessados.length) return;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const ano = parseInt(document.getElementById('matific-ano').value);
+            const { error: erroDelete } = await supabaseClient.from('resultados_matific').delete().eq('ano', ano);
+            if (erroDelete) throw new Error(`Não foi possível substituir os dados anteriores: ${erroDelete.message}`);
+            const { error } = await supabaseClient.from('resultados_matific').insert(dadosMatificProcessados);
+            if (error) throw error;
+            preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosMatificProcessados.length} registros foram gravados na tabela resultados_matific.</span>`;
+            document.getElementById('matific-file').value = ''; dadosMatificProcessados = [];
+        } catch (err) {
+            console.error('Erro na importação Matific:', err);
+            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_matific foi criada no Supabase.</span>`;
+            confirmar.disabled = false;
+        } finally { confirmar.textContent = '2. Confirmar Importação'; }
     });
 
     // =========================================================================
