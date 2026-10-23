@@ -572,6 +572,23 @@ async function carregarSupabase(){
         const e=(Number(rv.n_avaliacao)||1)-1;if(e>=0&&e<6)o.arr[e]=numP(rv.media);o.n++;
       }
     }
+    for(const s of map.values()){
+      const k=norm(s.n);
+      const o=avBy.get(k);
+      const temGranular=usarAv&&o&&o.n>0;
+      if(temGranular){
+        s.alu=o.arr;s.idx=o.idx;s.granular=true;
+      } else {
+        const bakeS=(DATA.s||[]).find(r0=>norm(r0.n)===k);
+        if(bakeS && Array.isArray(bakeS.alu) && bakeS.alu.length>1){
+          s.alu=bakeS.alu.slice();s.idx=(bakeS.idx||[]).slice();s.granular=true;
+        } else {
+          const r=alBy[k];
+          s.alu=r?[numP(r.media_das_avaliacoes_mensais)]:[null];
+          s.idx=r?[numP(r.indice_de_realizacao_das_avaliacoes_mensais)]:[null];
+        }
+      }
+    }
     // fallback de totais da rede: media das escolas quando a linha Total nao traz o dado
     const arr=[...map.values()];
     for(let b=0;b<nb;b++){
