@@ -33,7 +33,7 @@
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: bold; white-space: nowrap; }
+        th { background-color: #f1f5f9; color: #475569; font-weight: bold; white-space: normal; max-width: 150px; vertical-align: middle; }
         tr:hover { background-color: #f8fafc; }
         .text-right { text-align: right; }
         .badge-pct { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; background-color: #d1fae5; color: #065f46; }
@@ -80,7 +80,8 @@
                 Colunas por ano letivo: 2026 tem <strong>acessos, exercícios, tentativas, avaliações mensais</strong>
                 (média, não-zeradores e realização) e <strong>questões discursivas</strong>; 2025 tem
                 <strong>projetos enviados, unidades, exercícios e acertos até 2ª tentativa</strong>; 2024 tem
-                <strong>índice de projetos enviados</strong>. Um <strong>-</strong> indica coluna ausente na planilha daquele ano.
+                <strong>índice de projetos enviados</strong>. Ao filtrar um ano, as <strong>colunas sem dados
+                ficam ocultas automaticamente</strong>; sem filtro de ano, todas as colunas voltam a aparecer.
             </p>
             
             <div class="filters">
@@ -99,26 +100,7 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Ano</th>
-                            <th>Escola</th>
-                            <th>Matrículas</th>
-                            <th>Acessos</th>
-                            <th>% Acessos</th>
-                            <th>Cursos Concluídos</th>
-                            <th>Projetos Enviados</th>
-                            <th>% Projetos Enviados</th>
-                            <th>Unidades Concluídas</th>
-                            <th>Exercícios Realizados</th>
-                            <th>Total de Exercícios Realizados</th>
-                            <th>Qtd. Média de Tentativas por Exercício</th>
-                            <th>Total de Acertos até a 2ª Tentativa</th>
-                            <th>Índice de Exercícios Corretos até 2ª Tentativa</th>
-                            <th>Média das Avaliações Mensais</th>
-                            <th>Média das Avaliações Mensais entre Alunos que não Zeraram</th>
-                            <th>Índice de Realização das Avaliações Mensais</th>
-                            <th>Média nas Questões Discursivas</th>
-                        </tr>
+                        <tr id="cab-tabela"></tr>
                     </thead>
                     <tbody id="lista-resultados">
                         <tr><td colspan="18">Carregando dados da Alura...</td></tr>
@@ -175,57 +157,103 @@
         }
     }
 
-// Renderizar a tabela no HTML colocando a linha de Total sempre no final
+// Renderizar a tabela no HTML colocando a linha de Total sempre no final.
+// As colunas sem nenhum dado no recorte filtrado sao ocultadas automaticamente.
+    // Configuração das colunas da tabela (ordem, titulo e formato)
+    const COLUNAS_ALURA = [
+        { campo: 'ano', titulo: 'Ano' },
+        { campo: 'escola', titulo: 'Escola' },
+        { campo: 'matriculas_ativas', titulo: 'Matrículas', formato: 'inteiro' },
+        { campo: 'alunos_com_acessos_no_periodo', titulo: 'Acessos', formato: 'inteiro' },
+        { campo: 'indice_de_acessos_no_periodo', titulo: '% Acessos', formato: 'percentual' },
+        { campo: 'cursos_concluidos', titulo: 'Cursos Concluídos', formato: 'inteiro' },
+        { campo: 'projetos_enviados', titulo: 'Projetos Enviados', formato: 'inteiro' },
+        { campo: 'indice_de_projetos_enviados', titulo: '% Projetos Enviados', formato: 'percentual' },
+        { campo: 'unidades_concluidas', titulo: 'Unidades Concluídas', formato: 'inteiro' },
+        { campo: 'exercicios_realizados', titulo: 'Exercícios Realizados', formato: 'inteiro' },
+        { campo: 'total_de_exercicios_realizados', titulo: 'Total de Exercícios Realizados', formato: 'inteiro' },
+        { campo: 'quantidade_media_de_tentativas_por_exercicio', titulo: 'Qtd. Média de Tentativas por Exercício', formato: 'numero' },
+        { campo: 'total_de_acertos_ate_a_2a_tentativa', titulo: 'Total de Acertos até a 2ª Tentativa', formato: 'inteiro' },
+        { campo: 'indice_de_exercicios_corretos_ate_2a_tentativa', titulo: 'Índice de Exercícios Corretos até 2ª Tentativa', formato: 'numero' },
+        { campo: 'media_das_avaliacoes_mensais', titulo: 'Média das Avaliações Mensais', formato: 'numero', destaqueAno: '2026' },
+        { campo: 'media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram', titulo: 'Média das Avaliações Mensais entre Alunos que não Zeraram', formato: 'numero' },
+        { campo: 'indice_de_realizacao_das_avaliacoes_mensais', titulo: 'Índice de Realização das Avaliações Mensais', formato: 'percentual' },
+        { campo: 'media_nas_questoes_discursivas', titulo: 'Média nas Questões Discursivas', formato: 'numero' }
+    ];
+
+    // Formata o valor de celula conforme o formato configurado na coluna
+    function valorCelula(col, item) {
+        const v = item[col.campo];
+
+        if (col.campo === 'escola') return '<strong>' + (v || '-') + '</strong>';
+
+        if (col.formato === 'percentual') {
+            return '<span class="badge-pct">' + formatarPercentual(v) + '</span>';
+        }
+
+        if (col.formato === 'numero' || col.formato === 'inteiro') {
+            const fmt = formatarNumero(v, col.formato === 'inteiro');
+            // Coluna e o indicador principal do ano destacado: negrito
+            if (col.destaqueAno && String(item.ano) === col.destaqueAno && fmt !== '-') {
+                return '<strong style="color:#17365d;">' + fmt + '</strong>';
+            }
+            return fmt;
+        }
+
+        return v ?? '-';
+    }
+
+    // Escolhe as colunas visiveis: so permanecem as que possuem algum valor nas escolas do recorte
+    function colunasVisiveis(escolas) {
+        return COLUNAS_ALURA.filter(col =>
+            col.campo === 'ano' || col.campo === 'escola' ||
+            escolas.some(item => item[col.campo] !== null && item[col.campo] !== undefined && item[col.campo] !== '')
+        );
+    }
+
     function renderizarTabela(lista) {
         const tbody = document.getElementById('lista-resultados');
+        const thead = document.getElementById('cab-tabela');
+
+        // Atualiza os cabecalhos conforme as colunas visiveis do recorte
+        thead.innerHTML = lista.length ? colunasVisiveis(lista.filter(item => !ehLinhaTotal(item))).map(c => '<th>' + c.titulo + '</th>').join('') : '';
+
         if (lista.length === 0) {
+            thead.innerHTML = COLUNAS_ALURA.map(c => '<th>' + c.titulo + '</th>').join('');
             tbody.innerHTML = '<tr><td colspan="18" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
             return;
         }
 
         // Separa as escolas normais do registo de Total
-        const escolasNormais = lista.filter(item => !item.escola || item.escola.trim().toLowerCase() !== 'total');
-        const linhaTotal = lista.filter(item => item.escola && item.escola.trim().toLowerCase() === 'total');
+        const escolasNormais = lista.filter(item => !ehLinhaTotal(item));
+        const linhaTotal = lista.filter(item => ehLinhaTotal(item));
 
         // Junta as escolas e coloca o Total no final
         const listaOrdenada = [...escolasNormais, ...linhaTotal];
+        const colunas = colunasVisiveis(escolasNormais);
 
         tbody.innerHTML = listaOrdenada.map(item => {
-            const ehTotal = item.escola && item.escola.trim().toLowerCase() === 'total';
-            // 2026: ano cujo indicador principal e a media das avaliacoes mensais (valor em destaque)
-            const notaDestaque = String(item.ano) === '2026';
-            const notaFmt = formatarNumero(item.media_das_avaliacoes_mensais);
+            const ehTotal = ehLinhaTotal(item);
             return `
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
-                    <td>${item.ano ?? '-'}</td>
-                    <td><strong>${item.escola || '-'}</strong></td>
-                    <td>${item.matriculas_ativas ?? '-'}</td>
-                    <td>${item.alunos_com_acessos_no_periodo ?? '-'}</td>
-                    <td><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
-                    <td>${item.cursos_concluidos ?? '-'}</td>
-                    <td>${item.projetos_enviados ?? '-'}</td>
-                    <td>${formatarPercentual(item.indice_de_projetos_enviados)}</td>
-                    <td>${item.unidades_concluidas ?? '-'}</td>
-                    <td>${item.exercicios_realizados ?? '-'}</td>
-                    <td>${item.total_de_exercicios_realizados ?? '-'}</td>
-                    <td>${formatarNumero(item.quantidade_media_de_tentativas_por_exercicio)}</td>
-                    <td>${item.total_de_acertos_ate_a_2a_tentativa ?? '-'}</td>
-                    <td>${formatarNumero(item.indice_de_exercicios_corretos_ate_2a_tentativa)}</td>
-                    <td>${notaDestaque && notaFmt !== '-' ? '<strong style="color:#17365d;">' + notaFmt + '</strong>' : notaFmt}</td>
-                    <td>${formatarNumero(item.media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram)}</td>
-                    <td>${formatarPercentual(item.indice_de_realizacao_das_avaliacoes_mensais)}</td>
-                    <td>${formatarNumero(item.media_nas_questoes_discursivas)}</td>
+                    ${colunas.map(col => '<td>' + valorCelula(col, item) + '</td>').join('')}
                 </tr>
             `;
         }).join('');
     }
 
-    // Formata valores numericos decimais (notas e indices da planilha; nao sao percentuais)
-    function formatarNumero(valor) {
+    // Identifica a linha de subtotal "Total" da planilha (mantida visivel apenas nesta pagina)
+    function ehLinhaTotal(item) {
+        return !!item.escola && item.escola.trim().toLowerCase() === 'total';
+    }
+
+    // Formata valores numericos: decimais (notas e indices) ou inteiros (contagens, com separador de milhar)
+    function formatarNumero(valor, inteiro) {
         if (valor === null || valor === undefined || valor === '') return '-';
         const numero = Number(valor);
         if (isNaN(numero)) return '-';
-        return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const casas = inteiro ? 0 : 2;
+        return numero.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
     }
 
     // Converte o indice de acessos (razao entre 0 e 1) em percentual
