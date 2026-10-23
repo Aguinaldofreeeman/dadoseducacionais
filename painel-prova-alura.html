@@ -540,7 +540,7 @@ async function carregarSupabase(){
       supabaseClient.from('dados_educacionais').select('*').eq('ano','2026').limit(3000),
       supabaseClient.from('resultados_alura').select('*').eq('ano',2026).limit(200)]);
     if(rPP.error||rAL.error||!(rPP.data||[]).length)return null;
-    const bimOf=e=>{const m=String(e||'').match(/_([123])\s*[ºo°]?\s*bim/i);return m?+m[1]-1:null};
+    const bimOf=e=>{const m=String(e||'').match(/_([123])[ºo°_]*bim/i);return m?+m[1]-1:null};
     const nb=3,map=new Map();
     const tot={tec:Array(nb).fill(null),acertos:Array(nb).fill(null),part:Array(nb).fill(null),alunos:Array(nb).fill(null)};
     for(const r of rPP.data){
