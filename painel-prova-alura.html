@@ -607,6 +607,13 @@ async function carregarSupabase(){
         if((s.pp[b].tec==null||s.pp[b].tec===undefined)&&bp&&bp.tec!=null)s.pp[b].tec=bp.tec;
       }
     }
+    const bakeTot=DATA.tot||{};
+    for(let b=0;b<nb;b++){
+      if(tot.tec[b]==null && Array.isArray(bakeTot.tec) && bakeTot.tec[b]!=null) tot.tec[b]=bakeTot.tec[b];
+      if(tot.acertos[b]==null && Array.isArray(bakeTot.acertos) && bakeTot.acertos[b]!=null) tot.acertos[b]=bakeTot.acertos[b];
+      if(tot.part[b]==null && Array.isArray(bakeTot.part) && bakeTot.part[b]!=null) tot.part[b]=bakeTot.part[b];
+      if(tot.alunos[b]==null && Array.isArray(bakeTot.alunos) && bakeTot.alunos[b]!=null) tot.alunos[b]=bakeTot.alunos[b];
+    }
     let temAlu=false;for(const s of map.values()){if(s.alu&&s.alu.some(v=>v!=null))temAlu=true;}
     return {s:arr,tot,nb,aluAnual:!temAlu,fonte:'Supabase (dados_educacionais + resultados_alura' + (usarAv?' + avaliacoes_alura':'') + ')'};
   }catch(e){console.error('carregarSupabase',e);return null}
