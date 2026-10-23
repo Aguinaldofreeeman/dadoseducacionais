@@ -77,10 +77,11 @@
         <div class="card">
             <h2>Resultados por Unidade Escolar</h2>
             <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0; line-height: 1.5;">
-                A coluna <strong style="color:#17365d;">Média das Avaliações Mensais</strong> é o principal indicador
-                do ano letivo de <strong style="color:#17365d;">2026</strong> (média das notas das avaliações mensais,
-                por aluno, na escala da plataforma). Para os demais anos, o valor aparece apenas quando a coluna
-                existe na planilha de origem.
+                Indicadores por ano letivo: <strong style="color:#17365d;">Média das Avaliações Mensais</strong> (principal
+                indicador de <strong style="color:#17365d;">2026</strong>), <strong style="color:#17365d;">Índice de Exercícios
+                Corretos até 2ª Tentativa</strong> (principal indicador de <strong style="color:#17365d;">2025</strong>, também
+                presente em 2026) e <strong style="color:#17365d;">Média das Avaliações Mensais entre Alunos que não Zeraram</strong>
+                (2026). Os valores aparecem com <strong>-</strong> quando a coluna não existe na planilha de origem do ano.
             </p>
             
             <div class="filters">
@@ -102,17 +103,19 @@
                         <tr>
                             <th>Ano</th>
                             <th>Escola</th>
-                            <th class="text-right">Matrículas</th>
-                            <th class="text-right">Acessos</th>
-                            <th class="text-right">% Acessos</th>
-                            <th class="text-right">Cursos Concluídos</th>
-                            <th class="text-right">Projetos Enviados</th>
-                            <th class="text-right">Exercícios Realizados</th>
-                            <th class="text-right">Média das Avaliações Mensais</th>
+                            <th>Matrículas</th>
+                            <th>Acessos</th>
+                            <th>% Acessos</th>
+                            <th>Cursos Concluídos</th>
+                            <th>Projetos Enviados</th>
+                            <th>Exercícios Realizados</th>
+                            <th>Média das Avaliações Mensais</th>
+                            <th>Índice de Exercícios Corretos até 2ª Tentativa</th>
+                            <th>Média das Avaliações Mensais entre Alunos que não Zeraram</th>
                         </tr>
                     </thead>
                     <tbody id="lista-resultados">
-                        <tr><td colspan="9">Carregando dados da Alura...</td></tr>
+                        <tr><td colspan="11">Carregando dados da Alura...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -153,7 +156,7 @@
 
             if (error || !data || data.length === 0) {
                 // Caso a tabela ainda não esteja populada no banco, exibe mensagem informativa
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
                 return;
             }
 
@@ -162,7 +165,7 @@
             aplicarFiltros();
         } catch (err) {
             console.error('Erro ao carregar dados:', err);
-            tbody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
         }
     }
 
@@ -170,7 +173,7 @@
     function renderizarTabela(lista) {
         const tbody = document.getElementById('lista-resultados');
         if (lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
             return;
         }
 
@@ -185,25 +188,27 @@
             const ehTotal = item.escola && item.escola.trim().toLowerCase() === 'total';
             // 2026: ano cujo indicador principal e a media das avaliacoes mensais (valor em destaque)
             const notaDestaque = String(item.ano) === '2026';
-            const notaFmt = formatarNota(item.media_das_avaliacoes_mensais);
+            const notaFmt = formatarNumero(item.media_das_avaliacoes_mensais);
             return `
                 <tr ${ehTotal ? 'style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;"' : ''}>
                     <td>${item.ano ?? '-'}</td>
                     <td><strong>${item.escola || '-'}</strong></td>
-                    <td class="text-right">${item.matriculas_ativas ?? '-'}</td>
-                    <td class="text-right">${item.alunos_com_acessos_no_periodo ?? '-'}</td>
-                    <td class="text-right"><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
-                    <td class="text-right">${item.cursos_concluidos ?? '-'}</td>
-                    <td class="text-right">${item.projetos_enviados ?? '-'}</td>
-                    <td class="text-right">${item.exercicios_realizados ?? '-'}</td>
-                    <td class="text-right">${notaDestaque && notaFmt !== '-' ? '<strong style="color:#17365d;">' + notaFmt + '</strong>' : notaFmt}</td>
+                    <td>${item.matriculas_ativas ?? '-'}</td>
+                    <td>${item.alunos_com_acessos_no_periodo ?? '-'}</td>
+                    <td><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
+                    <td>${item.cursos_concluidos ?? '-'}</td>
+                    <td>${item.projetos_enviados ?? '-'}</td>
+                    <td>${item.exercicios_realizados ?? '-'}</td>
+                    <td>${notaDestaque && notaFmt !== '-' ? '<strong style="color:#17365d;">' + notaFmt + '</strong>' : notaFmt}</td>
+                    <td>${formatarNumero(item.indice_de_exercicios_corretos_ate_2a_tentativa)}</td>
+                    <td>${formatarNumero(item.media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram)}</td>
                 </tr>
             `;
         }).join('');
     }
 
-    // Formata a media das avaliacoes mensais (nota da plataforma, nao e percentual)
-    function formatarNota(valor) {
+    // Formata valores numericos decimais (notas e indices da planilha; nao sao percentuais)
+    function formatarNumero(valor) {
         if (valor === null || valor === undefined || valor === '') return '-';
         const numero = Number(valor);
         if (isNaN(numero)) return '-';
