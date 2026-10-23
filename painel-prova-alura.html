@@ -526,9 +526,11 @@ try{applyData(start)}catch(e){SRC={name:'planilha original'};applyData(DATA)}
 const numC=v=>{ // percentuais/indices da Prova Paulista (tornam-se 0–1; aceita '0.983', '99,2%', '52.2%')
   if(v==null)return null;if(typeof v==='number')return isFinite(v)?v:null;
   let t=String(v).trim();if(t==='')return null;const pc=t.includes('%');
-  t=t.replace('%','').replace(/\s/g,'').replace(/\.(?=\d{3}\b)/g,'').replace(/,(?=\d{3}\b)/g,'').replace(/,/g,'.');
-  const x=parseFloat(t.replace(/[^0-9.\-]/g,''));if(isNaN(x))return null;
-  return pc?x/100:(x>1.5?x/100:x)};
+  if(pc){t=t.replace('%','').replace(/\s/g,'').replace(/,/g,'.');const x=parseFloat(t);return isNaN(x)?null:x/100}
+  t=t.replace(/,/g,'.');
+  let x=parseFloat(t);
+  if(isNaN(x)){t=t.replace(/\.(?=\d{3}\b)/g,'');x=parseFloat(t);if(isNaN(x))return null}
+  return (x>1.5&&x<=100)?x/100:x};
 const numP=v=>{ // notas e contagens (sem conversao percentual)
   if(v==null)return null;if(typeof v==='number')return isFinite(v)?v:null;
   const x=parseFloat(String(v).replace(/[^0-9.\-]/g,''));return isNaN(x)?null:x};
