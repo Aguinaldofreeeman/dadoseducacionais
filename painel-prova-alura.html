@@ -155,7 +155,7 @@ td.hl{font-weight:600}
         <div class="chart" id="chPP"></div>
       </div>
       <div>
-        <div class="ph" style="margin-bottom:6px"><div><h2 style="font-size:14px">Alura por avaliação mensal</h2><p>Duas avaliações por bimestre, nota de 0 a 10.</p></div></div>
+        <div class="ph" style="margin-bottom:6px"><div><h2 style="font-size:14px" id="hAlu">Alura por avaliação mensal</h2><p id="pAlu">Duas avaliações por bimestre, nota de 0 a 10.</p></div></div>
         <div class="legend" id="lg2" style="margin-bottom:6px"></div>
         <div class="chart" id="chAlu"></div>
       </div>
@@ -208,18 +208,23 @@ const small=new Set(['DA','DE','DO','DAS','DOS','E']);
 const ABBR={PROF:'Prof.',PROFA:'Profa.',DR:'Dr.',DRA:'Dra.',DONA:'Dona',JD:'Jd.'};
 function pretty(n){return n.toLowerCase().split(' ').map((w,i)=>{const u=w.toUpperCase();if(ABBR[u])return ABBR[u];if(small.has(u)&&i>0)return w;return w.charAt(0).toUpperCase()+w.slice(1)}).join(' ')}
 const mean=a=>{const v=a.filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((p,c)=>p+c,0)/v.length:null};
-let S=[],TOT={},NB=3,N=0,COLS=[],CUR=null,SRC={name:'planilha original'};
+let S=[],TOT={},NB=3,N=0,COLS=[],CUR=null,SRC={name:'planilha original'},ALU={anual:false,labels:[],groups:null};
 function build(D){
   CUR=D;NB=D.nb||D.s[0].pp.length;N=D.s.length;
   S=D.s.map(r=>{const m=r.n.match(/^(.*) - (\d+)$/);
     return {id:r.n,name:pretty(m?m[1]:r.n),code:m?m[2]:'',pp:r.pp,a:r.alu.map((v,i)=>(v==null||(v===0&&r.idx[i]==null))?null:v)}});
   TOT=D.tot;
   BIM=Array.from({length:NB},(_,i)=>`${i+1}º Bim`);
+  ALU={anual:!!D.aluAnual,labels:D.aluAnual?['Média anual do ano']:BIM.flatMap(()=>['Av. 1','Av. 2']),groups:D.aluAnual?null:BIM};
   PERIOD=[...Array.from({length:NB},(_,i)=>`${i+1}º bimestre`),'acumulado do ano'];
   COLS=[{k:'rank',t:'#',v:r=>r.rank},{k:'name',t:'Escola',v:r=>r.s.name},
     {k:'val',t:'Resultado',v:r=>r.v},{k:'d',t:'Variação',v:r=>r.d},{k:'st',t:'Status',v:r=>({up:3,flat:2,down:1,nd:0})[r.st]},
     ...BIM.map((_,i)=>({k:'p'+i,t:BIM[i],g:'pp',v:r=>r.s.pp[i].tec})),
-    ...BIM.map((_,i)=>({k:'a'+i,t:BIM[i],g:'alu',v:r=>val(r.s,'alu',i)}))];
+    ...aluCols()];
+}
+function aluCols(){
+  if(ALU.groups)return BIM.map((_,i)=>({k:'a'+i,t:BIM[i],g:'alu',v:r=>val(r.s,'alu',i)}));
+  return [{k:'a0',t:'Ano',g:'alu',v:r=>val(r.s,'alu',0)}];
 }
 const fmtP=(v,d=1)=>v==null?'—':(v*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
 const fmtN=(v,d=2)=>v==null?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -232,10 +237,12 @@ const st={period:2,ind:'pp',cut:'all',sel:null,ppm:'tec',q:'',stat:'all',sort:{k
 
 function val(s,ind,p){
   if(ind==='pp')return p<NB?s.pp[p].tec:mean(s.pp.map(x=>x.tec));
+  if(ALU.anual)return s.a[0];
   return p<NB?mean([s.a[2*p],s.a[2*p+1]]):mean(s.a);
 }
 function lastB(ind){for(let b=NB-1;b>=0;b--){if(S.some(s=>val(s,ind,b)!=null))return b}return 0}
 function delta(s,ind,p){
+  if(ind==='alu'&&ALU.anual)return null;
   if(p===0)return null;
   let a,b; if(p===NB){a=val(s,ind,lastB(ind));b=val(s,ind,0);}else{a=val(s,ind,p);b=val(s,ind,p-1);}
   return a==null||b==null?null:a-b;
@@ -248,6 +255,7 @@ function redeVal(ind,p){
   return mean(S.map(s=>val(s,'alu',p)));
 }
 function redeDelta(ind,p){
+  if(ind==='alu'&&ALU.anual)return null;
   if(p===0)return null;
   const a=p===NB?redeVal(ind,lastB(ind)):redeVal(ind,p), b=p===NB?redeVal(ind,0):redeVal(ind,p-1);
   return a==null||b==null?null:a-b;
@@ -270,11 +278,11 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 /* ---------- cards ---------- */
 function renderCards(){
   const p=st.period, {full}=view(), ind=st.ind;
-  const dtxt=(i,d,p)=>{if(d==null)return '<span class="m">Primeira medição do ano</span>';const k=status(i,d);
+  const dtxt=(i,d,p)=>{if(i==='alu'&&ALU.anual)return '<span class="pill nd">Indicador anual</span> <span class="m">valor único do ano letivo</span>';if(d==null)return '<span class="m">Primeira medição do ano</span>';const k=status(i,d);
     return `<span class="pill ${k}">${ICO[k]} ${fmtD(i,d)}</span> <span class="m">${p===NB?BIM[lastB(i)].toLowerCase()+' vs 1º bim':'vs '+BIM[p-1].toLowerCase()}</span>`};
   const ppV=redeVal('pp',p), aluV=redeVal('alu',p);
   const ppb=BIM.map((_,i)=>`<span>${i+1}º <b>${fmtP(TOT.tec[i])}</b></span>`).join('');
-  const alb=BIM.map((_,i)=>`<span>${i+1}º <b>${fmtN(redeVal('alu',i))}</b></span>`).join('');
+  const alb=ALU.anual?`<span>Indicador anual <b>${fmtN(aluV)}</b></span>`:BIM.map((_,i)=>`<span>${i+1}º <b>${fmtN(redeVal('alu',i))}</b></span>`).join('');
   const cnt={up:0,down:0,flat:0,nd:0};full.forEach(x=>cnt[x.st]++);
   const tot=full.length, pc=k=>tot?(cnt[k]/tot*100):0;
   const wd=full.filter(x=>x.d!=null).sort((a,b)=>b.d-a.d);
@@ -306,10 +314,11 @@ function renderBars(){
   $('#barTitle').textContent=`${IND[ind]} por escola · ${PERIOD[p]}`;
   $('#barSub').textContent={all:`${list.length} escolas, da maior para a menor.`,top:'As 15 escolas com maior resultado, da primeira para a décima quinta.',bot:'Escolas prioritárias: as 15 com menor resultado, da última colocada para cima.'}[st.cut]+' Clique numa barra para ver a evolução da escola.';
   $('#barLegend').innerHTML=`<span><i style="--c:${COL[ind]}"></i>${IND[ind]}</span><span><i class="dv"></i>Média da rede ${fmtV(ind,av)}</span>`;
-  $('#bars').innerHTML=list.map(x=>`<button class="brow${st.sel===x.s.id?' sel':''}" data-id="${esc(x.s.id)}" aria-label="${esc(x.s.name)}, ${fmtV(ind,x.v)}">
+  $('#bars').innerHTML=list.length?list.map(x=>`<button class="brow${st.sel===x.s.id?' sel':''}" data-id="${esc(x.s.id)}" aria-label="${esc(x.s.name)}, ${fmtV(ind,x.v)}">
     <span class="r">${x.rank}</span><span class="nm" title="${esc(x.s.name)}">${esc(x.s.name)}</span>
     <span class="tr"><span class="fl" style="width:${x.v/dom*100}%;--c:${COL[ind]}"></span><span class="av" style="left:${av/dom*100}%"></span></span>
-    <span class="vl">${fmtV(ind,x.v)}</span></button>`).join('');
+    <span class="vl">${fmtV(ind,x.v)}</span></button>`).join('')
+    :`<div class="empty">Sem dados de ${IND[ind]} no período escolhido no banco de dados. Escolha outro período ou use a aba "Atualizar dados".</div>`;
 }
 $('#bars').addEventListener('click',e=>{const b=e.target.closest('.brow');if(b)focus(b.dataset.id)});
 $('#bars').addEventListener('mousemove',e=>{const b=e.target.closest('.brow');if(!b)return hideTip();
@@ -358,9 +367,9 @@ function renderLines(){
   $('#lg1').innerHTML=lg(COL.pp,s,s&&s.name);$('#lg2').innerHTML=lg(COL.alu,s,s&&s.name);
   drawLine($('#chPP'),{labels:BIM,ctx:S.map(x=>x.pp.map(q=>q[m])),rede:redePP,sel:s?s.pp.map(q=>q[m]):null,color:COL.pp,selName:s&&s.name,
     fmt:v=>fmtP(v),tick:v=>Math.round(v*100)+'%',aria:`Prova Paulista, ${mlabel}, por bimestre`,tipLabel:i=>`${BIM[i]} · ${mlabel}`});
-  const AL=BIM.flatMap(()=>['Av. 1','Av. 2']);
-  drawLine($('#chAlu'),{labels:AL,groups:BIM,ctx:S.map(x=>x.a),rede:AL.map((_,i)=>mean(S.map(x=>x.a[i]))),sel:s?s.a:null,color:COL.alu,selName:s&&s.name,
-    fixed:{lo:0,hi:10,step:2},fmt:v=>fmtN(v,2),tick:v=>v,aria:'Alura, nota por avaliação mensal',tipLabel:i=>`${AL[i]} do ${BIM[i>>1].toLowerCase()}`});
+  const AL=ALU.labels, GR=ALU.groups;
+  drawLine($('#chAlu'),{labels:AL,groups:GR,ctx:S.map(x=>x.a),rede:AL.map((_,i)=>mean(S.map(x=>x.a[i]))),sel:s?s.a:null,color:COL.alu,selName:s&&s.name,
+    fixed:{lo:0,hi:10,step:2},fmt:v=>fmtN(v,2),tick:v=>v,aria:'Alura, nota da avaliação',tipLabel:i=>GR?`${AL[i]} do ${BIM[i>>1].toLowerCase()}`:AL[i]});
 }
 
 /* ---------- tabela ---------- */
@@ -375,13 +384,13 @@ function renderTable(){
   $('#tblSub').textContent=`${rows.length} de ${N} escolas. Resultado, variação e status seguem o indicador (${IND[ind]}) e o período (${PERIOD[st.period]}) escolhidos acima.`;
   const sortAttr=k=>st.sort.k===k?(st.sort.d>0?'ascending':'descending'):'none';
   const th=c=>`<th aria-sort="${sortAttr(c.k)}"><button data-k="${c.k}">${c.t}</button></th>`;
-  const head=`<thead><tr class="g"><th></th><th></th><th colspan="3">${IND[ind]} · ${PERIOD[st.period]}</th><th colspan="${NB}">Prova Paulista (TEC)</th><th colspan="${NB}">Alura (média)</th></tr><tr>${COLS.map(th).join('')}</tr></thead>`;
+  const head=`<thead><tr class="g"><th></th><th></th><th colspan="3">${IND[ind]} · ${PERIOD[st.period]}</th><th colspan="${NB}">Prova Paulista (TEC)</th><th colspan="${ALU.groups?NB:1}">Alura${ALU.groups?' (média)':' (anual)'}</th></tr><tr>${COLS.map(th).join('')}</tr></thead>`;
   const body=rows.map(r=>`<tr data-id="${esc(r.s.id)}" class="${st.sel===r.s.id?'sel':''}"><td>${r.rank}</td>
     <td>${esc(r.s.name)} <span style="color:var(--muted);font-size:12px">${r.s.code}</span></td>
     <td class="hl">${fmtV(ind,r.v)}</td><td class="dl ${r.st}">${fmtD(ind,r.d)}</td><td>${pill(r.st)}</td>
-    ${BIM.map((_,i)=>`<td>${fmtP(r.s.pp[i].tec)}</td>`).join('')}${BIM.map((_,i)=>`<td>${fmtN(val(r.s,'alu',i))}</td>`).join('')}</tr>`).join('');
+    ${BIM.map((_,i)=>`<td>${fmtP(r.s.pp[i].tec)}</td>`).join('')}${(ALU.groups?BIM.map((_,i)=>`<td>${fmtN(val(r.s,'alu',i))}</td>`).join(''):`<td>${fmtN(val(r.s,'alu',0))}</td>`)}</tr>`).join('');
   $('#tbl').innerHTML=head+`<tbody>${body}</tbody>`+(rows.length?'':'');
-  if(!rows.length)$('#tbl').insertAdjacentHTML('beforeend',`<tbody><tr><td colspan="${5+2*NB}" class="empty">Nenhuma escola com esses filtros.</td></tr></tbody>`);
+  if(!rows.length)$('#tbl').insertAdjacentHTML('beforeend',`<tbody><tr><td colspan="${5+NB+(ALU.groups?NB:1)}" class="empty">Nenhuma escola com esses filtros.</td></tr></tbody>`);
 }
 $('#tbl').addEventListener('click',e=>{const b=e.target.closest('th button');if(b){const k=b.dataset.k;
     st.sort=st.sort.k===k?{k,d:-st.sort.d}:{k,d:(k==='name'||k==='rank')?1:-1};return renderTable()}
@@ -408,14 +417,22 @@ function applyData(D){
   Object.assign(st,{period:lastB('pp'),sel:null,sort:{k:'rank',d:1},q:'',stat:'all'});$('#q').value='';$('#st').value='all';
   syncPeriod();
   $('#selSchool').innerHTML='<option value="">Todas (média da rede)</option>'+S.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(s=>`<option value="${esc(s.id)}">${esc(s.name)} (${s.code})</option>`).join('');
-  const le=(()=>{for(let e=2*NB-1;e>=0;e--){if(S.some(s=>s.a[e]!=null))return e}return -1})();
+  const nSlots=S[0]?S[0].a.length:2*NB;
+  const le=(()=>{for(let e=nSlots-1;e>=0;e--){if(S.some(s=>s.a[e]!=null))return e}return -1})();
   const miss=le<0?0:S.filter(s=>s.a[le]==null).length;
-  const src=SRC.at?`arquivo "${esc(SRC.name)}" (carregado em ${fmtAt(SRC.at)})`:'planilha original';
+  const src=SRC.at?`arquivo "${esc(SRC.name)}" (carregado em ${fmtAt(SRC.at)})`:(CUR&&CUR.fonte?CUR.fonte:'planilha original');
   $('#stamp').textContent=`${N} escolas · ${NB} bimestres · ${TOT.alunos[0]!=null?TOT.alunos[0].toLocaleString('pt-BR')+' alunos na 1ª Prova Paulista':''}`;
-  $('#foot').innerHTML=`Fonte: ${src}. Os totais da Prova Paulista na rede vêm da linha "Total" da planilha, quando ela existe. A média da Alura é a média simples das escolas. ${le>=0&&miss?`A avaliação ${le%2+1} do ${(le>>1)+1}º bimestre ainda não foi lançada em ${miss} escolas e fica fora das médias. `:''}A Alura é a série de avaliações mensais da aba "Avaliações".`;
-  $('#srcNow').textContent=SRC.at?`Dados em uso: arquivo ${SRC.name}, carregado em ${fmtAt(SRC.at)} (${NB} bimestres, ${N} escolas).`:`Dados em uso: planilha original (${NB} bimestres, ${N} escolas).`;
+  $('#foot').innerHTML=`Fonte: ${src}. Os totais da Prova Paulista na rede vêm da linha "Total" da edição, ou da média das escolas quando ela não traz o dado. `
+    +(ALU.anual
+      ?`A nota da Alura é o indicador anual de cada escola (média das avaliações mensais, tabela resultados_alura); o banco não guarda a série por avaliação mensal.`
+      :`A média da Alura é a média simples das escolas.${le>=0&&miss?` A avaliação ${le%2+1} do ${(le>>1)+1}º bimestre ainda não foi lançada em ${miss} escolas e fica fora das médias.`:''}`);
+  $('#srcNow').textContent=SRC.at?`Dados em uso: arquivo ${SRC.name}, carregado em ${fmtAt(SRC.at)} (${NB} bimestres, ${N} escolas).`:`Dados em uso: ${CUR&&CUR.fonte?CUR.fonte:'planilha original'} (${NB} bimestres, ${N} escolas).`;
   $('#btnReset').hidden=!SRC.at;
-  $('#sub').textContent=`Análise por escola, 1º ao ${NB}º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.`;
+  $('#hAlu').textContent=ALU.anual?'Avaliação Alura · indicador anual':'Alura por avaliação mensal';
+  $('#pAlu').textContent=ALU.anual?'Média das avaliações mensais do ano letivo, nota de 0 a 10 (tabela resultados_alura).':'Duas avaliações por bimestre, nota de 0 a 10.';
+  $('#sub').textContent=ALU.anual
+    ?`Análise por escola, 1º ao ${NB}º bimestre. Prova Paulista medida pelo TEC, Alura pela média anual das avaliações mensais.`
+    :`Análise por escola, 1º ao ${NB}º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.`;
   all();renderLines();
 }
 
@@ -505,10 +522,67 @@ try{applyData(start)}catch(e){SRC={name:'planilha original'};applyData(DATA)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-// Protecao de rota nao autenticada (padrao das demais paginas da plataforma)
+// Protecao de rota nao autenticada (padrao das demais paginas da plataforma) + carga de dados do Supabase
+const numC=v=>{ // percentuais/indices da Prova Paulista (tornam-se 0–1; aceita '0.983', '99,2%', '52.2%')
+  if(v==null)return null;if(typeof v==='number')return isFinite(v)?v:null;
+  let t=String(v).trim();if(t==='')return null;const pc=t.includes('%');
+  t=t.replace('%','').replace(/\s/g,'').replace(/\.(?=\d{3}\b)/g,'').replace(/,(?=\d{3}\b)/g,'').replace(/,/g,'.');
+  const x=parseFloat(t.replace(/[^0-9.\-]/g,''));if(isNaN(x))return null;
+  return pc?x/100:(x>1.5?x/100:x)};
+const numP=v=>{ // notas e contagens (sem conversao percentual)
+  if(v==null)return null;if(typeof v==='number')return isFinite(v)?v:null;
+  const x=parseFloat(String(v).replace(/[^0-9.\-]/g,''));return isNaN(x)?null:x};
+
+async function carregarSupabase(){
+  try{
+    if(typeof supabaseClient==='undefined')return null;
+    const [rPP,rAL]=await Promise.all([
+      supabaseClient.from('dados_educacionais').select('*').eq('ano','2026').limit(3000),
+      supabaseClient.from('resultados_alura').select('*').eq('ano',2026).limit(200)]);
+    if(rPP.error||rAL.error||!(rPP.data||[]).length)return null;
+    const bimOf=e=>{const m=String(e||'').match(/_([123])\s*[ºo°]?\s*bim/i);return m?+m[1]-1:null};
+    const nb=3,map=new Map();
+    const tot={tec:Array(nb).fill(null),acertos:Array(nb).fill(null),part:Array(nb).fill(null),alunos:Array(nb).fill(null)};
+    for(const r of rPP.data){
+      const b=bimOf(r.edicao_planilha);if(b==null||b>=nb)continue;
+      const nm=String(r.escola||'').trim();if(!nm)continue;
+      if(/^total$/i.test(nm)){
+        if(r.total_alunos!=null)tot.alunos[b]=r.total_alunos;
+        const q=numC(r.participacao);if(q!=null)tot.part[b]=q;
+        const a=numC(r.acertos_prova);if(a!=null)tot.acertos[b]=a;
+        const t=numC(r.bio_tec);if(t!=null)tot.tec[b]=t;
+        continue;
+      }
+      if(!map.has(nm))map.set(nm,{n:nm,pp:Array.from({length:nb},()=>({alunos:null,part:null,acertos:null,tec:null})),alu:[],idx:[]});
+      const rec=map.get(nm).pp[b];
+      rec.alunos=numP(r.total_alunos);rec.part=numC(r.participacao);rec.acertos=numC(r.acertos_prova);rec.tec=numC(r.bio_tec);
+    }
+    if(!map.size)return null;
+    const norm=t=>String(t||'').toUpperCase().replace(/\s+/g,' ').trim();
+    const alBy={};(rAL.data||[]).forEach(r=>{if(r.escola&&!/^total$/i.test(r.escola.trim()))alBy[norm(r.escola)]=r});
+    for(const s of map.values()){
+      const r=alBy[norm(s.n)];
+      s.a=r?[(numP(r.media_das_avaliacoes_mensais)==null?null:numP(r.media_das_avaliacoes_mensais))]:[null];
+      s.idx=r?[numP(r.indice_de_realizacao_das_avaliacoes_mensais)]:[null];
+    }
+    // fallback de totais da rede: media das escolas quando a linha Total nao traz o dado
+    const arr=[...map.values()];
+    for(let b=0;b<nb;b++){
+      ['tec','acertos','part'].forEach(k=>{if(tot[k][b]==null){const v=arr.map(s=>s.pp[b][k]).filter(x=>x!=null);if(v.length)tot[k][b]=v.reduce((p,c)=>p+c,0)/v.length}});
+      if(tot.alunos[b]==null){const v=arr.map(s=>s.pp[b].alunos).filter(x=>x!=null);if(v.length)tot.alunos[b]=v.reduce((p,c)=>p+c,0)}
+    }
+    return {s:arr,tot,nb,aluAnual:true,fonte:'Supabase (dados_educacionais + resultados_alura)'};
+  }catch(e){console.error('carregarSupabase',e);return null}
+}
+
 (async () => {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) window.location.href = 'index.html';
+    if (!session) { window.location.href = 'index.html'; return; }
+    const DS = await carregarSupabase();
+    let base = DS || DATA;
+    let start = base;
+    try{const sv=JSON.parse(localStorage.getItem('ppalu:v1')||'null');if(sv&&sv.D&&Array.isArray(sv.D.s)&&sv.D.s.length&&sv.D.tot){start=sv.D;SRC={name:sv.name,at:sv.at}}}catch(e){}
+    try{applyData(start)}catch(e){SRC={name:DS?'Supabase':'planilha original'};applyData(base)}
 })();
 </script>
 
