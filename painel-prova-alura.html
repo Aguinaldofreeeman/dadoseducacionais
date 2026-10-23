@@ -562,7 +562,7 @@ async function carregarSupabase(){
     const alBy={};(rAL.data||[]).forEach(r=>{if(r.escola&&!/^total$/i.test(r.escola.trim()))alBy[norm(r.escola)]=r});
     for(const s of map.values()){
       const r=alBy[norm(s.n)];
-      s.a=r?[(numP(r.media_das_avaliacoes_mensais)==null?null:numP(r.media_das_avaliacoes_mensais))]:[null];
+      s.alu=r?[numP(r.media_das_avaliacoes_mensais)]:[null];
       s.idx=r?[numP(r.indice_de_realizacao_das_avaliacoes_mensais)]:[null];
     }
     // fallback de totais da rede: media das escolas quando a linha Total nao traz o dado
