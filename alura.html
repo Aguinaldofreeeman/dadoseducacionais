@@ -77,11 +77,10 @@
         <div class="card">
             <h2>Resultados por Unidade Escolar</h2>
             <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0; line-height: 1.5;">
-                Indicadores por ano letivo: <strong style="color:#17365d;">Média das Avaliações Mensais</strong> (principal
-                indicador de <strong style="color:#17365d;">2026</strong>), <strong style="color:#17365d;">Índice de Exercícios
-                Corretos até 2ª Tentativa</strong> (principal indicador de <strong style="color:#17365d;">2025</strong>, também
-                presente em 2026) e <strong style="color:#17365d;">Média das Avaliações Mensais entre Alunos que não Zeraram</strong>
-                (2026). Os valores aparecem com <strong>-</strong> quando a coluna não existe na planilha de origem do ano.
+                Colunas por ano letivo: 2026 tem <strong>acessos, exercícios, tentativas, avaliações mensais</strong>
+                (média, não-zeradores e realização) e <strong>questões discursivas</strong>; 2025 tem
+                <strong>projetos enviados, unidades, exercícios e acertos até 2ª tentativa</strong>; 2024 tem
+                <strong>índice de projetos enviados</strong>. Um <strong>-</strong> indica coluna ausente na planilha daquele ano.
             </p>
             
             <div class="filters">
@@ -108,14 +107,21 @@
                             <th>% Acessos</th>
                             <th>Cursos Concluídos</th>
                             <th>Projetos Enviados</th>
+                            <th>% Projetos Enviados</th>
+                            <th>Unidades Concluídas</th>
                             <th>Exercícios Realizados</th>
-                            <th>Média das Avaliações Mensais</th>
+                            <th>Total de Exercícios Realizados</th>
+                            <th>Qtd. Média de Tentativas por Exercício</th>
+                            <th>Total de Acertos até a 2ª Tentativa</th>
                             <th>Índice de Exercícios Corretos até 2ª Tentativa</th>
+                            <th>Média das Avaliações Mensais</th>
                             <th>Média das Avaliações Mensais entre Alunos que não Zeraram</th>
+                            <th>Índice de Realização das Avaliações Mensais</th>
+                            <th>Média nas Questões Discursivas</th>
                         </tr>
                     </thead>
                     <tbody id="lista-resultados">
-                        <tr><td colspan="11">Carregando dados da Alura...</td></tr>
+                        <tr><td colspan="18">Carregando dados da Alura...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -156,7 +162,7 @@
 
             if (error || !data || data.length === 0) {
                 // Caso a tabela ainda não esteja populada no banco, exibe mensagem informativa
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="18" style="text-align:center; padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
                 return;
             }
 
@@ -165,7 +171,7 @@
             aplicarFiltros();
         } catch (err) {
             console.error('Erro ao carregar dados:', err);
-            tbody.innerHTML = `<tr><td colspan="11" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="18" style="color:red; text-align:center;">Erro ao carregar resultados: ${err.message}</td></tr>`;
         }
     }
 
@@ -173,7 +179,7 @@
     function renderizarTabela(lista) {
         const tbody = document.getElementById('lista-resultados');
         if (lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="18" class="text-center" style="padding: 20px;">Nenhum dado da Alura importado no banco até ao momento.</td></tr>';
             return;
         }
 
@@ -198,10 +204,17 @@
                     <td><span class="badge-pct">${formatarPercentual(item.indice_de_acessos_no_periodo)}</span></td>
                     <td>${item.cursos_concluidos ?? '-'}</td>
                     <td>${item.projetos_enviados ?? '-'}</td>
+                    <td>${formatarPercentual(item.indice_de_projetos_enviados)}</td>
+                    <td>${item.unidades_concluidas ?? '-'}</td>
                     <td>${item.exercicios_realizados ?? '-'}</td>
-                    <td>${notaDestaque && notaFmt !== '-' ? '<strong style="color:#17365d;">' + notaFmt + '</strong>' : notaFmt}</td>
+                    <td>${item.total_de_exercicios_realizados ?? '-'}</td>
+                    <td>${formatarNumero(item.quantidade_media_de_tentativas_por_exercicio)}</td>
+                    <td>${item.total_de_acertos_ate_a_2a_tentativa ?? '-'}</td>
                     <td>${formatarNumero(item.indice_de_exercicios_corretos_ate_2a_tentativa)}</td>
+                    <td>${notaDestaque && notaFmt !== '-' ? '<strong style="color:#17365d;">' + notaFmt + '</strong>' : notaFmt}</td>
                     <td>${formatarNumero(item.media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram)}</td>
+                    <td>${formatarPercentual(item.indice_de_realizacao_das_avaliacoes_mensais)}</td>
+                    <td>${formatarNumero(item.media_nas_questoes_discursivas)}</td>
                 </tr>
             `;
         }).join('');
