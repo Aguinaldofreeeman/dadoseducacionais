@@ -157,6 +157,31 @@
                 <button type="button" id="matific-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - SARESP -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Oficial - SARESP (Metas Ouro e Diamante)</h3>
+            </div>
+            <div class="form-group">
+                <label for="saresp-ano">Ano Letivo Referente à Planilha</label>
+                <select id="saresp-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Reimportar o mesmo ano substitui os resultados anteriores da SARESP. A conquista é lida pela cor da célula da legenda da planilha (Ouro=verde, Diamante=azul, N/A=vermelho, Sistema·EJA=cinza).</span>
+            </div>
+            <div class="form-group">
+                <label for="saresp-file">Arquivo Excel da SARESP (.xlsx)</label>
+                <input type="file" id="saresp-file" accept=".xlsx, .xls">
+            </div>
+            <div id="saresp-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="saresp-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="saresp-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
@@ -768,6 +793,103 @@
         } catch (err) {
             console.error('Erro na importação Matific:', err);
             preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_matific foi criada no Supabase.</span>`;
+            confirmar.disabled = false;
+        } finally { confirmar.textContent = '2. Confirmar Importação'; }
+    });
+
+    // =========================================================================
+    // Importador da Planilha Oficial da SARESP (Metas Ouro e Diamante)
+    // =========================================================================
+    let dadosSarespProcessados = [];
+    let regionalSaresp = null;
+
+    const statusPelaCor = c => {
+        const fg = String((c && c.s && c.s.fgColor && c.s.fgColor.rgb) || '').slice(-6).toUpperCase();
+        if (fg === '7AD592') return 'ouro';
+        if (fg === '8DB5F8') return 'diamante';
+        if (fg === 'F28E85' || fg === 'EA9999') return 'na';
+        if (fg === 'D8D8D8' || fg === 'D9D9D9') return 'sistema';
+        return 'na';
+    };
+    const numeroSaresp = valor => {
+        if (valor == null) return null;
+        if (typeof valor === 'number') return Number.isFinite(valor) ? valor : null;
+        const n = parseFloat(String(valor).replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+    };
+
+    document.getElementById('saresp-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('saresp-ano').value);
+        const file = document.getElementById('saresp-file').files[0];
+        const preview = document.getElementById('saresp-preview');
+        const confirmar = document.getElementById('saresp-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true; dadosSarespProcessados = []; regionalSaresp = null;
+        if (!ano) return alert('Selecione o ano referente à planilha da SARESP.');
+        if (!file) return alert('Selecione o arquivo Excel da SARESP.');
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellStyles: true });
+                const aba = wb.Sheets[wb.SheetNames[0]];
+                // monta linhas únicas a partir das células das colunas A..G (estrutura fixa da exportação)
+                const porLinha = {};
+                Object.keys(aba).filter(k => /^[A-G]\d+$/.test(k)).forEach(k => {
+                    const r = parseInt(k.slice(1));
+                    (porLinha[r] = porLinha[r] || {})[k.charAt(0)] = aba[k];
+                });
+                let regional = null;
+                dadosSarespProcessados = Object.keys(porLinha).map(r => {
+                    const linha = porLinha[r];
+                    if (!linha.A || linha.A.v === undefined) return null;
+                    const unidade = String(linha.A.v).replace(/\r?\n/g, ' ').trim();
+                    if (!unidade) return null;
+                    if (/^(LEGENDA|\(N\/A\)|CONQUISTA|SISTEMA|META |PERSPECTIVA|UNIDADE)/i.test(unidade)) return null;
+                    const texto = cel => cel && cel.v !== undefined ? String(cel.v).replace(/\r?\n/g, ' ').trim() : null;
+                    const item = {
+                        ano,
+                        escola: unidade,
+                        nota: numeroSaresp(linha.B && linha.B.v),
+                        status: texto(linha.C) ? statusPelaCor(linha.C) : null,
+                        conquista_texto: texto(linha.C),
+                        contato: texto(linha.D),
+                        meta_ouro: numeroSaresp(linha.E && linha.E.v),
+                        meta_diamante: numeroSaresp(linha.F && linha.F.v),
+                        pp3bim: numeroSaresp(linha.G && linha.G.v)
+                    };
+                    if (/^MARILIA$/i.test(unidade)) { item.status = null; item.conquista_texto = null; item.contato = null; regionalSaresp = item; return null; }
+                    return item;
+                }).filter(Boolean);
+                if (dadosSarespProcessados.length < 20) throw new Error('Foram encontradas apenas ' + dadosSarespProcessados.length + ' escolas. Confira se o arquivo é a exportação completa "SARESP_METAS OURO E DIAMANTE".');
+                const cnt = { ouro: 0, diamante: 0, na: 0, sistema: 0 };
+                dadosSarespProcessados.forEach(x => { cnt[x.status] = (cnt[x.status] || 0) + 1; });
+                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosSarespProcessados.length} escolas + linha regional MARILIA encontradas na aba "${wb.SheetNames[0]}" para ${ano}. ` +
+                    `Conquistas: ${cnt.ouro} Ouro · ${cnt.diamante} Diamante · ${cnt.na} Não atingiu a meta · ${cnt.sistema} Sistema·EJA.`;
+                preview.style.display = 'block'; confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura SARESP:', err);
+                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`; preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('saresp-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('saresp-preview');
+        const confirmar = document.getElementById('saresp-confirmar');
+        if (!dadosSarespProcessados.length) return;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const ano = parseInt(document.getElementById('saresp-ano').value);
+            const { error: erroDelete } = await supabaseClient.from('resultados_saresp').delete().eq('ano', ano);
+            if (erroDelete) throw new Error(`Não foi possível substituir os dados anteriores: ${erroDelete.message}`);
+            if (regionalSaresp) dadosSarespProcessados.push(regionalSaresp);
+            const { error } = await supabaseClient.from('resultados_saresp').insert(dadosSarespProcessados);
+            if (error) throw error;
+            preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosSarespProcessados.length} registros foram gravados na tabela resultados_saresp.</span>`;
+            document.getElementById('saresp-file').value = ''; dadosSarespProcessados = []; regionalSaresp = null;
+        } catch (err) {
+            console.error('Erro na importação SARESP:', err);
+            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_saresp foi criada no Supabase.</span>`;
             confirmar.disabled = false;
         } finally { confirmar.textContent = '2. Confirmar Importação'; }
     });
