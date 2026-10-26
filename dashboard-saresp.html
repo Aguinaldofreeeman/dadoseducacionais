@@ -127,8 +127,7 @@ const st={f:null,q:"",s:"nota",pp:false},LO=3,HI=8.8,P=v=>((v-LO)/(HI-LO)*100).t
 const tip=$("#tip");
 function tp(e,t){tip.innerHTML=t;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-250)+"px";tip.style.top=e.clientY+14+"px"}
 const hide=()=>tip.style.opacity=0;
-function cnt(el){const t=+el.dataset.n,d=el.dataset.d?+el.dataset.d:1,t0=performance.now();
- (function s(now){const p=Math.min(1,(now-t0)/1100),e=1-Math.pow(1-p,4);el.textContent=(t*e).toFixed(d==1?1:0).replace(".",",");if(p<1)requestAnimationFrame(s)})(t0)}
+function cnt(el){const t=+el.dataset.n,d=el.dataset.d?+el.dataset.d:1;el.textContent=t.toFixed(d==1?1:0).replace(".",",")}
 const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;let N=0,W=0;
 function inicializar(){
 D=montarD();
