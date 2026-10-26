@@ -9,12 +9,14 @@
   </style>
 </head>
 <body>
-  <header><div><h1>SARESP — Metas Ouro e Diamante</h1><p>Diretoria de Ensino — Região de Marília</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="btn">Início</a><a href="dashboard-saresp.html" class="btn" style="background:#b7791f">Dashboard SARESP</a></div></header>
+  <header><div><h1>SARESP — Metas Ouro e Diamante</h1><p>Unidade Regional de Ensino de Marília</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="btn">Início</a><a href="dashboard-saresp.html" class="btn" style="background:#b7791f">Dashboard SARESP</a></div></header>
   <main>
     <p class="intro">Nota Final consolidada de 2025, conquista das metas e alvos por escola para 2026.</p>
     <section class="cards" id="cards"></section>
     <section class="panel"><div class="panel-head"><div><h2>Metas por escola</h2><p id="sub"></p></div><div class="filters"><select id="select-escola" aria-label="Filtrar escola"><option value="">Todas as Escolas</option></select><select id="status"><option value="">Todas as conquistas</option><option value="ouro">Conquistou Ouro</option><option value="diamante">Conquistou Diamante</option><option value="na">Não atingiu a meta 2025</option><option value="sistema">Sistema · EJA multisseriado</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="order"><option value="nota">Nota 2025 (maior)</option><option value="pp3bim">Prova Paulista 3º BIM (maior %)</option><option value="metaOuro">Meta Ouro 26-27</option><option value="nome">Escola (A–Z)</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Escola</th><th>Conquista 2025</th><th>Nota Final 2025</th><th>Meta Ouro 26-27</th><th>Meta Diamante 26-27</th><th>PP 3º BIM (% acertos)</th><th>Contato</th></tr></thead><tbody id="rows"></tbody></table></div></section>
-    <p class="note" id="rodape">Fonte: SARESP_METAS OURO E DIAMANTE.xlsx · Conquista 2025: <b>Ouro</b> = conquistou a meta Ouro · <b>Diamante</b> = conquistou a meta Diamante · <b>N/A</b> = não atingiu a meta 2025 · <b>Sistema · EJA</b> = unidades do sistema EJA multisseriado (classes hospitalares, socioeducativas, penitenciárias e EPF/CEL JTO), fora da classificação regular.</p>
+    <p class="note" id="rodape">
+      
+    </p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
   <script>
