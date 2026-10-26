@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f5fb">
 <title>SARESP 2026–27 · Metas Ouro & Diamante</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -61,11 +62,22 @@ h2{font-size:18px;letter-spacing:-.01em;margin-bottom:2px}.hint{color:var(--mut)
 .key{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font-size:12px;margin:2px 0 10px}.key i{display:inline-block;width:3px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px}
 #tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:7px 11px;border-radius:10px;font-size:12px;opacity:0;transition:opacity .12s;z-index:9;max-width:240px}
 footer{margin-top:30px;color:var(--mut);font-size:12px}
+
+/* Melhorias de usabilidade e acessibilidade */
+.skip{position:absolute;left:-9999px;top:auto}.skip:focus{left:18px;top:12px;z-index:50;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px}
+.tb{position:sticky;top:0;z-index:6;padding:12px 0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px)}
+.tb input:focus,.sg button:focus-visible,.lg button:focus-visible,.act:focus-visible{outline:3px solid color-mix(in srgb,var(--dia) 35%,transparent);outline-offset:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.act{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 11px;border-radius:10px;font:600 12px Inter,system-ui;cursor:pointer}.act:hover{border-color:var(--mut)}
+.filtersum{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--mut)}.chip b{color:var(--ink)}
+.row{cursor:pointer}.row:focus-visible{outline:3px solid color-mix(in srgb,var(--dia) 35%,transparent);outline-offset:2px}.details{grid-column:1/-1;display:none;padding-top:10px;border-top:1px dashed var(--line);color:var(--mut);font-size:12px}.row.open .details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.details b{display:block;color:var(--ink);font-size:14px}.empty{text-align:center;padding:32px}.muted{color:var(--mut)}
+@media(max-width:650px){.row.open .details{grid-template-columns:1fr 1fr}.tb{position:static}.actions{width:100%}.act{flex:1}.tb input{width:100%}}
+
 @media(max-width:860px){.kp{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;gap:10px}.tr{grid-column:1/-1;order:3}.pl{order:2}.nu{display:none}.hero{padding:18px 10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<a class="skip" href="#unidades">Ir para a lista de unidades</a>
 <div class="w">
 <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><a href="index.html" style="text-decoration:none;color:var(--bg);background:var(--ink);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600">Início</a><a href="saresp.html" style="text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600">Resultados SARESP</a></div>
 <div class="eye">Diretoria de Ensino · Marília</div>
@@ -86,11 +98,11 @@ footer{margin-top:30px;color:var(--mut);font-size:12px}
  <div class="card"><h2>Nota × Acertos na Prova Paulista</h2><p class="hint" id="cr"></p><svg id="sc" viewBox="0 0 520 280"></svg></div>
 </div>
 
-<div class="tb"><h2>Unidades escolares</h2>
+<div class="tb" id="unidades"><h2>Unidades escolares</h2>
  <input id="q" placeholder="Buscar escola ou contato…" aria-label="Buscar">
- <div class="sg" id="so"></div></div>
+ <div class="sg" id="so" aria-label="Ordenação"></div><div class="actions"><button class="act" id="ppOnly" type="button" aria-pressed="false">Somente com Prova Paulista</button><button class="act" id="reset" type="button">Limpar filtros</button><button class="act" id="csv" type="button">Exportar CSV</button></div></div>
 <div class="key"><span><i style="background:var(--gold)"></i>Meta Ouro</span><span><i style="background:var(--dia)"></i>Meta Diamante</span><span>Barra = nota consolidada · +x = salto até o Diamante</span></div>
-<div class="cnt" id="ct"></div>
+<div class="filtersum" id="fs" aria-live="polite"></div><div class="cnt" id="ct"></div>
 <div id="ls"></div>
 <footer id="fonte">Fonte: SARESP_METAS OURO E DIAMANTE.xlsx. “Nota atual” da diretoria conforme linha consolidada; demais indicadores calculados sobre as unidades listadas.</footer>
 </div>
@@ -111,7 +123,7 @@ const $=s=>document.querySelector(s),f1=n=>n.toFixed(1).replace(".",","),V=c=>`v
 let U=[];
 function tc(s){const K=/^(EE|EPF|EJA|II|III|IV|JTO|CEL|CASA|IFA|EMEF|CD|DE|HC)$/,L=/^(DE|DA|DO|DAS|DOS|E|A|AO|À)$/;
  return s.toLowerCase().split(" ").map(w=>{const u=w.toUpperCase();return K.test(u)&&!L.test(u)?u:L.test(u)?w:w.charAt(0).toUpperCase()+w.slice(1)}).join(" ")}
-const st={f:null,q:"",s:"nota"},LO=3,HI=8.8,P=v=>((v-LO)/(HI-LO)*100).toFixed(1)+"%";
+const st={f:null,q:"",s:"nota",pp:false},LO=3,HI=8.8,P=v=>((v-LO)/(HI-LO)*100).toFixed(1)+"%";
 const tip=$("#tip");
 function tp(e,t){tip.innerHTML=t;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-250)+"px";tip.style.top=e.clientY+14+"px"}
 const hide=()=>tip.style.opacity=0;
@@ -154,20 +166,24 @@ const SO={nota:["Nota","nota",-1],gap:["Maior salto","gap",-1],pp:["Prova Paulis
 $("#so").innerHTML=Object.keys(SO).map(k=>`<button data-s="${k}">${SO[k][0]}</button>`).join("");
 $("#so").onclick=e=>{if(e.target.dataset.s){st.s=e.target.dataset.s;draw()}};
 $("#q").oninput=e=>{st.q=e.target.value.toLowerCase();draw()};
+$("#ppOnly").onclick=()=>{st.pp=!st.pp;$("#ppOnly").setAttribute("aria-pressed",st.pp);$("#ppOnly").classList.toggle("on",st.pp);draw()};
+$("#reset").onclick=()=>{st.f=null;st.q="";st.s="nota";st.pp=false;$("#q").value="";$("#ppOnly").setAttribute("aria-pressed","false");$("#ppOnly").classList.remove("on");draw()};
+function filtered(){const [,key,dir]=SO[st.s];return U.filter(u=>(!st.f||u.st==st.f)&&(!st.pp||u.pp!=null)&&(`${u.n} ${u.c} ${u.ct||""}`.toLowerCase().includes(st.q))).sort((a,b)=>{const av=a[key],bv=b[key];if(key==="n")return av.localeCompare(bv,"pt-BR")*dir;return ((bv??-Infinity)-(av??-Infinity))*(dir<0?1:-1)});}
+$("#csv").onclick=()=>{const L=filtered(),q=v=>`"${String(v??"").replaceAll('"','""')}"`;const rows=[["Unidade","CIE","Contato","Nota atual","Situação 2025","Meta Ouro","Meta Diamante","Salto até Diamante","Prova Paulista (%)"],...L.map(u=>[u.n,u.c,u.ct, f1(u.nota),ST[u.st][0],f1(u.o),f1(u.d),f1(u.gap),u.pp==null?"":u.pp.toFixed(1).replace(".",",")])];const blob=new Blob(["\ufeff"+rows.map(r=>r.map(q).join(";")).join("\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="saresp_unidades_filtradas.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 function draw(){
  document.querySelectorAll(".lg button").forEach(b=>b.classList.toggle("on",b.dataset.k==st.f));
  document.querySelectorAll("#so button").forEach(b=>b.classList.toggle("on",b.dataset.s==st.s));
- const [,key,dir]=SO[st.s];
- const L=U.filter(u=>(!st.f||u.st==st.f)&&(`${u.n} ${u.c} ${u.ct||""}`.toLowerCase().includes(st.q)))
-  .sort((a,b)=>((a[key]??-1)>(b[key]??-1)?1:-1)*dir*(key=="n"?1:1)*(dir<0?1:1));
- if(dir<0)L.sort((a,b)=>(b[key]??-1)-(a[key]??-1));
+ const L=filtered();
+ const lm=L.length?avg(L.map(u=>u.nota)):0, lg=L.length?avg(L.map(u=>u.gap)):0, lp=L.filter(u=>u.pp!=null).length;
+ $("#fs").innerHTML=`<span class="chip"><b>${L.length}</b> unidades</span><span class="chip">Nota média <b>${L.length?f1(lm):"—"}</b></span><span class="chip">Salto médio <b>${L.length?"+"+f1(lg):"—"}</b></span><span class="chip">Com P.P. <b>${lp}</b></span>`;
  $("#ct").textContent=`Mostrando ${L.length} de ${N} unidades`+(st.f?` · filtro: ${ST[st.f][0]}`:"");
- $("#ls").innerHTML=L.map((u,i)=>{const c=V(ST[u.st][1]);return `<div class="row" title="Nota ${f1(u.nota)} · Ouro ${f1(u.o)} · Diamante ${f1(u.d)}">
+ $("#ls").innerHTML=L.map((u,i)=>{const c=V(ST[u.st][1]);return `<div class="row" tabindex="0" role="button" aria-expanded="false" title="Clique para ver detalhes">
  <div class="nm"><b>${u.n}</b><small>${[u.c,u.ct].filter(Boolean).join(" · ")}</small></div>
  <div class="tr"><div class="fl" data-w="${P(u.nota)}" style="background:linear-gradient(90deg,${c}66,${c})"></div><span class="mk o" style="left:${P(u.o)}"></span><span class="mk d" style="left:${P(u.d)}"></span></div>
  <div class="nu"><strong>${f1(u.nota)}</strong><small>+${f1(u.gap)} · ${u.pp!=null?u.pp.toFixed(0)+"% P.P.":"s/ P.P."}</small></div>
- <span class="pl" style="color:${c};border-color:${c}">${ST[u.st][0]}</span></div>`}).join("")||`<div class="card">Nenhuma unidade encontrada.</div>`;
+ <span class="pl" style="color:${c};border-color:${c}">${ST[u.st][0]}</span><div class="details"><span>Nota atual<b>${f1(u.nota)}</b></span><span>Meta Ouro<b>${f1(u.o)}</b></span><span>Meta Diamante<b>${f1(u.d)}</b></span><span>Prova Paulista<b>${u.pp!=null?u.pp.toFixed(1).replace(".",",")+"%":"Sem dado"}</b></span></div></div>`}).join("")||`<div class="card empty"><b>Nenhuma unidade encontrada</b><div class="muted">Revise a busca ou limpe os filtros.</div></div>`;
  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".fl").forEach(e=>e.style.width=e.dataset.w)));
+ document.querySelectorAll("#ls .row").forEach(row=>{const toggle=()=>{row.classList.toggle("open");row.setAttribute("aria-expanded",row.classList.contains("open"))};row.onclick=toggle;row.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle()}}});
 }
 draw();document.querySelectorAll("[data-n]").forEach(cnt);
 }
