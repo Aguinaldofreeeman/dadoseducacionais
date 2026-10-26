@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SARESP 2026–27 · Metas Ouro & Diamante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f5fb;--card:#fff;--ink:#0b1220;--mut:#5d687c;--line:#e2e7f1;--gold:#d99a00;--dia:#2f7df6;--bad:#e5484d;--eja:#8b95a7;--g1:rgba(47,125,246,.16);--g2:rgba(245,179,1,.18)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#060a13;--card:rgba(255,255,255,.045);--ink:#eef2fb;--mut:#8e9bb4;--line:rgba(255,255,255,.09);--gold:#ffc83d;--dia:#5aa9ff;--bad:#ff6b72;--eja:#8e9bb4;--g1:rgba(60,120,216,.28);--g2:rgba(255,200,61,.14)}}
+:root[data-theme="dark"]{--bg:#060a13;--card:rgba(255,255,255,.045);--ink:#eef2fb;--mut:#8e9bb4;--line:rgba(255,255,255,.09);--gold:#ffc83d;--dia:#5aa9ff;--bad:#ff6b72;--eja:#8e9bb4;--g1:rgba(60,120,216,.28);--g2:rgba(255,200,61,.14)}
+*{box-sizing:border-box;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh;
+background-image:radial-gradient(900px 500px at 8% -10%,var(--g1),transparent 60%),radial-gradient(800px 500px at 100% 0,var(--g2),transparent 60%);background-repeat:no-repeat}
+.w{max-width:1180px;margin:0 auto;padding:28px 18px 60px}
+h1,h2,.big,.k b{font-family:"Space Grotesk",Inter,sans-serif}
+.eye{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:600}
+h1{font-size:clamp(30px,5.4vw,56px);line-height:1.04;letter-spacing:-.03em;margin:8px 0 6px}
+h1 span{background:linear-gradient(90deg,var(--gold),var(--dia));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);max-width:620px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;backdrop-filter:blur(10px)}
+.hero{margin-top:26px;display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:10px;padding:26px}
+.hs{text-align:center}.hs small{display:block;color:var(--mut);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.big{font-size:clamp(40px,8vw,84px);font-weight:700;line-height:1;letter-spacing:-.04em}
+.hs.o .big{color:var(--gold)}.hs.d .big{color:var(--dia)}
+.ar{height:2px;width:clamp(20px,6vw,80px);background:linear-gradient(90deg,var(--line),var(--mut));position:relative}
+.ar:after{content:"";position:absolute;right:0;top:-3px;border:4px solid transparent;border-left:7px solid var(--mut)}
+.hs em{font-style:normal;font-size:13px;color:var(--mut)}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.k small{color:var(--mut);font-size:13px}.k b{display:block;font-size:34px;letter-spacing:-.03em;margin:4px 0 2px}.k em{font-style:normal;font-size:12px;color:var(--mut)}
+.g2{display:grid;grid-template-columns:5fr 7fr;gap:14px;margin-top:14px}
+h2{font-size:18px;letter-spacing:-.01em;margin-bottom:2px}.hint{color:var(--mut);font-size:13px;margin-bottom:12px}
+.dn{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.dn svg{width:170px;height:170px;flex:none}
+.lg{flex:1;min-width:170px;display:grid;gap:6px}
+.lg button{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;border:1px solid transparent;font-size:14px}
+.lg button:hover{background:var(--line)}.lg button.on{border-color:var(--ink)}
+.lg i{width:11px;height:11px;border-radius:50%;flex:none}.lg span{margin-left:auto;font-weight:600}
+#sc{width:100%;height:auto;overflow:visible}
+#sc text{fill:var(--mut);font-size:10px}#sc line{stroke:var(--line)}
+#sc circle{cursor:pointer;transition:r .15s}#sc circle:hover{r:8}
+.tb{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 12px}
+.tb h2{margin-right:auto;font-size:22px}
+.tb input{background:var(--card);border:1px solid var(--line);color:var(--ink);padding:9px 14px;border-radius:12px;font:inherit;min-width:200px}
+.sg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.sg button{all:unset;cursor:pointer;padding:6px 11px;border-radius:9px;font-size:13px;color:var(--mut)}
+.sg button.on{background:var(--ink);color:var(--bg);font-weight:600}
+.cnt{color:var(--mut);font-size:13px;margin-bottom:8px}
+.row{display:grid;grid-template-columns:minmax(180px,1.3fr) 2.2fr 120px 118px;gap:16px;align-items:center;padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:8px;transition:transform .2s,border-color .2s}
+.row:hover{transform:translateX(4px);border-color:var(--mut)}
+.nm b{display:block;font-weight:600;font-size:14px;line-height:1.25}.nm small{color:var(--mut);font-size:12px}
+.tr{position:relative;height:12px;border-radius:9px;background:var(--line)}
+.fl{position:absolute;inset:0 auto 0 0;border-radius:9px;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.mk{position:absolute;top:-5px;bottom:-5px;width:3px;border-radius:2px;margin-left:-1px}
+.mk.o{background:var(--gold);box-shadow:0 0 10px var(--gold)}.mk.d{background:var(--dia);box-shadow:0 0 10px var(--dia)}
+.nu{text-align:right}.nu strong{font:700 22px "Space Grotesk",sans-serif}.nu small{display:block;color:var(--mut);font-size:12px}
+.pl{justify-self:end;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid;white-space:nowrap}
+.key{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font-size:12px;margin:2px 0 10px}.key i{display:inline-block;width:3px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:7px 11px;border-radius:10px;font-size:12px;opacity:0;transition:opacity .12s;z-index:9;max-width:240px}
+footer{margin-top:30px;color:var(--mut);font-size:12px}
+@media(max-width:860px){.kp{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;gap:10px}.tr{grid-column:1/-1;order:3}.pl{order:2}.nu{display:none}.hero{padding:18px 10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="w">
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><a href="index.html" style="text-decoration:none;color:var(--bg);background:var(--ink);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600">Início</a><a href="saresp.html" style="text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600">Resultados SARESP</a></div>
+<div class="eye">Diretoria de Ensino · Marília</div>
+<h1>SARESP 2026–27<br><span>Metas Ouro & Diamante</span></h1>
+<p class="sub">Panorama das unidades: nota consolidada, metas do próximo ciclo, conquistas de 2025 e desempenho na Prova Paulista do 3º bimestre.</p>
+
+<div class="card hero">
+ <div class="hs"><small>Nota atual · Diretoria</small><div class="big" id="hn">0</div></div><div class="ar"></div>
+ <div class="hs o"><small>Meta Ouro</small><div class="big" id="ho">0</div><em id="eo"></em></div><div class="ar"></div>
+ <div class="hs d"><small>Meta Diamante</small><div class="big" id="hd">0</div><em id="ed"></em></div>
+</div>
+
+<div class="kp" id="kp"></div>
+
+<div class="g2">
+ <div class="card"><h2>Conquistas 2025</h2><p class="hint">Clique para filtrar as unidades abaixo.</p>
+  <div class="dn"><svg id="dn" viewBox="0 0 120 120"></svg><div class="lg" id="lg"></div></div></div>
+ <div class="card"><h2>Nota × Acertos na Prova Paulista</h2><p class="hint" id="cr"></p><svg id="sc" viewBox="0 0 520 280"></svg></div>
+</div>
+
+<div class="tb"><h2>Unidades escolares</h2>
+ <input id="q" placeholder="Buscar escola ou contato…" aria-label="Buscar">
+ <div class="sg" id="so"></div></div>
+<div class="key"><span><i style="background:var(--gold)"></i>Meta Ouro</span><span><i style="background:var(--dia)"></i>Meta Diamante</span><span>Barra = nota consolidada · +x = salto até o Diamante</span></div>
+<div class="cnt" id="ct"></div>
+<div id="ls"></div>
+<footer id="fonte">Fonte: SARESP_METAS OURO E DIAMANTE.xlsx. “Nota atual” da diretoria conforme linha consolidada; demais indicadores calculados sobre as unidades listadas.</footer>
+</div>
+<div id="tip"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<script>
+const BAKE={"regional":{"nota":4.1,"metaOuro":4.6,"metaDiamante":4.9},"escolas":[{"escola":"17 DE SETEMBRO - 33881","nota":5.2,"status":"ouro","conquistaTexto":"Ouro","contato":"Jefferson","metaOuro":5.8,"metaDiamante":6.2,"pp3bim":0.552},{"escola":"ABEL AUGUSTO FRAGATA - 33820","nota":6.5,"status":"na","conquistaTexto":"...","contato":"Vanessa","metaOuro":7,"metaDiamante":7.3,"pp3bim":0.815},{"escola":"ALCYR DA ROSA LIMA PROF - 33406","nota":3.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Patricia","metaOuro":4,"metaDiamante":4.2,"pp3bim":0.428},{"escola":"AMELIA LOPES ANDERS PROFA - 914198","nota":3.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Denise","metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.434},{"escola":"AMILCARE MATTEI PROF - 33728","nota":3.8,"status":"diamante","conquistaTexto":"Diamante","contato":"Luciane","metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.541},{"escola":"ANTONIO AUGUSTO NETTO - 33832","nota":3.5,"status":"na","conquistaTexto":"......","contato":"Marina","metaOuro":4,"metaDiamante":4.2,"pp3bim":0.48},{"escola":"ANTONIO DAUN - 33467","nota":4.2,"status":"na","conquistaTexto":"....","contato":"Thais","metaOuro":4.8,"metaDiamante":5.1,"pp3bim":0.514},{"escola":"ANTONIO DE BAPTISTA PROF - 33561","nota":3.9,"status":"na","conquistaTexto":"....","contato":"Ana Claudia IFA","metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.539},{"escola":"ANTONIO GOMES DE OLIVEIRA PROF - 33741","nota":7.1,"status":"diamante","conquistaTexto":"Diamante","contato":"Madalena","metaOuro":7.7,"metaDiamante":8.2,"pp3bim":0.754},{"escola":"ANTONIO REGINATO PROF - 43242","nota":4.1,"status":"ouro","conquistaTexto":"Ouro","contato":"Angela","metaOuro":4.6,"metaDiamante":4.8,"pp3bim":0.588},{"escola":"BALTAZAR DE GODOY MOREIRA PROF - 33856","nota":3.8,"status":"na","conquistaTexto":".....","contato":"David IFA","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.473},{"escola":"BENITO MARTINELLI PROF - 903693","nota":3.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Vander","metaOuro":4,"metaDiamante":4.2,"pp3bim":0.433},{"escola":"BENTO DE ABREU SAMPAIO VIDAL - 33662","nota":7.2,"status":"diamante","conquistaTexto":"Diamante","contato":"Erica","metaOuro":7.8,"metaDiamante":8.2,"pp3bim":0.701},{"escola":"BICUDO MONSENHOR - 33753","nota":4.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Grazielle","metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.502},{"escola":"CARLOTA DE NEGREIROS ROCHA PROFA - 33736","nota":7.5,"status":"na","conquistaTexto":".....","contato":"Agda Sup.","metaOuro":8,"metaDiamante":8.4,"pp3bim":0.784},{"escola":"CASTRO ALVES - 33613","nota":5.5,"status":"ouro","conquistaTexto":"Ouro","contato":"Elaine","metaOuro":6,"metaDiamante":6.3,"pp3bim":0.635},{"escola":"CEL JTO A EE BALTAZAR DE GODOY MOREIRA PROF - 985508","nota":3.8,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null},{"escola":"CEL JTO A EE CULTURA E LIBERDADE - 459768","nota":4.1,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null},{"escola":"CENTRO ATEND SOCIO-EDUC ADOLESCENTE DE MARILIA - CI - 559581","nota":3.9,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.4,"metaDiamante":4.7,"pp3bim":null},{"escola":"CENTRO ATEND SOCIO-EDUC AO ADOLESCENTE DE MARILIA - CIP - 148519","nota":3.9,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.4,"metaDiamante":4.7,"pp3bim":null},{"escola":"CENTRO DE DETENÇÃO PROVISÓRIA DE ÁLVARO DE CARVALHO - 7986","nota":3.4,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":3.8,"metaDiamante":4,"pp3bim":null},{"escola":"CENTRO DE RESSOCIALIZACAO DE MARILIA - 453262","nota":4,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null},{"escola":"CULTURA E LIBERDADE - 33625","nota":4.1,"status":"ouro","conquistaTexto":"Ouro","contato":"Lara","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":0.472},{"escola":"DIRCE BELLUZZO DE CAMPOS PROFA - 33558","nota":3.8,"status":"ouro","conquistaTexto":"Ouro","contato":"Alexandre","metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.472},{"escola":"EDSON VIANEI ALVES PROF - 923000","nota":4.3,"status":"ouro","conquistaTexto":"Ouro","contato":"Barbara","metaOuro":4.8,"metaDiamante":5.2,"pp3bim":0.558},{"escola":"EDUARDO DE SOUZA PORTO CEL - 33522","nota":4.5,"status":"ouro","conquistaTexto":"Ouro","contato":"Flávia","metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.491},{"escola":"EMICO MATSUMOTO GEOGRAFA - 446920","nota":5.2,"status":"ouro","conquistaTexto":"Ouro","contato":"Ligia","metaOuro":5.8,"metaDiamante":6.2,"pp3bim":0.552},{"escola":"EPF JTO À CULTURA E LIBERDADE - 11761","nota":4.1,"status":"sistema","conquistaTexto":"....","contato":".....","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null},{"escola":"EPF JTO À HILMAR MACHADO DE OLIVEIRA - 11637","nota":3.5,"status":"sistema","conquistaTexto":".....","contato":"....","metaOuro":3.9,"metaDiamante":4.1,"pp3bim":null},{"escola":"ERMELINDA CLARICE SANCHES PROFA - 33479","nota":3.8,"status":"na","conquistaTexto":"N/A","contato":"Debora","metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.433},{"escola":"GABRIEL MONTEIRO DA SILVA - 33674","nota":5.8,"status":"diamante","conquistaTexto":"Diamante","contato":"Ana Laura","metaOuro":6.4,"metaDiamante":6.8,"pp3bim":0.597},{"escola":"GERALDO ZANCOPE PROF - 33716","nota":5.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Fernanda","metaOuro":6.2,"metaDiamante":6.7,"pp3bim":0.769},{"escola":"GRACIEMA BAGANHA RIBEIRO - 33534","nota":3.9,"status":"ouro","conquistaTexto":"Ouro","contato":"Jussara","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.487},{"escola":"HATSUE TOYOTA - 903673","nota":4.5,"status":"ouro","conquistaTexto":"Ouro","contato":"Rita","metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.51},{"escola":"HEMOCENTRO DA FACULDADE DE MEDICINA MARILIA CL HOSPITALAR - 440361","nota":7.5,"status":"sistema","conquistaTexto":"....","contato":"....","metaOuro":8,"metaDiamante":8.4,"pp3bim":null},{"escola":"HILMAR MACHADO DE OLIVEIRA - 33492","nota":3.5,"status":"na","conquistaTexto":"N/A","contato":"Veronica","metaOuro":3.9,"metaDiamante":4.1,"pp3bim":0.523},{"escola":"HOSPITAL DAS CLINICAS DE MARILIA CLASSE HOSPITALAR - 559180","nota":7.5,"status":"sistema","conquistaTexto":"...","contato":"....","metaOuro":8,"metaDiamante":8.4,"pp3bim":null},{"escola":"HOSPITAL IRMANDADE STA CASA DE MISERICORDIA CL HOSPITALAR - 447912","nota":7.5,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":8,"metaDiamante":8.4,"pp3bim":null},{"escola":"IZIDORO DAUN - 33455","nota":3.9,"status":"na","conquistaTexto":"N/A","contato":"Jose Augusto","metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.49},{"escola":"JARDIM ALCIR RAINERI - 474629","nota":4.1,"status":"na","conquistaTexto":"N/A","contato":"Aline","metaOuro":4.6,"metaDiamante":4.8,"pp3bim":0.476},{"escola":"JARDIM SANTA ANTONIETA - 462688","nota":4.7,"status":"na","conquistaTexto":"N/A","contato":"Rodrigo","metaOuro":5.3,"metaDiamante":5.7,"pp3bim":0.528},{"escola":"JOAO WALFREDO ROTHERMUND PADRE - 907650","nota":4,"status":"ouro","conquistaTexto":"Ouro","contato":"Fernanda","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":0.5},{"escola":"JOSE ALFREDO DE ALMEIDA - 43254","nota":3.5,"status":"na","conquistaTexto":"N/A","contato":"Renata","metaOuro":3.9,"metaDiamante":4,"pp3bim":0.431},{"escola":"JOSE AMBROSIO DOS SANTOS - 33650","nota":3.8,"status":"diamante","conquistaTexto":"Diamante","contato":"Eduardo","metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.563},{"escola":"JOSE AUGUSTO BARTHOLO - 33686","nota":5.1,"status":"diamante","conquistaTexto":"Diamante","contato":"Marisa","metaOuro":5.7,"metaDiamante":6.1,"pp3bim":0.518},{"escola":"JOSE BONIFACIO DO COUTO - 33376","nota":3.6,"status":"na","conquistaTexto":"N/A","contato":"Adriano","metaOuro":4.1,"metaDiamante":4.4,"pp3bim":0.527},{"escola":"JOSE CARLOS MONTEIRO - 26414","nota":3.7,"status":"ouro","conquistaTexto":"Ouro","contato":"Sandra","metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.469},{"escola":"LOURENCO DE ALMEIDA SENNE DR - 33704","nota":5.7,"status":"diamante","conquistaTexto":"Diamante","contato":"Maristela","metaOuro":6.3,"metaDiamante":6.7,"pp3bim":0.625},{"escola":"LYDIA YVONE GOMES MARQUES PROFA - 33388","nota":3.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Sandra","metaOuro":4,"metaDiamante":4.1,"pp3bim":0.505},{"escola":"MARIA CECILIA FERRAZ DE FREITAS PROFA - 47855","nota":3.8,"status":"na","conquistaTexto":"N/A","contato":"Nice","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.46},{"escola":"MARIA IZABEL SAMPAIO VIDAL - 33819","nota":4,"status":"ouro","conquistaTexto":"Ouro","contato":"Juliana","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.453},{"escola":"MARIA STELLA DE CERQUEIRA CESAR PROFA - 36250","nota":6.6,"status":"diamante","conquistaTexto":"Diamante","contato":"Adriana","metaOuro":7.2,"metaDiamante":7.7,"pp3bim":0.788},{"escola":"MAURICIO MILANI - 47703","nota":3.8,"status":"ouro","conquistaTexto":"Ouro","contato":"João Marcos","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.429},{"escola":"NASIB CURY - 917990","nota":4.6,"status":"ouro","conquistaTexto":"Ouro","contato":"Ana Carla","metaOuro":5.2,"metaDiamante":5.6,"pp3bim":0.458},{"escola":"NELSON CABRINI PROF - 33698","nota":3.9,"status":"ouro","conquistaTexto":"Ouro","contato":"Monica","metaOuro":4.4,"metaDiamante":4.7,"pp3bim":0.501},{"escola":"NELY CARBONIERI DE ANDRADE PROFA - 33424","nota":4.6,"status":"na","conquistaTexto":"N/A","contato":"Rodrigo","metaOuro":5.2,"metaDiamante":5.5,"pp3bim":0.482},{"escola":"NEUZA MARIA MARANA FEIJAO PROFA - 33777","nota":4.2,"status":"ouro","conquistaTexto":"Ouro","contato":"Sandra","metaOuro":4.7,"metaDiamante":5,"pp3bim":0.533},{"escola":"NORMA MONICO TRUZZI PROFA - 33443","nota":4,"status":"diamante","conquistaTexto":"Diamante","contato":"Suzana","metaOuro":4.4,"metaDiamante":4.6,"pp3bim":0.601},{"escola":"ORACINA CORREA DE MORAES RODINE PROFA - 43655","nota":4.1,"status":"na","conquistaTexto":"N/A","contato":"Eduardo","metaOuro":4.4,"metaDiamante":4.7,"pp3bim":0.445},{"escola":"PENITENCIARIA DE MARILIA - 453237","nota":4,"status":"sistema","conquistaTexto":"....","contato":"....","metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null},{"escola":"PENITENCIÁRIA I DE GÁLIA - 9890","nota":3.9,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null},{"escola":"PENITENCIARIA II DE GALIA - 9892","nota":3.9,"status":"sistema","conquistaTexto":"....","contato":"....","metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null},{"escola":"PENITENCIARIA VALENTIM ALVES DA SILVA - 453158","nota":3.4,"status":"sistema","conquistaTexto":"...","contato":"...","metaOuro":3.8,"metaDiamante":4,"pp3bim":null},{"escola":"PIRMINO ANTONIO SCHMIDT MONSENHOR - 33789","nota":5.2,"status":"sistema","conquistaTexto":"...","contato":"Rose","metaOuro":5.7,"metaDiamante":5.7,"pp3bim":null},{"escola":"RAFAEL PAES DE BARROS DOUTOR - 33510","nota":3.4,"status":"na","conquistaTexto":"N/A","contato":"Marsy","metaOuro":3.8,"metaDiamante":4,"pp3bim":0.412},{"escola":"REIKO UEMURA TSUNOKAWA PROFA - 907662","nota":4.1,"status":"na","conquistaTexto":"N/A","contato":"Neto","metaOuro":4.6,"metaDiamante":4.9,"pp3bim":0.496},{"escola":"RUTH MAMEDE DE GODOY PROFA - 33637","nota":4,"status":"ouro","conquistaTexto":"Ouro","contato":"Regina","metaOuro":4.5,"metaDiamante":4.7,"pp3bim":0.595},{"escola":"SEBASTIAO MONACO VEREADOR - 44568","nota":3.6,"status":"na","conquistaTexto":"N/A","contato":"Josiane","metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.49},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA - 47843","nota":4.2,"status":"na","conquistaTexto":"N/A","contato":"Ana Paula  IFA","metaOuro":4.7,"metaDiamante":5.1,"pp3bim":0.516},{"escola":"VITU GIORGI DONA - 33790","nota":3.9,"status":"diamante","conquistaTexto":"Diamante","contato":"Roberto","metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.473},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR - 33765","nota":5,"status":"na","conquistaTexto":"N/A","contato":"Alexandre","metaOuro":5.6,"metaDiamante":6,"pp3bim":0.516},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679","nota":5.3,"status":"ouro","conquistaTexto":"Ouro","contato":"Leandro","metaOuro":5.9,"metaDiamante":6.3,"pp3bim":0.57}]};
+let DATA=BAKE;
+function montarD(){const RX=/^(.*?)\s-\s(\d+)$/;
+ return DATA.escolas.map(x=>{const m=x.escola.match(RX);
+  return [m?m[1]:x.escola, m?m[2]:'', x.nota==null?0:x.nota,
+   x.status==='ouro'?'O':x.status==='diamante'?'D':x.status==='sistema'?'E':'N',
+   x.contato||'', x.metaOuro==null?0:x.metaOuro, x.metaDiamante==null?0:x.metaDiamante,
+   x.pp3bim==null?null:Math.round(x.pp3bim*1000)/10];});}
+let D=montarD();
+const ST={O:["Ouro 2025","--gold"],D:["Diamante 2025","--dia"],N:["Não atingiu","--bad"],E:["EJA multisseriado","--eja"]};
+const $=s=>document.querySelector(s),f1=n=>n.toFixed(1).replace(".",","),V=c=>`var(${c})`;
+let U=[];
+function tc(s){const K=/^(EE|EPF|EJA|II|III|IV|JTO|CEL|CASA|IFA|EMEF|CD|DE|HC)$/,L=/^(DE|DA|DO|DAS|DOS|E|A|AO|À)$/;
+ return s.toLowerCase().split(" ").map(w=>{const u=w.toUpperCase();return K.test(u)&&!L.test(u)?u:L.test(u)?w:w.charAt(0).toUpperCase()+w.slice(1)}).join(" ")}
+const st={f:null,q:"",s:"nota"},LO=3,HI=8.8,P=v=>((v-LO)/(HI-LO)*100).toFixed(1)+"%";
+const tip=$("#tip");
+function tp(e,t){tip.innerHTML=t;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-250)+"px";tip.style.top=e.clientY+14+"px"}
+const hide=()=>tip.style.opacity=0;
+function cnt(el){const t=+el.dataset.n,d=el.dataset.d?+el.dataset.d:1,t0=performance.now();
+ (function s(now){const p=Math.min(1,(now-t0)/1100),e=1-Math.pow(1-p,4);el.textContent=(t*e).toFixed(d==1?1:0).replace(".",",");if(p<1)requestAnimationFrame(s)})(t0)}
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;let N=0,W=0;
+function inicializar(){
+D=montarD();
+U=D.map(([n,c,nota,st,ct,o,d,pp])=>({n:tc(n),c,nota,st,ct,o,d,pp,gap:d-nota}));
+N=U.length;W=U.filter(u=>u.st=="O"||u.st=="D").length;
+// Hero dinâmico
+(function(){const R=DATA.regional||{nota:4.1,metaOuro:4.6,metaDiamante:4.9};
+ $("#hn").dataset.n=R.nota!=null?R.nota:0;$("#ho").dataset.n=R.metaOuro!=null?R.metaOuro:0;$("#hd").dataset.n=R.metaDiamante!=null?R.metaDiamante:0;
+ $("#eo").textContent="+"+f1((R.metaOuro-R.nota))+" pt";$("#ed").textContent="+"+f1((R.metaDiamante-R.nota))+" pt";})();
+// KPIs
+$("#kp").innerHTML=[["Unidades analisadas",N,0,`${U.filter(u=>u.pp!=null).length} com dados da Prova Paulista`],
+["Nota média das unidades",avg(U.map(u=>u.nota)),1,`Melhor: ${f1(Math.max(...U.map(u=>u.nota)))} · Menor: ${f1(Math.min(...U.map(u=>u.nota)))}`],
+["Conquistaram meta em 2025",W/N*100,0,`${W} unidades (Ouro ou Diamante)`,"%"],
+["Salto médio até Diamante",avg(U.map(u=>u.gap)),1,"pontos a conquistar em 26–27","+"]]
+.map(([l,v,d,e,x])=>`<div class="card k"><small>${l}</small><b>${x=="+"?"+":""}<span data-n="${v}" data-d="${d?1:0}">0</span>${x=="%"?"%":""}</b><em>${e}</em></div>`).join("");
+// Donut
+const C=2*Math.PI*46;let off=0;const cn=k=>U.filter(u=>u.st==k).length;
+$("#dn").innerHTML=`<g transform="rotate(-90 60 60)">`+Object.keys(ST).map(k=>{const l=cn(k)/N*C,s=`<circle cx="60" cy="60" r="46" fill="none" stroke="${V(ST[k][1])}" stroke-width="14" stroke-dasharray="${Math.max(l-2,0)} ${C}" stroke-dashoffset="${-off}" style="cursor:pointer" data-k="${k}"/>`;off+=l;return s}).join("")+`</g><text x="60" y="62" text-anchor="middle" style="font:700 26px Space Grotesk;fill:var(--ink)">${N}</text><text x="60" y="76" text-anchor="middle" style="font-size:8px;fill:var(--mut)">unidades</text>`;
+$("#lg").innerHTML=Object.keys(ST).map(k=>`<button data-k="${k}"><i style="background:${V(ST[k][1])}"></i>${ST[k][0]}<span>${cn(k)}</span></button>`).join("");
+document.querySelectorAll("[data-k]").forEach(e=>e.onclick=()=>{st.f=st.f==e.dataset.k?null:e.dataset.k;draw()});
+// Scatter
+(function(){const S=U.filter(u=>u.pp!=null),mx=avg(S.map(u=>u.nota)),my=avg(S.map(u=>u.pp));
+ const r=S.reduce((a,u)=>a+(u.nota-mx)*(u.pp-my),0)/Math.sqrt(S.reduce((a,u)=>a+(u.nota-mx)**2,0)*S.reduce((a,u)=>a+(u.pp-my)**2,0));
+ $("#cr").textContent=`Correlação r = ${r.toFixed(2).replace(".",",")} · cada ponto é uma escola`;
+ const X=v=>40+(v-3)/(8-3)*470,Y=v=>240-(v-40)/(85-40)*225;let h="";
+ for(let v=3;v<=8;v++)h+=`<line x1="${X(v)}" x2="${X(v)}" y1="15" y2="240"/><text x="${X(v)}" y="256" text-anchor="middle">${v}</text>`;
+ for(let v=40;v<=80;v+=10)h+=`<line x1="40" x2="510" y1="${Y(v)}" y2="${Y(v)}"/><text x="32" y="${Y(v)+3}" text-anchor="end">${v}%</text>`;
+ h+=`<text x="275" y="274" text-anchor="middle">Nota consolidada</text>`;
+ S.forEach((u,i)=>h+=`<circle cx="${X(u.nota)}" cy="${Y(u.pp)}" r="0" data-i="${i}" fill="${V(ST[u.st][1])}" fill-opacity=".85" stroke="var(--bg)" stroke-width="1.5"/>`);
+ $("#sc").innerHTML=h;
+ $("#sc").querySelectorAll("circle").forEach((c,i)=>{const u=S[i];setTimeout(()=>c.setAttribute("r",5.5),200+i*12);
+  c.onmousemove=e=>tp(e,`<b>${u.n}</b><br>Nota ${f1(u.nota)} · ${u.pp.toFixed(1).replace(".",",")}% acertos`);c.onmouseleave=hide})})();
+// Controls
+const SO={nota:["Nota","nota",-1],gap:["Maior salto","gap",-1],pp:["Prova Paulista","pp",-1],az:["A–Z","n",1]};
+$("#so").innerHTML=Object.keys(SO).map(k=>`<button data-s="${k}">${SO[k][0]}</button>`).join("");
+$("#so").onclick=e=>{if(e.target.dataset.s){st.s=e.target.dataset.s;draw()}};
+$("#q").oninput=e=>{st.q=e.target.value.toLowerCase();draw()};
+function draw(){
+ document.querySelectorAll(".lg button").forEach(b=>b.classList.toggle("on",b.dataset.k==st.f));
+ document.querySelectorAll("#so button").forEach(b=>b.classList.toggle("on",b.dataset.s==st.s));
+ const [,key,dir]=SO[st.s];
+ const L=U.filter(u=>(!st.f||u.st==st.f)&&(`${u.n} ${u.c} ${u.ct||""}`.toLowerCase().includes(st.q)))
+  .sort((a,b)=>((a[key]??-1)>(b[key]??-1)?1:-1)*dir*(key=="n"?1:1)*(dir<0?1:1));
+ if(dir<0)L.sort((a,b)=>(b[key]??-1)-(a[key]??-1));
+ $("#ct").textContent=`Mostrando ${L.length} de ${N} unidades`+(st.f?` · filtro: ${ST[st.f][0]}`:"");
+ $("#ls").innerHTML=L.map((u,i)=>{const c=V(ST[u.st][1]);return `<div class="row" title="Nota ${f1(u.nota)} · Ouro ${f1(u.o)} · Diamante ${f1(u.d)}">
+ <div class="nm"><b>${u.n}</b><small>${[u.c,u.ct].filter(Boolean).join(" · ")}</small></div>
+ <div class="tr"><div class="fl" data-w="${P(u.nota)}" style="background:linear-gradient(90deg,${c}66,${c})"></div><span class="mk o" style="left:${P(u.o)}"></span><span class="mk d" style="left:${P(u.d)}"></span></div>
+ <div class="nu"><strong>${f1(u.nota)}</strong><small>+${f1(u.gap)} · ${u.pp!=null?u.pp.toFixed(0)+"% P.P.":"s/ P.P."}</small></div>
+ <span class="pl" style="color:${c};border-color:${c}">${ST[u.st][0]}</span></div>`}).join("")||`<div class="card">Nenhuma unidade encontrada.</div>`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".fl").forEach(e=>e.style.width=e.dataset.w)));
+}
+draw();document.querySelectorAll("[data-n]").forEach(cnt);
+}
+inicializar();
+async function carregarSupabase(){
+ try{
+  const {data:anos,error:erroAno}=await supabaseClient.from('resultados_saresp').select('ano').order('ano',{ascending:false}).limit(1);
+  if(erroAno||!anos||!anos.length)return;
+  const {data,error}=await supabaseClient.from('resultados_saresp').select('*').eq('ano',anos[0].ano);
+  if(error||!data||data.length<15)return;
+  const reg=data.filter(x=>/^MARILIA$/i.test(x.escola))[0]||{};
+  DATA={regional:{nota:reg.nota==null?null:Number(reg.nota),metaOuro:reg.meta_ouro==null?null:Number(reg.meta_ouro),metaDiamante:reg.meta_diamante==null?null:Number(reg.meta_diamante)},
+   escolas:data.filter(x=>!/^MARILIA$/i.test(x.escola)).map(r=>({escola:r.escola,nota:r.nota==null?null:Number(r.nota),status:r.status||'na',contato:r.contato||'',metaOuro:r.meta_ouro==null?null:Number(r.meta_ouro),metaDiamante:r.meta_diamante==null?null:Number(r.meta_diamante),pp3bim:r.pp3bim==null?null:Number(r.pp3bim)})),ano:anos[0].ano};
+  document.querySelector('#fonte').textContent='Fonte: Supabase (resultados_saresp) · ano letivo '+DATA.ano+' · importada via admin.html. “Nota atual” da diretoria conforme linha consolidada; demais indicadores calculados sobre as unidades listadas.';
+  inicializar();
+ }catch(err){console.warn('Falha ao buscar resultados_saresp:',err.message);}
+}
+(async()=>{const {data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href='index.html';return;}carregarSupabase();})();
+</script>
+</body>
+</html>
