@@ -39,6 +39,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
+| `redacao.html` | autenticado | **Redação Paulista**: índice semanal e nota por quinzena, evolução da rede, ranking e matriz escola × quinzena |
 | `admin.html` | ADM | Usuários + **importadores** de planilha (Alura e Prova Paulista) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
@@ -86,6 +87,18 @@ Colunas: as mesmas acima **sem** `id` e `created_at`.
 | `indice_de_realizacao_das_avaliacoes_mensais` | numeric |
 | `media_nas_questoes_discursivas` | numeric |
 | `created_at` | timestamptz |
+
+### Redação Paulista — `csv/REDACAO_QUINZENAL.csv` (arquivo estático, fora do Supabase)
+
+Planilha quinzenal com **50 escolas × 21 quinzenas**. Cada quinzena tem dois campos:
+`Índice` (índice semanal da plataforma Redação Paulista — valor bruto, **não é percentual**:
+chega a 1,56, então não deve ser lido como taxa de 0–100%) e `Nota`.
+
+- Cabeçalho mesclado em duas linhas (`FEVEREIRO`, `MARÇO`, `abr/26`…), datas no rodapé e
+  a linha `Total` (referência da rede).
+- 20 quinzenas com dados; **18/10 a 24/10 está vazia** em todas as escolas.
+- Os dados estão **embutidos** em `redacao.html` (constante `BAKE`), como nos demais dashboards.
+  Para atualizar: regerar o `BAKE` a partir do CSV e substituir a linha no arquivo.
 
 ### `edicoes_disponiveis`
 `ano` (text) · `edicao_planilha` (text) — catálogo das 9 edições (2024–2026).
