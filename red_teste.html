@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redação Paulista — Índice Quinzenal</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f3f6fa;margin:0;color:#243247}header{background:#17365d;color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px}header h1{margin:0;font-size:22px}header p{margin:5px 0 0;font-size:13px;opacity:.8}.btn{background:#475569;color:#fff;padding:9px 14px;border-radius:6px;text-decoration:none;font-size:14px}main{padding:30px;max-width:1400px;margin:auto}.intro{margin:0 0 20px;color:#526174}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:22px}.card,.panel{background:#fff;border-radius:9px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.card{padding:18px;border-left:4px solid #b7791f}.k{font-size:12px;color:#64748b;font-weight:bold;text-transform:uppercase;letter-spacing:.04em}.v{font-size:29px;color:#17365d;font-weight:bold;margin:7px 0 2px}.note{font-size:12px;color:#64748b}.panel{padding:20px}.panel-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap}.panel h2{font-size:18px;color:#17365d;margin:0 0 4px}.panel p{margin:0;color:#64748b;font-size:13px}.filters{display:flex;gap:10px;flex-wrap:wrap}.filters input,.filters select{padding:9px 11px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px}.filters input{min-width:215px}.filters select{max-width:280px}.table-wrap{overflow:auto;margin-top:17px;max-height:72vh;border:1px solid #e2e8f0;border-radius:8px}table{border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:2400px;width:100%}th,td{padding:8px;border-bottom:1px solid #e8edf3;text-align:center;white-space:nowrap}thead th{background:#17365d;color:#fff;font-weight:600}thead tr.grupo th{position:sticky;top:0;z-index:3;box-sizing:border-box;height:34px;padding:0 8px;font-size:11.5px;cursor:pointer;border-bottom:1px solid #0f2744}thead tr.grupo th:hover{background:#1d4472}thead tr.campos th{position:sticky;top:34px;z-index:2;background:#2d5a8a;box-sizing:border-box;height:28px;padding:0 4px;font-size:10.5px;min-width:54px;cursor:pointer}thead tr.campos th:hover{background:#37699f}thead tr.grupo th:first-child{left:0;top:0;z-index:12;min-width:262px;max-width:262px;text-align:left;background:#17365d;cursor:default}tbody td{border-bottom:1px solid #e8edf3}tbody td:first-child{position:sticky;left:0;background:#fff;text-align:left;font-weight:600;z-index:4;min-width:262px;max-width:262px;white-space:normal;line-height:1.35;box-shadow:1px 0 0 #d8e0e9}tbody tr:nth-child(even) td{background:#f8fafc}tbody tr:nth-child(even) td:first-child{background:#f1f5f9}tbody tr:hover td{background:#eef6fb}tbody tr:hover td:first-child{background:#e2edf5}tbody tr.regional td{background:#f1f5f9;font-weight:bold;color:#17365d;border-top:2px solid #17365d}tbody tr.regional td:first-child{background:#e8eef6}td.i{font-variant-numeric:tabular-nums;color:#334155}td.n{font-variant-numeric:tabular-nums;font-weight:600;color:#17365d;border-right:1px solid #d6e0ea}thead tr.campos th:nth-child(even){border-right:1px solid #1e4470}thead tr.grupo th{box-shadow:inset -1px 0 0 #2b5b8c}td.vazio{color:#cbd5e1;font-weight:400}.cod{font-size:11px;color:#94a3b8;font-weight:400;white-space:nowrap}.tag{display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:bold;margin-left:6px}.tag.nd{background:#7f1d1d;color:#fee2e2}.ordem{font-size:11px;color:#64748b;margin-top:12px}@media(max-width:600px){header{padding:16px;flex-wrap:wrap}main{padding:18px}.filters input{min-width:100%}}
+  
+    /* Dashboard dinamico */
+    #dashboardEscola{margin:0 0 22px}.db-hero{background:linear-gradient(135deg,#17365d,#2d5a8a 65%,#b7791f);color:#fff;border-radius:12px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;box-shadow:0 7px 22px rgba(23,54,93,.25)}.db-hero h2{margin:0;font-size:21px}.db-hero p{margin:5px 0 0;font-size:13px;opacity:.85}.db-badge{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);padding:8px 14px;border-radius:999px;font-weight:bold}.db-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:13px;margin:15px 0}.db-kpi{background:#fff;border-radius:10px;padding:16px;border-left:4px solid var(--c,#2d5a8a);box-shadow:0 2px 9px rgba(0,0,0,.07)}.db-kpi small{display:block;color:#64748b;text-transform:uppercase;font-weight:bold;font-size:11px}.db-kpi strong{display:block;color:#17365d;font-size:27px;margin:6px 0}.db-kpi span{font-size:12px;color:#64748b}.db-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}.db-panel{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 9px rgba(0,0,0,.07)}.db-panel h3{margin:0;color:#17365d;font-size:17px}.db-panel p{margin:4px 0 12px;color:#64748b;font-size:12px}.db-chart{height:270px}.db-insights{list-style:none;padding:0;margin:5px 0}.db-insights li{padding:9px 0;border-bottom:1px dashed #e2e8f0;font-size:13px}.db-heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:5px}.db-heat div{border-radius:6px;padding:7px 3px;color:#fff;text-align:center;font-size:10px;font-weight:bold}.db-help{text-align:center;padding:24px;background:#fff;border-radius:10px;color:#64748b}@media(max-width:850px){.db-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header><div><h1>Redação Paulista — Índice Quinzenal</h1><p id="subtitulo">Diretoria de Ensino — Região de Marília</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="btn">Início</a></div></header>
+  <main>
+    <p class="intro">Índice semanal da plataforma Redação Paulista e nota das produções textuais por unidade escolar, com todas as quinzenas da planilha de origem: <b>I</b> = índice semanal (valor bruto, não é percentual — por isso supera 1,0 em várias quinzenas) e <b>N</b> = nota das redações. A linha <b>MARILIA · Regional</b> reproduz a linha <i>Total</i> da planilha.</p>
+    <section class="cards" id="cards"></section>
+    <section id="dashboardEscola" aria-live="polite"></section>
+    <section class="panel"><div class="panel-head"><div><h2>Matriz escola × quinzena</h2><p id="sub"></p></div><div class="filters"><select id="select-escola" aria-label="Filtrar escola"><option value="">Todas as Escolas</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="order" aria-label="Ordenar por"></select></div></div><div class="table-wrap"><table><thead id="thead"></thead><tbody id="rows"></tbody></table></div><p class="ordem">Clique no cabeçalho de uma quinzena (ou em <b>I</b>/<b>N</b>) para ordenar por aquela coluna; clique de novo para inverter.</p></section>
+    <p class="note" id="rodape"></p>
+  </main>
+  <script>
+    const BAKE = {"periodos":[{"id":1,"mes":"FEVEREIRO","periodo":"22/2 a 28/02","indiceTotal":0.09,"notaTotal":7.0},{"id":2,"mes":"MARÇO","periodo":"29/03 a 04/04","indiceTotal":0.88,"notaTotal":6.4},{"id":3,"mes":"abr/26","periodo":"26/4 a 02/05","indiceTotal":0.66,"notaTotal":6.6},{"id":4,"mes":"mai/26","periodo":"31/05 a 06/06","indiceTotal":0.8,"notaTotal":7.0},{"id":5,"mes":"jun/26","periodo":"07/06 a 13/06","indiceTotal":0.82,"notaTotal":7.0},{"id":6,"mes":"jul/26","periodo":"14/06 a 20/06","indiceTotal":0.83,"notaTotal":6.9},{"id":7,"mes":"jul/26","periodo":"21/06 a 27/06","indiceTotal":0.79,"notaTotal":6.8},{"id":8,"mes":"jul/26","periodo":"28/06 a 04/07","indiceTotal":0.68,"notaTotal":6.6},{"id":9,"mes":"julho/agosto/2026","periodo":"26/07 a 01/08","indiceTotal":0.68,"notaTotal":6.6},{"id":10,"mes":"AGOSTO/2026","periodo":"02/08 a 08/08","indiceTotal":0.63,"notaTotal":6.6},{"id":11,"mes":"AGOSTO/2026","periodo":"09/08 a 15/08","indiceTotal":0.59,"notaTotal":6.5},{"id":12,"mes":"AGOSTO/2026","periodo":"16/08 a 22/08","indiceTotal":0.64,"notaTotal":6.6},{"id":13,"mes":"AGOSTO/2026","periodo":"23/08 a 29/08","indiceTotal":0.77,"notaTotal":6.6},{"id":14,"mes":"AGOSTO/2026","periodo":"30/08 a 05/09","indiceTotal":0.84,"notaTotal":6.7},{"id":15,"mes":"SETEMBRO/2026","periodo":"06/09 a 12/09","indiceTotal":0.83,"notaTotal":6.7},{"id":16,"mes":"SETEMBRO/2026","periodo":"13/09 a 19/09","indiceTotal":0.86,"notaTotal":6.7},{"id":17,"mes":"SETEMBRO/2026","periodo":"20/09 a 26/09","indiceTotal":0.79,"notaTotal":6.7},{"id":18,"mes":"SET/OUT/2026","periodo":"27/09 a 03/10","indiceTotal":0.74,"notaTotal":6.7},{"id":19,"mes":"OUTUBRO/2026","periodo":"04/09 a 10/10","indiceTotal":0.72,"notaTotal":6.7},{"id":20,"mes":"OUTUBRO/2026","periodo":"11/10 a 17/10","indiceTotal":0.69,"notaTotal":6.7},{"id":21,"mes":"OUTUBRO/2026","periodo":"18/10 a 24/10","indiceTotal":null,"notaTotal":null}],"escolas":[{"escola":"17 DE SETEMBRO","codigo":"33881","serie":[{"i":0.21,"n":7.1},{"i":1.04,"n":6.9},{"i":0.77,"n":7.0},{"i":1.35,"n":7.9},{"i":1.09,"n":7.5},{"i":1.08,"n":7.5},{"i":0.9,"n":7.4},{"i":0.82,"n":7.3},{"i":1.3,"n":7.2},{"i":1.28,"n":7.2},{"i":1.16,"n":7.1},{"i":0.95,"n":7.0},{"i":1.02,"n":6.9},{"i":0.85,"n":7.0},{"i":0.72,"n":6.9},{"i":0.78,"n":7.1},{"i":0.91,"n":7.1},{"i":0.8,"n":7.0},{"i":0.7,"n":6.7},{"i":0.71,"n":6.8},{"i":null,"n":null}]},{"escola":"ALCYR DA ROSA LIMA PROF","codigo":"33406","serie":[{"i":0.23,"n":7.3},{"i":1.13,"n":6.8},{"i":0.7,"n":6.6},{"i":0.59,"n":7.9},{"i":0.83,"n":6.8},{"i":0.95,"n":6.6},{"i":0.78,"n":6.7},{"i":0.32,"n":6.4},{"i":0.65,"n":6.5},{"i":0.84,"n":6.6},{"i":0.72,"n":6.7},{"i":0.77,"n":6.7},{"i":0.97,"n":6.7},{"i":1.06,"n":6.7},{"i":0.83,"n":6.7},{"i":0.88,"n":6.8},{"i":0.91,"n":6.8},{"i":0.99,"n":6.8},{"i":0.8,"n":6.8},{"i":0.83,"n":6.8},{"i":null,"n":null}]},{"escola":"AMELIA LOPES ANDERS PROFA","codigo":"914198","serie":[{"i":0.0,"n":9.0},{"i":0.86,"n":5.4},{"i":0.61,"n":6.2},{"i":1.09,"n":7.8},{"i":0.65,"n":6.6},{"i":0.72,"n":6.4},{"i":0.7,"n":6.2},{"i":0.69,"n":6.0},{"i":0.67,"n":5.9},{"i":0.51,"n":6.2},{"i":0.42,"n":6.4},{"i":0.62,"n":6.1},{"i":0.69,"n":6.1},{"i":0.82,"n":6.2},{"i":0.92,"n":6.0},{"i":0.86,"n":5.9},{"i":0.59,"n":5.9},{"i":0.6,"n":5.9},{"i":0.55,"n":5.7},{"i":0.59,"n":5.9},{"i":null,"n":null}]},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","serie":[{"i":0.0,"n":null},{"i":0.74,"n":6.9},{"i":0.56,"n":7.4},{"i":1.26,"n":7.7},{"i":0.68,"n":7.8},{"i":0.54,"n":7.8},{"i":0.41,"n":8.1},{"i":0.53,"n":7.7},{"i":0.78,"n":7.6},{"i":0.71,"n":7.7},{"i":0.71,"n":7.5},{"i":0.64,"n":7.3},{"i":0.67,"n":7.0},{"i":0.67,"n":7.0},{"i":0.64,"n":6.7},{"i":0.68,"n":6.6},{"i":0.97,"n":6.5},{"i":0.69,"n":6.6},{"i":0.69,"n":6.6},{"i":0.74,"n":6.7},{"i":null,"n":null}]},{"escola":"ANTONIO AUGUSTO NETTO","codigo":"33832","serie":[{"i":0.0,"n":null},{"i":0.51,"n":5.4},{"i":0.39,"n":6.4},{"i":1.16,"n":7.6},{"i":0.49,"n":7.4},{"i":0.52,"n":7.2},{"i":0.58,"n":7.0},{"i":0.48,"n":6.6},{"i":0.48,"n":6.6},{"i":0.47,"n":6.9},{"i":0.5,"n":7.0},{"i":0.45,"n":6.5},{"i":0.55,"n":6.3},{"i":0.58,"n":6.3},{"i":0.58,"n":6.3},{"i":0.52,"n":6.5},{"i":0.61,"n":6.6},{"i":0.57,"n":6.6},{"i":0.56,"n":6.6},{"i":0.54,"n":6.6},{"i":null,"n":null}]},{"escola":"ANTONIO DAUN","codigo":"33467","serie":[{"i":null,"n":null},{"i":0.87,"n":6.7},{"i":0.94,"n":6.7},{"i":1.04,"n":7.6},{"i":0.95,"n":6.9},{"i":1.36,"n":6.7},{"i":0.94,"n":6.6},{"i":0.95,"n":6.7},{"i":0.96,"n":6.7},{"i":0.97,"n":6.6},{"i":0.77,"n":6.6},{"i":0.78,"n":6.5},{"i":0.9,"n":6.5},{"i":0.9,"n":6.5},{"i":0.89,"n":6.5},{"i":1.0,"n":6.5},{"i":1.05,"n":6.1},{"i":0.93,"n":6.0},{"i":0.93,"n":6.0},{"i":0.93,"n":6.0},{"i":null,"n":null}]},{"escola":"ANTONIO DE BAPTISTA PROF","codigo":"33561","serie":[{"i":0.0,"n":null},{"i":0.93,"n":6.9},{"i":0.67,"n":7.2},{"i":0.73,"n":7.6},{"i":0.83,"n":7.4},{"i":0.78,"n":7.2},{"i":1.2,"n":7.2},{"i":0.82,"n":7.2},{"i":0.8,"n":7.4},{"i":0.75,"n":6.7},{"i":0.65,"n":6.5},{"i":0.35,"n":7.1},{"i":0.59,"n":6.8},{"i":0.79,"n":6.9},{"i":0.78,"n":6.9},{"i":0.78,"n":6.9},{"i":0.78,"n":7.0},{"i":1.04,"n":6.9},{"i":0.86,"n":7.6},{"i":0.81,"n":7.5},{"i":null,"n":null}]},{"escola":"ANTONIO REGINATO PROF","codigo":"43242","serie":[{"i":0.0,"n":6.7},{"i":1.07,"n":7.0},{"i":0.54,"n":7.0},{"i":0.72,"n":7.4},{"i":0.79,"n":7.5},{"i":0.79,"n":7.4},{"i":0.8,"n":7.3},{"i":0.55,"n":7.1},{"i":0.52,"n":7.2},{"i":0.41,"n":7.2},{"i":0.36,"n":7.3},{"i":0.56,"n":7.4},{"i":0.7,"n":7.3},{"i":0.78,"n":7.1},{"i":0.71,"n":7.2},{"i":0.69,"n":7.2},{"i":0.41,"n":7.1},{"i":0.47,"n":6.9},{"i":0.39,"n":7.0},{"i":0.39,"n":7.0},{"i":null,"n":null}]},{"escola":"BALTAZAR DE GODOY MOREIRA PROF","codigo":"33856","serie":[{"i":0.0,"n":null},{"i":0.47,"n":6.7},{"i":0.57,"n":7.0},{"i":0.49,"n":7.4},{"i":0.62,"n":7.3},{"i":0.76,"n":7.3},{"i":0.59,"n":7.5},{"i":0.68,"n":7.3},{"i":0.68,"n":7.3},{"i":0.66,"n":7.3},{"i":0.6,"n":7.2},{"i":0.65,"n":7.1},{"i":0.69,"n":7.1},{"i":0.69,"n":7.2},{"i":0.7,"n":7.3},{"i":0.64,"n":7.4},{"i":0.77,"n":7.5},{"i":0.55,"n":7.5},{"i":0.55,"n":7.6},{"i":0.62,"n":7.6},{"i":null,"n":null}]},{"escola":"BENITO MARTINELLI PROF","codigo":"903693","serie":[{"i":0.1,"n":6.6},{"i":0.83,"n":6.4},{"i":0.59,"n":6.1},{"i":0.9,"n":7.4},{"i":1.0,"n":6.8},{"i":0.73,"n":6.6},{"i":0.71,"n":6.6},{"i":0.53,"n":6.5},{"i":0.57,"n":6.4},{"i":0.56,"n":6.2},{"i":0.54,"n":6.2},{"i":0.62,"n":6.1},{"i":0.8,"n":6.2},{"i":0.91,"n":6.3},{"i":0.83,"n":6.3},{"i":0.93,"n":6.4},{"i":0.82,"n":6.6},{"i":0.7,"n":6.5},{"i":0.66,"n":6.4},{"i":0.57,"n":6.3},{"i":null,"n":null}]},{"escola":"BICUDO MONSENHOR","codigo":"33753","serie":[{"i":0.0,"n":null},{"i":0.89,"n":6.5},{"i":0.81,"n":6.8},{"i":1.01,"n":7.4},{"i":0.9,"n":7.2},{"i":0.69,"n":7.1},{"i":0.76,"n":6.9},{"i":0.75,"n":6.7},{"i":0.63,"n":6.4},{"i":0.59,"n":6.4},{"i":0.55,"n":6.6},{"i":0.8,"n":6.8},{"i":0.76,"n":6.9},{"i":0.79,"n":6.8},{"i":0.84,"n":6.8},{"i":0.97,"n":6.8},{"i":0.73,"n":6.5},{"i":0.76,"n":6.5},{"i":0.79,"n":6.6},{"i":0.73,"n":6.6},{"i":null,"n":null}]},{"escola":"CASTRO ALVES","codigo":"33613","serie":[{"i":0.02,"n":7.0},{"i":1.0,"n":5.5},{"i":0.96,"n":6.7},{"i":1.02,"n":7.4},{"i":1.0,"n":6.5},{"i":1.41,"n":6.5},{"i":1.0,"n":6.5},{"i":0.97,"n":6.3},{"i":0.96,"n":6.3},{"i":0.94,"n":6.4},{"i":0.91,"n":6.4},{"i":0.86,"n":6.3},{"i":0.87,"n":6.5},{"i":1.09,"n":6.7},{"i":1.2,"n":6.7},{"i":0.66,"n":6.7},{"i":0.91,"n":7.1},{"i":0.97,"n":7.1},{"i":0.75,"n":7.0},{"i":0.64,"n":7.0},{"i":null,"n":null}]},{"escola":"CULTURA E LIBERDADE","codigo":"33625","serie":[{"i":0.37,"n":7.7},{"i":0.77,"n":7.0},{"i":0.72,"n":7.0},{"i":0.77,"n":7.3},{"i":0.86,"n":7.0},{"i":0.83,"n":6.9},{"i":0.88,"n":6.7},{"i":0.82,"n":6.6},{"i":0.83,"n":6.7},{"i":0.72,"n":6.7},{"i":0.7,"n":6.6},{"i":0.86,"n":6.6},{"i":0.84,"n":6.3},{"i":1.0,"n":6.3},{"i":1.0,"n":6.2},{"i":0.93,"n":6.2},{"i":0.76,"n":6.3},{"i":0.86,"n":6.5},{"i":0.74,"n":6.5},{"i":0.69,"n":6.6},{"i":null,"n":null}]},{"escola":"DIRCE BELLUZZO DE CAMPOS PROFA","codigo":"33558","serie":[{"i":null,"n":null},{"i":0.83,"n":5.7},{"i":0.85,"n":5.9},{"i":0.69,"n":7.3},{"i":0.85,"n":6.4},{"i":0.99,"n":6.6},{"i":1.04,"n":6.7},{"i":0.84,"n":6.6},{"i":0.81,"n":6.5},{"i":0.8,"n":6.4},{"i":0.7,"n":6.3},{"i":0.62,"n":6.3},{"i":0.9,"n":6.3},{"i":0.93,"n":6.3},{"i":0.93,"n":6.3},{"i":1.16,"n":6.2},{"i":1.14,"n":6.1},{"i":0.86,"n":6.3},{"i":0.84,"n":6.4},{"i":0.83,"n":6.3},{"i":null,"n":null}]},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","serie":[{"i":0.1,"n":6.5},{"i":1.08,"n":6.3},{"i":0.85,"n":6.6},{"i":1.11,"n":7.3},{"i":1.31,"n":7.5},{"i":1.1,"n":7.3},{"i":0.89,"n":7.2},{"i":0.83,"n":7.1},{"i":0.64,"n":7.0},{"i":0.81,"n":6.9},{"i":0.87,"n":6.7},{"i":0.78,"n":6.6},{"i":0.91,"n":6.2},{"i":0.96,"n":6.3},{"i":0.86,"n":6.4},{"i":0.98,"n":6.5},{"i":1.06,"n":6.6},{"i":0.92,"n":7.1},{"i":1.12,"n":7.0},{"i":0.85,"n":7.0},{"i":null,"n":null}]},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","serie":[{"i":null,"n":null},{"i":1.25,"n":6.7},{"i":1.1,"n":7.0},{"i":0.71,"n":7.2},{"i":1.0,"n":6.9},{"i":0.92,"n":7.0},{"i":0.84,"n":7.1},{"i":0.89,"n":6.4},{"i":0.59,"n":6.5},{"i":0.6,"n":6.3},{"i":0.65,"n":6.3},{"i":0.95,"n":6.2},{"i":1.01,"n":6.8},{"i":1.09,"n":6.8},{"i":1.05,"n":7.1},{"i":1.36,"n":6.9},{"i":1.04,"n":6.8},{"i":0.88,"n":6.6},{"i":1.29,"n":6.6},{"i":1.07,"n":6.5},{"i":null,"n":null}]},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","serie":[{"i":0.17,"n":6.9},{"i":0.85,"n":6.3},{"i":0.65,"n":6.0},{"i":0.71,"n":7.2},{"i":1.26,"n":6.6},{"i":1.39,"n":6.6},{"i":1.03,"n":6.5},{"i":0.89,"n":6.4},{"i":0.72,"n":6.2},{"i":0.54,"n":6.5},{"i":0.72,"n":6.2},{"i":0.96,"n":6.1},{"i":0.98,"n":6.2},{"i":1.22,"n":6.5},{"i":1.18,"n":6.4},{"i":1.19,"n":6.5},{"i":0.99,"n":6.6},{"i":1.11,"n":6.6},{"i":1.18,"n":6.4},{"i":1.12,"n":6.4},{"i":null,"n":null}]},{"escola":"ERMELINDA CLARICE SANCHES PROFA","codigo":"33479","serie":[{"i":null,"n":null},{"i":0.73,"n":6.0},{"i":0.59,"n":5.8},{"i":0.6,"n":7.2},{"i":0.6,"n":6.5},{"i":0.57,"n":6.5},{"i":0.75,"n":6.6},{"i":0.61,"n":6.5},{"i":0.59,"n":6.4},{"i":0.55,"n":6.4},{"i":0.46,"n":6.7},{"i":0.55,"n":6.4},{"i":0.72,"n":6.2},{"i":0.72,"n":6.3},{"i":0.72,"n":6.1},{"i":0.85,"n":6.4},{"i":1.14,"n":6.2},{"i":0.94,"n":6.0},{"i":0.94,"n":6.0},{"i":0.92,"n":6.2},{"i":null,"n":null}]},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","serie":[{"i":null,"n":null},{"i":0.98,"n":5.9},{"i":0.88,"n":6.2},{"i":0.94,"n":7.2},{"i":0.81,"n":6.9},{"i":0.81,"n":6.9},{"i":1.15,"n":6.6},{"i":0.94,"n":6.3},{"i":0.94,"n":6.3},{"i":0.94,"n":6.3},{"i":0.94,"n":6.4},{"i":0.65,"n":5.8},{"i":0.93,"n":5.7},{"i":0.93,"n":5.7},{"i":0.99,"n":6.0},{"i":0.99,"n":6.1},{"i":1.25,"n":5.8},{"i":0.98,"n":6.0},{"i":0.98,"n":6.0},{"i":0.92,"n":5.7},{"i":null,"n":null}]},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","serie":[{"i":0.28,"n":6.6},{"i":1.15,"n":6.5},{"i":1.01,"n":7.1},{"i":0.8,"n":7.1},{"i":0.77,"n":7.2},{"i":0.83,"n":7.2},{"i":0.97,"n":7.2},{"i":0.43,"n":6.9},{"i":0.65,"n":6.6},{"i":0.74,"n":6.6},{"i":0.76,"n":6.5},{"i":0.84,"n":6.5},{"i":1.08,"n":6.6},{"i":0.96,"n":6.7},{"i":0.91,"n":6.6},{"i":0.93,"n":6.7},{"i":0.9,"n":6.8},{"i":0.76,"n":6.9},{"i":0.79,"n":6.8},{"i":0.69,"n":6.7},{"i":null,"n":null}]},{"escola":"HATSUE TOYOTA","codigo":"903673","serie":[{"i":0.17,"n":6.6},{"i":0.79,"n":6.2},{"i":0.6,"n":6.7},{"i":0.88,"n":7.0},{"i":0.64,"n":6.8},{"i":0.78,"n":6.9},{"i":0.63,"n":6.7},{"i":0.54,"n":6.3},{"i":0.63,"n":6.3},{"i":0.63,"n":6.2},{"i":0.55,"n":6.3},{"i":0.54,"n":6.4},{"i":0.76,"n":6.6},{"i":0.88,"n":6.7},{"i":0.84,"n":6.7},{"i":0.8,"n":6.6},{"i":0.63,"n":6.4},{"i":0.64,"n":6.3},{"i":0.53,"n":6.9},{"i":0.49,"n":6.8},{"i":null,"n":null}]},{"escola":"HILMAR MACHADO DE OLIVEIRA","codigo":"33492","serie":[{"i":0.01,"n":6.8},{"i":1.46,"n":6.7},{"i":0.51,"n":6.4},{"i":0.77,"n":7.0},{"i":1.27,"n":6.7},{"i":1.03,"n":6.6},{"i":0.86,"n":6.4},{"i":0.56,"n":6.3},{"i":0.31,"n":6.2},{"i":0.26,"n":6.3},{"i":0.48,"n":6.6},{"i":0.35,"n":6.9},{"i":0.55,"n":6.8},{"i":0.66,"n":6.7},{"i":0.72,"n":6.7},{"i":0.75,"n":6.6},{"i":0.71,"n":6.6},{"i":0.68,"n":6.5},{"i":0.55,"n":6.5},{"i":0.44,"n":6.4},{"i":null,"n":null}]},{"escola":"IZIDORO DAUN","codigo":"33455","serie":[{"i":null,"n":null},{"i":0.99,"n":6.5},{"i":0.9,"n":6.9},{"i":0.92,"n":7.0},{"i":1.04,"n":7.5},{"i":1.43,"n":7.2},{"i":0.89,"n":7.0},{"i":0.8,"n":6.6},{"i":0.81,"n":6.6},{"i":0.77,"n":6.6},{"i":0.38,"n":6.6},{"i":0.61,"n":6.9},{"i":0.85,"n":7.3},{"i":0.87,"n":7.2},{"i":0.97,"n":7.0},{"i":1.0,"n":6.9},{"i":0.93,"n":6.5},{"i":0.83,"n":6.2},{"i":0.88,"n":6.3},{"i":0.83,"n":6.4},{"i":null,"n":null}]},{"escola":"JARDIM ALCIR RAINERI","codigo":"474629","serie":[{"i":0.09,"n":7.3},{"i":0.8,"n":6.5},{"i":0.47,"n":7.3},{"i":0.68,"n":6.9},{"i":0.8,"n":7.2},{"i":0.81,"n":7.2},{"i":0.68,"n":7.1},{"i":0.73,"n":6.6},{"i":0.71,"n":6.7},{"i":0.66,"n":6.6},{"i":0.65,"n":6.5},{"i":0.69,"n":6.5},{"i":0.88,"n":6.9},{"i":1.13,"n":6.9},{"i":1.1,"n":7.0},{"i":1.02,"n":7.2},{"i":0.92,"n":7.3},{"i":0.8,"n":7.3},{"i":0.73,"n":7.6},{"i":0.6,"n":7.5},{"i":null,"n":null}]},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","serie":[{"i":0.28,"n":6.3},{"i":0.74,"n":6.2},{"i":0.89,"n":6.3},{"i":0.81,"n":6.9},{"i":0.97,"n":6.4},{"i":1.19,"n":6.4},{"i":0.83,"n":6.6},{"i":0.86,"n":6.3},{"i":0.86,"n":6.3},{"i":0.77,"n":6.2},{"i":0.62,"n":6.2},{"i":0.88,"n":6.0},{"i":0.89,"n":6.2},{"i":0.93,"n":6.2},{"i":0.9,"n":6.2},{"i":0.9,"n":6.1},{"i":0.94,"n":6.3},{"i":0.91,"n":6.0},{"i":0.9,"n":6.1},{"i":1.01,"n":5.9},{"i":null,"n":null}]},{"escola":"JOAO WALFREDO ROTHERMUND PADRE","codigo":"907650","serie":[{"i":0.0,"n":null},{"i":0.75,"n":5.9},{"i":0.51,"n":5.5},{"i":0.96,"n":6.9},{"i":0.5,"n":5.9},{"i":0.49,"n":6.0},{"i":0.63,"n":6.0},{"i":0.49,"n":6.4},{"i":0.47,"n":6.4},{"i":0.48,"n":6.2},{"i":0.42,"n":6.1},{"i":0.33,"n":6.2},{"i":0.51,"n":5.8},{"i":0.51,"n":5.8},{"i":0.54,"n":6.1},{"i":0.54,"n":6.2},{"i":0.27,"n":6.0},{"i":0.59,"n":6.0},{"i":0.59,"n":6.0},{"i":0.58,"n":5.5},{"i":null,"n":null}]},{"escola":"JOSE ALFREDO DE ALMEIDA","codigo":"43254","serie":[{"i":0.0,"n":null},{"i":0.28,"n":6.1},{"i":0.88,"n":7.2},{"i":1.0,"n":6.9},{"i":0.72,"n":7.7},{"i":0.87,"n":7.6},{"i":1.18,"n":7.7},{"i":0.73,"n":7.5},{"i":0.7,"n":7.5},{"i":0.63,"n":7.1},{"i":0.59,"n":7.1},{"i":0.49,"n":7.9},{"i":0.81,"n":7.7},{"i":0.96,"n":7.9},{"i":1.04,"n":7.9},{"i":1.13,"n":7.6},{"i":0.94,"n":7.4},{"i":0.75,"n":7.3},{"i":0.72,"n":7.0},{"i":0.76,"n":7.0},{"i":null,"n":null}]},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","serie":[{"i":0.26,"n":6.4},{"i":1.51,"n":7.5},{"i":0.64,"n":7.7},{"i":1.04,"n":6.9},{"i":1.41,"n":7.9},{"i":1.04,"n":7.7},{"i":0.99,"n":7.7},{"i":0.86,"n":8.3},{"i":0.59,"n":8.3},{"i":0.75,"n":7.9},{"i":0.93,"n":7.9},{"i":0.98,"n":7.8},{"i":0.98,"n":7.8},{"i":1.11,"n":7.6},{"i":0.73,"n":7.1},{"i":1.06,"n":7.3},{"i":1.02,"n":7.1},{"i":1.03,"n":7.3},{"i":1.3,"n":7.0},{"i":1.02,"n":7.4},{"i":null,"n":null}]},{"escola":"JOSE AUGUSTO BARTHOLO","codigo":"33686","serie":[{"i":null,"n":null},{"i":0.89,"n":4.4},{"i":0.96,"n":6.3},{"i":1.18,"n":6.9},{"i":1.05,"n":6.5},{"i":1.04,"n":6.5},{"i":1.0,"n":6.3},{"i":0.98,"n":6.3},{"i":0.95,"n":6.3},{"i":0.82,"n":6.1},{"i":1.11,"n":5.8},{"i":0.88,"n":5.7},{"i":0.9,"n":5.6},{"i":0.9,"n":5.6},{"i":0.9,"n":5.6},{"i":1.41,"n":5.6},{"i":0.98,"n":5.6},{"i":0.98,"n":5.5},{"i":0.98,"n":5.5},{"i":1.02,"n":5.6},{"i":null,"n":null}]},{"escola":"JOSE BONIFACIO DO COUTO","codigo":"33376","serie":[{"i":0.03,"n":6.5},{"i":0.92,"n":5.3},{"i":0.65,"n":6.4},{"i":1.09,"n":6.9},{"i":0.9,"n":6.9},{"i":0.87,"n":6.7},{"i":0.77,"n":6.9},{"i":0.6,"n":6.7},{"i":0.71,"n":6.8},{"i":0.58,"n":6.6},{"i":0.82,"n":6.7},{"i":0.81,"n":6.7},{"i":1.07,"n":6.7},{"i":1.14,"n":6.9},{"i":1.11,"n":7.1},{"i":0.82,"n":7.1},{"i":0.84,"n":7.2},{"i":0.64,"n":6.7},{"i":0.77,"n":6.4},{"i":0.85,"n":6.4},{"i":null,"n":null}]},{"escola":"JOSE CARLOS MONTEIRO","codigo":"26414","serie":[{"i":0.07,"n":7.3},{"i":0.98,"n":6.7},{"i":0.71,"n":6.8},{"i":0.63,"n":6.9},{"i":1.1,"n":7.3},{"i":0.93,"n":7.2},{"i":0.79,"n":7.1},{"i":0.79,"n":7.0},{"i":0.69,"n":7.0},{"i":0.42,"n":7.1},{"i":0.44,"n":7.1},{"i":0.5,"n":6.8},{"i":0.74,"n":6.7},{"i":0.83,"n":6.8},{"i":0.89,"n":6.9},{"i":1.01,"n":6.9},{"i":0.94,"n":7.0},{"i":0.7,"n":7.0},{"i":0.6,"n":6.8},{"i":0.54,"n":6.7},{"i":null,"n":null}]},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","serie":[{"i":null,"n":null},{"i":1.23,"n":6.3},{"i":0.82,"n":6.8},{"i":0.95,"n":6.9},{"i":1.13,"n":7.9},{"i":1.3,"n":7.5},{"i":0.95,"n":7.2},{"i":0.88,"n":7.1},{"i":0.95,"n":7.0},{"i":0.83,"n":6.9},{"i":0.66,"n":6.9},{"i":0.76,"n":7.0},{"i":1.09,"n":7.1},{"i":1.0,"n":7.1},{"i":0.95,"n":7.3},{"i":1.17,"n":7.4},{"i":0.94,"n":7.4},{"i":0.79,"n":7.1},{"i":0.77,"n":7.0},{"i":0.85,"n":6.8},{"i":null,"n":null}]},{"escola":"LYDIA YVONE GOMES MARQUES PROFA","codigo":"33388","serie":[{"i":0.05,"n":5.6},{"i":0.41,"n":4.7},{"i":0.61,"n":5.6},{"i":0.62,"n":6.8},{"i":0.63,"n":6.6},{"i":0.68,"n":6.4},{"i":0.63,"n":6.2},{"i":0.54,"n":6.1},{"i":0.54,"n":6.3},{"i":0.46,"n":6.4},{"i":0.54,"n":6.4},{"i":0.62,"n":6.1},{"i":0.54,"n":6.4},{"i":0.57,"n":6.5},{"i":0.55,"n":6.4},{"i":0.6,"n":6.3},{"i":0.45,"n":6.5},{"i":0.5,"n":6.1},{"i":0.51,"n":6.1},{"i":0.58,"n":6.2},{"i":null,"n":null}]},{"escola":"MARIA CECILIA FERRAZ DE FREITAS PROFA","codigo":"47855","serie":[{"i":0.0,"n":null},{"i":0.93,"n":6.4},{"i":0.61,"n":7.1},{"i":0.87,"n":6.8},{"i":0.4,"n":7.1},{"i":0.41,"n":7.2},{"i":0.46,"n":7.1},{"i":0.61,"n":6.9},{"i":0.62,"n":7.1},{"i":0.61,"n":6.9},{"i":0.66,"n":6.8},{"i":0.68,"n":7.2},{"i":0.64,"n":6.8},{"i":0.76,"n":6.9},{"i":0.87,"n":6.8},{"i":0.99,"n":6.9},{"i":0.75,"n":6.8},{"i":0.67,"n":7.1},{"i":0.74,"n":7.0},{"i":0.66,"n":7.1},{"i":null,"n":null}]},{"escola":"MARIA IZABEL SAMPAIO VIDAL","codigo":"33819","serie":[{"i":0.13,"n":6.5},{"i":0.98,"n":5.7},{"i":0.46,"n":6.1},{"i":1.2,"n":6.8},{"i":0.84,"n":6.8},{"i":0.77,"n":6.7},{"i":0.66,"n":6.7},{"i":0.49,"n":6.5},{"i":0.44,"n":6.6},{"i":0.35,"n":6.5},{"i":0.43,"n":6.5},{"i":0.6,"n":6.5},{"i":0.75,"n":6.3},{"i":0.88,"n":6.3},{"i":0.86,"n":6.3},{"i":0.86,"n":6.3},{"i":0.64,"n":6.3},{"i":0.55,"n":6.4},{"i":0.58,"n":6.5},{"i":0.61,"n":6.5},{"i":null,"n":null}]},{"escola":"MAURICIO MILANI","codigo":"47703","serie":[{"i":0.59,"n":7.3},{"i":0.98,"n":7.1},{"i":0.76,"n":7.5},{"i":0.72,"n":6.7},{"i":1.1,"n":7.7},{"i":0.95,"n":7.9},{"i":0.93,"n":7.9},{"i":0.56,"n":7.9},{"i":0.65,"n":7.7},{"i":0.75,"n":7.6},{"i":0.89,"n":7.4},{"i":0.82,"n":7.4},{"i":1.09,"n":7.5},{"i":0.98,"n":7.5},{"i":0.91,"n":7.7},{"i":0.98,"n":7.9},{"i":0.99,"n":8.1},{"i":1.02,"n":8.2},{"i":0.85,"n":8.3},{"i":0.91,"n":8.3},{"i":null,"n":null}]},{"escola":"NASIB CURY","codigo":"917990","serie":[{"i":0.0,"n":null},{"i":0.69,"n":5.4},{"i":0.72,"n":6.3},{"i":0.95,"n":6.7},{"i":0.74,"n":6.8},{"i":0.72,"n":6.6},{"i":0.58,"n":6.5},{"i":0.57,"n":5.8},{"i":0.56,"n":5.8},{"i":0.54,"n":5.5},{"i":0.5,"n":5.4},{"i":0.65,"n":5.5},{"i":0.73,"n":5.9},{"i":0.73,"n":6.0},{"i":0.73,"n":5.9},{"i":0.73,"n":5.9},{"i":0.81,"n":6.2},{"i":0.71,"n":6.0},{"i":0.71,"n":6.0},{"i":0.74,"n":6.1},{"i":null,"n":null}]},{"escola":"NELSON CABRINI PROF","codigo":"33698","serie":[{"i":0.0,"n":null},{"i":0.75,"n":5.5},{"i":0.68,"n":6.4},{"i":0.78,"n":6.7},{"i":0.99,"n":6.8},{"i":1.03,"n":6.5},{"i":0.79,"n":6.5},{"i":0.68,"n":6.4},{"i":0.65,"n":6.4},{"i":0.21,"n":6.4},{"i":0.06,"n":6.3},{"i":0.24,"n":7.0},{"i":0.59,"n":6.4},{"i":0.64,"n":6.1},{"i":0.66,"n":6.6},{"i":0.78,"n":6.8},{"i":0.68,"n":6.0},{"i":0.53,"n":6.2},{"i":0.59,"n":6.0},{"i":0.57,"n":5.9},{"i":null,"n":null}]},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","serie":[{"i":0.0,"n":null},{"i":0.81,"n":6.1},{"i":0.6,"n":6.1},{"i":0.57,"n":6.7},{"i":0.77,"n":6.7},{"i":1.02,"n":6.8},{"i":0.74,"n":7.0},{"i":0.82,"n":6.9},{"i":0.76,"n":6.9},{"i":0.7,"n":6.8},{"i":0.52,"n":6.8},{"i":0.62,"n":6.5},{"i":0.61,"n":6.8},{"i":0.67,"n":6.8},{"i":0.72,"n":6.8},{"i":0.7,"n":6.7},{"i":0.69,"n":6.7},{"i":0.62,"n":6.5},{"i":0.66,"n":6.7},{"i":0.67,"n":6.6},{"i":null,"n":null}]},{"escola":"NEUZA MARIA MARANA FEIJAO PROFA","codigo":"33777","serie":[{"i":0.0,"n":6.5},{"i":0.95,"n":5.8},{"i":0.75,"n":6.7},{"i":0.73,"n":6.6},{"i":0.85,"n":6.4},{"i":0.62,"n":6.5},{"i":0.81,"n":6.6},{"i":0.81,"n":6.8},{"i":0.81,"n":6.8},{"i":0.8,"n":6.6},{"i":0.69,"n":6.5},{"i":0.45,"n":6.4},{"i":0.81,"n":6.1},{"i":0.87,"n":6.3},{"i":0.91,"n":6.4},{"i":0.96,"n":6.6},{"i":0.88,"n":6.4},{"i":0.51,"n":6.5},{"i":0.91,"n":6.8},{"i":0.92,"n":6.9},{"i":null,"n":null}]},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","serie":[{"i":0.22,"n":6.8},{"i":1.22,"n":6.6},{"i":0.93,"n":6.3},{"i":0.54,"n":6.6},{"i":1.18,"n":6.8},{"i":1.39,"n":6.5},{"i":1.0,"n":6.3},{"i":0.95,"n":5.9},{"i":0.9,"n":5.6},{"i":0.78,"n":5.6},{"i":0.47,"n":5.4},{"i":0.05,"n":4.3},{"i":0.65,"n":5.4},{"i":1.03,"n":6.3},{"i":1.12,"n":6.4},{"i":1.52,"n":6.4},{"i":1.56,"n":6.4},{"i":1.02,"n":6.6},{"i":0.88,"n":6.4},{"i":0.82,"n":6.3},{"i":null,"n":null}]},{"escola":"ORACINA CORREA DE MORAES RODINE PROFA","codigo":"43655","serie":[{"i":0.0,"n":6.0},{"i":0.54,"n":6.2},{"i":0.49,"n":6.3},{"i":0.57,"n":6.6},{"i":0.57,"n":6.6},{"i":0.52,"n":6.6},{"i":0.67,"n":6.7},{"i":0.49,"n":6.6},{"i":0.6,"n":6.6},{"i":0.57,"n":6.4},{"i":0.56,"n":6.2},{"i":0.49,"n":6.2},{"i":0.53,"n":6.0},{"i":0.41,"n":5.9},{"i":0.5,"n":6.0},{"i":0.47,"n":6.0},{"i":0.52,"n":6.3},{"i":0.54,"n":6.4},{"i":0.55,"n":6.4},{"i":0.42,"n":6.3},{"i":null,"n":null}]},{"escola":"RAFAEL PAES DE BARROS DOUTOR","codigo":"33510","serie":[{"i":0.01,"n":5.8},{"i":1.02,"n":6.1},{"i":0.63,"n":6.6},{"i":0.97,"n":6.5},{"i":0.61,"n":7.0},{"i":0.37,"n":7.1},{"i":0.25,"n":6.9},{"i":0.58,"n":6.3},{"i":0.58,"n":6.3},{"i":0.5,"n":6.3},{"i":0.52,"n":6.3},{"i":0.89,"n":6.5},{"i":0.69,"n":6.4},{"i":0.75,"n":6.5},{"i":0.81,"n":6.5},{"i":1.03,"n":6.7},{"i":0.68,"n":7.0},{"i":0.69,"n":7.3},{"i":0.85,"n":7.2},{"i":0.83,"n":7.1},{"i":null,"n":null}]},{"escola":"REIKO UEMURA TSUNOKAWA PROFA","codigo":"907662","serie":[{"i":null,"n":null},{"i":1.45,"n":6.4},{"i":0.48,"n":6.5},{"i":0.55,"n":6.5},{"i":1.27,"n":6.7},{"i":1.18,"n":6.7},{"i":0.83,"n":6.4},{"i":0.81,"n":6.2},{"i":0.53,"n":6.3},{"i":0.23,"n":6.2},{"i":0.16,"n":6.2},{"i":0.51,"n":6.5},{"i":0.68,"n":6.5},{"i":0.69,"n":6.6},{"i":0.7,"n":6.6},{"i":0.93,"n":6.6},{"i":0.73,"n":6.7},{"i":0.69,"n":6.7},{"i":0.68,"n":6.7},{"i":0.7,"n":7.2},{"i":null,"n":null}]},{"escola":"RUTH MAMEDE DE GODOY PROFA","codigo":"33637","serie":[{"i":0.02,"n":8.5},{"i":0.98,"n":6.9},{"i":0.91,"n":7.1},{"i":0.87,"n":6.5},{"i":1.02,"n":7.6},{"i":1.05,"n":7.5},{"i":0.96,"n":7.3},{"i":0.97,"n":7.4},{"i":0.91,"n":7.4},{"i":1.04,"n":7.4},{"i":1.06,"n":7.1},{"i":0.82,"n":7.2},{"i":0.97,"n":7.3},{"i":1.1,"n":7.4},{"i":0.89,"n":7.4},{"i":0.75,"n":7.8},{"i":1.12,"n":7.6},{"i":1.06,"n":7.7},{"i":1.09,"n":7.8},{"i":1.06,"n":7.8},{"i":null,"n":null}]},{"escola":"SEBASTIAO MONACO VEREADOR","codigo":"44568","serie":[{"i":0.08,"n":5.6},{"i":0.56,"n":5.9},{"i":0.52,"n":6.3},{"i":0.84,"n":6.3},{"i":0.63,"n":6.9},{"i":0.64,"n":7.0},{"i":0.68,"n":6.6},{"i":0.55,"n":6.1},{"i":0.57,"n":6.2},{"i":0.6,"n":5.9},{"i":0.53,"n":5.7},{"i":0.52,"n":6.0},{"i":0.63,"n":6.7},{"i":0.7,"n":6.8},{"i":0.62,"n":6.9},{"i":0.64,"n":7.0},{"i":0.63,"n":7.0},{"i":0.54,"n":6.6},{"i":0.46,"n":6.6},{"i":0.47,"n":6.6},{"i":null,"n":null}]},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","serie":[{"i":0.0,"n":8.0},{"i":1.19,"n":5.9},{"i":0.81,"n":6.5},{"i":0.89,"n":6.3},{"i":0.99,"n":7.0},{"i":1.2,"n":7.0},{"i":0.94,"n":6.6},{"i":0.89,"n":6.5},{"i":0.85,"n":6.5},{"i":0.79,"n":6.5},{"i":0.54,"n":6.2},{"i":0.77,"n":6.5},{"i":0.89,"n":6.4},{"i":0.93,"n":6.5},{"i":0.92,"n":6.7},{"i":1.07,"n":6.7},{"i":0.97,"n":6.8},{"i":0.89,"n":7.2},{"i":0.9,"n":7.1},{"i":0.86,"n":6.9},{"i":null,"n":null}]},{"escola":"VITU GIORGI DONA","codigo":"33790","serie":[{"i":null,"n":null},{"i":0.93,"n":5.6},{"i":0.5,"n":5.9},{"i":0.72,"n":6.3},{"i":0.76,"n":6.3},{"i":0.86,"n":6.2},{"i":1.18,"n":5.9},{"i":0.94,"n":5.6},{"i":0.92,"n":5.8},{"i":0.91,"n":5.7},{"i":0.78,"n":5.8},{"i":0.57,"n":6.0},{"i":0.93,"n":5.8},{"i":0.96,"n":5.9},{"i":0.96,"n":6.1},{"i":1.13,"n":5.9},{"i":1.03,"n":5.9},{"i":1.0,"n":5.8},{"i":1.07,"n":5.7},{"i":0.95,"n":5.5},{"i":null,"n":null}]},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","serie":[{"i":0.15,"n":7.5},{"i":1.14,"n":6.6},{"i":1.06,"n":6.9},{"i":0.93,"n":6.1},{"i":0.63,"n":6.9},{"i":0.74,"n":6.7},{"i":0.88,"n":6.7},{"i":0.86,"n":6.5},{"i":0.85,"n":6.5},{"i":0.9,"n":6.4},{"i":0.88,"n":6.4},{"i":0.76,"n":6.5},{"i":0.86,"n":6.7},{"i":1.04,"n":6.7},{"i":0.93,"n":6.7},{"i":0.96,"n":6.7},{"i":0.97,"n":6.5},{"i":0.88,"n":6.1},{"i":0.84,"n":6.0},{"i":0.76,"n":5.9},{"i":null,"n":null}]},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","serie":[{"i":0.57,"n":6.6},{"i":1.08,"n":6.9},{"i":0.83,"n":7.3},{"i":0.53,"n":5.9},{"i":1.24,"n":7.5},{"i":1.0,"n":7.2},{"i":1.0,"n":7.1},{"i":0.77,"n":7.2},{"i":0.97,"n":7.3},{"i":0.98,"n":7.2},{"i":0.96,"n":7.4},{"i":0.99,"n":7.5},{"i":1.07,"n":7.4},{"i":1.08,"n":7.5},{"i":1.03,"n":7.8},{"i":1.0,"n":8.1},{"i":0.95,"n":8.1},{"i":1.08,"n":7.8},{"i":1.07,"n":7.5},{"i":0.94,"n":7.1},{"i":null,"n":null}]}]};
+
+    const nf1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtN = v => (v == null || Number.isNaN(v)) ? '—' : nf1.format(v);
+    const fmtI = v => (v == null || Number.isNaN(v)) ? '—' : nf2.format(v);
+    const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const media = arr => {
+      const v = arr.filter(x => x != null && !Number.isNaN(x));
+      return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+    };
+
+    const periodos = BAKE.periodos;
+    const total = periodos.map(p => ({ n: p.notaTotal, i: p.indiceTotal }));
+    const escolas = BAKE.escolas.map(e => {
+      const serie = e.serie || [];
+      return {
+        escola: e.escola,
+        codigo: e.codigo,
+        serie: serie,
+        medN: media(serie.map(v => v.n)),
+        medI: media(serie.map(v => v.i))
+      };
+    });
+
+    const lancadas = periodos.map((p, k) => p.notaTotal == null ? -1 : k).filter(k => k >= 0);
+    const semDados = periodos.filter(p => p.notaTotal == null).map(p => p.periodo);
+    const kUltimo = lancadas.length ? lancadas[lancadas.length - 1] : 0;
+    const rotuloCurto = p => String(p.periodo || '').split(' a ')[0] || p.mes;
+
+    const cards = document.querySelector('#cards'), rows = document.querySelector('#rows'),
+      thead = document.querySelector('#thead'), sub = document.querySelector('#sub'),
+      rodape = document.querySelector('#rodape'), q = document.querySelector('#q'),
+      ordemSel = document.querySelector('#order'), selectEscola = document.querySelector('#select-escola'),
+      subtitulo = document.querySelector('#subtitulo');
+
+    const OPCOES = [
+      ['medN', 'Nota média (maior)'],
+      ['medI', 'Índice médio (maior)'],
+      ['ultN', 'Última quinzena · nota (maior)'],
+      ['ultI', 'Última quinzena · índice (maior)'],
+      ['nome', 'Escola (A–Z)']
+    ];
+
+    let ordem = { campo: 'medN', dir: -1 };
+    let extra = null;
+
+    function rotuloOrdem(campo) {
+      const fixa = OPCOES.filter(o => o[0] === campo)[0];
+      if (fixa) return fixa[1].replace(/\s*\((maior|A–Z)\)$/, '');
+      const m = /^k(\d+)([in])$/.exec(campo);
+      if (m) return 'quinzena ' + periodos[Number(m[1])].periodo + ' · ' + (m[2] === 'i' ? 'índice' : 'nota');
+      return campo;
+    }
+
+    function valor(e, campo) {
+      const m = /^k(\d+)([in])$/.exec(campo);
+      if (m) {
+        const s = e.serie[Number(m[1])];
+        return s ? s[m[2]] : null;
+      }
+      if (campo === 'ultN') return e.serie[kUltimo] ? e.serie[kUltimo].n : null;
+      if (campo === 'ultI') return e.serie[kUltimo] ? e.serie[kUltimo].i : null;
+      if (campo === 'medI') return e.medI;
+      if (campo === 'medN') return e.medN;
+      return null;
+    }
+
+    function renderCards() {
+      const medN = media(total.map(t => t.n));
+      const medI = media(total.map(t => t.i));
+      const T = total[kUltimo] || {};
+      const comNota = escolas.filter(e => e.serie[kUltimo] && e.serie[kUltimo].n != null)
+        .sort((a, b) => b.serie[kUltimo].n - a.serie[kUltimo].n);
+      const melhor = comNota[0];
+      const preenchidas = escolas.reduce((a, e) => a + e.serie.filter(v => v.n != null).length, 0);
+      const celulas = escolas.length * periodos.length;
+
+      cards.innerHTML = [
+        ['Nota média da rede', fmtN(medN), 'Média das ' + lancadas.length + ' quinzenas lançadas'],
+        ['Índice médio da rede', fmtI(medI), 'Valor bruto da plataforma'],
+        ['Última quinzena · ' + periodos[kUltimo].periodo, fmtN(T.n), 'Índice ' + fmtI(T.i) + ' na linha Total'],
+        ['Melhor nota da última quinzena', fmtN(melhor ? melhor.serie[kUltimo].n : null), melhor ? melhor.escola : 'Sem lançamento'],
+        ['Cobertura de notas', preenchidas + '/' + celulas, escolas.length + ' escolas × ' + periodos.length + ' quinzenas']
+      ].map(c => '<div class="card"><div class="k">' + esc(c[0]) + '</div><div class="v">' + esc(c[1]) +
+        '</div><div class="note" title="' + esc(c[2]) + '">' + esc(c[2]) + '</div></div>').join('');
+    }
+
+    function montarCabecalho() {
+      let grupo = '<tr class="grupo"><th rowspan="2">Escola</th>';
+      let campos = '<tr class="campos">';
+      periodos.forEach((p, k) => {
+        const ativo = ordem.campo.indexOf('k' + k) === 0;
+        const seta = ativo ? (ordem.dir < 0 ? ' ▼' : ' ▲') : '';
+        grupo += '<th colspan="2" data-k="' + k + '" data-campo="n" class="' + (ativo ? 'on' : '') +
+          '" title="' + esc('Ordenar por nota · ' + p.periodo + ' · ' + p.mes) + '">' +
+          esc(rotuloCurto(p)) + seta + (p.notaTotal == null ? '<span class="tag nd">sem dados</span>' : '') + '</th>';
+        campos += '<th data-k="' + k + '" data-campo="i" title="' + esc('Ordenar por índice · ' + p.periodo) + '">I</th>' +
+          '<th data-k="' + k + '" data-campo="n" title="' + esc('Ordenar por nota · ' + p.periodo) + '">N</th>';
+      });
+      thead.innerHTML = grupo + '</tr>' + campos + '</tr>';
+
+      thead.querySelectorAll('th[data-k]').forEach(th => {
+        th.addEventListener('click', () => {
+          const campo = 'k' + th.dataset.k + th.dataset.campo;
+          ordem = (ordem.campo === campo) ? { campo: campo, dir: -ordem.dir } : { campo: campo, dir: -1 };
+          extra = [campo, 'Quinzena ' + periodos[Number(th.dataset.k)].periodo + ' · ' + (th.dataset.campo === 'i' ? 'índice' : 'nota')];
+          renderOpcoes();
+          render();
+        });
+      });
+    }
+
+    function renderOpcoes() {
+      ordemSel.innerHTML = OPCOES.map(o => '<option value="' + o[0] + '">' + esc(o[1]) + '</option>').join('') +
+        (extra ? '<option value="' + extra[0] + '">' + esc(extra[1]) + '</option>' : '');
+      ordemSel.value = ordem.campo;
+    }
+
+    function render() {
+      const termo = q.value.trim().toLowerCase();
+      const alvo = selectEscola.value;
+
+      const lista = escolas.filter(e => (!alvo || e.escola === alvo) &&
+        (!termo || e.escola.toLowerCase().includes(termo) || String(e.codigo || '').includes(termo)));
+
+      if (ordem.campo === 'nome') {
+        lista.sort((a, b) => ordem.dir * a.escola.localeCompare(b.escola, 'pt-BR'));
+      } else {
+        lista.sort((a, b) => {
+          const va = valor(a, ordem.campo), vb = valor(b, ordem.campo);
+          if (va == null && vb == null) return a.escola.localeCompare(b.escola, 'pt-BR');
+          if (va == null) return 1;
+          if (vb == null) return -1;
+          return ordem.dir * (va - vb);
+        });
+      }
+
+      sub.textContent = lista.length + ' de ' + escolas.length + ' unidades · ' + periodos.length +
+        ' quinzenas · ordenado por ' + rotuloOrdem(ordem.campo).toLowerCase() +
+        (ordem.campo === 'nome' ? (ordem.dir < 0 ? ' (Z–A)' : ' (A–Z)') : (ordem.dir < 0 ? ' (maior)' : ' (menor)')) + '.';
+
+      const regional = '<tr class="regional"><td>MARILIA · Regional</td>' + periodos.map((p, k) =>
+        '<td class="i' + (total[k].i == null ? ' vazio' : '') + '">' + fmtI(total[k].i) + '</td>' +
+        '<td class="n' + (total[k].n == null ? ' vazio' : '') + '">' + fmtN(total[k].n) + '</td>').join('') + '</tr>';
+
+      rows.innerHTML = regional + lista.map(e => {
+        const tds = periodos.map((p, k) => {
+          const s = e.serie[k] || {};
+          return '<td class="i' + (s.i == null ? ' vazio' : '') + '">' + fmtI(s.i) + '</td>' +
+            '<td class="n' + (s.n == null ? ' vazio' : '') + '">' + fmtN(s.n) + '</td>';
+        }).join('');
+        return '<tr><td>' + esc(e.escola) + (e.codigo ? ' <span class="cod">· ' + esc(e.codigo) + '</span>' : '') + '</td>' + tds + '</tr>';
+      }).join('');
+
+      montarCabecalho();
+    }
+
+    selectEscola.innerHTML = '<option value="">Todas as Escolas</option><option disabled>— Escolas —</option>' +
+      [...escolas].sort((a, b) => a.escola.localeCompare(b.escola, 'pt-BR'))
+        .map(x => '<option value="' + esc(x.escola) + '">' + esc(x.escola) + '</option>').join('');
+
+    subtitulo.textContent = 'Diretoria de Ensino — Região de Marília · ' + escolas.length + ' escolas · ' +
+      periodos.length + ' quinzenas (' + lancadas.length + ' com lançamento)';
+    rodape.textContent = 'Fonte: REDACAO_QUINZENAL.csv · ' + escolas.length + ' escolas · ' + periodos.length +
+      ' quinzenas (da primeira, ' + periodos[0].periodo + ', à última, ' + periodos[periodos.length - 1].periodo + ') · ' +
+      'I = índice semanal da plataforma (valor bruto; pode superar 1,0) · N = nota das produções textuais.' +
+      (semDados.length ? ' Sem lançamento em todas as escolas: ' + semDados.join('; ') + '.' : '');
+
+    renderOpcoes();
+    renderCards();
+    render();
+
+    q.oninput = render;
+    selectEscola.onchange = render;
+    ordemSel.onchange = function () {
+      ordem = { campo: ordemSel.value, dir: ordemSel.value === 'nome' ? 1 : -1 };
+      extra = null;
+      renderOpcoes();
+      render();
+    };
+
+    /* Proteção de rota: exige sessão ativa, como nas demais páginas.
+       Se a lib do Supabase não carregar, a página mantém os dados visíveis. */
+    (async function () {
+      /* Em arquivo local (file://), nao redireciona para index.html.
+         No Vercel (http/https), a protecao original continua ativa. */
+      if (true) {
+        console.info('Visualizacao local: verificacao de sessao ignorada.');
+        return;
+      }
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+        console.warn('supabase-js não carregou: dados exibidos sem verificação de sessão.');
+        return;
+      }
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { location.href = 'index.html'; }
+      } catch (err) {
+        console.warn('Falha ao verificar a sessão:', err.message);
+      }
+    })();
+  </script>
+
+
+  <script>
+  /* Dashboard 100% local: sem CDN, config.js ou bibliotecas externas. */
+  (()=>{
+    const sel=document.querySelector('#select-escola'), box=document.querySelector('#dashboardEscola');
+    if(!sel||!box||typeof BAKE==='undefined') return;
+    const P=BAKE.periodos,E=BAKE.escolas, ks=P.map((p,k)=>p.notaTotal==null?-1:k).filter(k=>k>=0), last=ks.at(-1);
+    const ok=(e,k)=>e.serie[k]&&Number.isFinite(e.serie[k].n), avg=a=>{a=a.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+    const f=(v,d=1)=>v==null?'—':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const kpi=(t,v,n,c)=>`<div class="db-kpi" style="--c:${c}"><small>${t}</small><strong>${v}</strong><span>${n}</span></div>`;
+    function spark(vals,ref){
+      const W=720,H=240,p=32, all=[...vals,...(ref||[])].filter(Number.isFinite), lo=Math.min(...all)-.2, hi=Math.max(...all)+.2, x=i=>p+i*(W-2*p)/Math.max(1,vals.length-1), y=v=>H-p-(v-lo)*(H-2*p)/(hi-lo||1);
+      const path=a=>a.map((v,i)=>Number.isFinite(v)?`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`:'').join(' ');
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafico de evolucao" style="width:100%;height:100%"><g stroke="#e5e7eb">${[0,1,2,3].map(i=>`<line x1="${p}" y1="${p+i*(H-2*p)/3}" x2="${W-p}" y2="${p+i*(H-2*p)/3}"/>`).join('')}</g>${ref?`<path d="${path(ref)}" fill="none" stroke="#b7791f" stroke-width="3" stroke-dasharray="7 5"/>`:''}<path d="${path(vals)}" fill="none" stroke="#17365d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${vals.map((v,i)=>Number.isFinite(v)?`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#17365d"><title>${esc(P[ks[i]].periodo)}: ${f(v)}</title></circle>`:'').join('')}</svg>`;
+    }
+    function bars(items){const m=Math.max(...items.map(x=>x.v),1);return `<div style="display:grid;gap:7px">${items.map((x,i)=>`<button type="button" data-school="${esc(x.name)}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer"><span style="font-size:10px;color:#475569">${i+1}. ${esc(x.name)}</span><span style="display:flex;align-items:center;gap:7px"><i style="display:block;height:14px;width:${Math.max(8,x.v/m*88)}%;background:${i<3?'#b7791f':'#2d5a8a'};border-radius:4px"></i><b>${f(x.v)}</b></span></button>`).join('')}</div>`}
+    function render(){const name=sel.value;if(!name){const rank=E.filter(e=>ok(e,last)).sort((a,b)=>b.serie[last].n-a.serie[last].n).slice(0,10);box.innerHTML=`<div class="db-grid"><div class="db-panel"><h3>Panorama da rede</h3><p>Evolucao da nota regional por quinzena</p><div class="db-chart">${spark(ks.map(k=>P[k].notaTotal))}</div></div><div class="db-panel"><h3>Top 10 da ultima quinzena</h3><p>${esc(P[last].periodo)}</p>${bars(rank.map(e=>({name:e.escola,v:e.serie[last].n})))}</div></div>`;box.querySelectorAll('[data-school]').forEach(b=>b.onclick=()=>{sel.value=b.dataset.school;sel.dispatchEvent(new Event('change'))});return}
+      const e=E.find(x=>x.escola===name);if(!e)return;const have=ks.filter(k=>ok(e,k)),rank=E.filter(x=>ok(x,last)).sort((a,b)=>b.serie[last].n-a.serie[last].n),pos=rank.indexOf(e)+1,at=ok(e,last)?e.serie[last].n:null,an=have.length>1?e.serie[have.at(-2)].n:null,mn=avg(have.map(k=>e.serie[k].n)),mi=avg(have.map(k=>e.serie[k].i)),rn=avg(ks.map(k=>P[k].notaTotal)),ri=avg(ks.map(k=>P[k].indiceTotal)),dif=at==null?null:at-P[last].notaTotal,ac=have.filter(k=>e.serie[k].n>P[k].notaTotal).length,best=have.reduce((a,k)=>a==null||e.serie[k].n>e.serie[a].n?k:a,null),worst=have.reduce((a,k)=>a==null||e.serie[k].n<e.serie[a].n?k:a,null),four=have.slice(-4),tr=four.length>1?e.serie[four.at(-1)].n-e.serie[four[0]].n:null;
+      box.innerHTML=`<div class="db-hero"><div><h2>${esc(e.escola)}</h2><p>Codigo ${esc(e.codigo)} · painel individual</p></div><div class="db-badge">🏆 ${pos}º de ${rank.length}</div></div><div class="db-kpis">${kpi('Ultima nota',f(at),an==null?'Sem comparacao':(at-an>=0?'▲ ':'▼ ')+f(Math.abs(at-an)),'#17365d')}${kpi('Nota media',f(mn),'Regional: '+f(rn),'#2d5a8a')}${kpi('Indice medio',f(mi,2),'Regional: '+f(ri,2),'#b7791f')}${kpi('Diferenca da rede',(dif>=0?'+':'')+f(dif),'Ultima quinzena',dif>=0?'#15803d':'#b91c1c')}${kpi('Acima da rede',ac,'de '+have.length+' quinzenas','#7c3aed')}</div><div class="db-grid"><div class="db-panel"><h3>Evolucao da nota</h3><p>Azul: escola · dourado tracejado: regional</p><div class="db-chart">${spark(ks.map(k=>e.serie[k]?.n??null),ks.map(k=>P[k].notaTotal))}</div></div><div class="db-panel"><h3>Insights automaticos</h3><ul class="db-insights"><li>⭐ Melhor nota: <b>${f(e.serie[best]?.n)}</b> em ${esc(P[best]?.periodo)}</li><li>⚠️ Menor nota: <b>${f(e.serie[worst]?.n)}</b> em ${esc(P[worst]?.periodo)}</li><li>${tr>.05?'📈 Tendencia de alta':tr<-.05?'📉 Tendencia de queda':'➡️ Tendencia estavel'}</li><li>${mi>=ri?'✅ Indice acima da rede':'🔔 Indice abaixo da rede'}</li></ul></div><div class="db-panel" style="grid-column:1/-1"><h3>Mapa de calor</h3><p>Verde: acima · amarelo: proximo · vermelho: abaixo</p><div class="db-heat">${have.map(k=>{const v=e.serie[k].n,r=P[k].notaTotal,c=v>=r+.3?'#15803d':v>=r-.3?'#b7791f':'#b91c1c';return `<div style="background:${c}" title="${esc(P[k].periodo)}">${esc(P[k].periodo.split(' a ')[0])}<br>${f(v)}</div>`}).join('')}</div></div></div>`;
+    }
+    sel.addEventListener('change',render);render();
+  })();
+  </script>
+</body>
+</html>
