@@ -39,7 +39,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
-| `redacao.html` | autenticado | **Redação Paulista**: matriz escola × quinzena com índice semanal e nota de todas as quinzenas, filtro por escola e ordenação por coluna |
+| `redacao.html` | autenticado | **Redação Paulista**: painel regional (evolução e top 10 da última quinzena), painel individual por escola (KPIs, evolução, insights e mapa de calor) e matriz escola × quinzena completa |
 | `admin.html` | ADM | Usuários + **importadores** de planilha (Alura e Prova Paulista) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
