@@ -182,6 +182,31 @@
                 <button type="button" id="saresp-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Redação Paulista -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Oficial - Redação Paulista</h3>
+            </div>
+            <div class="form-group">
+                <label for="redacao-ano">Ano Letivo Referente à Planilha</label>
+                <select id="redacao-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Aceita a planilha consolidada (pares Índice/Nota por quinzena) e também a exportação semanal de uma quinzena (colunas Índice de Redações Concluídas e Nota Média). A consolidada substitui todos os dados do ano; a semanal substitui apenas a quinzena identificada no arquivo.</span>
+            </div>
+            <div class="form-group">
+                <label for="redacao-file">Planilha da Redação Paulista (.xlsx, .xls ou .csv)</label>
+                <input type="file" id="redacao-file" accept=".xlsx, .xls, .csv">
+            </div>
+            <div id="redacao-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="redacao-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="redacao-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
@@ -890,6 +915,241 @@
         } catch (err) {
             console.error('Erro na importação SARESP:', err);
             preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_saresp foi criada no Supabase.</span>`;
+            confirmar.disabled = false;
+        } finally { confirmar.textContent = '2. Confirmar Importação'; }
+    });
+
+    // =========================================================================
+    // Importador da Planilha Oficial da Redação Paulista
+    // =========================================================================
+    let dadosRedacao = null;
+
+    const REDACAO = (() => {
+        const semAcento = v => String(v == null ? '' : v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const texto = v => v == null ? '' : String(v).replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
+        const numero = v => {
+            if (v == null || v === '') return null;
+            if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+            let s = String(v).replace('%', '').trim();
+            if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+            const n = parseFloat(s.replace(',', '.'));
+            return Number.isFinite(n) ? n : null;
+        };
+        const dataCurta = s => {
+            const m = /^(\d{1,2})\/(\d{1,2})$/.exec(String(s).trim());
+            return m ? m[1].padStart(2, '0') + '/' + m[2].padStart(2, '0') : String(s).trim();
+        };
+        const diaMes = v => {
+            if (v instanceof Date && !isNaN(v)) return String(v.getDate()).padStart(2, '0') + '/' + String(v.getMonth() + 1).padStart(2, '0');
+            const s = texto(v);
+            const m = /^(\d{1,2})\/(\d{1,2})(?:\/\d{2,4})?$/.exec(s);
+            return m ? dataCurta(m[1] + '/' + m[2]) : '';
+        };
+        const RE_INTERVALO = /(\d{1,2}\/\d{1,2})\s*(?:a|à|ate|até|-|–)\s*(\d{1,2}\/\d{1,2})/i;
+        const intervalo = v => {
+            if (v instanceof Date && !isNaN(v)) return diaMes(v);
+            const s = texto(v);
+            const m = RE_INTERVALO.exec(s);
+            return m ? dataCurta(m[1]) + ' a ' + dataCurta(m[2]) : diaMes(v);
+        };
+        const separar = nome => {
+            const s = texto(nome);
+            const m = /^(.*?)\s*[-–]\s*(\d{3,9})$/.exec(s);
+            return m ? { escola: m[1].trim(), codigo: m[2] } : { escola: s, codigo: null };
+        };
+        const aEsquerda = (linha, c) => {
+            for (let i = c; i >= 1; i--) {
+                const v = (linha || [])[i];
+                if (v !== null && v !== undefined && texto(v) !== '') return v;
+            }
+            return null;
+        };
+        const ehRegional = N => /^(total|total geral|total rede|marilia)$/.test(N);
+
+        function lerMatriz(linhas, norm, h, ano) {
+            const cols = [];
+            let atual = null;
+            (norm[h] || []).forEach((c, i) => {
+                if (!i) return;
+                if (c === 'indice') { atual = { i: i, n: null }; cols.push(atual); }
+                else if (c === 'nota' && atual && atual.n == null) atual.n = i;
+            });
+            const usadas = cols.filter(c => c.n != null);
+            if (!usadas.length) throw new Error('A linha de cabeçalho tem colunas de índice, mas não encontrei as colunas de nota correspondentes.');
+
+            let linhaDatas = -1, melhor = 0;
+            linhas.forEach((l, i) => {
+                const cnt = (l || []).filter(c => intervalo(c) !== '').length;
+                if (cnt > melhor) { melhor = cnt; linhaDatas = i; }
+            });
+            if (melhor < Math.max(2, Math.floor(usadas.length / 2))) linhaDatas = -1;
+
+            let linhaMeses = -1;
+            for (let i = h - 1; i >= 0 && i >= h - 4; i--) {
+                const preenchidas = (linhas[i] || []).filter(c => texto(c) !== '').length;
+                if (preenchidas >= Math.min(3, usadas.length)) { linhaMeses = i; break; }
+            }
+            if (linhaMeses === linhaDatas) linhaMeses = -1;
+
+            const periodos = usadas.map((c, k) => {
+                const bruto = linhaDatas >= 0 ? aEsquerda(linhas[linhaDatas], c.i) : null;
+                const data = bruto == null ? '' : intervalo(bruto);
+                const mes = linhaMeses >= 0 ? texto(aEsquerda(linhas[linhaMeses], c.i)) : '';
+                const periodo = data || (mes ? mes + ' · ' + (k + 1) + 'ª quinzena' : (k + 1) + 'ª quinzena');
+                return { quinzena: k + 1, periodo: periodo, mes: mes || null };
+            });
+
+            const registros = [];
+            let regional = null;
+            for (let i = h + 1; i < linhas.length; i++) {
+                const nome = texto((linhas[i] || [])[0]);
+                if (!nome) continue;
+                const N = semAcento(nome);
+                if (/^(filtros aplicados|legenda|fonte|observa)/.test(N)) continue;
+                const alvo = ehRegional(N) ? { escola: 'MARILIA', codigo: null } : separar(nome);
+                let algum = false;
+                const itens = usadas.map((c, k) => {
+                    const indice = numero((linhas[i] || [])[c.i]);
+                    const nota = numero((linhas[i] || [])[c.n]);
+                    if (indice != null || nota != null) algum = true;
+                    return { ano: ano, escola: alvo.escola, codigo: alvo.codigo, quinzena: periodos[k].quinzena, periodo: periodos[k].periodo, mes: periodos[k].mes, indice: indice, nota: nota };
+                });
+                if (!algum) continue;
+                if (ehRegional(N)) { regional = itens; continue; }
+                itens.forEach(it => registros.push(it));
+            }
+            if (!registros.length) throw new Error('Nenhuma escola com dados foi encontrada na planilha.');
+            return { tipo: 'matriz', periodos: periodos, registros: registros, regional: regional, escolas: new Set(registros.map(r => r.escola)).size };
+        }
+
+        function lerSemanal(linhas, norm, h, ano) {
+            const cab = norm[h];
+            const colIndice = cab.findIndex((c, i) => i > 0 && c.indexOf('indice') >= 0);
+            const colNota = cab.findIndex((c, i) => i > 0 && (c === 'nota media' || c === 'nota'));
+            if (colIndice < 0 || colNota < 0) throw new Error('Não encontrei as colunas de índice e de nota média na exportação semanal.');
+
+            let periodo = '';
+            for (let i = 0; i < linhas.length && !periodo; i++) {
+                for (const cel of (linhas[i] || [])) {
+                    const m = RE_INTERVALO.exec(texto(cel));
+                    if (m) { periodo = dataCurta(m[1]) + ' a ' + dataCurta(m[2]); break; }
+                }
+            }
+            if (!periodo) throw new Error('Não consegui identificar a quinzena do arquivo. Mantenha a linha "Filtros aplicados" na exportação ou use a planilha consolidada.');
+
+            const registros = [];
+            let regional = null;
+            for (let i = h + 1; i < linhas.length; i++) {
+                const nome = texto((linhas[i] || [])[0]);
+                if (!nome) continue;
+                const N = semAcento(nome);
+                if (/^(filtros aplicados|legenda|observa)/.test(N)) continue;
+                const indice = numero((linhas[i] || [])[colIndice]);
+                const nota = numero((linhas[i] || [])[colNota]);
+                if (indice == null && nota == null) continue;
+                const alvo = ehRegional(N) ? { escola: 'MARILIA', codigo: null } : separar(nome);
+                const item = { ano: ano, escola: alvo.escola, codigo: alvo.codigo, quinzena: null, periodo: periodo, mes: null, indice: indice, nota: nota };
+                if (ehRegional(N)) regional = [item];
+                else registros.push(item);
+            }
+            if (!registros.length) throw new Error('Nenhuma escola com dados foi encontrada na planilha.');
+            return { tipo: 'semanal', periodos: [{ quinzena: null, periodo: periodo, mes: null }], registros: registros, regional: regional, escolas: new Set(registros.map(r => r.escola)).size };
+        }
+
+        function ler(linhas, ano) {
+            const norm = linhas.map(l => (l || []).map(semAcento));
+            const cabecalho = norm.findIndex(l => l.includes('indice') && l.includes('nota') && (l.includes('unidade') || l.includes('escola')) && !l.includes('nota media'));
+            if (cabecalho >= 0) return lerMatriz(linhas, norm, cabecalho, ano);
+            const semanal = norm.findIndex(l => l.includes('escola') && l.some(c => c === 'nota media'));
+            if (semanal >= 0) return lerSemanal(linhas, norm, semanal, ano);
+            throw new Error('Formato não reconhecido: não encontrei as colunas da planilha da Redação (consolidada ou exportação semanal).');
+        }
+
+        return { ler: ler };
+    })();
+
+    document.getElementById('redacao-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('redacao-ano').value);
+        const file = document.getElementById('redacao-file').files[0];
+        const preview = document.getElementById('redacao-preview');
+        const confirmar = document.getElementById('redacao-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true; dadosRedacao = null;
+        if (!ano) return alert('Selecione o ano referente à planilha da Redação Paulista.');
+        if (!file) return alert('Selecione a planilha da Redação Paulista.');
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
+                const aba = wb.Sheets[wb.SheetNames[0]];
+                const linhas = XLSX.utils.sheet_to_json(aba, { header: 1, defval: null, raw: true, blankrows: false });
+                const resultado = REDACAO.ler(linhas, ano);
+                resultado.arquivo = file.name;
+                resultado.aba = wb.SheetNames[0];
+                dadosRedacao = resultado;
+                const periodo = resultado.periodos[0].periodo;
+                const ultimo = resultado.periodos[resultado.periodos.length - 1].periodo;
+                preview.innerHTML = '<strong>Sucesso:</strong> ' + resultado.escolas + ' escolas + linha regional MARILIA · ' +
+                    (resultado.tipo === 'matriz'
+                        ? resultado.periodos.length + ' quinzenas (da primeira, ' + periodo + ', à última, ' + ultimo + ')'
+                        : 'quinzena ' + periodo) +
+                    ' · ' + resultado.registros.length + ' registros para ' + ano + ' (aba "' + wb.SheetNames[0] + '").' +
+                    '<br><span style="color:#64748b;">' + (resultado.tipo === 'matriz'
+                        ? 'A confirmação substitui todos os dados de ' + ano + ' da Redação Paulista.'
+                        : 'A confirmação substitui apenas a quinzena ' + periodo + ' de ' + ano + '.') + '</span>';
+                preview.style.display = 'block'; confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura Redação:', err);
+                preview.innerHTML = '<span style="color:red;">Erro ao ler o arquivo: ' + err.message + '</span>';
+                preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('redacao-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('redacao-preview');
+        const confirmar = document.getElementById('redacao-confirmar');
+        if (!dadosRedacao) return;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const ano = parseInt(document.getElementById('redacao-ano').value);
+            let quinzena = dadosRedacao.periodos[0].quinzena;
+
+            if (!quinzena) {
+                const periodo = dadosRedacao.periodos[0].periodo;
+                const { data: existentes, error: erroBusca } = await supabaseClient
+                    .from('resultados_redacao').select('quinzena').eq('ano', ano).eq('periodo', periodo).limit(1);
+                if (erroBusca) throw new Error('Não foi possível consultar as quinzenas existentes: ' + erroBusca.message);
+                if (existentes && existentes.length) {
+                    quinzena = existentes[0].quinzena;
+                } else {
+                    const { data: ultimo, error: erroMax } = await supabaseClient
+                        .from('resultados_redacao').select('quinzena').eq('ano', ano).order('quinzena', { ascending: false }).limit(1);
+                    if (erroMax) throw new Error('Não foi possível consultar a última quinzena lançada: ' + erroMax.message);
+                    quinzena = ultimo && ultimo.length ? Number(ultimo[0].quinzena) + 1 : 1;
+                }
+                dadosRedacao.registros.forEach(r => { r.quinzena = quinzena; });
+                if (dadosRedacao.regional) dadosRedacao.regional.forEach(r => { r.quinzena = quinzena; });
+            }
+
+            let exclusao = supabaseClient.from('resultados_redacao').delete().eq('ano', ano);
+            if (dadosRedacao.tipo === 'semanal') exclusao = exclusao.eq('quinzena', quinzena);
+            const { error: erroDelete } = await exclusao;
+            if (erroDelete) throw new Error('Não foi possível substituir os dados anteriores: ' + erroDelete.message);
+
+            const todos = dadosRedacao.registros.concat(dadosRedacao.regional || []);
+            for (let i = 0; i < todos.length; i += 500) {
+                const { error } = await supabaseClient.from('resultados_redacao').insert(todos.slice(i, i + 500));
+                if (error) throw error;
+            }
+
+            preview.innerHTML = '<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ' + todos.length +
+                ' registros gravados na tabela resultados_redacao (' + dadosRedacao.escolas + ' escolas + regional, ano ' + ano + ', quinzena ' + quinzena + ').</span>';
+            document.getElementById('redacao-file').value = '';
+            dadosRedacao = null;
+        } catch (err) {
+            console.error('Erro na importação da Redação:', err);
+            preview.innerHTML = '<span style="color:red;">Erro ao gravar no banco: ' + err.message + '. Verifique se a tabela resultados_redacao foi criada no Supabase (veja supabase-resultados-redacao.sql).</span>';
             confirmar.disabled = false;
         } finally { confirmar.textContent = '2. Confirmar Importação'; }
     });

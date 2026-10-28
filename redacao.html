@@ -35,22 +35,32 @@
       return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
     };
 
-    const periodos = BAKE.periodos;
-    const total = periodos.map(p => ({ n: p.notaTotal, i: p.indiceTotal }));
-    const escolas = BAKE.escolas.map(e => {
-      const serie = e.serie || [];
-      return {
-        escola: e.escola,
-        codigo: e.codigo,
-        serie: serie,
-        medN: media(serie.map(v => v.n)),
-        medI: media(serie.map(v => v.i))
-      };
-    });
+    /* Dados em uso: começa com o BAKE embutido e é substituído pelo Supabase quando há resultado importado. */
+    const DADOS = { periodos: BAKE.periodos, escolas: BAKE.escolas };
+    let periodos = [];
+    let total = [];
+    let escolas = [];
+    let lancadas = [];
+    let semDados = [];
+    let kUltimo = 0;
 
-    const lancadas = periodos.map((p, k) => p.notaTotal == null ? -1 : k).filter(k => k >= 0);
-    const semDados = periodos.filter(p => p.notaTotal == null).map(p => p.periodo);
-    const kUltimo = lancadas.length ? lancadas[lancadas.length - 1] : 0;
+    function prepararDados() {
+      periodos = DADOS.periodos;
+      total = periodos.map(p => ({ n: p.notaTotal, i: p.indiceTotal }));
+      escolas = DADOS.escolas.map(e => {
+        const serie = e.serie || [];
+        return {
+          escola: e.escola,
+          codigo: e.codigo,
+          serie: serie,
+          medN: media(serie.map(v => v.n)),
+          medI: media(serie.map(v => v.i))
+        };
+      });
+      lancadas = periodos.map((p, k) => p.notaTotal == null ? -1 : k).filter(k => k >= 0);
+      semDados = periodos.filter(p => p.notaTotal == null).map(p => p.periodo);
+      kUltimo = lancadas.length ? lancadas[lancadas.length - 1] : 0;
+    }
     const rotuloCurto = p => String(p.periodo || '').split(' a ')[0] || p.mes;
 
     const cards = document.querySelector('#cards'), rows = document.querySelector('#rows'),
@@ -181,20 +191,27 @@
       montarCabecalho();
     }
 
-    selectEscola.innerHTML = '<option value="">Todas as Escolas</option><option disabled>— Escolas —</option>' +
-      [...escolas].sort((a, b) => a.escola.localeCompare(b.escola, 'pt-BR'))
-        .map(x => '<option value="' + esc(x.escola) + '">' + esc(x.escola) + '</option>').join('');
+    function atualizarRodape(fonte, ano) {
+      const origem = fonte === 'supabase'
+        ? 'Fonte: Supabase (resultados_redacao) · ano letivo ' + ano + ' · importada via admin.html'
+        : 'Fonte: REDACAO_QUINZENAL.csv (dados embutidos na página)';
+      rodape.textContent = origem + ' · ' + escolas.length + ' escolas · ' + periodos.length +
+        ' quinzenas (da primeira, ' + periodos[0].periodo + ', à última, ' + periodos[periodos.length - 1].periodo + ') · ' +
+        'I = índice semanal da plataforma (valor bruto; pode superar 1,0) · N = nota das produções textuais.' +
+        (semDados.length ? ' Sem lançamento em todas as escolas: ' + semDados.join('; ') + '.' : '');
+    }
 
-    subtitulo.textContent = 'Diretoria de Ensino — Região de Marília · ' + escolas.length + ' escolas · ' +
-      periodos.length + ' quinzenas (' + lancadas.length + ' com lançamento)';
-    rodape.textContent = 'Fonte: REDACAO_QUINZENAL.csv · ' + escolas.length + ' escolas · ' + periodos.length +
-      ' quinzenas (da primeira, ' + periodos[0].periodo + ', à última, ' + periodos[periodos.length - 1].periodo + ') · ' +
-      'I = índice semanal da plataforma (valor bruto; pode superar 1,0) · N = nota das produções textuais.' +
-      (semDados.length ? ' Sem lançamento em todas as escolas: ' + semDados.join('; ') + '.' : '');
-
-    renderOpcoes();
-    renderCards();
-    render();
+    function iniciarPagina() {
+      prepararDados();
+      selectEscola.innerHTML = '<option value="">Todas as Escolas</option><option disabled>— Escolas —</option>' +
+        [...escolas].sort((a, b) => a.escola.localeCompare(b.escola, 'pt-BR'))
+          .map(x => '<option value="' + esc(x.escola) + '">' + esc(x.escola) + '</option>').join('');
+      subtitulo.textContent = 'Diretoria de Ensino — Região de Marília · ' + escolas.length + ' escolas · ' +
+        periodos.length + ' quinzenas (' + lancadas.length + ' com lançamento)';
+      renderOpcoes();
+      renderCards();
+      render();
+    }
 
     q.oninput = render;
     selectEscola.onchange = render;
@@ -204,6 +221,46 @@
       renderOpcoes();
       render();
     };
+
+    iniciarPagina();
+    atualizarRodape('csv');
+
+    /* Carrega o resultado importado em admin.html. Sem dados no banco (ou sem a tabela),
+       a página segue com o BAKE embutido. */
+    (async function () {
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient.from('resultados_redacao').select('*').order('ano', { ascending: false });
+        if (error || !data || data.length < 20) return;
+        const ano = data[0].ano;
+        const linhas = data.filter(r => r.ano === ano);
+        const qs = [...new Set(linhas.map(r => Number(r.quinzena)))].sort((a, b) => a - b);
+        const posicao = {};
+        qs.forEach((q, k) => { posicao[q] = k; });
+        const periodosBd = qs.map(q => {
+          const ref = linhas.find(r => Number(r.quinzena) === q) || {};
+          return { quinzena: q, periodo: ref.periodo || ('Quinzena ' + q), mes: ref.mes || '', indiceTotal: null, notaTotal: null };
+        });
+        const mapa = {};
+        linhas.forEach(r => {
+          const k = posicao[Number(r.quinzena)];
+          if (!mapa[r.escola]) mapa[r.escola] = { escola: r.escola, codigo: r.codigo || null, serie: periodosBd.map(() => ({ i: null, n: null })) };
+          if (!mapa[r.escola].codigo && r.codigo) mapa[r.escola].codigo = r.codigo;
+          mapa[r.escola].serie[k] = { i: r.indice == null ? null : Number(r.indice), n: r.nota == null ? null : Number(r.nota) };
+        });
+        const regional = mapa['MARILIA'];
+        if (regional) periodosBd.forEach((p, k) => { p.indiceTotal = regional.serie[k].i; p.notaTotal = regional.serie[k].n; });
+        const escolasBd = Object.keys(mapa).filter(n => !/^MARILIA$/i.test(n)).map(n => mapa[n]);
+        if (!escolasBd.length) return;
+        DADOS.periodos = periodosBd;
+        DADOS.escolas = escolasBd;
+        iniciarPagina();
+        atualizarRodape('supabase', ano);
+        if (typeof window.iniciarDashboard === 'function') window.iniciarDashboard();
+      } catch (err) {
+        console.warn('Falha ao carregar resultados_redacao:', err.message);
+      }
+    })();
 
     /* Proteção de rota: exige sessão ativa, como nas demais páginas.
        Se a lib do Supabase não carregar, a página mantém os dados visíveis. */
@@ -229,11 +286,11 @@
 
 
   <script>
-  /* Dashboard 100% local: sem CDN, config.js ou bibliotecas externas. */
-  (()=>{
+  /* Painel regional e por escola: dados de DADOS (BAKE ou Supabase). Pode ser reiniciado após importação. */
+  window.iniciarDashboard = function(){
     const sel=document.querySelector('#select-escola'), box=document.querySelector('#dashboardEscola');
-    if(!sel||!box||typeof BAKE==='undefined') return;
-    const P=BAKE.periodos,E=BAKE.escolas, ks=P.map((p,k)=>p.notaTotal==null?-1:k).filter(k=>k>=0), last=ks.at(-1);
+    if(!sel||!box||typeof DADOS==='undefined') return;
+    const P=DADOS.periodos,E=DADOS.escolas, ks=P.map((p,k)=>p.notaTotal==null?-1:k).filter(k=>k>=0), last=ks.at(-1);
     const ok=(e,k)=>e.serie[k]&&Number.isFinite(e.serie[k].n), avg=a=>{a=a.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
     const f=(v,d=1)=>v==null?'—':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
     const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -248,8 +305,11 @@
       const e=E.find(x=>x.escola===name);if(!e)return;const have=ks.filter(k=>ok(e,k)),rank=E.filter(x=>ok(x,last)).sort((a,b)=>b.serie[last].n-a.serie[last].n),pos=rank.indexOf(e)+1,at=ok(e,last)?e.serie[last].n:null,an=have.length>1?e.serie[have.at(-2)].n:null,mn=avg(have.map(k=>e.serie[k].n)),mi=avg(have.map(k=>e.serie[k].i)),rn=avg(ks.map(k=>P[k].notaTotal)),ri=avg(ks.map(k=>P[k].indiceTotal)),dif=at==null?null:at-P[last].notaTotal,ac=have.filter(k=>e.serie[k].n>P[k].notaTotal).length,best=have.reduce((a,k)=>a==null||e.serie[k].n>e.serie[a].n?k:a,null),worst=have.reduce((a,k)=>a==null||e.serie[k].n<e.serie[a].n?k:a,null),four=have.slice(-4),tr=four.length>1?e.serie[four.at(-1)].n-e.serie[four[0]].n:null;
       box.innerHTML=`<div class="db-hero"><div><h2>${esc(e.escola)}</h2><p>Código ${esc(e.codigo)} · painel individual</p></div><div class="db-badge">🏆 ${pos}º de ${rank.length}</div></div><div class="db-kpis">${kpi('Última nota',f(at),an==null?'Sem comparação':(at-an>=0?'▲ ':'▼ ')+f(Math.abs(at-an)),'#17365d')}${kpi('Nota média',f(mn),'Regional: '+f(rn),'#2d5a8a')}${kpi('Índice médio',f(mi,2),'Regional: '+f(ri,2),'#b7791f')}${kpi('Diferença da rede',(dif>=0?'+':'')+f(dif),'Última quinzena',dif>=0?'#15803d':'#b91c1c')}${kpi('Acima da rede',ac,'de '+have.length+' quinzenas','#7c3aed')}</div><div class="db-grid"><div class="db-panel"><h3>Evolução da nota</h3><p>Azul: escola · dourado tracejado: regional</p><div class="db-chart">${spark(ks.map(k=>e.serie[k]?.n??null),ks.map(k=>P[k].notaTotal))}</div></div><div class="db-panel"><h3>Insights automáticos</h3><ul class="db-insights"><li>⭐ Melhor nota: <b>${f(e.serie[best]?.n)}</b> em ${esc(P[best]?.periodo)}</li><li>⚠️ Menor nota: <b>${f(e.serie[worst]?.n)}</b> em ${esc(P[worst]?.periodo)}</li><li>${tr>.05?'📈 Tendência de alta':tr<-.05?'📉 Tendência de queda':'➡️ Tendência estável'}</li><li>${mi>=ri?'✅ Índice acima da rede':'🔔 Índice abaixo da rede'}</li></ul></div><div class="db-panel" style="grid-column:1/-1"><h3>Mapa de calor</h3><p>Verde: acima · amarelo: próximo · vermelho: abaixo</p><div class="db-heat">${have.map(k=>{const v=e.serie[k].n,r=P[k].notaTotal,c=v>=r+.3?'#15803d':v>=r-.3?'#b7791f':'#b91c1c';return `<div style="background:${c}" title="${esc(P[k].periodo)}">${esc(P[k].periodo.split(' a ')[0])}<br>${f(v)}</div>`}).join('')}</div></div></div>`;
     }
-    sel.addEventListener('change',render);render();
-  })();
+    if(!sel.__dashLigado){ sel.addEventListener('change',()=>sel.__dashRender&&sel.__dashRender()); sel.__dashLigado=true; }
+    sel.__dashRender=render;
+    render();
+  };
+  window.iniciarDashboard();
   </script>
 </body>
 </html>

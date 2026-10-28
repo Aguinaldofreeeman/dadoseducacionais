@@ -40,7 +40,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
 | `redacao.html` | autenticado | **Redação Paulista**: painel regional (evolução e top 10 da última quinzena), painel individual por escola (KPIs, evolução, insights e mapa de calor) e matriz escola × quinzena completa |
-| `admin.html` | ADM | Usuários + **importadores** de planilha (Alura e Prova Paulista) |
+| `admin.html` | ADM | Usuários + **importadores** de planilha (Alura, Prova Paulista, Matific, SARESP e Redação Paulista) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
 
@@ -88,17 +88,21 @@ Colunas: as mesmas acima **sem** `id` e `created_at`.
 | `media_nas_questoes_discursivas` | numeric |
 | `created_at` | timestamptz |
 
-### Redação Paulista — `csv/REDACAO_QUINZENAL.csv` (arquivo estático, fora do Supabase)
+### `resultados_redacao` — Redação Paulista (50 escolas × quinzenas)
 
-Planilha quinzenal com **50 escolas × 21 quinzenas**. Cada quinzena tem dois campos:
-`Índice` (índice semanal da plataforma Redação Paulista — valor bruto, **não é percentual**:
-chega a 1,56, então não deve ser lido como taxa de 0–100%) e `Nota`.
+Uma linha por **escola × quinzena**; a linha regional usa `escola = 'MARILIA'`.
+`ano` · `escola` · `codigo` · `quinzena` (1..N) · `periodo` (ex.: `11/10 a 17/10`) · `mes` ·
+`indice` (índice semanal da plataforma — valor bruto, **não é percentual**: chega a 1,56, então
+não deve ser lido como taxa de 0–100%) · `nota` (nota das produções textuais) · `created_at`.
 
-- Cabeçalho mesclado em duas linhas (`FEVEREIRO`, `MARÇO`, `abr/26`…), datas no rodapé e
-  a linha `Total` (referência da rede).
-- 20 quinzenas com dados; **18/10 a 24/10 está vazia** em todas as escolas.
-- Os dados estão **embutidos** em `redacao.html` (constante `BAKE`), como nos demais dashboards.
-  Para atualizar: regerar o `BAKE` a partir do CSV e substituir a linha no arquivo.
+- Estrutura criada por `supabase-resultados-redacao.sql` (executar uma vez no SQL Editor).
+- Importação em `admin.html` → **Importar Planilha Oficial - Redação Paulista**. Aceita:
+  - **planilha consolidada** (pares `Índice`/`Nota` por quinzena, linha `Total` vira `MARILIA`) —
+    substitui todos os dados do ano;
+  - **exportação semanal** de uma quinzena (`Índice de Redações Concluídas` e `Nota Média`, com a
+    linha `Filtros aplicados` indicando o intervalo) — substitui apenas aquela quinzena.
+- `redacao.html` lê a tabela e, se ela estiver vazia ou indisponível, usa o `BAKE` embutido
+  (gerado de `csv/REDACAO_QUINZENAL.csv`, 50 escolas × 21 quinzenas).
 
 ### `edicoes_disponiveis`
 `ano` (text) · `edicao_planilha` (text) — catálogo das 9 edições (2024–2026).
