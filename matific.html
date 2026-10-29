@@ -9,7 +9,7 @@
   </style>
 </head>
 <body>
-  <header><div><h1>Resultados — Matific</h1><p>Diretoria de Ensino — Região de Marília · Ensino Fundamental Anos Finais</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="btn">Início</a><a href="dashboard-matific.html" class="btn" style="background:#0d9488">Dashboard Matific</a></div></header>
+  <header><div><h1>Resultados — Matific</h1><p>Unidade Regional de Ensino de Marília · Ensino Fundamental Anos Finais</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="btn">Início</a><a href="dashboard-matific.html" class="btn" style="background:#0d9488">Dashboard Matific</a></div></header>
   <main>
     <p class="intro">Visão consolidada de participação e realização de atividades por escola.</p>
     <section class="cards" id="cards"></section>
@@ -51,7 +51,7 @@
         const {data,error}=await supabaseClient.from('resultados_matific').select('*').eq('ano',anos[0].ano);
         if(error||!data||data.length<10)return;
         DATA=aPartirDeBanco(data);
-        fonte.textContent='Fonte: Supabase (resultados_matific) · ano letivo '+DATA.ano+' · importada via admin.html.';
+        fonte.textContent='Fonte: Escola  · ano letivo '+DATA.ano+' ·.';
         inicializar();
       }catch(err){console.warn('Falha ao buscar resultados_matific:',err.message);}
     }
