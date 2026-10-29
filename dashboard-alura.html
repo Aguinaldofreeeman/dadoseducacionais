@@ -129,6 +129,10 @@
                     <input type="text" id="filtro-busca-alura" placeholder="Digite o nome da escola..." style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                 </div>
                 <div class="filter-group">
+                    <label for="filtro-escola-alura">Selecionar escola</label>
+                    <select id="filtro-escola-alura"><option value="">Todas as escolas</option></select>
+                </div>
+                <div class="filter-group">
                     <span class="help">Indicadores de uso da plataforma, independentes dos resultados da prova.</span>
                 </div>
             </div>
@@ -150,12 +154,12 @@
                 <div class="chart-box"><canvas id="chart-alura-indicador"></canvas></div>
             </div>
             <div class="card">
-                <h3>Engajamento digital por escola (Top 10)</h3>
+                <h3 id="titulo-engajamento-alura">Engajamento digital por escola (Top 10)</h3>
                 <div class="chart-box"><canvas id="chart-alura"></canvas></div>
             </div>
             <div class="card">
-                <h3>Evolução do engajamento por ano</h3>
-                <div class="chart-box"><canvas id="chart-alura-evolucao"></canvas></div>
+                <h3 id="titulo-avaliacoes-nao-zeradas">Média das avaliações entre alunos que não zeraram</h3>
+                <div class="chart-box"><canvas id="chart-alura-avaliacoes-nao-zeradas"></canvas></div>
             </div>
         </div>
 
@@ -255,6 +259,17 @@
         return String(escola || '').trim().toUpperCase().startsWith('TOTAL');
     }
 
+    function escolaCorresponde(escola) {
+        const nome = String(escola || '').trim().toLocaleLowerCase('pt-BR');
+        const busca = document.getElementById('filtro-busca-alura').value.trim().toLocaleLowerCase('pt-BR');
+        const selecionada = document.getElementById('filtro-escola-alura').value.trim().toLocaleLowerCase('pt-BR');
+        return (!busca || nome.includes(busca)) && (!selecionada || nome === selecionada);
+    }
+
+    function filtrarEscolas(escolas) {
+        return escolas.filter(r => escolaCorresponde(r.escola));
+    }
+
     function chaveEdicao(nome) {
         const ano = (String(nome).match(/(20\d{2})/) || [])[1] || '0000';
         const bim = (String(nome).match(/(\d)\s*º?\s*_?bim/i) || [])[1] || '0';
@@ -333,7 +348,8 @@
         const def = INDICADOR_PRINCIPAL[String(ano)];
         if (!def) return null;
 
-        const linhas = dadosAlura.filter(r => String(r.ano) === String(ano) && !ehTotal(r.escola));
+        const linhas = dadosAlura.filter(r =>
+            String(r.ano) === String(ano) && !ehTotal(r.escola) && escolaCorresponde(r.escola));
         const valores = linhas
             .map(r => ({ escola: r.escola, valor: num(r[def.campo]) }))
             .filter(v => v.valor !== null);
@@ -437,15 +453,25 @@
 
     function montarFiltrosAlura() {
         const selectAno = document.getElementById('filtro-ano-alura');
+        const selectEscola = document.getElementById('filtro-escola-alura');
         const anos = [...new Set(dadosAlura.map(d => d.ano).filter(a => a !== null && a !== undefined).map(a => String(a)))]
             .sort((a, b) => b.localeCompare(a));
+        const escolas = [...new Map(dadosAlura
+            .filter(r => !ehTotal(r.escola))
+            .map(r => [String(r.escola || '').trim().toLocaleLowerCase('pt-BR'), r.escola]))
+            .entries()]
+            .sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
 
         selectAno.innerHTML = '<option value="">Todos os anos</option>' +
             anos.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+        selectEscola.innerHTML = '<option value="">Todas as escolas</option>' +
+            escolas.map(([chave, nome]) => '<option value="' + chave.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '">' +
+                String(nome).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</option>').join('');
     }
 
     document.getElementById('filtro-ano-alura').addEventListener('change', aplicarFiltrosAlura);
     document.getElementById('filtro-busca-alura').addEventListener('input', aplicarFiltrosAlura);
+    document.getElementById('filtro-escola-alura').addEventListener('change', aplicarFiltrosAlura);
 
     function linhasAlura() {
         const ano = document.getElementById('filtro-ano-alura').value;
@@ -482,8 +508,7 @@
     }
 
     function renderKpisAlura(escolas) {
-        const busca = document.getElementById('filtro-busca-alura').value.trim().toLowerCase();
-        const filtradas = escolas.filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca));
+        const filtradas = filtrarEscolas(escolas);
 
         const soma = (campo) => filtradas.reduce((a, r) => a + (r[campo] || 0), 0);
         const possui = (campo) => filtradas.some(r => r[campo] !== null && r[campo] !== undefined);
@@ -508,7 +533,6 @@
     }
 
     function renderTabelaAlura(escolas) {
-        const busca = document.getElementById('filtro-busca-alura').value.trim().toLowerCase();
         const anoSel = document.getElementById('filtro-ano-alura').value;
         const def = anoSel ? INDICADOR_PRINCIPAL[anoSel] : null;
 
@@ -516,8 +540,7 @@
         const thIndicador = document.getElementById('th-indicador-alura');
         thIndicador.textContent = def ? def.titulo : 'Indicador principal';
 
-        const filtradas = [...escolas]
-            .filter(r => !busca || String(r.escola || '').toLowerCase().includes(busca))
+        const filtradas = filtrarEscolas([...escolas])
             .sort((a, b) => (b.alunos_com_acessos_no_periodo || 0) - (a.alunos_com_acessos_no_periodo || 0));
 
         const anoParaIndicador = anoSel || (Object.keys(INDICADOR_PRINCIPAL)
@@ -563,10 +586,12 @@
     }
 
     function graficoAlura(escolas) {
-        const dados = [...escolas]
+        const dados = filtrarEscolas([...escolas])
             .filter(r => r.indice_de_acessos_no_periodo !== null)
             .sort((a, b) => b.indice_de_acessos_no_periodo - a.indice_de_acessos_no_periodo)
             .slice(0, 10);
+        document.getElementById('titulo-engajamento-alura').textContent =
+            dados.length === 1 ? 'Engajamento digital da escola selecionada' : 'Engajamento digital por escola (Top 10)';
 
         criarGrafico('chart-alura', {
             type: 'bar',
@@ -600,62 +625,65 @@
         });
     }
 
-    function graficoAluraEvolucao() {
-        const anos = [...new Set(dadosAlura.map(d => d.ano).filter(a => a !== null && a !== undefined))]
-            .sort((a, b) => String(a).localeCompare(String(b)));
+    function graficoMediaAvaliacoesNaoZeradas() {
+        const anoSel = document.getElementById('filtro-ano-alura').value;
+        const anoIndicador = '2026';
+        const campo = 'media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram';
+        const titulo = 'Média das avaliações entre alunos que não zeraram';
+        const tituloEl = document.getElementById('titulo-avaliacoes-nao-zeradas');
 
-        const porAno = anos.map(ano => {
-            const linhas = dadosAlura.filter(d => String(d.ano) === String(ano));
-            return {
-                ano,
-                matriculas: mediaNum(linhas, 'matriculas_ativas'),
-                acessos: mediaNum(linhas, 'alunos_com_acessos_no_periodo'),
-                indice: taxa(mediaNum(linhas, 'indice_de_acessos_no_periodo'))
-            };
-        });
+        if (anoSel && anoSel !== anoIndicador) {
+            tituloEl.textContent = titulo + ' — disponível em ' + anoIndicador;
+            criarGrafico('chart-alura-avaliacoes-nao-zeradas', {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+            return;
+        }
 
-        criarGrafico('chart-alura-evolucao', {
-            type: 'line',
+        const dados = dadosAlura
+            .filter(r => String(r.ano) === anoIndicador && !ehTotal(r.escola) && escolaCorresponde(r.escola))
+            .map(r => ({ escola: r.escola, valor: num(r[campo]) }))
+            .filter(r => r.valor !== null)
+            .sort((a, b) => b.valor - a.valor)
+            .slice(0, 10);
+
+        tituloEl.textContent = titulo + ' — ' + anoIndicador + (dados.length === 1 ? '' : ' (Top 10)');
+        criarGrafico('chart-alura-avaliacoes-nao-zeradas', {
+            type: 'bar',
             data: {
-                labels: porAno.map(a => a.ano),
-                datasets: [
-                    {
-                        label: 'Matrículas ativas (média por escola)',
-                        data: porAno.map(a => a.matriculas),
-                        borderColor: '#0284c7',
-                        backgroundColor: 'rgba(2,132,199,0.10)',
-                        tension: 0.3,
-                        fill: true,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Alunos com acesso (média por escola)',
-                        data: porAno.map(a => a.acessos),
-                        borderColor: '#0d9488',
-                        backgroundColor: 'rgba(13,148,136,0.10)',
-                        tension: 0.3,
-                        fill: true,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Índice de acesso (%)',
-                        data: porAno.map(a => a.indice === null ? null : a.indice * 100),
-                        borderColor: '#d97706',
-                        borderDash: [6, 4],
-                        tension: 0.3,
-                        fill: false,
-                        yAxisID: 'y1'
-                    }
-                ]
+                labels: dados.map(r => r.escola),
+                datasets: [{
+                    label: 'Média das avaliações',
+                    data: dados.map(r => r.valor),
+                    backgroundColor: '#0d9488',
+                    borderRadius: 4
+                }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => 'Média das avaliações: ' + formatarIndicador(ctx.raw, 'nota')
+                        }
+                    }
+                },
                 scales: {
-                    y: { position: 'left', title: { display: true, text: 'Alunos (média)' } },
-                    y1: { position: 'right', title: { display: true, text: '%' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: v => v + '%' } },
-                    x: { ticks: { font: { size: 11 } } }
+                    x: {
+                        title: { display: true, text: 'Média das avaliações' },
+                        ticks: { callback: valor => Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) }
+                    },
+                    y: { ticks: { font: { size: 10 } } }
                 }
             }
         });
@@ -668,7 +696,7 @@
         renderTabelaAlura(escolas);
         graficoIndicadorAlura();
         graficoAlura(escolas);
-        graficoAluraEvolucao();
+        graficoMediaAvaliacoesNaoZeradas();
     }
 
     // ===================== DICIONÁRIO =====================
