@@ -29,12 +29,36 @@
     </section>
 
     <section class="metrics-grid" aria-label="Resumo dos resultados">
+      <article class="metric-card metric-primary"><h3>Presença</h3><strong id="kpi-presenca">-</strong><span>indicador principal · média ponderada</span></article>
+      <article class="metric-card metric-secondary"><h3>Aulas dadas</h3><strong id="kpi-aulas">-</strong><span>segundo indicador · média ponderada</span></article>
       <article class="metric-card"><h3>Escolas</h3><strong id="kpi-escolas">-</strong><span>unidades no recorte</span></article>
       <article class="metric-card"><h3>Matrículas ativas</h3><strong id="kpi-matriculas">-</strong><span>total do recorte</span></article>
-      <article class="metric-card"><h3>Presença</h3><strong id="kpi-presenca">-</strong><span>média ponderada</span></article>
-      <article class="metric-card"><h3>Aulas dadas</h3><strong id="kpi-aulas">-</strong><span>média ponderada</span></article>
       <article class="metric-card"><h3>Turmas</h3><strong id="kpi-turmas">-</strong><span>total do recorte</span></article>
       <article class="metric-card"><h3>Escolas PEI</h3><strong id="kpi-pei">-</strong><span>unidades no recorte</span></article>
+    </section>
+
+    <section class="dashboard" aria-labelledby="titulo-dashboard">
+      <div class="section-heading">
+        <div><span class="eyebrow">Visão analítica</span><h2 id="titulo-dashboard">Painel de indicadores</h2></div>
+      </div>
+      <div class="dashboard-grid">
+        <article class="card chart-card chart-primary">
+          <div class="chart-heading"><div><h3>Evolução da presença</h3><p>Média ponderada por matrículas ativas</p></div><div class="chart-summary"><strong id="resumo-presenca">-</strong><span id="delta-presenca"></span></div></div>
+          <div id="chart-presenca" class="chart-content"></div>
+        </article>
+        <article class="card chart-card chart-secondary">
+          <div class="chart-heading"><div><h3>Evolução das aulas dadas</h3><p>Média ponderada por aulas previstas</p></div><div class="chart-summary"><strong id="resumo-aulas">-</strong><span id="delta-aulas"></span></div></div>
+          <div id="chart-aulas" class="chart-content"></div>
+        </article>
+        <article class="card chart-card chart-primary">
+          <div class="chart-heading"><div><h3>Escolas com maior presença</h3><p>Classificação no período e filtros atuais</p></div></div>
+          <div id="ranking-presenca" class="ranking-chart"></div>
+        </article>
+        <article class="card chart-card chart-secondary">
+          <div class="chart-heading"><div><h3>Escolas com mais aulas dadas</h3><p>Classificação no período e filtros atuais</p></div></div>
+          <div id="ranking-aulas" class="ranking-chart"></div>
+        </article>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="titulo-resultados">
