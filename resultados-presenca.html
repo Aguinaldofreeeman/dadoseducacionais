@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados de Presença e Aulas</title>
+  <link rel="stylesheet" href="css/resultados-presenca.css">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <h1>Resultados de Presença e Aulas</h1>
+      <p>Diretoria de Ensino — Região de Marília</p>
+    </div>
+    <a class="btn-inicio" href="index.html">Início</a>
+  </header>
+  <main>
+    <section class="card filtros-card" aria-labelledby="titulo-filtros">
+      <div class="section-heading">
+        <div><span class="eyebrow">Consulta</span><h2 id="titulo-filtros">Filtros</h2></div>
+        <button type="button" id="limpar-filtros" class="btn-secundario">Limpar filtros</button>
+      </div>
+      <div class="filters">
+        <div class="filter-group"><label for="filtro-periodo">Período</label><select id="filtro-periodo"></select></div>
+        <div class="filter-group"><label for="filtro-escola">Escola</label><select id="filtro-escola"><option value="">Todas as escolas</option></select></div>
+        <div class="filter-group filter-search"><label for="filtro-busca">Buscar escola</label><input id="filtro-busca" type="search" placeholder="Nome ou código da escola"></div>
+      </div>
+      <p id="status-filtro" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="metrics-grid" aria-label="Resumo dos resultados">
+      <article class="metric-card"><h3>Escolas</h3><strong id="kpi-escolas">-</strong><span>unidades no recorte</span></article>
+      <article class="metric-card"><h3>Matrículas ativas</h3><strong id="kpi-matriculas">-</strong><span>total do recorte</span></article>
+      <article class="metric-card"><h3>Presença</h3><strong id="kpi-presenca">-</strong><span>média ponderada</span></article>
+      <article class="metric-card"><h3>Aulas dadas</h3><strong id="kpi-aulas">-</strong><span>média ponderada</span></article>
+      <article class="metric-card"><h3>Turmas</h3><strong id="kpi-turmas">-</strong><span>total do recorte</span></article>
+      <article class="metric-card"><h3>Escolas PEI</h3><strong id="kpi-pei">-</strong><span>unidades no recorte</span></article>
+    </section>
+
+    <section class="card" aria-labelledby="titulo-resultados">
+      <div class="section-heading"><div><span class="eyebrow">Detalhamento</span><h2 id="titulo-resultados">Resultados por unidade escolar</h2></div></div>
+      <div class="table-responsive">
+        <table>
+          <thead><tr><th>Escola</th><th>Código</th><th>PEI</th><th>Matrículas</th><th>Presença</th><th>Evolução presença</th><th>Aulas previstas</th><th>Aulas dadas</th><th>Evolução aulas</th><th>Turmas</th><th>Matrizes</th><th>Supervisor(a)</th></tr></thead>
+          <tbody id="tabela-resultados"></tbody>
+        </table>
+      </div>
+    </section>
+    <p class="fonte">Fonte: arquivos Geral e semanas 33 a 38 fornecidos para esta página.</p>
+  </main>
+  <script src="js/dados-presenca.js"></script>
+  <script src="js/resultados-presenca.js"></script>
+</body>
+</html>
