@@ -1625,6 +1625,11 @@
         if (typeof valor === 'number') {
             if (!Number.isFinite(valor)) throw new Error(`Valor inválido na coluna "${campo}".`);
             if (inteiros.includes(campo) && !Number.isInteger(valor)) {
+                const separadorMilharInterpretadoComoDecimal =
+                    valor > 0 && valor < 1000 &&
+                    Number.isInteger(valor * 1000) &&
+                    !Number.isInteger(valor * 100);
+                if (separadorMilharInterpretadoComoDecimal) return valor * 1000;
                 throw new Error(`A coluna "${campo}" deve conter números inteiros.`);
             }
             return valor;
