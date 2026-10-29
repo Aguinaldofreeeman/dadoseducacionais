@@ -1,0 +1,26 @@
+.home-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 7px;
+    background: #0d9488;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.home-button:hover,
+.home-button:focus-visible {
+    background: #0f766e;
+    color: #fff;
+}
+
+.home-button:focus-visible {
+    outline: 3px solid rgba(13, 148, 136, .35);
+    outline-offset: 2px;
+}
