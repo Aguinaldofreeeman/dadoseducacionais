@@ -108,18 +108,21 @@ não deve ser lido como taxa de 0–100%) · `nota` (nota das produções textua
 
 ### `resultados_presenca` e `resultados_robotica`
 
-As tabelas alimentam os painéis de **Aluno Presente** e **Robótica**. O script
-`supabase-resultados-presenca-robotica.sql` cria as tabelas e as políticas RLS; execute-o uma vez
-no SQL Editor do mesmo projeto Supabase configurado em `config.js`. O script recarrega o cache do
-PostgREST ao final. A leitura é permitida a usuários autenticados e a gravação/exclusão somente a
-administradores ativos.
+As tabelas alimentam os painéis de **Aluno Presente** e **Robótica**. Para configurar apenas
+**Aluno Presente**, execute `supabase-resultados-presenca.sql` no SQL Editor do mesmo projeto
+Supabase configurado em `config.js`; ele cria a tabela e as políticas RLS necessárias para inserir
+e atualizar registros por período/escola sem apagar dados e garante a chave única exigida pelo
+upsert. Para configurar as duas tabelas, use
+`supabase-resultados-presenca-robotica.sql`. Os scripts recarregam o cache do PostgREST ao final.
+A leitura é permitida a usuários autenticados e a gravação/exclusão somente a administradores ativos.
 
 - No `admin.html`, use **Importar CSV - Aluno Presente**. O CSV deve ter `periodo`, `escola`,
   `codigo_escola`, `matriculas_ativas`, `presenca`, `aulas_previstas` e `aulas_dadas`; também aceita
   `periodo_label`, `pei`, `evolucao_presenca`, `evolucao_aulas`, `total_turmas`, `total_matrizes`,
   `tipo_escola` e `supervisor`. Também aceita o relatório semanal exportado com `Escola` no formato
   `NOME - CÓDIGO`, `"(%) de Presença"` e o período no filtro `IntervaloSemanaAtual`. A importação
-  substitui todos os períodos existentes.
+  adiciona novos períodos e atualiza os dados da mesma escola quando um período é reenviado, sem
+  apagar os demais períodos.
 - Use **Importar CSV - Robótica** com `escola` (ou `escola` no formato `NOME - CÓDIGO`),
   `mat`, `pub`, `rasc`, `corr`, `dev`, `conc`, `acerto`, `indice` e `nota`; `codigo_escola` é
   opcional quando o código já está no nome da escola. A importação substitui os resultados atuais.

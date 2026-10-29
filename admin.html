@@ -214,7 +214,7 @@
             <div class="form-group">
                 <label for="presenca-file">Arquivo CSV de presença (.csv)</label>
                 <input type="file" id="presenca-file" accept=".csv">
-                <span class="help-text">Aceita as colunas periodo, escola (com código no formato "NOME - CÓDIGO"), matriculas_ativas, presenca, aulas_previstas e aulas_dadas; também lê o período do filtro IntervaloSemanaAtual e aceita os demais campos opcionais. A importação substitui todos os períodos existentes.</span>
+                <span class="help-text">Aceita as colunas periodo, escola (com código no formato "NOME - CÓDIGO"), matriculas_ativas, presenca, aulas_previstas e aulas_dadas; também lê o período do filtro IntervaloSemanaAtual e aceita os demais campos opcionais. Novos períodos são adicionados; reenvios atualizam a mesma escola no período sem apagar os outros períodos.</span>
             </div>
             <div id="presenca-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
             <div class="actions">
@@ -1814,7 +1814,10 @@
                             : `${registro.escola} (${registro.codigo_escola})`;
                         return `<li>${csvEscaparHtml(nome)}</li>`;
                     }).join('');
-                    preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">A confirmação substituirá os dados atuais de ${tipo === 'presenca' ? 'todos os períodos de presença' : 'Robótica'}.</span><ul>${amostra}</ul>`;
+                    const destinoImportacao = tipo === 'presenca'
+                        ? 'Os registros serão adicionados aos períodos existentes; escola e período já cadastrados serão atualizados.'
+                        : 'A confirmação substituirá todos os resultados atuais de Robótica.';
+                    preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">${destinoImportacao}</span><ul>${amostra}</ul>`;
                     preview.className = 'msg';
                     preview.style.display = 'block';
                     confirmar.disabled = false;
@@ -1841,22 +1844,28 @@
             confirmar.textContent = 'Importando...';
             let dadosRemovidos = false;
             try {
-                const { error: erroRemocao } = await supabaseClient
-                    .from(config.tabela)
-                    .delete()
-                    .not('codigo_escola', 'is', null);
-                if (erroRemocao) throw erroRemocao;
-                dadosRemovidos = true;
+                if (tipo === 'robotica') {
+                    const { error: erroRemocao } = await supabaseClient
+                        .from(config.tabela)
+                        .delete()
+                        .not('codigo_escola', 'is', null);
+                    if (erroRemocao) throw erroRemocao;
+                    dadosRemovidos = true;
+                }
 
                 const tamanhoLote = 250;
                 for (let i = 0; i < registros.length; i += tamanhoLote) {
-                    const { error } = await supabaseClient
-                        .from(config.tabela)
-                        .insert(registros.slice(i, i + tamanhoLote));
+                    const lote = registros.slice(i, i + tamanhoLote);
+                    const consulta = supabaseClient.from(config.tabela);
+                    const { error } = tipo === 'presenca'
+                        ? await consulta.upsert(lote, { onConflict: 'periodo,codigo_escola' })
+                        : await consulta.insert(lote);
                     if (error) throw error;
                 }
 
-                preview.textContent = `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
+                preview.textContent = tipo === 'presenca'
+                    ? `Importação concluída: ${registros.length} registros adicionados ou atualizados em ${config.tabela}. Os demais períodos foram preservados.`
+                    : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
                 preview.className = 'msg success';
                 input.value = '';
                 csvDadosPendentes[tipo] = null;
@@ -1865,7 +1874,7 @@
                 const tabelaAusente = erro.code === 'PGRST205' ||
                     String(erro.message || '').includes('Could not find the table');
                 const detalheErro = tabelaAusente
-                    ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-presenca-robotica.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                    ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Para Aluno Presente, execute supabase-resultados-presenca.sql no SQL Editor desse mesmo projeto e tente novamente.`
                     : '';
                 preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${detalheErro}${dadosRemovidos ? ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.' : ''}`;
                 preview.className = 'msg error';

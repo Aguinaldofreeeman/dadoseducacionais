@@ -25,6 +25,9 @@ create table if not exists public.resultados_presenca (
 create index if not exists resultados_presenca_periodo_idx
   on public.resultados_presenca (periodo, escola);
 
+create unique index if not exists resultados_presenca_periodo_codigo_escola_uidx
+  on public.resultados_presenca (periodo, codigo_escola);
+
 alter table public.resultados_presenca enable row level security;
 
 drop policy if exists "Select autenticado em resultados_presenca" on public.resultados_presenca;
@@ -49,7 +52,21 @@ create policy "Delete apenas ADM em resultados_presenca" on public.resultados_pr
     )
   );
 
-grant select, insert, delete on public.resultados_presenca to authenticated;
+drop policy if exists "Update apenas ADM em resultados_presenca" on public.resultados_presenca;
+create policy "Update apenas ADM em resultados_presenca" on public.resultados_presenca
+  for update to authenticated using (
+    exists (
+      select 1 from public.perfis_usuarios p
+      where p.id = auth.uid() and p.escopo in ('ADM', 'ADMIN') and p.ativo = true
+    )
+  ) with check (
+    exists (
+      select 1 from public.perfis_usuarios p
+      where p.id = auth.uid() and p.escopo in ('ADM', 'ADMIN') and p.ativo = true
+    )
+  );
+
+grant select, insert, update, delete on public.resultados_presenca to authenticated;
 
 create table if not exists public.resultados_robotica (
   id uuid primary key default gen_random_uuid(),
