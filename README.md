@@ -110,8 +110,9 @@ não deve ser lido como taxa de 0–100%) · `nota` (nota das produções textua
 
 As tabelas alimentam os painéis de **Aluno Presente** e **Robótica**. O script
 `supabase-resultados-presenca-robotica.sql` cria as tabelas e as políticas RLS; execute-o uma vez
-no SQL Editor do Supabase. A leitura é permitida a usuários autenticados e a gravação/exclusão
-somente a administradores ativos.
+no SQL Editor do mesmo projeto Supabase configurado em `config.js`. O script recarrega o cache do
+PostgREST ao final. A leitura é permitida a usuários autenticados e a gravação/exclusão somente a
+administradores ativos.
 
 - No `admin.html`, use **Importar CSV - Aluno Presente**. O CSV deve ter `periodo`, `escola`,
   `codigo_escola`, `matriculas_ativas`, `presenca`, `aulas_previstas` e `aulas_dadas`; também aceita

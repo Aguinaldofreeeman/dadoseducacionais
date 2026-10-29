@@ -1862,7 +1862,12 @@
                 csvDadosPendentes[tipo] = null;
             } catch (erro) {
                 console.error(`Erro ao importar CSV de ${tipo}:`, erro);
-                preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${dadosRemovidos ? ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.' : ''}`;
+                const tabelaAusente = erro.code === 'PGRST205' ||
+                    String(erro.message || '').includes('Could not find the table');
+                const detalheErro = tabelaAusente
+                    ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-presenca-robotica.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                    : '';
+                preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${detalheErro}${dadosRemovidos ? ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.' : ''}`;
                 preview.className = 'msg error';
                 confirmar.disabled = false;
             } finally {

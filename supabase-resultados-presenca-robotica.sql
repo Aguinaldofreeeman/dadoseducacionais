@@ -92,3 +92,5 @@ create policy "Delete apenas ADM em resultados_robotica" on public.resultados_ro
   );
 
 grant select, insert, delete on public.resultados_robotica to authenticated;
+
+notify pgrst, 'reload schema';
