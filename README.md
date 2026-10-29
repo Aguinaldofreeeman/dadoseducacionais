@@ -116,7 +116,9 @@ somente a administradores ativos.
 - No `admin.html`, use **Importar CSV - Aluno Presente**. O CSV deve ter `periodo`, `escola`,
   `codigo_escola`, `matriculas_ativas`, `presenca`, `aulas_previstas` e `aulas_dadas`; também aceita
   `periodo_label`, `pei`, `evolucao_presenca`, `evolucao_aulas`, `total_turmas`, `total_matrizes`,
-  `tipo_escola` e `supervisor`. A importação substitui todos os períodos existentes.
+  `tipo_escola` e `supervisor`. Também aceita o relatório semanal exportado com `Escola` no formato
+  `NOME - CÓDIGO`, `"(%) de Presença"` e o período no filtro `IntervaloSemanaAtual`. A importação
+  substitui todos os períodos existentes.
 - Use **Importar CSV - Robótica** com `escola` (ou `escola` no formato `NOME - CÓDIGO`),
   `mat`, `pub`, `rasc`, `corr`, `dev`, `conc`, `acerto`, `indice` e `nota`; `codigo_escola` é
   opcional quando o código já está no nome da escola. A importação substitui os resultados atuais.

@@ -214,7 +214,7 @@
             <div class="form-group">
                 <label for="presenca-file">Arquivo CSV de presença (.csv)</label>
                 <input type="file" id="presenca-file" accept=".csv">
-                <span class="help-text">Use as colunas periodo, periodo_label, escola, codigo_escola, pei, matriculas_ativas, presenca, evolucao_presenca, aulas_previstas, aulas_dadas, evolucao_aulas, total_turmas, total_matrizes, tipo_escola e supervisor. A importação substitui todos os períodos existentes.</span>
+                <span class="help-text">Aceita as colunas periodo, escola (com código no formato "NOME - CÓDIGO"), matriculas_ativas, presenca, aulas_previstas e aulas_dadas; também lê o período do filtro IntervaloSemanaAtual e aceita os demais campos opcionais. A importação substitui todos os períodos existentes.</span>
             </div>
             <div id="presenca-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
             <div class="actions">
@@ -1555,13 +1555,26 @@
         presenca: {
             tabela: 'resultados_presenca',
             campos: {
-                periodo: ['periodo', 'semana', 'referencia'],
+                periodo: [
+                    'periodo', 'periodo de referencia', 'periodo referencia',
+                    'semana', 'semana de referencia', 'semana referencia',
+                    'mes', 'mes de referencia', 'mes referencia', 'competencia'
+                ],
                 periodo_label: ['periodo_label', 'periodo label', 'nome do periodo'],
                 escola: ['escola', 'unidade escolar', 'nome da escola'],
-                codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
+                codigo_escola: [
+                    'codigo_escola', 'codigo da escola', 'codigo escola', 'codigo da unidade escolar',
+                    'codigo unidade escolar', 'codigo da ue', 'codigo ue', 'cod escola',
+                    'cod. escola', 'cod ue', 'cie', 'codigo cie', 'codigo inep', 'inep'
+                ],
                 pei: ['pei', 'programa ensino integral'],
                 matriculas_ativas: ['matriculas_ativas', 'matriculas ativas', 'matriculas'],
-                presenca: ['presenca', 'percentual de presenca'],
+                presenca: [
+                    'presenca', 'presenca (%)', '% de presenca', 'de presenca',
+                    'percentual de presenca', 'presenca escolar', 'indice de presenca',
+                    'frequencia', 'frequencia (%)', 'percentual de frequencia',
+                    'taxa de frequencia', 'frequencia dos alunos'
+                ],
                 evolucao_presenca: ['evolucao_presenca', 'evolucao presenca'],
                 aulas_previstas: ['aulas_previstas', 'aulas previstas'],
                 aulas_dadas: ['aulas_dadas', 'aulas dadas', 'percentual de aulas dadas'],
@@ -1569,9 +1582,12 @@
                 total_turmas: ['total_turmas', 'total turmas', 'total de turmas', 'turmas'],
                 total_matrizes: ['total_matrizes', 'total matrizes', 'total de matrizes', 'matrizes'],
                 tipo_escola: ['tipo_escola', 'tipo escola'],
-                supervisor: ['supervisor', 'supervisor(a)', 'supervisao']
+                supervisor: [
+                    'supervisor', 'supervisor(a)', 'supervisao',
+                    'supervisor de ensino', 'supervisora de ensino', 'supervisor(a) de ensino'
+                ]
             },
-            obrigatorios: ['periodo', 'escola', 'codigo_escola', 'matriculas_ativas', 'presenca', 'aulas_previstas', 'aulas_dadas'],
+            obrigatorios: ['escola', 'matriculas_ativas', 'presenca', 'aulas_previstas', 'aulas_dadas'],
             inteiros: ['matriculas_ativas', 'aulas_previstas', 'total_turmas', 'total_matrizes'],
             numericos: ['presenca', 'evolucao_presenca', 'aulas_dadas', 'evolucao_aulas']
         },
@@ -1633,9 +1649,17 @@
     }
 
     function csvLerRegistros(linhas, config, tipo) {
+        const metadados = linhas.flat()
+            .map(celula => String(celula ?? ''))
+            .join('\n');
+        const intervaloSemana = metadados.match(
+            /intervalo\s*semana\s*atual\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
+        );
+        const periodoInferido = intervaloSemana ? intervaloSemana[1].trim() : '';
         let linhaCabecalho = -1;
         let colunas = {};
         let ausentes = [];
+        let nomesColunas = [];
         for (let i = 0; i < linhas.length; i++) {
             const linha = linhas[i] || [];
             if (!linha.some(celula => String(celula ?? '').trim())) continue;
@@ -1651,18 +1675,23 @@
                 linhaCabecalho = i;
                 colunas = candidatas;
                 ausentes = faltantes;
+                nomesColunas = linha.map(celula => String(celula ?? '').trim()).filter(Boolean);
             }
             if (!faltantes.length) {
                 linhaCabecalho = i;
                 colunas = candidatas;
                 ausentes = [];
+                nomesColunas = linha.map(celula => String(celula ?? '').trim()).filter(Boolean);
                 break;
             }
         }
         if (linhaCabecalho < 0) throw new Error('O CSV está vazio.');
 
         if (ausentes.length) {
-            throw new Error(`Colunas obrigatórias ausentes: ${ausentes.join(', ')}.`);
+            throw new Error(
+                `Colunas obrigatórias ausentes: ${ausentes.join(', ')}. ` +
+                `Cabeçalhos encontrados: ${nomesColunas.join(', ') || 'nenhum'}.`
+            );
         }
 
         const registros = [];
@@ -1670,6 +1699,7 @@
         for (let i = linhaCabecalho + 1; i < linhas.length; i++) {
             const linha = linhas[i] || [];
             if (!linha.some(celula => String(celula ?? '').trim())) continue;
+            if (csvNormalizar(linha[0]).startsWith('filtrosaplicados')) continue;
 
             const registro = {};
             Object.keys(config.campos).forEach(campo => {
@@ -1682,10 +1712,22 @@
 
             if (tipo === 'presenca') {
                 registro.periodo = String(registro.periodo ?? '').trim();
+                if (!registro.periodo) registro.periodo = periodoInferido;
                 registro.periodo_label = String(registro.periodo_label || registro.periodo).trim();
                 registro.codigo_escola = String(registro.codigo_escola ?? '').trim();
+                if (!registro.codigo_escola) {
+                    const correspondencia = registro.escola.match(/^(.*?)\s*-\s*(\d+)$/);
+                    if (correspondencia) {
+                        registro.escola = correspondencia[1].trim();
+                        registro.codigo_escola = correspondencia[2];
+                    }
+                }
                 if (!registro.periodo || !registro.codigo_escola) {
-                    throw new Error(`Linha ${i + 1}: período e código da escola são obrigatórios.`);
+                    throw new Error(
+                        `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
+                        'Informe as colunas periodo e codigo_escola ou inclua o código no fim do nome ' +
+                        'da escola e o filtro IntervaloSemanaAtual no CSV.'
+                    );
                 }
                 const pei = csvNormalizar(registro.pei);
                 if (['sim', 's', 'true', '1', 'pei'].includes(pei)) registro.pei = 1;
