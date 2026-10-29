@@ -1,12 +1,13 @@
 (() => {
   'use strict';
-  const dados = Array.isArray(window.DADOS_PRESENCA) ? window.DADOS_PRESENCA : [];
+  let dados = Array.isArray(window.DADOS_PRESENCA) ? window.DADOS_PRESENCA : [];
   const periodo = document.querySelector('#filtro-periodo');
   const escola = document.querySelector('#filtro-escola');
   const busca = document.querySelector('#filtro-busca');
   const tbody = document.querySelector('#tabela-resultados');
   const status = document.querySelector('#status-filtro');
-  const periodos = [...new Map(dados.map(r => [r.periodo, r.periodo_label])).entries()];
+  let periodos = [];
+  let avisoFonte = '';
   const nf = new Intl.NumberFormat('pt-BR');
   const pf = new Intl.NumberFormat('pt-BR',{style:'percent',minimumFractionDigits:1,maximumFractionDigits:1});
   const df = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1,signDisplay:'exceptZero'});
@@ -21,7 +22,7 @@
 
   function preencherPeriodos(){
     periodo.innerHTML = periodos.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');
-    periodo.value='geral';
+    periodo.value=periodos.some(([valor])=>valor==='geral')?'geral':(periodos[0]?.[0] || '');
   }
   function escolasDoPeriodo(){
     const p=periodo.value;
@@ -65,10 +66,39 @@
   function aplicar(){
     const lista=filtrados(); renderResumo(lista); renderTabela(lista);
     const label=periodo.options[periodo.selectedIndex]?.textContent || '';
-    status.textContent=`${nf.format(lista.length)} escola(s) exibida(s) em ${label}.`;
+    status.textContent=`${nf.format(lista.length)} escola(s) exibida(s) em ${label}.${avisoFonte}`;
   }
   periodo.addEventListener('change',()=>{escola.value='';busca.value='';preencherEscolas();aplicar();});
   escola.addEventListener('change',aplicar); busca.addEventListener('input',aplicar);
-  document.querySelector('#limpar-filtros').addEventListener('click',()=>{periodo.value='geral';busca.value='';preencherEscolas();escola.value='';aplicar();});
-  preencherPeriodos(); preencherEscolas(); aplicar();
+  document.querySelector('#limpar-filtros').addEventListener('click',()=>{periodo.value=periodos.some(([valor])=>valor==='geral')?'geral':(periodos[0]?.[0] || '');busca.value='';preencherEscolas();escola.value='';aplicar();});
+
+  function atualizarDados(novosDados) {
+    dados = novosDados;
+    periodos = [...new Map(dados.map(r => [r.periodo, r.periodo_label])).entries()];
+    preencherPeriodos();
+    preencherEscolas();
+    aplicar();
+  }
+
+  atualizarDados(dados);
+  if (typeof supabaseClient !== 'undefined') {
+    supabaseClient
+      .from('resultados_presenca')
+      .select('periodo, periodo_label, escola, codigo_escola, pei, matriculas_ativas, presenca, evolucao_presenca, aulas_previstas, aulas_dadas, evolucao_aulas, total_turmas, total_matrizes, tipo_escola, supervisor')
+      .then(({ data, error }) => {
+        if (error) throw error;
+        if (data?.length) {
+          avisoFonte = ' Dados carregados do Supabase.';
+          atualizarDados(data);
+        } else {
+          avisoFonte = ' Tabela no Supabase vazia; exibindo os dados locais.';
+          aplicar();
+        }
+      })
+      .catch(erro => {
+        console.error('Erro ao carregar resultados de presença do Supabase:', erro);
+        avisoFonte = ' Não foi possível consultar o Supabase; exibindo os dados locais.';
+        aplicar();
+      });
+  }
 })();

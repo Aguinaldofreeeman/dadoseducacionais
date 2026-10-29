@@ -207,6 +207,36 @@
                 <button type="button" id="redacao-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar CSV - Aluno Presente</h3>
+            </div>
+            <div class="form-group">
+                <label for="presenca-file">Arquivo CSV de presença (.csv)</label>
+                <input type="file" id="presenca-file" accept=".csv">
+                <span class="help-text">Use as colunas periodo, periodo_label, escola, codigo_escola, pei, matriculas_ativas, presenca, evolucao_presenca, aulas_previstas, aulas_dadas, evolucao_aulas, total_turmas, total_matrizes, tipo_escola e supervisor. A importação substitui todos os períodos existentes.</span>
+            </div>
+            <div id="presenca-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="presenca-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="presenca-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar CSV - Robótica</h3>
+            </div>
+            <div class="form-group">
+                <label for="robotica-file">Arquivo CSV de Robótica (.csv)</label>
+                <input type="file" id="robotica-file" accept=".csv">
+                <span class="help-text">Use as colunas escola (ou escola - código), codigo_escola, mat, pub, rasc, corr, dev, conc, acerto, indice e nota. A importação substitui todos os resultados existentes.</span>
+            </div>
+            <div id="robotica-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="robotica-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="robotica-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card Novo Usuário -->
         <div class="card">
             <div class="modal-header">
@@ -1520,6 +1550,283 @@
             btnConfirmar.textContent = '2. Confirmar Importação';
         }
     });
+
+    const CSV_IMPORTADORES = {
+        presenca: {
+            tabela: 'resultados_presenca',
+            campos: {
+                periodo: ['periodo', 'semana', 'referencia'],
+                periodo_label: ['periodo_label', 'periodo label', 'nome do periodo'],
+                escola: ['escola', 'unidade escolar', 'nome da escola'],
+                codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
+                pei: ['pei', 'programa ensino integral'],
+                matriculas_ativas: ['matriculas_ativas', 'matriculas ativas', 'matriculas'],
+                presenca: ['presenca', 'percentual de presenca'],
+                evolucao_presenca: ['evolucao_presenca', 'evolucao presenca'],
+                aulas_previstas: ['aulas_previstas', 'aulas previstas'],
+                aulas_dadas: ['aulas_dadas', 'aulas dadas', 'percentual de aulas dadas'],
+                evolucao_aulas: ['evolucao_aulas', 'evolucao aulas'],
+                total_turmas: ['total_turmas', 'total turmas', 'total de turmas', 'turmas'],
+                total_matrizes: ['total_matrizes', 'total matrizes', 'total de matrizes', 'matrizes'],
+                tipo_escola: ['tipo_escola', 'tipo escola'],
+                supervisor: ['supervisor', 'supervisor(a)', 'supervisao']
+            },
+            obrigatorios: ['periodo', 'escola', 'codigo_escola', 'matriculas_ativas', 'presenca', 'aulas_previstas', 'aulas_dadas'],
+            inteiros: ['matriculas_ativas', 'aulas_previstas', 'total_turmas', 'total_matrizes'],
+            numericos: ['presenca', 'evolucao_presenca', 'aulas_dadas', 'evolucao_aulas']
+        },
+        robotica: {
+            tabela: 'resultados_robotica',
+            campos: {
+                escola: ['escola', 'unidade escolar', 'nome da escola'],
+                codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
+                mat: ['mat', 'matriculas ativas', 'matriculas'],
+                pub: ['pub', 'atividades publicadas', 'publicadas'],
+                rasc: ['rasc', 'rascunhos', 'atividades em rascunho'],
+                corr: ['corr', 'corrigidas', 'atividades corrigidas'],
+                dev: ['dev', 'devolvidas', 'atividades devolvidas'],
+                conc: ['conc', 'concluidas', 'atividades concluidas'],
+                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', 'taxa de acertos das questoes'],
+                indice: ['indice', 'indice de atividades por aluno'],
+                nota: ['nota', 'nota media']
+            },
+            obrigatorios: ['escola', 'mat', 'pub', 'rasc', 'corr', 'dev', 'conc', 'acerto', 'indice', 'nota'],
+            inteiros: ['mat', 'pub', 'rasc', 'corr', 'dev', 'conc'],
+            numericos: ['acerto', 'indice', 'nota']
+        }
+    };
+
+    const csvDadosPendentes = {};
+
+    function csvNormalizar(texto) {
+        return String(texto ?? '').trim().toLocaleLowerCase('pt-BR')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    function csvNumero(valor, campo, inteiros) {
+        if (valor === null || valor === undefined || String(valor).trim() === '') return null;
+        if (typeof valor === 'number') {
+            if (!Number.isFinite(valor)) throw new Error(`Valor inválido na coluna "${campo}".`);
+            if (inteiros.includes(campo) && !Number.isInteger(valor)) {
+                throw new Error(`A coluna "${campo}" deve conter números inteiros.`);
+            }
+            return valor;
+        }
+
+        let texto = String(valor).trim().replace(/\s/g, '');
+        if (/^(?:-|–|—|n\/?a)$/i.test(texto)) return null;
+        const percentual = texto.endsWith('%');
+        texto = texto.replace(/%$/, '').replace(/[^\d,.-]/g, '');
+        if (texto.includes(',')) {
+            texto = texto.replace(/\./g, '').replace(',', '.');
+        } else if (inteiros.includes(campo) && /^-?\d{1,3}(\.\d{3})+$/.test(texto)) {
+            texto = texto.replace(/\./g, '');
+        }
+        let numero = Number(texto);
+        if (!Number.isFinite(numero)) throw new Error(`Valor "${valor}" inválido na coluna "${campo}".`);
+        if (percentual) numero /= 100;
+        if (inteiros.includes(campo) && !Number.isInteger(numero)) {
+            throw new Error(`A coluna "${campo}" deve conter números inteiros.`);
+        }
+        return numero;
+    }
+
+    function csvLerRegistros(linhas, config, tipo) {
+        let linhaCabecalho = -1;
+        let colunas = {};
+        let ausentes = [];
+        for (let i = 0; i < linhas.length; i++) {
+            const linha = linhas[i] || [];
+            if (!linha.some(celula => String(celula ?? '').trim())) continue;
+
+            const cabecalho = linha.map(csvNormalizar);
+            const candidatas = {};
+            Object.entries(config.campos).forEach(([campo, aliases]) => {
+                const aceitos = aliases.map(csvNormalizar);
+                candidatas[campo] = cabecalho.findIndex(nome => aceitos.includes(nome));
+            });
+            const faltantes = config.obrigatorios.filter(campo => candidatas[campo] < 0);
+            if (linhaCabecalho < 0) {
+                linhaCabecalho = i;
+                colunas = candidatas;
+                ausentes = faltantes;
+            }
+            if (!faltantes.length) {
+                linhaCabecalho = i;
+                colunas = candidatas;
+                ausentes = [];
+                break;
+            }
+        }
+        if (linhaCabecalho < 0) throw new Error('O CSV está vazio.');
+
+        if (ausentes.length) {
+            throw new Error(`Colunas obrigatórias ausentes: ${ausentes.join(', ')}.`);
+        }
+
+        const registros = [];
+        const chaves = new Set();
+        for (let i = linhaCabecalho + 1; i < linhas.length; i++) {
+            const linha = linhas[i] || [];
+            if (!linha.some(celula => String(celula ?? '').trim())) continue;
+
+            const registro = {};
+            Object.keys(config.campos).forEach(campo => {
+                const indice = colunas[campo];
+                registro[campo] = indice < 0 ? null : linha[indice];
+            });
+
+            registro.escola = String(registro.escola ?? '').trim();
+            if (!registro.escola) continue;
+
+            if (tipo === 'presenca') {
+                registro.periodo = String(registro.periodo ?? '').trim();
+                registro.periodo_label = String(registro.periodo_label || registro.periodo).trim();
+                registro.codigo_escola = String(registro.codigo_escola ?? '').trim();
+                if (!registro.periodo || !registro.codigo_escola) {
+                    throw new Error(`Linha ${i + 1}: período e código da escola são obrigatórios.`);
+                }
+                const pei = csvNormalizar(registro.pei);
+                if (['sim', 's', 'true', '1', 'pei'].includes(pei)) registro.pei = 1;
+                else if (['nao', 'n', 'false', '0', ''].includes(pei)) registro.pei = 0;
+                else throw new Error(`Linha ${i + 1}: valor PEI inválido ("${registro.pei}").`);
+            } else {
+                registro.codigo_escola = String(registro.codigo_escola ?? '').trim();
+                if (!registro.codigo_escola) {
+                    const correspondencia = registro.escola.match(/^(.*?)\s*-\s*(\d+)$/);
+                    if (correspondencia) {
+                        registro.escola = correspondencia[1].trim();
+                        registro.codigo_escola = correspondencia[2];
+                    }
+                }
+                if (!registro.codigo_escola) {
+                    throw new Error(`Linha ${i + 1}: informe codigo_escola ou use "ESCOLA - CÓDIGO" na coluna escola.`);
+                }
+            }
+
+            config.inteiros.concat(config.numericos).forEach(campo => {
+                registro[campo] = csvNumero(registro[campo], campo, config.inteiros);
+            });
+            config.obrigatorios.forEach(campo => {
+                if (registro[campo] === null || registro[campo] === '') {
+                    throw new Error(`Linha ${i + 1}: o campo obrigatório "${campo}" está vazio.`);
+                }
+            });
+
+            const chave = tipo === 'presenca'
+                ? `${registro.periodo}|${registro.codigo_escola}`
+                : registro.codigo_escola;
+            if (chaves.has(chave)) throw new Error(`Linha ${i + 1}: registro duplicado para ${chave}.`);
+            chaves.add(chave);
+            registros.push(registro);
+        }
+
+        if (!registros.length) throw new Error('Nenhum registro de escola foi encontrado no CSV.');
+        return registros;
+    }
+
+    function csvEscaparHtml(valor) {
+        return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        })[caractere]);
+    }
+
+    function configurarImportadorCsv(tipo) {
+        const config = CSV_IMPORTADORES[tipo];
+        const input = document.getElementById(`${tipo}-file`);
+        const preview = document.getElementById(`${tipo}-preview`);
+        const ler = document.getElementById(`${tipo}-ler`);
+        const confirmar = document.getElementById(`${tipo}-confirmar`);
+
+        ler.addEventListener('click', () => {
+            const arquivo = input.files[0];
+            preview.style.display = 'none';
+            confirmar.disabled = true;
+            csvDadosPendentes[tipo] = null;
+            if (!arquivo) {
+                preview.textContent = 'Selecione o arquivo CSV.';
+                preview.className = 'msg error';
+                preview.style.display = 'block';
+                return;
+            }
+
+            const leitor = new FileReader();
+            leitor.onload = evento => {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(evento.target.result), { type: 'array' });
+                    const planilha = workbook.Sheets[workbook.SheetNames[0]];
+                    const linhas = XLSX.utils.sheet_to_json(planilha, {
+                        header: 1, defval: null, raw: true, blankrows: false
+                    });
+                    const registros = csvLerRegistros(linhas, config, tipo);
+                    csvDadosPendentes[tipo] = registros;
+                    const amostra = registros.slice(0, 3).map(registro => {
+                        const nome = tipo === 'presenca'
+                            ? `${registro.escola} (${registro.periodo})`
+                            : `${registro.escola} (${registro.codigo_escola})`;
+                        return `<li>${csvEscaparHtml(nome)}</li>`;
+                    }).join('');
+                    preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">A confirmação substituirá os dados atuais de ${tipo === 'presenca' ? 'todos os períodos de presença' : 'Robótica'}.</span><ul>${amostra}</ul>`;
+                    preview.className = 'msg';
+                    preview.style.display = 'block';
+                    confirmar.disabled = false;
+                } catch (erro) {
+                    console.error(`Erro ao ler CSV de ${tipo}:`, erro);
+                    preview.textContent = `Erro ao ler o CSV: ${erro.message}`;
+                    preview.className = 'msg error';
+                    preview.style.display = 'block';
+                }
+            };
+            leitor.onerror = () => {
+                preview.textContent = 'Não foi possível ler o arquivo CSV.';
+                preview.className = 'msg error';
+                preview.style.display = 'block';
+            };
+            leitor.readAsArrayBuffer(arquivo);
+        });
+
+        confirmar.addEventListener('click', async () => {
+            const registros = csvDadosPendentes[tipo];
+            if (!registros?.length) return;
+
+            confirmar.disabled = true;
+            confirmar.textContent = 'Importando...';
+            let dadosRemovidos = false;
+            try {
+                const { error: erroRemocao } = await supabaseClient
+                    .from(config.tabela)
+                    .delete()
+                    .not('codigo_escola', 'is', null);
+                if (erroRemocao) throw erroRemocao;
+                dadosRemovidos = true;
+
+                const tamanhoLote = 250;
+                for (let i = 0; i < registros.length; i += tamanhoLote) {
+                    const { error } = await supabaseClient
+                        .from(config.tabela)
+                        .insert(registros.slice(i, i + tamanhoLote));
+                    if (error) throw error;
+                }
+
+                preview.textContent = `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
+                preview.className = 'msg success';
+                input.value = '';
+                csvDadosPendentes[tipo] = null;
+            } catch (erro) {
+                console.error(`Erro ao importar CSV de ${tipo}:`, erro);
+                preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${dadosRemovidos ? ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.' : ''}`;
+                preview.className = 'msg error';
+                confirmar.disabled = false;
+            } finally {
+                confirmar.textContent = '2. Confirmar Importação';
+                preview.style.display = 'block';
+            }
+        });
+    }
+
+    configurarImportadorCsv('presenca');
+    configurarImportadorCsv('robotica');
 
 </script>
 </body>

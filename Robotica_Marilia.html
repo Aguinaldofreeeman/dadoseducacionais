@@ -166,6 +166,7 @@ tfoot td.l{background:var(--surface2)}
       <p>Compare as escolas pelo índice de atividades realizadas por aluno, nota média e taxa de acertos. Use os filtros e clique numa escola para ver o detalhe.</p>
     </div>
   </header>
+  <p id="data-status" class="note" role="status" hidden></p>
 
   <section class="card filters" aria-label="Filtros">
     <div class="f f-q"><label for="q">Buscar escola ou código</label><input id="q" class="inp" type="search" placeholder="Ex.: Bicudo, 33753" autocomplete="off"></div>
@@ -209,6 +210,8 @@ tfoot td.l{background:var(--surface2)}
 <div id="tip" hidden></div>
 <div id="toast" hidden>Tabela copiada</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script>
 const SRC = {"rows": [{"escola": "ANTONIO DAUN - 33467", "mat": 81, "pub": 1025, "rasc": 1, "corr": 0, "dev": 0, "conc": 1024, "acerto": 0.7340048780487802, "indice": 0.4682222222222222, "nota": 7.147598189968675}, {"escola": "JOSE AMBROSIO DOS SANTOS - 33650", "mat": 66, "pub": 529, "rasc": 5, "corr": 0, "dev": 0, "conc": 524, "acerto": 0.7901701323251418, "indice": 0.467, "nota": 8.043905861788389}, {"escola": "JARDIM SANTA ANTONIETA - 462688", "mat": 262, "pub": 4109, "rasc": 7, "corr": 0, "dev": 0, "conc": 4102, "acerto": 0.8692005354100752, "indice": 0.46047058823529413, "nota": 8.167825434760791}, {"escola": "EMICO MATSUMOTO GEOGRAFA - 446920", "mat": 207, "pub": 2372, "rasc": 9, "corr": 30, "dev": 0, "conc": 2333, "acerto": 0.8210528550201655, "indice": 0.335735294117647, "nota": 7.244409059348154}, {"escola": "LOURENCO DE ALMEIDA SENNE DR - 33704", "mat": 278, "pub": 2934, "rasc": 10, "corr": 0, "dev": 0, "conc": 2924, "acerto": 0.6769325153374232, "indice": 0.31872727272727275, "nota": 6.574136449374536}, {"escola": "BICUDO MONSENHOR - 33753", "mat": 549, "pub": 5944, "rasc": 24, "corr": 10, "dev": 0, "conc": 5910, "acerto": 0.8243386377031235, "indice": 0.3171470588235294, "nota": 8.313059654849436}, {"escola": "EDSON VIANEI ALVES PROF - 923000", "mat": 209, "pub": 2079, "rasc": 9, "corr": 0, "dev": 0, "conc": 2070, "acerto": 0.7489514189514189, "indice": 0.3095, "nota": 7.551730243944776}, {"escola": "CASTRO ALVES - 33613", "mat": 233, "pub": 2208, "rasc": 9, "corr": 38, "dev": 0, "conc": 2161, "acerto": 0.702912288716309, "indice": 0.2949375, "nota": 6.8135402296078205}, {"escola": "EDUARDO DE SOUZA PORTO CEL - 33522", "mat": 209, "pub": 1910, "rasc": 19, "corr": 0, "dev": 0, "conc": 1891, "acerto": 0.748175392670157, "indice": 0.2918709677419355, "nota": 7.575822433925678}, {"escola": "17 DE SETEMBRO - 33881", "mat": 235, "pub": 1909, "rasc": 5, "corr": 0, "dev": 0, "conc": 1904, "acerto": 0.6470298585646934, "indice": 0.2531875, "nota": 6.999106245711399}, {"escola": "NASIB CURY - 917990", "mat": 231, "pub": 1827, "rasc": 4, "corr": 0, "dev": 0, "conc": 1823, "acerto": 0.6105473453749314, "indice": 0.246625, "nota": 6.19763526478596}, {"escola": "SYLVIA RIBEIRO DE CARVALHO PROFA - 47843", "mat": 330, "pub": 2424, "rasc": 8, "corr": 0, "dev": 0, "conc": 2416, "acerto": 0.7505672442244226, "indice": 0.23616129032258062, "nota": 7.381871975864667}, {"escola": "NORMA MONICO TRUZZI PROFA - 33443", "mat": 137, "pub": 792, "rasc": 0, "corr": 0, "dev": 0, "conc": 792, "acerto": 0.7398221092757307, "indice": 0.19269999999999998, "nota": 6.554454016150052}, {"escola": "NELY CARBONIERI DE ANDRADE PROFA - 33424", "mat": 348, "pub": 2310, "rasc": 6, "corr": 7, "dev": 0, "conc": 2297, "acerto": 0.6285866030782571, "indice": 0.18917142857142857, "nota": 6.447055197674113}, {"escola": "WALDEMAR MONIZ DA ROCHA BARROS DR - 33765", "mat": 306, "pub": 1417, "rasc": 12, "corr": 0, "dev": 0, "conc": 1405, "acerto": 0.6814855328158081, "indice": 0.1766153846153846, "nota": 7.078040171819464}, {"escola": "GRACIEMA BAGANHA RIBEIRO - 33534", "mat": 298, "pub": 1040, "rasc": 3, "corr": 43, "dev": 0, "conc": 994, "acerto": 0.6106440511307767, "indice": 0.15818181818181817, "nota": 5.446431816238297}, {"escola": "AMILCARE MATTEI PROF - 33728", "mat": 198, "pub": 433, "rasc": 8, "corr": 0, "dev": 0, "conc": 425, "acerto": 0.7875288683602771, "indice": 0.15328571428571428, "nota": 8.554137907546998}, {"escola": "WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679", "mat": 219, "pub": 734, "rasc": 4, "corr": 0, "dev": 0, "conc": 730, "acerto": 0.5894822888283378, "indice": 0.1515, "nota": 6.109720495167512}, {"escola": "GABRIEL MONTEIRO DA SILVA - 33674", "mat": 287, "pub": 1034, "rasc": 3, "corr": 0, "dev": 0, "conc": 1031, "acerto": 0.5830125725338491, "indice": 0.13815384615384615, "nota": 5.2751594991543085}], "total": {"mat": 4683, "pub": 37030, "rasc": 146, "corr": 128, "dev": 0, "conc": 36756, "acerto": 0.7372633430291551, "indice": 0.20194871794871797, "nota": 7.261833643354222}};
 const ABBR = {PROF:"Prof.",PROFA:"Profa.",DR:"Dr.",CEL:"Cel."};
@@ -218,12 +221,12 @@ const pretty = s => s.split(" ").map((w,i)=>{
   const l=w.toLowerCase();
   return (i>0&&SMALL.has(l))?l:l.charAt(0).toUpperCase()+l.slice(1);
 }).join(" ");
-const DATA = SRC.rows.map((r,i)=>{
+let DATA = SRC.rows.map((r,i)=>{
   const m = r.escola.match(/^(.*) - (\d+)$/);
   return {id:i,nome:pretty(m?m[1]:r.escola),codigo:m?m[2]:"",mat:r.mat,pub:r.pub,rasc:r.rasc,corr:r.corr,dev:r.dev,conc:r.conc,acerto:r.acerto,indice:r.indice,nota:r.nota,poraluno:r.conc/r.mat};
 });
-const SHEET = SRC.total;
-const N = DATA.length;
+let SHEET = SRC.total;
+let N = DATA.length;
 
 const nf0 = v=>Math.round(v).toLocaleString("pt-BR");
 const nf1 = v=>v.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
@@ -462,6 +465,54 @@ $("#copy").addEventListener("click",()=>{
 bindTip($("#rk"));bindTip($("#sc"));
 st.sel=DATA.reduce((b,s)=>s.indice>b.indice?s:b,DATA[0]).id;
 render();
+
+async function carregarResultadosRobotica(){
+  const statusDados=$("#data-status");
+  try{
+    const {data,error}=await supabaseClient
+      .from("resultados_robotica")
+      .select("escola,codigo_escola,mat,pub,rasc,corr,dev,conc,acerto,indice,nota")
+      .order("escola");
+    if(error) throw error;
+    if(!data?.length){
+      statusDados.textContent="Tabela de Robótica vazia no Supabase; exibindo os dados locais.";
+      statusDados.hidden=false;
+      return;
+    }
+
+    DATA=data.map((r,i)=>({
+      id:i,nome:pretty(r.escola),codigo:String(r.codigo_escola),
+      mat:Number(r.mat),pub:Number(r.pub),rasc:Number(r.rasc),corr:Number(r.corr),
+      dev:Number(r.dev),conc:Number(r.conc),acerto:Number(r.acerto),
+      indice:Number(r.indice),nota:Number(r.nota),
+      poraluno:Number(r.mat)?Number(r.conc)/Number(r.mat):0
+    }));
+    N=DATA.length;
+    const soma=campo=>DATA.reduce((total,registro)=>total+registro[campo],0);
+    const concluidas=soma("conc");
+    SHEET={
+      mat:soma("mat"),pub:soma("pub"),rasc:soma("rasc"),corr:soma("corr"),
+      dev:soma("dev"),conc:concluidas,
+      acerto:concluidas?DATA.reduce((total,registro)=>total+registro.acerto*registro.conc,0)/concluidas:0,
+      indice:soma("indice")/N,
+      nota:concluidas?DATA.reduce((total,registro)=>total+registro.nota*registro.conc,0)/concluidas:0
+    };
+    for(const k in M){
+      const valores=DATA.map(M[k].get).sort((a,b)=>a-b);
+      CUT[k]=[valores[Math.floor(N/3)],valores[Math.floor(2*N/3)]];
+      MAXV[k]=valores[N-1];
+    }
+    st.sel=DATA.reduce((melhor,registro)=>registro.indice>melhor.indice?registro:melhor,DATA[0]).id;
+    statusDados.textContent="Dados carregados do Supabase.";
+    statusDados.hidden=false;
+    render();
+  }catch(erro){
+    console.error("Erro ao carregar resultados de Robótica do Supabase:",erro);
+    statusDados.textContent="Não foi possível consultar o Supabase; exibindo os dados locais.";
+    statusDados.hidden=false;
+  }
+}
+carregarResultadosRobotica();
 </script>
 
 </body></html>

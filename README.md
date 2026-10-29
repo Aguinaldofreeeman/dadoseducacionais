@@ -40,7 +40,9 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
 | `redacao.html` | autenticado | **Redação Paulista**: painel regional (evolução e top 10 da última quinzena), painel individual por escola (KPIs, evolução, insights e mapa de calor) e matriz escola × quinzena completa |
-| `admin.html` | ADM | Usuários + **importadores** de planilha (Alura, Prova Paulista, Matific, SARESP e Redação Paulista) |
+| `resultados-presenca.html` | autenticado | **Aluno Presente**: presença, aulas e evolução por escola e período |
+| `Robotica_Marilia.html` | autenticado | **Robótica**: indicadores de atividades, acertos e notas por escola |
+| `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente e Robótica) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
 
@@ -104,6 +106,24 @@ não deve ser lido como taxa de 0–100%) · `nota` (nota das produções textua
 - `redacao.html` lê a tabela e, se ela estiver vazia ou indisponível, usa o `BAKE` embutido
   (gerado de `csv/REDACAO_QUINZENAL.csv`, 50 escolas × 21 quinzenas).
 
+### `resultados_presenca` e `resultados_robotica`
+
+As tabelas alimentam os painéis de **Aluno Presente** e **Robótica**. O script
+`supabase-resultados-presenca-robotica.sql` cria as tabelas e as políticas RLS; execute-o uma vez
+no SQL Editor do Supabase. A leitura é permitida a usuários autenticados e a gravação/exclusão
+somente a administradores ativos.
+
+- No `admin.html`, use **Importar CSV - Aluno Presente**. O CSV deve ter `periodo`, `escola`,
+  `codigo_escola`, `matriculas_ativas`, `presenca`, `aulas_previstas` e `aulas_dadas`; também aceita
+  `periodo_label`, `pei`, `evolucao_presenca`, `evolucao_aulas`, `total_turmas`, `total_matrizes`,
+  `tipo_escola` e `supervisor`. A importação substitui todos os períodos existentes.
+- Use **Importar CSV - Robótica** com `escola` (ou `escola` no formato `NOME - CÓDIGO`),
+  `mat`, `pub`, `rasc`, `corr`, `dev`, `conc`, `acerto`, `indice` e `nota`; `codigo_escola` é
+  opcional quando o código já está no nome da escola. A importação substitui os resultados atuais.
+- Os dois importadores validam cabeçalhos, linhas e duplicatas antes de permitir a gravação. Os
+  painéis consultam o Supabase e mantêm os dados locais atuais como fallback quando a tabela estiver
+  vazia ou indisponível.
+
 ### `edicoes_disponiveis`
 `ano` (text) · `edicao_planilha` (text) — catálogo das 9 edições (2024–2026).
 
@@ -151,6 +171,8 @@ Políticas ativas:
 |---|---|---|---|
 | `dados_educacionais` | autenticados | **ADM** | **ADM** |
 | `resultados_alura` | autenticados | **ADM** | **ADM** |
+| `resultados_presenca` | autenticados | **ADM ativo** | **ADM ativo** |
+| `resultados_robotica` | autenticados | **ADM ativo** | **ADM ativo** |
 | `perfis_usuarios` | autenticados | autenticados | autenticados |
 
 > A exclusão é liberada só para ADM porque o importador precisa limpar o ano antes de gravar.
