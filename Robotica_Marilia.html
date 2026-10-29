@@ -1,0 +1,467 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Robótica Marília</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: faixa de filtros fixa no topo, KPIs, depois ranking à esquerda e dispersão + escola em foco à direita, tabela completa embaixo. */
+:root{
+  --bg:#F1F4F9; --surface:#FFFFFF; --surface2:#F6F8FC; --ink:#122033; --muted:#566779; --line:#DFE5EE;
+  --accent:#2B52D1; --accent-soft:#E5EBFC;
+  --g:#4CB37A; --y:#F2C230; --r:#E5645C; --on-status:#14231B;
+  --shadow:0 1px 2px rgba(18,32,51,.06),0 4px 16px rgba(18,32,51,.05);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1118; --surface:#141C26; --surface2:#1A2430; --ink:#E7EDF4; --muted:#93A4B6; --line:#243142;
+    --accent:#8FAAFF; --accent-soft:#1E2A4C;
+    --g:#52C487; --y:#F0C84A; --r:#F0746C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1118; --surface:#141C26; --surface2:#1A2430; --ink:#E7EDF4; --muted:#93A4B6; --line:#243142;
+  --accent:#8FAAFF; --accent-soft:#1E2A4C;
+  --g:#52C487; --y:#F0C84A; --r:#F0746C;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;padding-top:4px}
+header.top h1{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:700;letter-spacing:-.02em}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:16px 18px 0}
+.card-h h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.card-h .hint{color:var(--muted);font-size:12.5px}
+.card-b{padding:12px 18px 18px}
+
+/* filtros */
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;padding:12px 14px;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f>label,.f>.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.inp{height:36px;border:1px solid var(--line);background:var(--surface2);border-radius:9px;padding:0 10px;min-width:0}
+.inp:hover{border-color:var(--muted)}
+.f-q{flex:1 1 220px}.f-q .inp{width:100%}
+.f-m{flex:1 1 230px}.f-m .inp{width:100%}
+.f-r{flex:0 1 150px}
+.f-r input[type=range]{width:100%;accent-color:var(--accent);height:36px;margin:0}
+.f-r .val{font-weight:600;font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-weight:600;font-size:13px}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip .dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.25)}
+.chip .n{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.85}
+.btn{height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.scale{display:none;width:100%;gap:14px;align-items:flex-end;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:12px}
+.scale.open{display:flex}
+.scale .inp{width:96px}
+.scale p{margin:0;color:var(--muted);font-size:12.5px;max-width:48ch}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .s{color:var(--muted);font-size:12.5px}
+.dist{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px;margin:8px 0 4px;background:var(--line)}
+.dist i{display:block;min-width:0}
+
+.c-g{background:var(--g)}.c-y{background:var(--y)}.c-r{background:var(--r)}
+
+/* grade */
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+/* legenda */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
+
+/* ranking */
+.rk{display:flex;flex-direction:column;gap:3px}
+.rk-row{display:grid;grid-template-columns:22px minmax(120px,1.1fr) minmax(80px,1.4fr) 54px;align-items:center;gap:10px;width:100%;
+  padding:5px 8px;border:1px solid transparent;border-radius:9px;background:none;text-align:left;cursor:pointer}
+.rk-row:hover{background:var(--surface2)}
+.rk-row.sel{background:var(--accent-soft);border-color:var(--accent)}
+.rk-n{color:var(--muted);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.rk-name{min-width:0;font-weight:600;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-name small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.rk-track{position:relative;height:16px;background:var(--surface2);border-radius:4px}
+.rk-fill{position:absolute;inset:0 auto 0 0;border-radius:0 4px 4px 0;border:1px solid rgba(0,0,0,.22);border-left:0}
+.rk-cut{position:absolute;top:-3px;bottom:-3px;width:0;border-left:1.5px dashed var(--muted);opacity:.8}
+.rk-val{text-align:right;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.rk-row{grid-template-columns:18px minmax(0,1fr) 52px}.rk-track{display:none}}
+
+/* dispersão */
+.sc{width:100%;height:auto;display:block}
+.sc text{font-family:var(--f-body)}
+.sc .pt{cursor:pointer}
+.sc .pt:hover{stroke:var(--ink);stroke-width:2}
+
+/* foco */
+.focus-h{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.focus-h h3{font-size:20px;line-height:1.15}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:700;color:var(--on-status);border:1px solid rgba(0,0,0,.2);white-space:nowrap}
+.cod{color:var(--muted);font-size:12.5px}
+.fm{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.fm div{background:var(--surface2);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:1px}
+.fm .l{font-size:11px;color:var(--muted);font-weight:600}
+.fm .v{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.fm .d{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);padding:24px 6px;text-align:center}
+
+/* tabela */
+.tw{overflow-x:auto;border-top:1px solid var(--line);margin-top:12px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--surface2);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;vertical-align:bottom;white-space:normal;min-width:84px}
+th:hover{color:var(--ink)}
+th[aria-sort] {color:var(--accent)}
+th.l,td.l{text-align:left}
+td.l{white-space:normal;min-width:230px;position:sticky;left:0;background:var(--surface);z-index:1;font-weight:600}
+th.l{position:sticky;left:0;z-index:2;min-width:230px}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface2)}
+tbody tr:hover td.l{background:var(--surface2)}
+tbody tr.sel td{background:var(--accent-soft)}
+td.mat{background:var(--accent-soft)}
+td.st{color:var(--on-status);font-weight:700}
+tfoot td{font-weight:700;background:var(--surface2);border-bottom:0}
+tfoot td.l{background:var(--surface2)}
+.note{color:var(--muted);font-size:12px;padding:10px 18px 14px}
+
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:9px 11px;border-radius:10px;font-size:12px;line-height:1.5;max-width:260px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+#tip b{display:block;font-size:13px;margin-bottom:2px}
+#tip span{opacity:.75}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;z-index:60}
+@media (prefers-reduced-motion:no-preference){.rk-fill{transition:width .35s ease}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Programa de Robótica · Marília</div>
+      <h1>Atividades por escola</h1>
+      <p>Compare as escolas pelo índice de atividades realizadas por aluno, nota média e taxa de acertos. Use os filtros e clique numa escola para ver o detalhe.</p>
+    </div>
+  </header>
+
+  <section class="card filters" aria-label="Filtros">
+    <div class="f f-q"><label for="q">Buscar escola ou código</label><input id="q" class="inp" type="search" placeholder="Ex.: Bicudo, 33753" autocomplete="off"></div>
+    <div class="f f-m"><label for="metric">Colorir e ordenar por</label><select id="metric" class="inp"></select></div>
+    <div class="f"><span class="lbl">Faixa de cor</span><div class="chips" id="chips"></div></div>
+    <div class="f f-r"><label for="minMat">Matrículas mínimas · <span class="val num" id="minMatV">0</span></label><input id="minMat" type="range" min="0" max="500" step="50" value="0"></div>
+    <div class="f f-r"><label for="minNota">Nota mínima · <span class="val num" id="minNotaV">0</span></label><input id="minNota" type="range" min="0" max="8" step="0.5" value="0"></div>
+    <div class="f"><span class="lbl">&nbsp;</span><div class="chips"><button class="btn" id="scaleBtn" type="button" aria-expanded="false">Ajustar escala</button><button class="btn" id="reset" type="button">Limpar</button></div></div>
+    <div class="scale" id="scale">
+      <div class="f"><label for="tG">Verde a partir de</label><input id="tG" class="inp num" type="number" step="0.01" min="0" max="2"></div>
+      <div class="f"><label for="tR">Vermelho abaixo de</label><input id="tR" class="inp num" type="number" step="0.01" min="0" max="2"></div>
+      <p>Valores do <b>Índice de atividades por aluno</b>. Na planilha as cores aparecem em 3 grupos: acima de 0,46 verde, entre 0,17 e 0,34 amarelo, abaixo de 0,16 vermelho. Os limites aqui ficam no meio dos intervalos e você pode mudar.</p>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Resumo"></section>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="rkT">
+      <div class="card-h"><h2 id="rkT">Ranking das escolas</h2><button class="btn" id="flip" type="button" style="height:30px;padding:0 10px;font-size:12.5px">Inverter ordem</button></div>
+      <div class="card-b"><div class="legend" id="legend"></div><div class="rk" id="rk"></div></div>
+    </section>
+    <div class="col">
+      <section class="card" aria-labelledby="scT">
+        <div class="card-h"><h2 id="scT">Índice × nota média</h2><span class="hint">Tamanho da bolha = matrículas ativas</span></div>
+        <div class="card-b"><svg class="sc" id="sc" viewBox="0 0 560 370" role="img" aria-label="Dispersão do índice de atividades por aluno contra a nota média, uma bolha por escola"></svg></div>
+      </section>
+      <section class="card" aria-labelledby="fcT">
+        <div class="card-h"><h2 id="fcT">Escola em foco</h2></div>
+        <div class="card-b" id="focus"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="tbT">
+    <div class="card-h"><h2 id="tbT">Tabela completa</h2><span><span class="hint" id="tbHint"></span> <button class="btn" id="copy" type="button" style="height:30px;padding:0 10px;font-size:12.5px;margin-left:8px">Copiar para Excel</button></span></div>
+    <div class="tw" id="tw"></div>
+    <div class="note">A coluna de matrículas segue o azul da planilha. A coluna colorida muda conforme o campo escolhido em “Colorir e ordenar por”. Os totais sem filtro são os da planilha; com filtro, a nota é ponderada pelas atividades concluídas e o índice é a média simples das escolas.</div>
+  </section>
+</div>
+<div id="tip" hidden></div>
+<div id="toast" hidden>Tabela copiada</div>
+
+<script>
+const SRC = {"rows": [{"escola": "ANTONIO DAUN - 33467", "mat": 81, "pub": 1025, "rasc": 1, "corr": 0, "dev": 0, "conc": 1024, "acerto": 0.7340048780487802, "indice": 0.4682222222222222, "nota": 7.147598189968675}, {"escola": "JOSE AMBROSIO DOS SANTOS - 33650", "mat": 66, "pub": 529, "rasc": 5, "corr": 0, "dev": 0, "conc": 524, "acerto": 0.7901701323251418, "indice": 0.467, "nota": 8.043905861788389}, {"escola": "JARDIM SANTA ANTONIETA - 462688", "mat": 262, "pub": 4109, "rasc": 7, "corr": 0, "dev": 0, "conc": 4102, "acerto": 0.8692005354100752, "indice": 0.46047058823529413, "nota": 8.167825434760791}, {"escola": "EMICO MATSUMOTO GEOGRAFA - 446920", "mat": 207, "pub": 2372, "rasc": 9, "corr": 30, "dev": 0, "conc": 2333, "acerto": 0.8210528550201655, "indice": 0.335735294117647, "nota": 7.244409059348154}, {"escola": "LOURENCO DE ALMEIDA SENNE DR - 33704", "mat": 278, "pub": 2934, "rasc": 10, "corr": 0, "dev": 0, "conc": 2924, "acerto": 0.6769325153374232, "indice": 0.31872727272727275, "nota": 6.574136449374536}, {"escola": "BICUDO MONSENHOR - 33753", "mat": 549, "pub": 5944, "rasc": 24, "corr": 10, "dev": 0, "conc": 5910, "acerto": 0.8243386377031235, "indice": 0.3171470588235294, "nota": 8.313059654849436}, {"escola": "EDSON VIANEI ALVES PROF - 923000", "mat": 209, "pub": 2079, "rasc": 9, "corr": 0, "dev": 0, "conc": 2070, "acerto": 0.7489514189514189, "indice": 0.3095, "nota": 7.551730243944776}, {"escola": "CASTRO ALVES - 33613", "mat": 233, "pub": 2208, "rasc": 9, "corr": 38, "dev": 0, "conc": 2161, "acerto": 0.702912288716309, "indice": 0.2949375, "nota": 6.8135402296078205}, {"escola": "EDUARDO DE SOUZA PORTO CEL - 33522", "mat": 209, "pub": 1910, "rasc": 19, "corr": 0, "dev": 0, "conc": 1891, "acerto": 0.748175392670157, "indice": 0.2918709677419355, "nota": 7.575822433925678}, {"escola": "17 DE SETEMBRO - 33881", "mat": 235, "pub": 1909, "rasc": 5, "corr": 0, "dev": 0, "conc": 1904, "acerto": 0.6470298585646934, "indice": 0.2531875, "nota": 6.999106245711399}, {"escola": "NASIB CURY - 917990", "mat": 231, "pub": 1827, "rasc": 4, "corr": 0, "dev": 0, "conc": 1823, "acerto": 0.6105473453749314, "indice": 0.246625, "nota": 6.19763526478596}, {"escola": "SYLVIA RIBEIRO DE CARVALHO PROFA - 47843", "mat": 330, "pub": 2424, "rasc": 8, "corr": 0, "dev": 0, "conc": 2416, "acerto": 0.7505672442244226, "indice": 0.23616129032258062, "nota": 7.381871975864667}, {"escola": "NORMA MONICO TRUZZI PROFA - 33443", "mat": 137, "pub": 792, "rasc": 0, "corr": 0, "dev": 0, "conc": 792, "acerto": 0.7398221092757307, "indice": 0.19269999999999998, "nota": 6.554454016150052}, {"escola": "NELY CARBONIERI DE ANDRADE PROFA - 33424", "mat": 348, "pub": 2310, "rasc": 6, "corr": 7, "dev": 0, "conc": 2297, "acerto": 0.6285866030782571, "indice": 0.18917142857142857, "nota": 6.447055197674113}, {"escola": "WALDEMAR MONIZ DA ROCHA BARROS DR - 33765", "mat": 306, "pub": 1417, "rasc": 12, "corr": 0, "dev": 0, "conc": 1405, "acerto": 0.6814855328158081, "indice": 0.1766153846153846, "nota": 7.078040171819464}, {"escola": "GRACIEMA BAGANHA RIBEIRO - 33534", "mat": 298, "pub": 1040, "rasc": 3, "corr": 43, "dev": 0, "conc": 994, "acerto": 0.6106440511307767, "indice": 0.15818181818181817, "nota": 5.446431816238297}, {"escola": "AMILCARE MATTEI PROF - 33728", "mat": 198, "pub": 433, "rasc": 8, "corr": 0, "dev": 0, "conc": 425, "acerto": 0.7875288683602771, "indice": 0.15328571428571428, "nota": 8.554137907546998}, {"escola": "WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679", "mat": 219, "pub": 734, "rasc": 4, "corr": 0, "dev": 0, "conc": 730, "acerto": 0.5894822888283378, "indice": 0.1515, "nota": 6.109720495167512}, {"escola": "GABRIEL MONTEIRO DA SILVA - 33674", "mat": 287, "pub": 1034, "rasc": 3, "corr": 0, "dev": 0, "conc": 1031, "acerto": 0.5830125725338491, "indice": 0.13815384615384615, "nota": 5.2751594991543085}], "total": {"mat": 4683, "pub": 37030, "rasc": 146, "corr": 128, "dev": 0, "conc": 36756, "acerto": 0.7372633430291551, "indice": 0.20194871794871797, "nota": 7.261833643354222}};
+const ABBR = {PROF:"Prof.",PROFA:"Profa.",DR:"Dr.",CEL:"Cel."};
+const SMALL = new Set(["de","da","do","dos","das","e"]);
+const pretty = s => s.split(" ").map((w,i)=>{
+  if(ABBR[w]) return ABBR[w];
+  const l=w.toLowerCase();
+  return (i>0&&SMALL.has(l))?l:l.charAt(0).toUpperCase()+l.slice(1);
+}).join(" ");
+const DATA = SRC.rows.map((r,i)=>{
+  const m = r.escola.match(/^(.*) - (\d+)$/);
+  return {id:i,nome:pretty(m?m[1]:r.escola),codigo:m?m[2]:"",mat:r.mat,pub:r.pub,rasc:r.rasc,corr:r.corr,dev:r.dev,conc:r.conc,acerto:r.acerto,indice:r.indice,nota:r.nota,poraluno:r.conc/r.mat};
+});
+const SHEET = SRC.total;
+const N = DATA.length;
+
+const nf0 = v=>Math.round(v).toLocaleString("pt-BR");
+const nf1 = v=>v.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const nf2 = v=>v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const nf3 = v=>v.toLocaleString("pt-BR",{minimumFractionDigits:3,maximumFractionDigits:3});
+const pct = v=>(v*100).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $ = s=>document.querySelector(s);
+
+const M = {
+  indice:{label:"Índice de atividades por aluno",short:"Índice",fmt:nf3,get:s=>s.indice},
+  nota:{label:"Nota média",short:"Nota média",fmt:nf1,get:s=>s.nota},
+  acerto:{label:"Taxa de acertos das questões",short:"Acertos",fmt:pct,get:s=>s.acerto},
+  poraluno:{label:"Atividades concluídas por aluno (calculado)",short:"Concl./aluno",fmt:nf1,get:s=>s.poraluno},
+  conc:{label:"Atividades concluídas",short:"Concluídas",fmt:nf0,get:s=>s.conc},
+  pub:{label:"Atividades publicadas",short:"Publicadas",fmt:nf0,get:s=>s.pub},
+  mat:{label:"Matrículas ativas",short:"Matrículas",fmt:nf0,get:s=>s.mat}
+};
+const CUT={}, MAXV={};
+for(const k in M){const v=DATA.map(M[k].get).sort((a,b)=>a-b);CUT[k]=[v[Math.floor(N/3)],v[Math.floor(2*N/3)]];MAXV[k]=v[N-1];}
+
+const st = {q:"",metric:"indice",faixa:"todas",minMat:0,minNota:0,tG:0.40,tR:0.17,asc:false,sel:null,sort:{key:"indice",dir:-1}};
+const FX = {g:"Verde",y:"Amarelo",r:"Vermelho"};
+const LV = {g:"Alto",y:"Médio",r:"Baixo"};
+
+function cls(s,k=st.metric){
+  const v=M[k].get(s);
+  if(k==="indice") return v>=st.tG?"g":(v<st.tR?"r":"y");
+  const [lo,hi]=CUT[k]; return v>=hi?"g":(v<lo?"r":"y");
+}
+function rules(k=st.metric){
+  const f=M[k].fmt;
+  if(k==="indice") return {g:"≥ "+nf2(st.tG),y:nf2(st.tR)+" a "+nf2(st.tG),r:"< "+nf2(st.tR)};
+  const [lo,hi]=CUT[k];
+  return {g:"≥ "+f(hi)+" (terço superior)",y:f(lo)+" a "+f(hi),r:"< "+f(lo)+" (terço inferior)"};
+}
+function filtered(ignoreFaixa){
+  const q=st.q.trim().toLowerCase();
+  return DATA.filter(s=>
+    (!q||s.nome.toLowerCase().includes(q)||s.codigo.includes(q))&&
+    s.mat>=st.minMat&&s.nota>=st.minNota&&
+    (ignoreFaixa||st.faixa==="todas"||cls(s)===st.faixa));
+}
+function agg(l){
+  if(l.length===N) return SHEET;
+  const sum=k=>l.reduce((a,s)=>a+s[k],0), conc=sum("conc");
+  return {mat:sum("mat"),pub:sum("pub"),rasc:sum("rasc"),corr:sum("corr"),dev:sum("dev"),conc,
+    acerto:conc?l.reduce((a,s)=>a+s.acerto*s.conc,0)/conc:0,
+    indice:l.length?l.reduce((a,s)=>a+s.indice,0)/l.length:0,
+    nota:conc?l.reduce((a,s)=>a+s.nota*s.conc,0)/conc:0};
+}
+function rankOf(s,k){const v=M[k].get(s);return DATA.filter(o=>M[k].get(o)>v).length+1;}
+const mean = k=>DATA.reduce((a,s)=>a+M[k].get(s),0)/N;
+
+/* tooltip */
+const tip=$("#tip");
+function tipHtml(s){
+  const c=cls(s);
+  return `<b>${esc(s.nome)}</b><span>${esc(s.codigo)} · ${FX[c]} (${LV[c]}) em ${esc(M[st.metric].short.toLowerCase())}</span><br>
+  Índice ${nf3(s.indice)} · Nota ${nf1(s.nota)}<br>Acertos ${pct(s.acerto)} · ${nf0(s.mat)} matrículas<br>${nf0(s.conc)} atividades concluídas`;
+}
+function moveTip(e){
+  const pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+pad,y=e.clientY+pad;
+  if(x+w>innerWidth-8)x=e.clientX-w-pad; if(y+h>innerHeight-8)y=e.clientY-h-pad;
+  tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px";
+}
+function bindTip(root){
+  root.addEventListener("mousemove",e=>{
+    const t=e.target.closest("[data-id]"); if(!t){tip.hidden=true;return;}
+    tip.innerHTML=tipHtml(DATA[+t.dataset.id]); tip.hidden=false; moveTip(e);
+  });
+  root.addEventListener("mouseleave",()=>{tip.hidden=true;});
+  root.addEventListener("click",e=>{const t=e.target.closest("[data-id]"); if(t){st.sel=+t.dataset.id;render();}});
+  root.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){const t=e.target.closest("[data-id]"); if(t){e.preventDefault();st.sel=+t.dataset.id;render();}}
+  });
+}
+
+/* KPIs */
+function renderKPIs(l){
+  const a=agg(l),n=l.length,none=!n;
+  const cnt={g:0,y:0,r:0}; l.forEach(s=>cnt[cls(s)]++);
+  const tile=(k,v,s)=>`<div class="card kpi"><span class="k">${k}</span><span class="v">${none?"—":v}</span><span class="s">${s}</span></div>`;
+  const dist=n?`<div class="dist" role="img" aria-label="${cnt.g} verdes, ${cnt.y} amarelas, ${cnt.r} vermelhas">${["g","y","r"].map(c=>cnt[c]?`<i class="c-${c}" style="flex:${cnt[c]}"></i>`:"").join("")}</div>`:"";
+  $("#kpis").innerHTML=
+   `<div class="card kpi"><span class="k">Escolas</span><span class="v">${n}<span style="font-size:15px;color:var(--muted);font-weight:500"> de ${N}</span></span>${dist}<span class="s">${cnt.g} verdes · ${cnt.y} amarelas · ${cnt.r} vermelhas</span></div>`+
+   tile("Matrículas ativas",nf0(a.mat),none?"":`média de ${nf0(a.mat/n)} por escola`)+
+   tile("Atividades publicadas",nf0(a.pub),none?"":`${nf1(a.pub/a.mat)} por aluno`)+
+   tile("Atividades concluídas",nf0(a.conc),none?"":`${pct(a.conc/a.pub)} das publicadas`)+
+   tile("Em rascunho ou correção",nf0(a.rasc+a.corr),none?"":`${nf0(a.rasc)} rascunho · ${nf0(a.corr)} em correção`)+
+   tile("Taxa de acertos",pct(a.acerto),"das questões respondidas")+
+   tile("Nota média",nf1(a.nota),"escala de 0 a 10")+
+   tile("Índice por aluno",nf3(a.indice),"atividades realizadas por aluno");
+}
+
+/* filtros */
+function renderChips(){
+  const base=filtered(true); const c={todas:base.length,g:0,y:0,r:0}; base.forEach(s=>c[cls(s)]++);
+  const items=[["todas","Todas",null],["g","Verde","g"],["y","Amarelo","y"],["r","Vermelho","r"]];
+  $("#chips").innerHTML=items.map(([k,l,d])=>`<button type="button" class="chip" data-f="${k}" aria-pressed="${st.faixa===k}">${d?`<span class="dot c-${d}"></span>`:""}${l}<span class="n">${c[k]}</span></button>`).join("");
+}
+
+/* ranking */
+function renderRanking(l){
+  const m=M[st.metric],r=rules();
+  $("#legend").innerHTML=["g","y","r"].map(c=>`<span><i class="c-${c}"></i>${LV[c]}: ${r[c]}</span>`).join("");
+  const list=l.slice().sort((a,b)=>(m.get(b)-m.get(a))*(st.asc?-1:1));
+  if(!list.length){$("#rk").innerHTML=`<div class="empty">Nenhuma escola com esses filtros.</div>`;return;}
+  const max=MAXV[st.metric];
+  const cuts=st.metric==="indice"?[st.tR,st.tG].map(v=>`<i class="rk-cut" style="left:${Math.min(100,v/max*100)}%"></i>`).join(""):"";
+  $("#rk").innerHTML=list.map((s,i)=>`<button type="button" class="rk-row${s.id===st.sel?" sel":""}" data-id="${s.id}">
+    <span class="rk-n">${i+1}</span>
+    <span class="rk-name" title="${esc(s.nome)}">${esc(s.nome)}<small>${esc(s.codigo)}</small></span>
+    <span class="rk-track"><i class="rk-fill c-${cls(s)}" style="width:${m.get(s)/max*100}%"></i>${cuts}</span>
+    <span class="rk-val">${m.fmt(m.get(s))}</span></button>`).join("");
+}
+
+/* dispersão */
+function renderScatter(l){
+  const W=560,H=370,mg={l:46,r:18,t:14,b:46},iw=W-mg.l-mg.r,ih=H-mg.t-mg.b,xmax=0.5,ymin=5,ymax=9;
+  const X=v=>mg.l+Math.min(v,xmax)/xmax*iw,Y=v=>mg.t+(1-(v-ymin)/(ymax-ymin))*ih;
+  let o="";
+  if(st.metric==="indice"){
+    o+=`<rect x="${X(0)}" y="${mg.t}" width="${X(st.tR)-X(0)}" height="${ih}" fill="var(--r)" opacity=".12"/>`;
+    o+=`<rect x="${X(st.tR)}" y="${mg.t}" width="${X(st.tG)-X(st.tR)}" height="${ih}" fill="var(--y)" opacity=".12"/>`;
+    o+=`<rect x="${X(st.tG)}" y="${mg.t}" width="${X(xmax)-X(st.tG)}" height="${ih}" fill="var(--g)" opacity=".12"/>`;
+  }
+  for(let v=0;v<=xmax+1e-9;v+=0.1){o+=`<line x1="${X(v)}" x2="${X(v)}" y1="${mg.t}" y2="${mg.t+ih}" stroke="var(--line)"/><text x="${X(v)}" y="${mg.t+ih+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${nf1(v)}</text>`;}
+  for(let v=ymin;v<=ymax;v++){o+=`<line x1="${mg.l}" x2="${mg.l+iw}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${mg.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;}
+  o+=`<text x="${mg.l+iw/2}" y="${H-6}" text-anchor="middle" font-size="12" fill="var(--muted)">Índice de atividades por aluno</text>`;
+  o+=`<text transform="translate(12 ${mg.t+ih/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Nota média</text>`;
+  if(l.length>1){
+    const mx=l.reduce((a,s)=>a+s.indice,0)/l.length,my=l.reduce((a,s)=>a+s.nota,0)/l.length;
+    o+=`<line x1="${X(mx)}" x2="${X(mx)}" y1="${mg.t}" y2="${mg.t+ih}" stroke="var(--muted)" stroke-dasharray="4 4"/>`;
+    o+=`<line x1="${mg.l}" x2="${mg.l+iw}" y1="${Y(my)}" y2="${Y(my)}" stroke="var(--muted)" stroke-dasharray="4 4"/>`;
+    o+=`<text x="${mg.l+iw-2}" y="${Y(my)-5}" text-anchor="end" font-size="10.5" fill="var(--muted)">média ${nf1(my)}</text>`;
+    o+=`<text x="${X(mx)+4}" y="${mg.t+11}" font-size="10.5" fill="var(--muted)">média ${nf2(mx)}</text>`;
+  }
+  const rad=s=>5+Math.sqrt(s.mat/MAXV.mat)*10;
+  l.slice().sort((a,b)=>b.mat-a.mat).forEach(s=>{
+    const c=cls(s);
+    o+=`<circle class="pt" data-id="${s.id}" tabindex="0" role="button" aria-label="${esc(s.nome)}: índice ${nf3(s.indice)}, nota ${nf1(s.nota)}" cx="${X(s.indice)}" cy="${Y(s.nota)}" r="${rad(s)}" style="fill:var(--${c})" fill-opacity=".92" stroke="var(--surface)" stroke-width="2"/>`;
+  });
+  const s=DATA[st.sel];
+  if(s&&l.includes(s)){
+    const cx=X(s.indice),cy=Y(s.nota),r=rad(s),left=cx>mg.l+iw*0.6;
+    o+=`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--accent)" stroke-width="2.5" pointer-events="none"/>`;
+    o+=`<text x="${left?cx-r-8:cx+r+8}" y="${cy+4}" text-anchor="${left?"end":"start"}" font-size="12" font-weight="700" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" pointer-events="none">${esc(s.nome)}</text>`;
+  }
+  $("#sc").innerHTML=o;
+}
+
+/* foco */
+function renderFocus(l){
+  const s=DATA[st.sel],el=$("#focus");
+  if(!s||!l.includes(s)){el.innerHTML=`<div class="empty">Clique numa escola do ranking, da tabela ou do gráfico para ver o detalhe.</div>`;return;}
+  const c=cls(s);
+  const row=(k)=>{
+    const m=M[k],v=m.get(s),d=v-mean(k);
+    const dtxt=(d>=0?"▲ ":"▼ ")+(k==="acerto"?nf1(Math.abs(d)*100)+" p.p.":m.fmt(Math.abs(d)))+" vs média";
+    return `<div><span class="l">${m.short}</span><span class="v">${m.fmt(v)}</span><span class="d">${rankOf(s,k)}º de ${N} · ${dtxt}</span></div>`;
+  };
+  el.innerHTML=`<div class="focus-h"><div><h3>${esc(s.nome)}</h3><span class="cod">Código ${esc(s.codigo)}</span></div>
+    <span class="pill c-${c}">${FX[c]} · ${LV[c]}</span></div>
+    <div class="fm">${["indice","nota","acerto","mat","pub","conc"].map(row).join("")}
+    <div><span class="l">Pendências</span><span class="v">${nf0(s.rasc+s.corr)}</span><span class="d">${nf0(s.rasc)} rascunho · ${nf0(s.corr)} em correção · ${nf0(s.dev)} devolvidas</span></div>
+    <div><span class="l">Concluídas por aluno</span><span class="v">${nf1(s.poraluno)}</span><span class="d">${pct(s.conc/s.pub)} das publicadas</span></div></div>`;
+}
+
+/* tabela */
+const COLS=[
+  {k:"nome",l:"Escola",left:true,get:s=>s.nome,fmt:s=>`${esc(s.nome)}<br><span class="cod" style="font-weight:400">${esc(s.codigo)}</span>`},
+  {k:"mat",l:"Matrículas ativas",fmt:s=>nf0(s.mat),cls:"mat"},
+  {k:"pub",l:"Atividades publicadas",fmt:s=>nf0(s.pub)},
+  {k:"rasc",l:"Em rascunho",fmt:s=>nf0(s.rasc)},
+  {k:"corr",l:"Em correção",fmt:s=>nf0(s.corr)},
+  {k:"dev",l:"Devolvidas",fmt:s=>nf0(s.dev)},
+  {k:"conc",l:"Concluídas",fmt:s=>nf0(s.conc)},
+  {k:"acerto",l:"Taxa de acertos",fmt:s=>pct(s.acerto)},
+  {k:"indice",l:"Índice por aluno",fmt:s=>nf3(s.indice)},
+  {k:"nota",l:"Nota média",fmt:s=>nf1(s.nota)},
+  {k:"poraluno",l:"Concl. por aluno",fmt:s=>nf1(s.poraluno)}
+];
+function renderTable(l){
+  const {key,dir}=st.sort;
+  const rows=l.slice().sort((a,b)=>key==="nome"?a.nome.localeCompare(b.nome,"pt-BR")*dir:(a[key]-b[key])*dir);
+  $("#tbHint").textContent=`${l.length} de ${N} escolas`;
+  const a=agg(l),n=l.length;
+  const head=COLS.map(c=>`<th class="${c.left?"l":""}" data-k="${c.k}" ${c.k===key?`aria-sort="${dir>0?"ascending":"descending"}"`:""}>${c.l}${c.k===key?(dir>0?" ▲":" ▼"):""}</th>`).join("");
+  const body=rows.map(s=>`<tr data-id="${s.id}" class="${s.id===st.sel?"sel":""}">${COLS.map(c=>{
+    let cl=c.left?"l":(c.cls||"");
+    if(M[c.k]&&c.k===st.metric){return `<td class="st c-${cls(s)}">${c.fmt(s)}</td>`;}
+    return `<td class="${cl}">${c.fmt(s)}</td>`;}).join("")}</tr>`).join("");
+  const tot={nome:n===N?"Total (planilha)":"Total do filtro",mat:a.mat,pub:a.pub,rasc:a.rasc,corr:a.corr,dev:a.dev,conc:a.conc,acerto:a.acerto,indice:a.indice,nota:a.nota,poraluno:a.mat?a.conc/a.mat:0};
+  const fmts={mat:nf0,pub:nf0,rasc:nf0,corr:nf0,dev:nf0,conc:nf0,acerto:pct,indice:nf3,nota:nf1,poraluno:nf1};
+  const foot=n?`<tfoot><tr>${COLS.map(c=>c.left?`<td class="l">${tot.nome}</td>`:`<td>${fmts[c.k](tot[c.k])}</td>`).join("")}</tr></tfoot>`:"";
+  $("#tw").innerHTML=n?`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot}</table>`:`<div class="empty">Nenhuma escola com esses filtros.</div>`;
+}
+
+function render(){
+  const l=filtered();
+  renderKPIs(l);renderChips();renderRanking(l);renderScatter(l);renderFocus(l);renderTable(l);
+}
+
+/* eventos */
+$("#metric").innerHTML=Object.keys(M).map(k=>`<option value="${k}">${M[k].label}</option>`).join("");
+$("#tG").value=st.tG;$("#tR").value=st.tR;
+$("#q").addEventListener("input",e=>{st.q=e.target.value;render();});
+$("#metric").addEventListener("change",e=>{st.metric=e.target.value;if(M[st.metric]&&COLS.some(c=>c.k===st.metric))st.sort={key:st.metric,dir:-1};st.asc=false;render();});
+$("#minMat").addEventListener("input",e=>{st.minMat=+e.target.value;$("#minMatV").textContent=nf0(st.minMat);render();});
+$("#minNota").addEventListener("input",e=>{st.minNota=+e.target.value;$("#minNotaV").textContent=nf1(st.minNota);render();});
+$("#chips").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(b){st.faixa=b.dataset.f;render();}});
+$("#flip").addEventListener("click",()=>{st.asc=!st.asc;render();});
+$("#scaleBtn").addEventListener("click",e=>{const o=$("#scale").classList.toggle("open");e.currentTarget.setAttribute("aria-expanded",o);});
+function thr(){const g=parseFloat($("#tG").value),r=parseFloat($("#tR").value);if(!isNaN(g)&&!isNaN(r)&&r<=g){st.tG=g;st.tR=r;render();}}
+$("#tG").addEventListener("input",thr);$("#tR").addEventListener("input",thr);
+$("#reset").addEventListener("click",()=>{
+  Object.assign(st,{q:"",faixa:"todas",minMat:0,minNota:0,metric:"indice",asc:false,tG:0.40,tR:0.17,sort:{key:"indice",dir:-1}});
+  $("#q").value="";$("#minMat").value=0;$("#minNota").value=0;$("#minMatV").textContent="0";$("#minNotaV").textContent="0";
+  $("#metric").value="indice";$("#tG").value=0.4;$("#tR").value=0.17;render();
+});
+$("#tw").addEventListener("click",e=>{
+  const th=e.target.closest("th[data-k]");
+  if(th){const k=th.dataset.k;st.sort=st.sort.key===k?{key:k,dir:-st.sort.dir}:{key:k,dir:k==="nome"?1:-1};render();return;}
+  const tr=e.target.closest("tr[data-id]");if(tr){st.sel=+tr.dataset.id;render();}
+});
+$("#copy").addEventListener("click",()=>{
+  const l=filtered(),{key,dir}=st.sort;
+  const rows=l.slice().sort((a,b)=>key==="nome"?a.nome.localeCompare(b.nome,"pt-BR")*dir:(a[key]-b[key])*dir);
+  const tsv=[COLS.map(c=>c.l).join("\t")].concat(rows.map(s=>[s.nome+" - "+s.codigo,s.mat,s.pub,s.rasc,s.corr,s.dev,s.conc,s.acerto,s.indice,s.nota,s.poraluno].map(v=>typeof v==="number"?String(v).replace(".",","):v).join("\t"))).join("\n");
+  const done=()=>{const t=$("#toast");t.hidden=false;setTimeout(()=>{t.hidden=true;},1800);};
+  const fb=()=>{const ta=document.createElement("textarea");ta.value=tsv;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(_){}ta.remove();};
+  (navigator.clipboard?navigator.clipboard.writeText(tsv).then(done,fb):Promise.resolve(fb()));
+});
+bindTip($("#rk"));bindTip($("#sc"));
+st.sel=DATA.reduce((b,s)=>s.indice>b.indice?s:b,DATA[0]).id;
+render();
+</script>
+
+</body></html>
