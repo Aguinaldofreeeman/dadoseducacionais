@@ -31,8 +31,9 @@ create unique index if not exists resultados_presenca_periodo_codigo_escola_uidx
 alter table public.resultados_presenca enable row level security;
 
 drop policy if exists "Select autenticado em resultados_presenca" on public.resultados_presenca;
-create policy "Select autenticado em resultados_presenca" on public.resultados_presenca
-  for select to authenticated using (true);
+drop policy if exists "Select público em resultados_presenca" on public.resultados_presenca;
+create policy "Select público em resultados_presenca" on public.resultados_presenca
+  for select to anon, authenticated using (true);
 
 drop policy if exists "Insert apenas ADM em resultados_presenca" on public.resultados_presenca;
 create policy "Insert apenas ADM em resultados_presenca" on public.resultados_presenca
@@ -57,6 +58,7 @@ create policy "Update apenas ADM em resultados_presenca" on public.resultados_pr
     )
   );
 
-grant select, insert, update on public.resultados_presenca to authenticated;
+grant select on public.resultados_presenca to anon, authenticated;
+grant insert, update on public.resultados_presenca to authenticated;
 
 notify pgrst, 'reload schema';
