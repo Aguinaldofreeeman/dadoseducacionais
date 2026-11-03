@@ -1662,12 +1662,13 @@
             /intervalo\s*semana\s*atual\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
         );
         const periodoNoArquivo = String(nomeArquivo).match(
-            /(?:semana\s*\d+\s*[-–—]\s*)?(\d{1,2}[./]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./]\d{1,2})/i
+            /(?:semana\s*(\d+)\s*[-–—]\s*)?(\d{1,2}[./]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./]\d{1,2})/i
         );
         const periodoInferido = intervaloSemana
             ? intervaloSemana[1].trim()
             : periodoNoArquivo
-                ? periodoNoArquivo[1].replace(/[.]/g, '/').replace(/\s+/g, ' ').trim()
+                ? (periodoNoArquivo[1] ? periodoNoArquivo[1] + ' - ' : '') +
+                    periodoNoArquivo[2].replace(/[.]/g, '/').replace(/\s+/g, ' ').trim()
                 : '';
         let linhaCabecalho = -1;
         let colunas = {};

@@ -1,4 +1,12 @@
 -- ============================================================================
+-- Corrigir o rótulo da semana 39 importada pelo nome do arquivo.
+-- Execute uma vez se os registros foram gravados como "25/10 a 31/10".
+-- ============================================================================
+update public.resultados_presenca
+set periodo = '39 - 25/10 a 31/10',
+    periodo_label = '39 - 25/10 a 31/10'
+where periodo = '25/10 a 31/10';
+
 --  PLATAFORMA DE DADOS EDUCACIONAIS - Manutenção do banco (Supabase SQL Editor)
 --  Rode os blocos na ordem. Todos são idempotentes (podem rodar várias vezes).
 --
