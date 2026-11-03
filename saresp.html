@@ -347,7 +347,7 @@
         const { data, error } = await supabaseClient.from('resultados_saresp').select('*').eq('ano', anos[0].ano);
         if (error || !data || data.length < 15) return;
         DATA = aPartirDeBanco(data);
-        rodape.textContent = ''';
+        rodape.textContent = 'Dados carregados do Supabase.';
         inicializar();
       } catch (err) { console.warn('Falha ao buscar resultados_saresp:', err.message); }
     }
