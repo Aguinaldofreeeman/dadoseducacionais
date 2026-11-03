@@ -210,12 +210,12 @@
         </div>
         <div class="card">
             <div class="modal-header">
-                <h3>Importar CSV - Aluno Presente</h3>
+                <h3>Importar Planilha - Aluno Presente</h3>
             </div>
             <div class="form-group">
-                <label for="presenca-file">Arquivo CSV de presença (.csv)</label>
-                <input type="file" id="presenca-file" accept=".csv">
-                <span class="help-text">Aceita as colunas periodo, escola (com código no formato "NOME - CÓDIGO"), matriculas_ativas, presenca, aulas_previstas e aulas_dadas; também lê o período do filtro IntervaloSemanaAtual e aceita os demais campos opcionais. Novos períodos são adicionados; reenvios atualizam a mesma escola no período sem apagar os outros períodos.</span>
+                <label for="presenca-file">Arquivo de presença (.csv, .xlsx ou .xls)</label>
+                <input type="file" id="presenca-file" accept=".csv,.xlsx,.xls">
+                <span class="help-text">Aceita CSV e Excel com as colunas periodo, escola (com código no formato "NOME - CÓDIGO"), matriculas_ativas, presenca, aulas_previstas e aulas_dadas; também lê o período do filtro IntervaloSemanaAtual e aceita os demais campos opcionais. Novos períodos são adicionados; reenvios atualizam a mesma escola no período sem apagar os outros períodos.</span>
             </div>
             <div id="presenca-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
             <div class="actions">
@@ -1691,7 +1691,7 @@
                 break;
             }
         }
-        if (linhaCabecalho < 0) throw new Error('O CSV está vazio.');
+        if (linhaCabecalho < 0) throw new Error('O arquivo está vazio.');
 
         if (ausentes.length) {
             throw new Error(
@@ -1732,7 +1732,7 @@
                     throw new Error(
                         `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
                         'Informe as colunas periodo e codigo_escola ou inclua o código no fim do nome ' +
-                        'da escola e o filtro IntervaloSemanaAtual no CSV.'
+                        'da escola e o filtro IntervaloSemanaAtual no arquivo.'
                     );
                 }
                 const pei = csvNormalizar(registro.pei);
@@ -1770,7 +1770,7 @@
             registros.push(registro);
         }
 
-        if (!registros.length) throw new Error('Nenhum registro de escola foi encontrado no CSV.');
+        if (!registros.length) throw new Error('Nenhum registro de escola foi encontrado no arquivo.');
         return registros;
     }
 
@@ -1793,7 +1793,7 @@
             confirmar.disabled = true;
             csvDadosPendentes[tipo] = null;
             if (!arquivo) {
-                preview.textContent = 'Selecione o arquivo CSV.';
+                preview.textContent = 'Selecione um arquivo de dados.';
                 preview.className = 'msg error';
                 preview.style.display = 'block';
                 return;
@@ -1823,14 +1823,14 @@
                     preview.style.display = 'block';
                     confirmar.disabled = false;
                 } catch (erro) {
-                    console.error(`Erro ao ler CSV de ${tipo}:`, erro);
-                    preview.textContent = `Erro ao ler o CSV: ${erro.message}`;
+                    console.error(`Erro ao ler arquivo de ${tipo}:`, erro);
+                    preview.textContent = `Erro ao ler a planilha: ${erro.message}`;
                     preview.className = 'msg error';
                     preview.style.display = 'block';
                 }
             };
             leitor.onerror = () => {
-                preview.textContent = 'Não foi possível ler o arquivo CSV.';
+                preview.textContent = 'Não foi possível ler o arquivo selecionado.';
                 preview.className = 'msg error';
                 preview.style.display = 'block';
             };
