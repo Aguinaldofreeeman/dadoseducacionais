@@ -1654,14 +1654,21 @@
         return numero;
     }
 
-    function csvLerRegistros(linhas, config, tipo) {
+    function csvLerRegistros(linhas, config, tipo, nomeArquivo = '') {
         const metadados = linhas.flat()
             .map(celula => String(celula ?? ''))
             .join('\n');
         const intervaloSemana = metadados.match(
             /intervalo\s*semana\s*atual\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
         );
-        const periodoInferido = intervaloSemana ? intervaloSemana[1].trim() : '';
+        const periodoNoArquivo = String(nomeArquivo).match(
+            /(?:semana\s*\d+\s*[-–—]\s*)?(\d{1,2}[./]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./]\d{1,2})/i
+        );
+        const periodoInferido = intervaloSemana
+            ? intervaloSemana[1].trim()
+            : periodoNoArquivo
+                ? periodoNoArquivo[1].replace(/[.]/g, '/').replace(/\s+/g, ' ').trim()
+                : '';
         let linhaCabecalho = -1;
         let colunas = {};
         let ausentes = [];
@@ -1807,7 +1814,7 @@
                     const linhas = XLSX.utils.sheet_to_json(planilha, {
                         header: 1, defval: null, raw: true, blankrows: false
                     });
-                    const registros = csvLerRegistros(linhas, config, tipo);
+                    const registros = csvLerRegistros(linhas, config, tipo, arquivo.name);
                     csvDadosPendentes[tipo] = registros;
                     const amostra = registros.slice(0, 3).map(registro => {
                         const nome = tipo === 'presenca'
