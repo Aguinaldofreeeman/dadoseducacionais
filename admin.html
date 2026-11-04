@@ -1922,6 +1922,389 @@
         });
     }
 
+    // =====================================================================
+    // Importador da Planilha Consolidada - Prova Paulista e Avaliação Regional
+    // Lê a aba "Dados" (Escolas PP 1 BIM / 2 BIM / 3 BIM: Total Alunos,
+    // Participação, Acertos e TEC) e a aba "Avaliações" (1ª e 2ª avaliação
+    // de cada bimestre). Grava em dados_educacionais (uma edição por
+    // bimestre, padrão "Prova_Paulista_Nº_bim_ANO.xlsx") e avaliacoes_alura.
+    // =====================================================================
+    function consNormalizar(texto) {
+        return String(texto == null ? '' : texto)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().trim();
+    }
+
+    function consEscapar(texto) {
+        return String(texto == null ? '' : texto)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Notas e contagens: sem conversão de escala (exceto percentual explícito)
+    function consNumero(valor) {
+        if (valor === null || valor === undefined || valor === '') return null;
+        if (typeof valor === 'number') return isFinite(valor) ? valor : null;
+        let texto = String(valor).trim();
+        const temPercentual = texto.includes('%');
+        texto = texto.replace(/%/g, '').replace(/\s/g, '')
+            .replace(/\.(?=\d{3}\b)/g, '').replace(',', '.');
+        const numero = parseFloat(texto);
+        if (isNaN(numero)) return null;
+        return temPercentual ? numero / 100 : numero;
+    }
+
+    // Percentuais da Prova Paulista: escala 0-100 é convertida para 0-1
+    function consPercentual(valor) {
+        let numero = consNumero(valor);
+        if (numero != null && numero > 1.5) numero = numero / 100;
+        return numero;
+    }
+
+    let consRegistros = [];   // dados_educacionais (inclui a linha "Total")
+    let consAvaliacoes = [];  // avaliacoes_alura
+    let consEdicoes = [];     // edições da Prova Paulista a gravar
+    let consAvisos = [];
+    let consAno = '';
+    let consComTotalAlunos = true;
+
+    // Confere se a coluna opcional total_alunos existe no banco
+    // Qualquer erro na consulta desativa a coluna (evita falha na gravação;
+    // a leitura de uma coluna inexistente retorna erro mesmo com a tabela vazia)
+    async function consDetectarColunasOpcionais() {
+        const { error } = await supabaseClient
+            .from('dados_educacionais')
+            .select('total_alunos')
+            .limit(1);
+        consComTotalAlunos = error ? false : true;
+    }
+
+    document.getElementById('cons-ler').addEventListener('click', async () => {
+        const arquivoInput = document.getElementById('cons-file');
+        const previewEl = document.getElementById('cons-preview');
+        const btnConfirmar = document.getElementById('cons-confirmar');
+        const anoSel = document.getElementById('cons-ano').value;
+
+        previewEl.style.display = 'none';
+        btnConfirmar.disabled = true;
+        consRegistros = [];
+        consAvaliacoes = [];
+        consEdicoes = [];
+        consAvisos = [];
+        consAno = anoSel;
+
+        if (!anoSel) {
+            alert('Por favor, selecione o ano referente à planilha antes de prosseguir.');
+            return;
+        }
+
+        if (!arquivoInput.files || arquivoInput.files.length === 0) {
+            alert('Por favor, selecione a planilha consolidada (.xlsx).');
+            return;
+        }
+
+        const arquivo = arquivoInput.files[0];
+        const leitor = new FileReader();
+
+        leitor.onload = function(e) {
+            try {
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+
+                // Localiza as duas abas
+                const nomeDados = workbook.SheetNames.find(n => consNormalizar(n) === 'dados');
+                const nomeAvals = workbook.SheetNames.find(n => /^avaliacoes?$/.test(consNormalizar(n)));
+                if (!nomeDados) {
+                    throw new Error('Não encontrei a aba "Dados". As abas do arquivo são: ' + workbook.SheetNames.join(', ') + '.');
+                }
+
+                // Aba "Dados": blocos de bimestre iniciados em colunas "Escolas PP N BIM"
+                const rd = XLSX.utils.sheet_to_json(workbook.Sheets[nomeDados], { header: 1, defval: null, raw: true });
+                const blocos = [];
+                (rd[0] || []).forEach((titulo, coluna) => {
+                    const m = consNormalizar(titulo).match(/^escolas?\s*pp\s*(\d)/);
+                    if (m) blocos.push({ b: +m[1] - 1, c: coluna });
+                });
+                if (!blocos.length) {
+                    throw new Error('Na aba "Dados", a primeira linha precisa ter colunas como "Escolas PP 1 BIM", "Escolas PP 2 BIM" e assim por diante.');
+                }
+
+                const edicaoDoBim = b => 'Prova_Paulista_' + (b + 1) + 'º_bim_' + consAno + '.xlsx';
+                consEdicoes = [...new Set(blocos.map(x => edicaoDoBim(x.b)))];
+
+                // Converte as linhas em registros (uma linha pode alimentar vários bimestres)
+                const porChave = new Map();
+                let ignoradas = 0;
+                let emEscala100 = false;
+
+                for (let r = 1; r < rd.length; r++) {
+                    const linha = rd[r] || [];
+                    for (const bloco of blocos) {
+                        const nome = linha[bloco.c];
+                        if (nome == null || String(nome).trim() === '') continue;
+                        const nomeEscola = String(nome).trim();
+
+                        if (PP_METADADOS.some(m => nomeEscola.toUpperCase().includes(m))) { ignoradas++; continue; }
+
+                        const ehTotal = consNormalizar(nomeEscola) === 'total';
+                        const registro = {
+                            ano: consAno,
+                            edicao_planilha: edicaoDoBim(bloco.b),
+                            escola: ehTotal ? 'Total' : nomeEscola
+                        };
+                        const alunos = consNumero(linha[bloco.c + 1]);
+                        const part = consPercentual(linha[bloco.c + 2]);
+                        const acertos = consPercentual(linha[bloco.c + 3]);
+                        const tec = consPercentual(linha[bloco.c + 4]);
+
+                        if (consComTotalAlunos && alunos != null) registro.total_alunos = alunos;
+                        if (part != null) registro.participacao = part;
+                        if (acertos != null) registro.acertos_prova = acertos;
+                        if (tec != null) registro.bio_tec = tec;
+
+                        porChave.set(registro.edicao_planilha + '||' + registro.escola, registro);
+                        if (part != null && part > 1.5) emEscala100 = true;
+                    }
+                }
+                consRegistros = [...porChave.values()];
+                if (!consRegistros.length) {
+                    throw new Error('Não encontrei nenhuma escola na aba "Dados".');
+                }
+                if (emEscala100) consAvisos.push('Alguns percentuais da Prova Paulista estavam em escala de 0 a 100 e foram convertidos para 0 a 1.');
+
+                // Aba "Avaliações": 1ª/2ª avaliação por bimestre
+                if (nomeAvals) {
+                    const ra = XLSX.utils.sheet_to_json(workbook.Sheets[nomeAvals], { header: 1, defval: null, raw: true });
+                    const titulos = ra[0] || [];
+                    const cabeEscolas = ra[1] || [];
+
+                    const colunasAval = [];
+                    cabeEscolas.forEach((h, c) => {
+                        if (consNormalizar(h) !== 'escola') return;
+                        for (let k = c; k <= c + 4 && k < titulos.length; k++) {
+                            const m = consNormalizar(titulos[k]).match(/(\d)\D*avalia\D*(\d)\D*bim/);
+                            if (m) { colunasAval.push({ n: +m[1], bim: +m[2], c: c }); break; }
+                        }
+                    });
+
+                    if (!colunasAval.length) {
+                        consAvisos.push('A aba "Avaliações" foi encontrada, mas não reconheci os títulos (esperado: "1ª AVALIAÇÃO - 1º BIM"). Nenhuma avaliação será importada.');
+                    } else {
+                        // Casamento de nomes: exato primeiro, depois ignorando acentos/maiúsculas
+                        const mapaEscolas = new Map();
+                        consRegistros.forEach(reg => {
+                            if (reg.escola === 'Total') return;
+                            mapaEscolas.set(reg.escola, reg.escola);
+                            const chave = consNormalizar(reg.escola);
+                            if (!mapaEscolas.has(chave)) mapaEscolas.set(chave, reg.escola);
+                        });
+
+                        const naoCasadas = new Set();
+                        const porChaveAval = new Map();
+
+                        for (const coluna of colunasAval) {
+                            for (let r = 2; r < ra.length; r++) {
+                                const linha = ra[r] || [];
+                                const nome = linha[coluna.c];
+                                if (nome == null || String(nome).trim() === '') continue;
+                                const nomeEscola = String(nome).trim();
+                                if (consNormalizar(nomeEscola) === 'total') continue;
+
+                                const alvo = mapaEscolas.get(nomeEscola) || mapaEscolas.get(consNormalizar(nomeEscola));
+                                if (!alvo) { naoCasadas.add(nomeEscola); continue; }
+
+                                const registro = {
+                                    ano: +consAno,
+                                    escola: alvo,
+                                    n_avaliacao: coluna.n,
+                                    bimestre: coluna.bim,
+                                    media_entre_nao_zerados: consNumero(linha[coluna.c + 1]),
+                                    media: consNumero(linha[coluna.c + 2]),
+                                    indice_realizacao: consNumero(linha[coluna.c + 3])
+                                };
+                                if (registro.media == null && registro.indice_realizacao == null && registro.media_entre_nao_zerados == null) continue;
+                                porChaveAval.set(alvo + '||' + coluna.n + '||' + coluna.bim, registro);
+                            }
+                        }
+                        consAvaliacoes = [...porChaveAval.values()];
+
+                        if (naoCasadas.size) {
+                            consAvisos.push(naoCasadas.size + ' nome(s) da aba "Avaliações" não existem na aba "Dados" e foram ignorados (ex.: ' + [...naoCasadas].slice(0, 2).join('; ') + ').');
+                        }
+                    }
+                } else {
+                    consAvisos.push('O arquivo não tem a aba "Avaliações". Apenas a Prova Paulista será importada.');
+                }
+
+                consRenderPreview(previewEl, arquivo.name, nomeDados, nomeAvals, ignoradas);
+                previewEl.style.display = 'block';
+                btnConfirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura da planilha consolidada:', err);
+                previewEl.innerHTML = '<span style="color:#dc2626;">Erro ao ler o arquivo: ' + consEscapar(err.message) + '</span>';
+                previewEl.style.display = 'block';
+            }
+        };
+
+        leitor.onerror = function() {
+            previewEl.innerHTML = '<span style="color:#dc2626;">Não foi possível ler o arquivo.</span>';
+            previewEl.style.display = 'block';
+        };
+
+        // Descobre se a coluna total_alunos existe antes de montar os registros
+        await consDetectarColunasOpcionais();
+        leitor.readAsArrayBuffer(arquivo);
+    });
+
+    // Monta a pré-visualização dos dois blocos (Prova Paulista + Avaliações)
+    function consRenderPreview(previewEl, nomeArquivo, nomeDados, nomeAvals, ignoradas) {
+        const pct = v => (v * 100).toFixed(1).replace('.', ',') + '%';
+        const porBim = consEdicoes.map((edicao, i) => {
+            const escolas = consRegistros.filter(r => r.edicao_planilha === edicao && r.escola !== 'Total');
+            const total = consRegistros.find(r => r.edicao_planilha === edicao && r.escola === 'Total');
+            const comTec = escolas.filter(r => r.bio_tec != null).length;
+            return '<tr><td>' + (i + 1) + 'º BIM</td><td>' + escolas.length + '</td><td>' + comTec + '</td><td>' +
+                (total && total.total_alunos != null ? total.total_alunos : '—') + '</td><td>' +
+                (total && total.participacao != null ? pct(total.participacao) : '—') + '</td><td>' +
+                (total && total.acertos_prova != null ? pct(total.acertos_prova) : '—') + '</td><td>' +
+                (total && total.bio_tec != null ? pct(total.bio_tec) : '—') + '</td></tr>';
+        }).join('');
+
+        let html = '<p><strong>Planilha:</strong> ' + consEscapar(nomeArquivo) +
+            ' — aba "Dados" detectada: ' + consEscapar(nomeDados) +
+            (nomeAvals ? ' (com a aba "Avaliações")' : '') + '</p>' +
+            '<p><strong>Ano:</strong> ' + consEscapar(consAno) + ' · <strong>Edições a gravar:</strong> ' +
+            consEdicoes.join(', ') + '</p>' +
+            '<p><strong>dados_educacionais:</strong> ' + consRegistros.length + ' registro(s)' +
+            (ignoradas ? ' (' + ignoradas + ' linha(s) de metadados ignoradas)' : '') +
+            (consComTotalAlunos ? '' : ' (sem a coluna total_alunos no banco)') + '</p>' +
+            '<table><thead><tr><th>Bimestre</th><th>Escolas</th><th>Com TEC</th><th>Total alunos</th><th>Participação (Rede)</th><th>Acertos (Rede)</th><th>TEC (Rede)</th></tr></thead><tbody>' +
+            porBim + '</tbody></table>';
+
+        if (consAvaliacoes.length) {
+            const porAval = consEdicoes.map((_, b) => {
+                return [1, 2].map(n => {
+                    const qtd = consAvaliacoes.filter(r => r.bimestre === b + 1 && r.n_avaliacao === n && r.media != null).length;
+                    return '<tr><td>' + (b + 1) + 'º BIM</td><td>' + n + 'ª avaliação</td><td>' + qtd + '</td></tr>';
+                }).join('');
+            }).join('');
+            html += '<p style="margin-top:10px;"><strong>avaliacoes_alura:</strong> ' + consAvaliacoes.length + ' registro(s) no ano ' + consEscapar(consAno) + '.</p>' +
+                '<table><thead><tr><th>Bimestre</th><th>Avaliação</th><th>Escolas com média</th></tr></thead><tbody>' + porAval + '</tbody></table>';
+        }
+
+        if (consAvisos.length) {
+            html += consAvisos.map(a => '<p style="color:#b45309; font-weight:bold;">Atenção: ' + consEscapar(a) + '</p>').join('');
+        }
+
+        html += '<p style="margin-top:10px;"><strong>Amostra (3 primeiras escolas, 1º BIM):</strong></p>' +
+            '<table><thead><tr><th>Escola</th><th>Total alunos</th><th>Participação</th><th>Acertos</th><th>TEC</th></tr></thead><tbody>' +
+            consRegistros.filter(r => r.edicao_planilha === consEdicoes[0] && r.escola !== 'Total').slice(0, 3).map(r =>
+                '<tr><td>' + consEscapar(r.escola) + '</td><td>' + (r.total_alunos ?? '—') + '</td><td>' +
+                (r.participacao != null ? pct(r.participacao) : '—') + '</td><td>' +
+                (r.acertos_prova != null ? pct(r.acertos_prova) : '—') + '</td><td>' +
+                (r.bio_tec != null ? pct(r.bio_tec) : '—') + '</td></tr>').join('') +
+            '</tbody></table>';
+
+        previewEl.innerHTML = html;
+    }
+
+    document.getElementById('cons-confirmar').addEventListener('click', async () => {
+        const previewEl = document.getElementById('cons-preview');
+        const btnConfirmar = document.getElementById('cons-confirmar');
+
+        if (!consRegistros.length && !consAvaliacoes.length) return;
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Importando...';
+
+        try {
+            const avisos = [];
+
+            // 1) dados_educacionais: remove os dados anteriores de cada edição
+            for (const edicao of consEdicoes) {
+                const { data: antigos } = await supabaseClient
+                    .from('dados_educacionais')
+                    .select('id')
+                    .eq('ano', consAno)
+                    .eq('edicao_planilha', edicao);
+                const quantidade = antigos ? antigos.length : 0;
+
+                const { data: removidos, error: erroDelete } = await supabaseClient
+                    .from('dados_educacionais')
+                    .delete()
+                    .eq('ano', consAno)
+                    .eq('edicao_planilha', edicao)
+                    .select('id');
+
+                if (erroDelete) {
+                    console.error('Erro ao limpar ' + edicao + ':', erroDelete);
+                    avisos.push('não foi possível remover os ' + quantidade + ' registro(s) anteriores da edição ' + edicao + ' (' + erroDelete.message + '). Reimportar pode gerar duplicatas.');
+                } else if (quantidade > 0 && (!removidos || removidos.length === 0)) {
+                    avisos.push('os ' + quantidade + ' registro(s) anteriores da edição ' + edicao + ' não foram removidos (permissão de exclusão negada). Reimportar pode gerar duplicatas.');
+                }
+            }
+
+            // 2) Grava a Prova Paulista em lotes
+            const TAMANHO_LOTE = 250;
+            for (let i = 0; i < consRegistros.length; i += TAMANHO_LOTE) {
+                const { error } = await supabaseClient
+                    .from('dados_educacionais')
+                    .insert(consRegistros.slice(i, i + TAMANHO_LOTE));
+                if (error) throw error;
+            }
+
+            // 3) Registra as edições no catálogo
+            const { data: edicoes } = await supabaseClient
+                .from('edicoes_disponiveis')
+                .select('ano, edicao_planilha');
+            for (const edicao of consEdicoes) {
+                const jaExiste = edicoes && edicoes.some(e =>
+                    String(e.ano) === String(consAno) && e.edicao_planilha === edicao);
+                if (!jaExiste) {
+                    const { error } = await supabaseClient
+                        .from('edicoes_disponiveis')
+                        .insert({ ano: consAno, edicao_planilha: edicao });
+                    if (error) throw error;
+                }
+            }
+
+            // 4) avaliacoes_alura: limpa o ano e grava a série mensal
+            let totalAvals = 0;
+            if (consAvaliacoes.length) {
+                const { error: erroLimpar } = await supabaseClient
+                    .from('avaliacoes_alura')
+                    .delete()
+                    .eq('ano', consAno);
+                if (erroLimpar) throw new Error('Não foi possível limpar avaliacoes_alura do ano ' + consAno + ': ' + erroLimpar.message);
+
+                for (let i = 0; i < consAvaliacoes.length; i += TAMANHO_LOTE) {
+                    const { error } = await supabaseClient
+                        .from('avaliacoes_alura')
+                        .insert(consAvaliacoes.slice(i, i + TAMANHO_LOTE));
+                    if (error) throw error;
+                }
+                totalAvals = consAvaliacoes.length;
+            }
+
+            previewEl.innerHTML = '<span style="color:green;"><strong>Importação concluída!</strong> ' +
+                consRegistros.length + ' registro(s) gravados em dados_educacionais (' + consEdicoes.join(', ') + ')' +
+                (totalAvals ? ' e ' + totalAvals + ' registro(s) em avaliacoes_alura (ano ' + consAno + ').' : '.') +
+                avisos.map(a => ' <span style="color:#b45309;">Atenção: ' + consEscapar(a) + '</span>').join('') + '</span>';
+            document.getElementById('cons-file').value = '';
+            consRegistros = [];
+            consAvaliacoes = [];
+            consEdicoes = [];
+            consAno = '';
+            btnConfirmar.textContent = '2. Confirmar Importação';
+            btnConfirmar.disabled = true;
+        } catch (err) {
+            console.error('Erro na importação consolidada:', err);
+            previewEl.innerHTML = '<span style="color:#dc2626;">Erro ao gravar no banco: ' + consEscapar(err.message) +
+                ' A Prova Paulista pode ter sido gravada antes da falha; verifique o banco antes de reenviar.</span>';
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '2. Confirmar Importação';
+        }
+    });
+
     configurarImportadorCsv('presenca');
     configurarImportadorCsv('robotica');
 
