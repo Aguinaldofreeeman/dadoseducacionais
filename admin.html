@@ -74,6 +74,33 @@
 
 
 
+        <!-- Card de Importação - Planilha Consolidada (Prova Paulista + Avaliações Alura) -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Consolidada - Prova Paulista e Avaliação Regional</h3>
+            </div>
+            <div class="form-group">
+                <label for="cons-ano">Ano Letivo Referente à Planilha</label>
+                <select id="cons-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Lê a aba "Dados" (Escolas PP 1 BIM, 2 BIM, 3 BIM...: Total Alunos, Participação, Acertos e TEC) e a aba "Avaliações" (1ª e 2ª avaliação de cada bimestre). Atualiza as tabelas dados_educacionais e avaliacoes_alura, que alimentam o painel Prova Paulista e Alura. Reimportar substitui os dados anteriores do ano.</span>
+            </div>
+            <div class="form-group">
+                <label for="cons-file">Planilha consolidada (.xlsx)</label>
+                <input type="file" id="cons-file" accept=".xlsx, .xls">
+            </div>
+            <div id="cons-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="cons-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="cons-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
+        
+
 
         <!-- Card de Importação de Dados -->
         <div class="card">
