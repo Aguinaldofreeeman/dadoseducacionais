@@ -78,7 +78,7 @@
       ['nome', 'Escola (A–Z)']
     ];
 
-    let ordem = { campo: 'medN', dir: -1 };
+    let ordem = { campo: 'nome', dir: 1 };
     let extra = null;
 
     function rotuloOrdem(campo) {
@@ -180,14 +180,14 @@
         '<td class="i' + (total[k].i == null ? ' vazio' : '') + '">' + fmtI(total[k].i) + '</td>' +
         '<td class="n' + (total[k].n == null ? ' vazio' : '') + '">' + fmtN(total[k].n) + '</td>').join('') + '</tr>';
 
-      rows.innerHTML = regional + lista.map(e => {
+      rows.innerHTML = lista.map(e => {
         const tds = periodos.map((p, k) => {
           const s = e.serie[k] || {};
           return '<td class="i' + (s.i == null ? ' vazio' : '') + '">' + fmtI(s.i) + '</td>' +
             '<td class="n' + (s.n == null ? ' vazio' : '') + '">' + fmtN(s.n) + '</td>';
         }).join('');
         return '<tr><td>' + esc(e.escola) + (e.codigo ? ' <span class="cod">· ' + esc(e.codigo) + '</span>' : '') + '</td>' + tds + '</tr>';
-      }).join('');
+      }).join('') + regional;
 
       montarCabecalho();
     }
