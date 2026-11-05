@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização Mensal da Alura</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background-color: #17365d; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 22px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
+        .btn-nav:hover { background-color: #0f766e; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        main { padding: 30px; max-width: 1100px; margin: 0 auto; }
+
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+
+        /* Grid de Resumo Mensal */
+        .monthly-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .monthly-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; }
+        .monthly-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #64748b; text-transform: uppercase; }
+        .monthly-card .value { font-size: 32px; font-weight: bold; color: #17365d; }
+        .monthly-card .label { font-size: 12px; color: #94a3b8; margin-top: 5px; display: block; }
+
+        /* Seleção de Mês */
+        .month-selector { margin-bottom: 20px; }
+        .month-selector label { font-size: 14px; color: #475569; margin-right: 10px; }
+        .month-selector select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+
+        /* Tabela de Dados Mensais */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f1f5f9; color: #475569; font-weight: bold; white-space: normal; max-width: 150px; vertical-align: middle; }
+        tr:hover { background-color: #f8fafc; }
+        .text-right { text-align: right; }
+        .badge-pct { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; background-color: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Visualização Mensal da Alura</h1>
+        <div class="header-actions">
+            <a href="alura.html" class="btn-nav">Resultados por Unidade Escolar</a>
+            <a href="index.html" class="btn-nav">Início</a>
+            <button id="btn-sair" class="btn-logout">Sair</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="monthly-grid">
+            <div class="monthly-card">
+                <h3>Total de Acessos</h3>
+                <div class="value" id="total-acessos">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+            <div class="monthly-card">
+                <h3>Cursos Concluídos</h3>
+                <div class="value" id="total-cursos">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+            <div class="monthly-card">
+                <h3>Exercícios Realizados</h3>
+                <div class="value" id="total-exercicios">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+            <div class="monthly-card">
+                <h3>Projetos Enviados</h3>
+                <div class="value" id="total-projetos">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+        </div>
+
+        <div class="monthly-grid">
+            <div class="monthly-card">
+                <h3>Média de Avaliações Mensais</h3>
+                <div class="value" id="media-avaliacoes">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+            <div class="monthly-card">
+                <h3>Índice de Realização</h3>
+                <div class="value" id="indice-realizacao">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+            <div class="monthly-card">
+                <h3>Total de Matrículas</h3>
+                <div class="value" id="total-matriculas">-</div>
+                <div class="label">Mês corrente</div>
+            </div>
+        </div>
+
+        <div class="month-selector">
+            <label for="filtro-mes">Selecione o Mês</label>
+            <select id="filtro-mes">
+                <option value="todos">Todos os Meses</option>
+                <option value="2026-11">Novembro 2026</option>
+                <option value="2026-10">Outubro 2026</option>
+                <option value="2026-09">Setembro 2026</option>
+                <option value="2026-08">Agosto 2026</option>
+            </select>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Escola</th>
+                        <th>Acessos</th>
+                        <th>Exercícios</th>
+                        <th>Avaliações Médias</th>
+                        <th>Índice Realização (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-mensal">
+                    <tr><td colspan="5" style="text-align:center; padding: 20px;">Carregando dados mensais da Alura...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let dadosMensais = [];
+
+        // Proteção de rota não autenticada
+        async function verificarSessao() {
+            const { data: { session} } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+            } else {
+                carregarDadosMensais();
+            }
+        }
+        verificarSessao();
+
+        document.getElementById('btn-sair').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        });
+
+        // Carregar Dados Mensais da Alura
+        async function carregarDadosMensais() {
+            const tbody = document.getElementById('lista-mensal');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('resultados_alura')
+                    .select('*')
+                    .order('escola', { ascending: true });
+
+                if (error || !data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Nenhum dado mensal da Alura importado no banco até ao momento.</td></tr>';
+                    return;
+                }
+
+                dadosMensais = data;
+                popularMesSelecionado();
+                renderizarTabelaMensal(dadosMensais);
+            } catch (err) {
+                console.error('Erro ao carregar dados mensais:', err);
+                tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Erro ao carregar dados: ${err.message}</td></tr>`;
+            }
+        }
+
+        function popularMesSelecionado() {
+            const mesSelect = document.getElementById('filtro-mes');
+            const meses = [...new Set(dadosMensais.map(item => item.mes))].filter(mes => mes !== null);
+            mesSelect.innerHTML = '<option value="todos">Todos os Meses</option>';
+            meses.forEach(mes => {
+                const option = document.createElement('option');
+                option.value = mes;
+                option.textContent = mes;
+                mesSelect.appendChild(option);
+            });
+        }
+
+        function renderizarTabelaMensal(lista) {
+            const tbody = document.getElementById('lista-mensal');
+            const mesSelecionado = document.getElementById('filtro-mes').value;
+
+            const filtrados = mesSelecionado === 'todos'
+                ? lista
+                : lista.filter(item => item.mes === mesSelecionado);
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Nenhum dado disponível para o mês selecionado.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtrados.map(item => {
+                const indiceRealizacao = item.total_de_acertos_ate_a_2a_tentativa > 0
+                    ? ((item.exercicios_realizados || 0) / item.total_de_acertos_ate_a_2a_tentativa) * 100
+                    : 0;
+                return `
+                    <tr>
+                        <td><strong>${item.escola}</strong></td>
+                        <td class="text-right">${formatarNumero(item.alunos_com_acessos_no_periodo, false)}</td>
+                        <td class="text-right">${formatarNumero(item.exercicios_realizados, true)}</td>
+                        <td class="text-right">${formatarNumero(item.media_das_avaliacoes_mensais, true)}</td>
+                        <td class="text-right"><span class="badge-pct">${indiceRealizacao.toFixed(1)}%</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.atualizarResumoMensal = function(lista) {
+            const meses = [...new Set(lista.map(item => item.mes))].filter(mes => mes !== null);
+            const exibir = (campo) => {
+                const valores = lista.filter(item => item.mes === meses[meses.length - 1] || (meses.length === 1 && item.mes === meses[0]));
+                if (valores.length === 0) return '-';
+                const soma = valores.reduce((acc, curr) => acc + (curr[campo] || 0), 0);
+                return soma.toLocaleString('pt-BR');
+            };
+
+            document.getElementById('total-acessos').textContent = exibir('alunos_com_acessos_no_periodo');
+            document.getElementById('total-cursos').textContent = exibir('cursos_concluidos');
+            document.getElementById('total-exercicios').textContent = exibir('exercicios_realizados');
+            document.getElementById('total-projetos').textContent = exibir('projetos_enviados');
+            document.getElementById('media-avaliacoes').textContent = formatarNumero(
+                lista.reduce((acc, curr) => acc + (curr.media_das_avaliacoes_mensais || 0), 0) / (meses.length || 1), true
+            );
+            document.getElementById('indice-realizacao').textContent = formatarPercentual(
+                lista.reduce((acc, curr) => acc + (curr.exercicios_realizados || 0), 0) / 
+                lista.reduce((acc, curr) => acc + (curr.total_de_acertos_ate_a_2a_tentativa || 1), 1) * 100
+            );
+        };
+
+        function formatarNumero(valor, inteiro) {
+            if (valor === null || valor === undefined || valor === '') return '-';
+            const numero = Number(valor);
+            if (isNaN(numero)) return '-';
+            const casas = inteiro ? 0 : 2;
+            return numero.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+        }
+
+        function formatarPercentual(valor) {
+            if (valor === null || valor === undefined || valor === '') return '-';
+            const numero = Number(valor);
+            if (isNaN(numero)) return '-';
+            return numero.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+        }
+
+        document.getElementById('filtro-mes').addEventListener('change', () => {
+            renderizarTabelaMensal(dadosMensais);
+            atualizarResumoMensal(dadosMensais);
+        });
+    </script>
+</body>
+</html>

@@ -77,7 +77,9 @@
 
         <!-- Card da Tabela de Resultados -->
         <div class="card">
-            <h2>Resultados por Unidade Escolar</h2>
+            <h2>Resultados por Unidade Escolar
+                <span class="btn-nav" style="margin-left: 12px; background-color: #6d28d9; cursor: pointer;" onclick="abrirVisualizacaoMensal()">Visualização Mensal da Alura</span>
+            </h2>
             <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0; line-height: 1.5;">
                 Colunas por ano letivo: 2026 tem <strong>acessos, exercícios, tentativas, avaliações mensais</strong>
                 (média, não-zeradores e realização) e <strong>questões discursivas</strong>; 2025 tem
@@ -322,6 +324,10 @@
     window.filtrarResultados = function() {
         aplicarFiltros();
     };
+
+    function abrirVisualizacaoMensal() {
+        window.location.href = 'visualizacao-mensal-alura.html';
+    }
 </script>
 </body>
 </html>
