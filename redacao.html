@@ -18,7 +18,7 @@
     <p class="intro">Índice semanal da plataforma Redação Paulista e nota das produções textuais por unidade escolar, com todas as quinzenas da planilha de origem: <b>I</b> = índice semanal (valor bruto, não é percentual — por isso supera 1,0 em várias quinzenas) e <b>N</b> = nota das redações. A linha <b>MARILIA · Regional</b> reproduz a linha <i>Total</i> da planilha.</p>
     <section class="cards" id="cards"></section>
     <section id="dashboardEscola" aria-live="polite"></section>
-    <section class="panel"><div class="panel-head"><div><h2>Matriz escola × quinzena</h2><p id="sub"></p></div><div class="filters"><select id="select-escola" aria-label="Filtrar escola"><option value="">Todas as Escolas</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="order" aria-label="Ordenar por"></select></div></div><div class="table-wrap"><table><thead id="thead"></thead><tbody id="rows"></tbody></table></div><p class="ordem">Clique no cabeçalho de uma quinzena (ou em <b>I</b>/<b>N</b>) para ordenar por aquela coluna; clique de novo para inverter.</p></section>
+    <section class="panel"><div class="panel-head"><div><h2>Matriz escola × quinzena</h2><p id="sub"></p></div><div class="filters"><select id="select-escola" aria-label="Filtrar escola"><option value="">Todas as Escolas</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="order" aria-label="Ordenar por"></select><select id="destaque" aria-label="Destaque ou atenção"><option value="todos">Todos</option><option value="top">Top 10 · Destaque</option><option value="bottom">Bottom 10 · Atenção</option></select></div></div><div class="table-wrap"><table><thead id="thead"></thead><tbody id="rows"></tbody></table></div><p class="ordem">Clique no cabeçalho de uma quinzena (ou em <b>I</b>/<b>N</b>) para ordenar por aquela coluna; clique de novo para inverter.</p></section>
     <p class="note" id="rodape"></p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -68,7 +68,8 @@
       thead = document.querySelector('#thead'), sub = document.querySelector('#sub'),
       rodape = document.querySelector('#rodape'), q = document.querySelector('#q'),
       ordemSel = document.querySelector('#order'), selectEscola = document.querySelector('#select-escola'),
-      subtitulo = document.querySelector('#subtitulo');
+      subtitulo = document.querySelector('#subtitulo'),
+      destaqueSel = document.querySelector('#destaque');
 
     const OPCOES = [
       ['medN', 'Nota média (maior)'],
@@ -80,6 +81,7 @@
 
     let ordem = { campo: 'nome', dir: 1 };
     let extra = null;
+    let destaque = 'todos';
 
     function rotuloOrdem(campo) {
       const fixa = OPCOES.filter(o => o[0] === campo)[0];
@@ -172,9 +174,21 @@
         });
       }
 
-      sub.textContent = lista.length + ' de ' + escolas.length + ' unidades · ' + periodos.length +
-        ' quinzenas · ordenado por ' + rotuloOrdem(ordem.campo).toLowerCase() +
-        (ordem.campo === 'nome' ? (ordem.dir < 0 ? ' (Z–A)' : ' (A–Z)') : (ordem.dir < 0 ? ' (maior)' : ' (menor)')) + '.';
+      if (destaque === 'top') {
+        lista.sort((a, b) => (b.medN ?? -Infinity) - (a.medN ?? -Infinity));
+        lista = lista.slice(0, 10);
+      } else if (destaque === 'bottom') {
+        lista.sort((a, b) => (a.medN ?? Infinity) - (b.medN ?? Infinity));
+        lista = lista.slice(0, 10);
+      }
+
+      const rotuloFiltro = destaque === 'top' ? 'Top 10 · Destaque' : destaque === 'bottom' ? 'Bottom 10 · Atenção' : 'Todos';
+      const ordenadoPor = destaque !== 'todos'
+        ? 'nota média'
+        : rotuloOrdem(ordem.campo).toLowerCase() +
+          (ordem.campo === 'nome' ? (ordem.dir < 0 ? ' (Z–A)' : ' (A–Z)') : (ordem.dir < 0 ? ' (maior)' : ' (menor)'));
+      sub.textContent = (destaque !== 'todos' ? '🔟 ' + rotuloFiltro + ' — ' : '') + lista.length + ' de ' + escolas.length + ' unidades · ' + periodos.length +
+        ' quinzenas · ordenado por ' + ordenadoPor + '.';
 
       const regional = '<tr class="regional"><td>MARILIA · Regional</td>' + periodos.map((p, k) =>
         '<td class="i' + (total[k].i == null ? ' vazio' : '') + '">' + fmtI(total[k].i) + '</td>' +
@@ -216,6 +230,7 @@
 
     q.oninput = render;
     selectEscola.onchange = render;
+    destaqueSel.onchange = function () { destaque = destaqueSel.value; render(); };
     ordemSel.onchange = function () {
       ordem = { campo: ordemSel.value, dir: ordemSel.value === 'nome' ? 1 : -1 };
       extra = null;
