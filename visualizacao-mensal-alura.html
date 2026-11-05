@@ -82,8 +82,9 @@ tr.tot td:first-child{background:var(--accent-soft)}
   <section class="card" aria-labelledby="hc"><h2 id="hc">Evolução em 2026</h2><p class="sub" id="csub"></p>
     <svg class="chart" id="chart" viewBox="0 0 760 230" role="img" aria-label="Evolução mensal do indicador"></svg>
     <div class="readout" id="readout" aria-live="polite"></div></section>
+  <section class="card" id="escolaSec" aria-labelledby="esk" hidden><h2 id="esk">Escola selecionada · <span id="escolaNome"></span></h2><p class="sub" id="eskSub"></p><div class="kpis" id="eskKpis" style="margin-top:10px"></div></section>
   <section aria-labelledby="ht"><h2 id="ht">Escola por escola</h2><p class="sub" id="tsub"></p>
-    <div class="tools"><input type="search" id="q" class="grow" placeholder="Buscar escola ou código" aria-label="Buscar escola"><label class="row" style="gap:6px"><span class="sub">Ordenar</span><select id="sort"></select></label></div>
+    <div class="tools"><label class="row" style="gap:6px"><span class="sub">Escola</span><select id="school" aria-label="Selecionar escola"></select></label><label class="row" style="gap:6px"><span class="sub">Ordenar</span><select id="sort"></select></label></div>
     <div class="tablewrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <p class="note" style="margin-top:8px">Escolas sem dado no mês aparecem com “–”. Médias da rede ponderam pelas matrículas no índice de acessos; nos demais índices é a média simples das escolas.</p></section>
 </main>
@@ -111,14 +112,16 @@ function agg(mes,m){const rows=DATA[mes];if(!rows)return null;
   if(m.a==='ratio'){let a=0,b=0;rows.forEach(r=>{a+=r[1]||0;b+=r[0]||0});return b?a/b:null}
   const v=rows.map(r=>r[m.i]).filter(x=>x!=null);if(!v.length)return null;
   const s=v.reduce((x,y)=>x+y,0);return m.a==='sum'?s:s/v.length}
+function schoolVal(k,m,n){const r=DATA[n]&&DATA[n][k];return r?r[m.i]:null}
 
-let sel=[],metric=METRICS[2];
+let sel=[],metric=METRICS[2],chosenSchool=null;
 try{const s=JSON.parse(localStorage.getItem('alura26')||'null');if(s){sel=s.sel.filter(x=>have.includes(x));const mm=METRICS.find(x=>x.i===s.m);if(mm)metric=mm}}catch(e){}
 if(!sel.length)sel=have.slice(-2);
 
 const $=id=>document.getElementById(id);
 $('metric').innerHTML=METRICS.map(m=>`<option value="${m.i}">${m.n}</option>`).join('');
 $('metric').value=metric.i;
+$('school').innerHTML=`<option value="">Todas as escolas</option>`+SCHOOLS.map((n,k)=>`<option value="${k}">${n}</option>`).join('');
 function save(){try{localStorage.setItem('alura26',JSON.stringify({sel,m:metric.i}))}catch(e){}}
 
 function buildChips(){$('months').innerHTML=MS.map((s,k)=>{const n=k+1,ok=have.includes(n);
@@ -128,7 +131,7 @@ function toggle(n){sel=sel.includes(n)?(sel.length>1?sel.filter(x=>x!==n):sel):[
 $('allm').onclick=()=>{sel=[...have];render()};
 $('lastTwo').onclick=()=>{sel=have.slice(-2);render()};
 $('metric').onchange=e=>{metric=METRICS.find(m=>m.i===+e.target.value);render()};
-$('q').oninput=renderTable;$('sort').onchange=renderTable;
+$('school').onchange=e=>{chosenSchool=e.target.value===''?null:+e.target.value;render()};$('sort').onchange=renderTable;
 
 function renderKpis(){
   const f=sel[0],l=sel[sel.length-1];
@@ -143,23 +146,26 @@ function renderKpis(){
 function niceMax(v,m){if(m.f==='pct')return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));return Math.ceil(v/p*2)/2*p||1}
 function renderChart(){
   const W=760,H=230,L=52,R=14,T=14,B=30;
-  const vals=have.map(n=>agg(n,metric));const mx=niceMax(Math.max(...vals.filter(v=>v!=null)),metric);
+  const redeVals=have.map(n=>agg(n,metric));
+  const valOf=n=>chosenSchool==null?agg(n,metric):schoolVal(chosenSchool,metric,n);
+  const vals=chosenSchool==null?redeVals:have.map(n=>schoolVal(chosenSchool,metric,n));const mx=niceMax(Math.max(...vals.filter(v=>v!=null)),metric);
   const x=k=>L+(W-L-R)*(k/11),y=v=>T+(H-T-B)*(1-v/mx);
   let s='';
   for(let t=0;t<=4;t++){const v=mx*t/4,yy=y(v);s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${yy+4}" text-anchor="end">${metric.f==='pct'?Math.round(v*100)+'%':F[metric.f==='int'?'int':metric.f].format(v)}</text>`}
   MS.forEach((m,k)=>{const ok=have.includes(k+1);s+=`<text x="${x(k)}" y="${H-8}" text-anchor="middle" style="${ok?'':'opacity:.45'}">${m}</text>`});
+  if(chosenSchool!=null){const dpts=have.map((n,j)=>[x(n-1),y(redeVals[j]),n,redeVals[j]]).filter(p=>p[3]!=null);if(dpts.length)s+=`<path d="${dpts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`}
   const pts=have.map((n,j)=>[x(n-1),y(vals[j]),n,vals[j]]).filter(p=>p[3]!=null);
   s+=`<path d="${pts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
   pts.forEach(p=>{const on=sel.includes(p[2]);
     s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${on?6:4.5}" fill="${on?'var(--accent)':'var(--surface)'}" stroke="${on?'var(--surface)':'var(--accent)'}" stroke-width="2"/>`;
-    s+=`<circle class="pt" data-m="${p[2]}" cx="${p[0]}" cy="${p[1]}" r="16" fill="transparent" tabindex="0" role="button" aria-label="${MN[p[2]-1]}: ${fmt(metric,p[3])}. ${on?'Remover da seleção':'Adicionar à seleção'}"/>`});
+    s+=`<circle class="pt" data-m="${p[2]}" cx="${p[0]}" cy="${p[1]}" r="16" fill="transparent" tabindex="0" role="button" aria-label="${MN[p[2]-1]}: ${fmt(metric,valOf(p[2]))}. ${on?'Remover da seleção':'Adicionar à seleção'}"/>`});
   $('chart').innerHTML=s;
-  $('csub').textContent=metric.n+'. Pontos preenchidos são os meses escolhidos; clique em um ponto para incluir ou tirar o mês.';
+  $('csub').textContent=(chosenSchool==null?'Rede · ':(SCHOOLS[chosenSchool]+' · '))+metric.n+'. Pontos preenchidos são os meses escolhidos; clique em um ponto para incluir ou tirar o mês.'+(chosenSchool==null?'':' Linha tracejada: rede.');
   $('readout').textContent='';
 }
 $('chart').addEventListener('click',e=>{const p=e.target.closest('.pt');if(p)toggle(+p.dataset.m)});
 $('chart').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('pt')){e.preventDefault();toggle(+e.target.dataset.m)}});
-function ro(e){const p=e.target.closest&&e.target.closest('.pt');$('readout').textContent=p?`${MN[+p.dataset.m-1]}: ${fmt(metric,agg(+p.dataset.m,metric))}`:''}
+function ro(e){const p=e.target.closest&&e.target.closest('.pt');$('readout').textContent=p?`${MN[+p.dataset.m-1]}: ${fmt(metric,valOf(+p.dataset.m))}`:''}
 $('chart').addEventListener('mouseover',ro);$('chart').addEventListener('focusin',ro);
 
 function setSort(){const cur=$('sort').value||'nome';const l=MS[sel[sel.length-1]-1];
@@ -168,8 +174,8 @@ function setSort(){const cur=$('sort').value||'nome';const l=MS[sel[sel.length-1
   $('sort').innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
   $('sort').value=opts.some(o=>o[0]===cur)?cur:'nome'}
 function renderTable(){
-  const f=sel[0],l=sel[sel.length-1],multi=sel.length>1,q=$('q').value.trim().toLowerCase(),i=metric.i;
-  let idx=SCHOOLS.map((n,k)=>k).filter(k=>!q||SCHOOLS[k].toLowerCase().includes(q));
+  const f=sel[0],l=sel[sel.length-1],multi=sel.length>1,i=metric.i;
+  let idx=SCHOOLS.map((n,k)=>k);
   const val=(mes,k)=>DATA[mes][k][i],dl=k=>{const a=val(f,k),b=val(l,k);return a==null||b==null?null:b-a};
   const s=$('sort').value;const cmp=(g,dir)=>(a,b)=>{const x=g(a),y=g(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return dir*(x-y)};
   if(s==='nome')idx.sort((a,b)=>SCHOOLS[a].localeCompare(SCHOOLS[b],'pt-BR'));
@@ -182,7 +188,21 @@ function renderTable(){
   $('tbody').innerHTML=idx.length?totRow+body:`<tr><td class="empty" colspan="${sel.length+2}">Nenhuma escola encontrada para “${q}”.</td></tr>`;
   $('tsub').textContent=`${metric.n} em ${sel.map(n=>MN[n-1]).join(', ')}. ${idx.length} de ${SCHOOLS.length} escolas.`;
 }
-function render(){buildChips();renderKpis();renderChart();setSort();renderTable();save()}
+function renderSchoolKpis(){
+  const sec=$('escolaSec');
+  if(chosenSchool==null){sec.hidden=true;return;}
+  sec.hidden=false;
+  const k=chosenSchool;
+  $('escolaNome').textContent=SCHOOLS[k];
+  const f=sel[0],l=sel[sel.length-1];
+  $('eskSub').textContent=sel.length===1?`${MN[f-1]} de 2026.`:`${sel.map(n=>MS[n-1]).join(', ')}. A variação compara ${MN[l-1]} com ${MN[f-1]}.`;
+  $('eskKpis').innerHTML=KPI.map(m=>{
+    const lv=schoolVal(k,m,l);let extra='';
+    if(sel.length>1){const d=fmtDelta(m,schoolVal(k,m,f),lv);if(d)extra=`<span class="${d.cls}">${d.ar} ${d.t}</span> <span>vs ${MS[f-1]} (${fmt(m,schoolVal(k,m,f))})</span>`}
+    else extra=`<span>${F.int.format(schoolVal(k,METRICS[1],l)||0)} de ${F.int.format(schoolVal(k,METRICS[0],l)||0)} alunos acessaram</span>`;
+    if(m.i!==2&&sel.length===1)extra='&nbsp;';
+    return `<div class="kpi"><div class="n">${m.n}</div><div class="v">${fmt(m,lv)}</div><div class="m">${extra}</div></div>`}).join('')}
+function render(){buildChips();renderKpis();renderChart();setSort();renderTable();renderSchoolKpis();save()}
 render();
 </script>
 
