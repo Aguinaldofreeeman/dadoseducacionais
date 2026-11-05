@@ -159,7 +159,7 @@
       const termo = q.value.trim().toLowerCase();
       const alvo = selectEscola.value;
 
-      const lista = escolas.filter(e => (!alvo || e.escola === alvo) &&
+      let lista = escolas.filter(e => (!alvo || e.escola === alvo) &&
         (!termo || e.escola.toLowerCase().includes(termo) || String(e.codigo || '').includes(termo)));
 
       if (ordem.campo === 'nome') {
