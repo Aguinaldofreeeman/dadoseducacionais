@@ -1,81 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resultados de Presença e Aulas</title>
-  <link rel="stylesheet" href="css/resultados-presenca.css">
-  <link rel="stylesheet" href="css/home-button.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Resultados de Presença e Aulas</title>
+<style>
+:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
+header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}
+.btn{padding:9px 14px;border-radius:8px;color:#fff;font:14px inherit;background:var(--p);border:0;cursor:pointer}
+main{max-width:1320px;margin:auto;padding:22px 30px 40px}
+.g{background:#16803c;color:#fff}.y{background:#facc15;color:#422006}.r{background:#dc2626;color:#fff}
+.sq{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px}.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:12px}
+.avg{background:linear-gradient(120deg,#17365d,#134e6f);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:14px;box-shadow:var(--sh)}
+.avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 6px;display:flex;align-items:center;gap:8px}.avg .d{font-size:12px;opacity:.75;margin-top:6px}
+.bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}.avg .bar{background:#ffffff30}.avg .bar i{background:#5eead4}
+.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}.warn .bar i{background:#f59e0b}
+.legend{background:#0f2a47;color:#fff;border-radius:10px;padding:10px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;font-size:14px}.legend .sq{width:20px;height:20px;margin-right:8px;vertical-align:middle}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.card,.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh)}.card{padding:16px 18px;border-left:4px solid var(--a)}
+.card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}
+.dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
+.fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:160px}
+#status-filtro{font-size:12px;color:var(--m);margin:8px 2px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p,.ch p{font-size:13px;color:var(--m);margin:0 0 14px}.ch{display:flex;justify-content:space-between;gap:12px}.ch h2{margin:0 0 4px}.cs{text-align:right;white-space:nowrap}.cs strong{display:block;font-size:24px;color:var(--p)}
+.rank{display:grid;gap:4px;align-content:start;max-height:460px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 66px;gap:10px;align-items:center;font-size:13px;cursor:pointer;padding:4px;border-radius:8px}.row:hover{background:var(--bg)}
+.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
+.f{display:grid;grid-template-columns:170px 1fr 110px;gap:10px;align-items:center;font-size:13px;margin-bottom:14px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .gl{stroke:var(--b)}
+.tw{overflow:auto;max-height:480px}table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child,th:last-child,td:last-child{text-align:left}tbody tr:hover{background:var(--bg)}
+.empty,.fonte,.leg{font-size:12px;color:var(--m)}.fonte{margin-top:18px}.leg{margin-top:8px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.f{grid-template-columns:130px 1fr 96px}.fp{position:static}}
+@media(max-width:550px){header{padding:16px}main{padding:14px}.filters select,.filters input{min-width:100%}}
+</style>
+<link rel="stylesheet" href="css/home-button.css">
 </head>
 <body>
-  <header class="site-header">
-    <div>
-      <h1>Resultados de Presença e Aulas</h1>
-      <p>Unidade Regional de Ensino de Marília</p>
-    </div>
-    <a class="home-button" href="index.html">Início</a>
-  </header>
-  <main>
-    <section class="card filtros-card" aria-labelledby="titulo-filtros">
-      <div class="section-heading">
-        <div><span class="eyebrow">Consulta</span><h2 id="titulo-filtros">Filtros</h2></div>
-        <button type="button" id="limpar-filtros" class="btn-secundario">Limpar filtros</button>
-      </div>
-      <div class="filters">
-        <div class="filter-group"><label for="filtro-periodo">Período</label><select id="filtro-periodo"></select></div>
-        <div class="filter-group"><label for="filtro-escola">Escola</label><select id="filtro-escola"><option value="">Todas as escolas</option></select></div>
-        <div class="filter-group filter-search"><label for="filtro-busca">Buscar escola</label><input id="filtro-busca" type="search" placeholder="Nome ou código da escola"></div>
-      </div>
-      <p id="status-filtro" class="status" aria-live="polite"></p>
-    </section>
-
-    <section class="metrics-grid" aria-label="Resumo dos resultados">
-      <article class="metric-card metric-primary"><h3>Presença</h3><strong id="kpi-presenca">-</strong><span>indicador principal · média ponderada</span></article>
-      <article class="metric-card metric-secondary"><h3>Aulas dadas</h3><strong id="kpi-aulas">-</strong><span>segundo indicador · média ponderada</span></article>
-      <article class="metric-card"><h3>Escolas</h3><strong id="kpi-escolas">-</strong><span>unidades no recorte</span></article>
-      <article class="metric-card"><h3>Matrículas ativas</h3><strong id="kpi-matriculas">-</strong><span>total do recorte</span></article>
-      <article class="metric-card"><h3>Turmas</h3><strong id="kpi-turmas">-</strong><span>total do recorte</span></article>
-      <article class="metric-card"><h3>Escolas PEI</h3><strong id="kpi-pei">-</strong><span>unidades no recorte</span></article>
-    </section>
-
-    <section class="dashboard" aria-labelledby="titulo-dashboard">
-      <div class="section-heading">
-        <div><span class="eyebrow">Visão analítica</span><h2 id="titulo-dashboard">Painel de indicadores</h2></div>
-      </div>
-      <div class="dashboard-grid">
-        <article class="card chart-card chart-primary">
-          <div class="chart-heading"><div><h3>Evolução da presença</h3><p>Média ponderada por matrículas ativas</p></div><div class="chart-summary"><strong id="resumo-presenca">-</strong><span id="delta-presenca"></span></div></div>
-          <div id="chart-presenca" class="chart-content"></div>
-        </article>
-        <article class="card chart-card chart-secondary">
-          <div class="chart-heading"><div><h3>Evolução das aulas dadas</h3><p>Média ponderada por aulas previstas</p></div><div class="chart-summary"><strong id="resumo-aulas">-</strong><span id="delta-aulas"></span></div></div>
-          <div id="chart-aulas" class="chart-content"></div>
-        </article>
-        <article class="card chart-card chart-primary">
-          <div class="chart-heading"><div><h3>Escolas com maior presença</h3><p>Classificação no período e filtros atuais</p></div></div>
-          <div id="ranking-presenca" class="ranking-chart"></div>
-        </article>
-        <article class="card chart-card chart-secondary">
-          <div class="chart-heading"><div><h3>Escolas com mais aulas dadas</h3><p>Classificação no período e filtros atuais</p></div></div>
-          <div id="ranking-aulas" class="ranking-chart"></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="card" aria-labelledby="titulo-resultados">
-      <div class="section-heading"><div><span class="eyebrow">Detalhamento</span><h2 id="titulo-resultados">Resultados por unidade escolar</h2></div></div>
-      <div class="table-responsive">
-        <table>
-          <thead><tr><th>Escola</th><th>Código</th><th>PEI</th><th>Matrículas</th><th>Presença</th><th>Evolução presença</th><th>Aulas previstas</th><th>Aulas dadas</th><th>Evolução aulas</th><th>Turmas</th><th>Matrizes</th><th>Supervisor(a)</th></tr></thead>
-          <tbody id="tabela-resultados"></tbody>
-        </table>
-      </div>
-    </section>
-    <p class="fonte">Fonte: Escola Total - Aluno Presente.</p>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="js/dados-presenca.js"></script>
-  <script src="js/resultados-presenca.js"></script>
+<header><div><h1>Resultados de Presença e Aulas</h1><p>Unidade Regional de Ensino de Marília</p></div><a class="home-button" href="index.html">Início</a></header>
+<main>
+<section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub"></p><div class="items" id="avg"></div></section>
+<div class="legend"><span>(%) de Presença</span><span><i class="sq r"></i>Menor que 85%</span><span><i class="sq y"></i>Maior ou igual a 85% e menor que 90%</span><span><i class="sq g"></i>Maior ou igual a 90%</span></div>
+<section class="cards" id="cards"></section>
+<section class="panel fp"><div class="filters">
+<select id="filtro-periodo" title="Período"></select>
+<select id="filtro-escola"><option value="">Todas as escolas</option></select>
+<input id="filtro-busca" type="search" placeholder="Nome ou código da escola">
+<select id="filtro-faixa"><option value="">Todas as faixas de presença</option><option value="g">Verde (90% ou mais)</option><option value="y">Amarelo (85% a menos de 90%)</option><option value="r">Vermelho (menos de 85%)</option></select>
+<select id="filtro-pei"><option value="">PEI e demais escolas</option><option value="s">Somente escolas PEI</option><option value="n">Somente escolas não PEI</option></select>
+<select id="filtro-sup"><option value="">Todos(as) os(as) supervisores(as)</option></select>
+<select id="filtro-ranking"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select>
+<button type="button" class="btn" id="limpar-filtros">Limpar filtros</button></div><p id="status-filtro" aria-live="polite"></p></section>
+<section class="grid">
+<article class="panel"><div class="ch"><div><h2>Evolução da presença</h2><p>Média ponderada por matrículas ativas</p></div><div class="cs"><strong id="resumo-presenca">-</strong><span id="delta-presenca"></span></div></div><div id="chart-presenca"></div><div class="leg">Linha contínua: recorte atual. Tracejada: média regional. Faixas: vermelho abaixo de 85%, amarelo de 85% a 90%, verde a partir de 90%.</div></article>
+<article class="panel"><div class="ch"><div><h2>Evolução das aulas dadas</h2><p>Média ponderada por aulas previstas</p></div><div class="cs"><strong id="resumo-aulas">-</strong><span id="delta-aulas"></span></div></div><div id="chart-aulas"></div><div class="leg">Linha contínua: recorte atual. Tracejada: média regional.</div></article>
+<article class="panel"><h2>Ranking de presença</h2><p>Cor pela faixa de presença. Clique numa escola para filtrar. A marca vermelha indica a média regional.</p><div id="ranking-presenca" class="rank"></div></article>
+<article class="panel"><h2>Ranking de aulas dadas</h2><p>Classificação no período e filtros atuais. A marca vermelha indica a média regional.</p><div id="ranking-aulas" class="rank"></div></article>
+<article class="panel"><h2>Semáforo de presença</h2><p>Escolas e matrículas em cada faixa, no recorte atual.</p><div id="sem"></div></article>
+<article class="panel"><h2>Escolas PEI e demais escolas</h2><p>Comparação de presença e aulas dadas, respeitando os demais filtros.</p><div id="pei"></div></article>
+</section>
+<article class="panel"><h2>Resultados por unidade escolar</h2><p>Clique no título de uma coluna para ordenar. A ordenação inicial é pela presença.</p><div class="tw"><table><thead></thead><tbody id="tabela-resultados"></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv">Exportar CSV</button></p></article>
+<p class="fonte">Fonte: Escola Total - Aluno Presente.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/dados-presenca.js"></script>
+<script>
+/* ===== FONTE DE DADOS: se os nomes abaixo diferirem dos seus, ajuste aqui ===== */
+async function carregarLinhas(){
+  const g=window.DADOS_PRESENCA||window.dadosPresenca;if(Array.isArray(g)&&g.length)return g;
+  const {data,error}=await supabaseClient.from('resultados_presenca').select('*');if(error)throw error;return data;
+}
+const pick=(r,k)=>{for(const n of k)if(r[n]!=null&&r[n]!=='')return r[n]},num=v=>(typeof v==='string'?(v.includes(',')?+v.replace('%','').replace(/\./g,'').replace(',','.'):parseFloat(v)):+v)||0;
+function norm(r){const g=(...k)=>pick(r,k),m=num(g('matriculas','matriculas_ativas','total_matriculas')),p=num(g('presenca','percentual_presenca','perc_presenca')),pv=num(g('aulas_previstas','previstas')),a=num(g('aulas_dadas_percentual','perc_aulas_dadas','aulas_dadas','dadas'));
+  return{per:String(g('periodo','mes','referencia')??'Período único'),escola:String(g('escola','nome_escola','unidade_escolar')??''),cod:g('codigo','cod_escola','codigo_escola')??'',pei:/^(1|true|sim|s|pei)$/i.test(String(g('pei','escola_pei')??'')),mat:m,pres:p<=1.0001?p*100:p,prev:pv,ad:a>100&&pv?a/pv*100:a<=1.0001?a*100:a,turmas:num(g('turmas','total_turmas')),matrizes:g('matrizes','matriz','total_matrizes')??'',sup:String(g('supervisor','supervisora','supervisor_a')??'')}}
+/* ===== Painel ===== */
+const $=s=>document.querySelector(s),F=(v,d)=>(+v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}),nf=n=>Math.round(n).toLocaleString('pt-BR'),pc=v=>F(v,1)+'%',esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),sn=s=>s.replace(/ - \d+$/,''),fx=p=>p>=90?'g':p>=85?'y':'r',COR={g:'#16803c',y:'#facc15',r:'#dc2626'},FN={g:'Verde',y:'Amarelo',r:'Vermelho'};
+const selP=$('#filtro-periodo'),selE=$('#filtro-escola'),q=$('#filtro-busca'),fai=$('#filtro-faixa'),selPei=$('#filtro-pei'),sup=$('#filtro-sup'),vis=$('#filtro-ranking');
+let ROWS=[],BY={},PER=[],CUR=[],ts={k:'pres',d:-1};
+const dl=(d,suf='')=>d==null?'<span class="empty">–</span>':'<span class="dl '+(d>.0001?'up':d<-.0001?'dn':'')+'">'+(d>.0001?'▲ ':d<-.0001?'▼ ':'')+F(Math.abs(d),1)+' p.p.'+suf+'</span>';
+function agg(l){const s=k=>l.reduce((a,x)=>a+x[k],0),m=s('mat'),w=x=>x.prev||1,sw=l.reduce((a,x)=>a+w(x),0)||1;return{n:l.length,mat:m,turmas:s('turmas'),pei:l.filter(x=>x.pei).length,pres:m?l.reduce((a,x)=>a+x.pres*x.mat,0)/m:0,ad:l.reduce((a,x)=>a+x.ad*w(x),0)/sw}}
+function filt(rows,noF,noP){const t=q.value.trim().toLowerCase(),e=selE.value,f=fai.value,pe=selPei.value,s=sup.value;return rows.filter(x=>(!e||x.escola===e)&&(!t||(x.escola+' '+x.cod).toLowerCase().includes(t))&&(noF||!f||fx(x.pres)===f)&&(noP||!pe||(pe==='s')===x.pei)&&(!s||x.sup===s))}
+function line(id,ser,labs,bands){const el=$(id),all=ser.flatMap(s=>s.v).filter(v=>v>0);if(!all.length){el.innerHTML='<p class="empty">Sem dados para o recorte.</p>';return}
+const W=620,H=250,L=44,P=18,T=22,B=34,lo=Math.max(0,Math.floor(Math.min(...all)-3)),hi=Math.min(100,Math.ceil(Math.max(...all)+2)),n=labs.length,X=i=>n>1?L+i*(W-L-P)/(n-1):(L+W-P)/2,Y=v=>H-B-(v-lo)/(hi-lo)*(H-T-B),st=hi-lo>20?5:hi-lo>8?2:1;let s=`<svg viewBox="0 0 ${W} ${H}">`;
+if(bands)[[0,85,'r'],[85,90,'y'],[90,100,'g']].forEach(([a,b,c])=>{a=Math.max(a,lo);b=Math.min(b,hi);if(a<b)s+=`<rect x="${L}" y="${Y(b)}" width="${W-L-P}" height="${Y(a)-Y(b)}" fill="${COR[c]}" opacity=".13"/>`});
+for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)s+=`<line x1="${L}" x2="${W-P}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}%</text>`;
+labs.forEach((t,i)=>s+=`<text x="${X(i)}" y="${H-B+16}" text-anchor="middle">${esc(t.length>10?t.slice(0,10):t)}</text>`);
+ser.forEach((e,k)=>{const pts=e.v.map((v,i)=>v>0?[X(i),Y(v),v,i]:null).filter(Boolean);s+=`<polyline fill="none" stroke="${e.c}" stroke-width="${e.dash?2:3}" ${e.dash?'stroke-dasharray="5 5"':''} points="${pts.map(p=>p[0]+','+p[1]).join(' ')}"/>`+pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="${e.dash?3:5}" fill="${e.c}"><title>${esc(labs[p[3]])}: ${pc(p[2])}</title></circle>${e.dash?'':`<text x="${p[0]}" y="${p[1]-10}" text-anchor="middle" style="fill:var(--t);font-weight:700">${F(p[2],1)}</text>`}`).join('')});el.innerHTML=s+'</svg>'}
+function rank(id,l,k,fmt,ref,sem){const md=vis.value,asc=md==='bot',a=[...l].sort((x,y)=>asc?x[k]-y[k]:y[k]-x[k]).slice(0,md==='all'?l.length:10),lo=Math.max(0,Math.floor(Math.min(...CUR.map(x=>x[k]))/5)*5-5),sc=v=>Math.max(0,Math.min(100,(v-lo)/(100-lo)*100));
+$(id).classList.toggle('warn',asc&&!sem);$(id).innerHTML=a.length?a.map((x,i)=>`<div class="row" data-e="${esc(x.escola)}"><span class="pos">${i+1}</span><div><div class="school" title="${esc(x.escola)}">${esc(sn(x.escola))}</div><div class="bar"><i style="width:${sc(x[k])}%${sem?';background:'+COR[fx(x[k])]:''}"></i><u style="left:${sc(ref)}%"></u></div></div><b>${fmt(x[k])}</b></div>`).join(''):'<p class="empty">Nenhuma escola encontrada.</p>'}
+function sema(l){const T=l.length||1,M=agg(l).mat||1;$('#sem').innerHTML=[['g','≥ 90%'],['y','85% a 90%'],['r','< 85%']].map(([c,d])=>{const a=l.filter(x=>fx(x.pres)===c),m=a.reduce((s,x)=>s+x.mat,0);return`<div class="f"><b><i class="sq ${c}"></i> ${FN[c]}<small>${d}</small></b><div class="bar big"><i style="width:${a.length/T*100}%;background:${COR[c]}"></i></div><strong>${a.length} escolas<small>${pc(m/M*100)} das matrículas</small></strong></div>`}).join('')}
+function peiP(l){$('#pei').innerHTML=[['Escolas PEI',l.filter(x=>x.pei)],['Demais escolas',l.filter(x=>!x.pei)]].map(([nm,a])=>{const g=agg(a);return g.n?`<div class="f"><b>${nm}<small>${g.n} escolas, ${nf(g.mat)} matrículas</small></b><div class="bar big"><i style="width:${g.pres}%;background:${COR[fx(g.pres)]}"></i></div><strong>${pc(g.pres)}<small>aulas dadas ${pc(g.ad)}</small></strong></div>`:`<div class="f"><b>${nm}</b><span class="empty">Nenhuma escola no recorte</span><span></span></div>`}).join('')}
+const COLS=[['escola','Escola'],['cod','Código'],['pei','PEI'],['mat','Matrículas'],['pres','Presença'],['dp','Evolução presença'],['prev','Aulas previstas'],['ad','Aulas dadas'],['da','Evolução aulas'],['turmas','Turmas'],['matrizes','Matrizes'],['sup','Supervisor(a)']],TX=['escola','cod','sup','matrizes'];
+const sorted=l=>[...l].sort((a,b)=>TX.includes(ts.k)?ts.d*String(a[ts.k]).localeCompare(String(b[ts.k]),'pt-BR',{numeric:true}):ts.d*((a[ts.k]??-1e9)-(b[ts.k]??-1e9)));
+let LT=[];
+function table(){$('thead').innerHTML='<tr>'+COLS.map(c=>`<th data-k="${c[0]}">${c[1]}${ts.k===c[0]?(ts.d>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+$('#tabela-resultados').innerHTML=sorted(LT).map(x=>`<tr><td>${esc(x.escola)}</td><td>${esc(x.cod)}</td><td>${x.pei?'Sim':'Não'}</td><td>${nf(x.mat)}</td><td><span class="bd ${fx(x.pres)}">${pc(x.pres)}</span></td><td>${dl(x.dp)}</td><td>${nf(x.prev)}</td><td>${pc(x.ad)}</td><td>${dl(x.da)}</td><td>${nf(x.turmas)}</td><td>${esc(x.matrizes)}</td><td>${esc(x.sup)}</td></tr>`).join('')}
+function render(){const p=selP.value,i=PER.indexOf(p);CUR=BY[p]||[];const R=agg(CUR),l=filt(CUR),S=agg(l),pm=new Map((BY[PER[i-1]]||[]).map(x=>[x.escola,x])),ser=PER.map(t=>agg(filt(BY[t],1))),reg=PER.map(t=>agg(BY[t])),pr=i>0?ser[i-1]:null;
+LT=l.map(x=>{const o=pm.get(x.escola);return{...x,dp:o?x.pres-o.pres:null,da:o?x.ad-o.ad:null}});
+$('#avgSub').textContent='Período '+p+': '+R.n+' escolas, '+nf(R.mat)+' matrículas ativas.';
+$('#avg').innerHTML=[['Presença',pc(R.pres)+` <span class="bd ${fx(R.pres)}">${FN[fx(R.pres)]}</span>`,R.pres,'Média ponderada por matrículas'],['Aulas dadas',pc(R.ad),R.ad,'Média ponderada por aulas previstas'],['Escolas em verde',R.n?CUR.filter(x=>fx(x.pres)==='g').length+' de '+R.n:'-',R.n?CUR.filter(x=>fx(x.pres)==='g').length/R.n*100:0,'Presença de 90% ou mais'],['Escolas em vermelho',CUR.filter(x=>fx(x.pres)==='r').length+' de '+R.n,R.n?CUR.filter(x=>fx(x.pres)==='r').length/R.n*100:0,'Presença abaixo de 85%'],['Matrículas ativas',nf(R.mat),null,nf(R.mat/(R.n||1))+' por escola'],['Turmas',nf(R.turmas),null,F(R.mat/(R.turmas||1),1)+' alunos por turma'],['Escolas PEI',R.pei+' de '+R.n,R.n?R.pei/R.n*100:0,'Unidades no período']].map(x=>`<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div>${x[2]==null?'':`<div class="bar"><i style="width:${x[2]}%"></i></div>`}<div class="d">${x[3]}</div></div>`).join('');
+$('#status-filtro').textContent=l.length+' de '+R.n+' escolas no recorte atual.';
+$('#cards').innerHTML=[['Presença',pc(S.pres),'Média ponderada, '+FN[fx(S.pres)],dl(S.pres-R.pres,' vs região'),COR[fx(S.pres)]],['Aulas dadas',pc(S.ad),'Média ponderada',dl(S.ad-R.ad,' vs região')],['Escolas',nf(S.n),'de '+nf(R.n)+' na região',''],['Matrículas ativas',nf(S.mat),pc(S.mat/(R.mat||1)*100)+' da região',''],['Turmas',nf(S.turmas),F(S.mat/(S.turmas||1),1)+' matrículas por turma',''],['Escolas PEI',nf(S.pei),'de '+nf(S.n)+' no recorte','']].map(x=>`<article class="card"${x[4]?` style="border-left-color:${x[4]}"`:''}><div class="k">${x[0]}</div><div class="v">${x[1]}</div><div class="d">${x[2]}</div>${x[3]}</article>`).join('');
+line('#chart-presenca',[{v:reg.map(g=>g.pres),c:'#94a3b8',dash:1},{v:ser.map(g=>g.pres),c:'#0d9488'}],PER,1);line('#chart-aulas',[{v:reg.map(g=>g.ad),c:'#94a3b8',dash:1},{v:ser.map(g=>g.ad),c:'#4f46e5'}],PER,0);
+$('#resumo-presenca').textContent=pc(S.pres);$('#delta-presenca').innerHTML=dl(pr?S.pres-pr.pres:null);$('#resumo-aulas').textContent=pc(S.ad);$('#delta-aulas').innerHTML=dl(pr?S.ad-pr.ad:null);
+rank('#ranking-presenca',l,'pres',pc,R.pres,1);rank('#ranking-aulas',l,'ad',pc,R.ad,0);sema(l);peiP(filt(CUR,0,1));table()}
+function init(){BY={};ROWS.forEach(x=>(BY[x.per]=BY[x.per]||[]).push(x));PER=Object.keys(BY);if(PER.every(p=>/^\d{4}[-/]\d{2}/.test(p)))PER.sort();
+selP.innerHTML=PER.map(p=>`<option>${esc(p)}</option>`).join('');selP.value=PER[PER.length-1];
+const U=k=>[...new Set(ROWS.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')),O=a=>a.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+selE.innerHTML='<option value="">Todas as escolas</option>'+O(U('escola'));sup.innerHTML='<option value="">Todos(as) os(as) supervisores(as)</option>'+O(U('sup'));render()}
+[selP,selE,fai,selPei,sup,vis].forEach(el=>el.addEventListener('change',render));q.addEventListener('input',render);
+$('#limpar-filtros').onclick=()=>{[selE,q,fai,selPei,sup].forEach(e=>e.value='');selP.value=PER[PER.length-1];vis.value='top';render()};
+document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:TX.includes(k)?1:-1};table()}});
+$('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.cod,x.pei?'Sim':'Não',x.mat,F(x.pres,1),x.dp==null?'':F(x.dp,1),x.prev,F(x.ad,1),x.da==null?'':F(x.da,1),x.turmas,x.matrizes,x.sup].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='presenca-escolas.csv';a.click()};
+(async()=>{try{if(typeof supabaseClient!=='undefined'){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href='index.html';return}}
+ROWS=(await carregarLinhas()).map(norm).filter(x=>x.escola);if(!ROWS.length)throw new Error('nenhuma linha');init()}catch(e){$('#status-filtro').textContent='Não foi possível carregar os dados ('+e.message+'). Ajuste a função carregarLinhas() no início do script.';console.error(e)}})();
+</script>
 </body>
 </html>
