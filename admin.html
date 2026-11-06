@@ -132,32 +132,6 @@
             </div>
         </div>
 
-        <!-- Card do Atualizador (Re-sync) - Resultados da Alura -->
-        <div class="card">
-            <div class="modal-header">
-                <h3>Atualizador — Resultados da Alura (Re-sincronizar)</h3>
-            </div>
-            <div class="form-group">
-                <label for="atualizador-ano">Ano Letivo Referente à Planilha</label>
-                <select id="atualizador-ano">
-                    <option value="">Selecione o ano...</option>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                </select>
-                <span class="help-text">Re-sincroniza a planilha de resultados da Alura: escolas existentes (pela coluna <strong>Escola</strong>) são <strong>atualizadas</strong> e novas escolas são <strong>inseridas</strong>. Diferente dos importadores, não apaga as demais escolas do banco. Colunas esperadas: Escola, Matrículas Ativas, Alunos com Acessos no Período, Índice de Acessos no Período, Total de Exercícios Realizados, Quantidade Média de Tentativas por Exercício, Índice de Exercícios Corretos até 2ª Tentativa, Média das Avaliações Mensais entre Alunos que não Zeraram, Média das Avaliações Mensais, Índice de Realização das Avaliações Mensais e Média nas Questões Discursivas.</span>
-            </div>
-            <div class="form-group">
-                <label for="atualizador-file">Planilha de Resultados da Alura (.xlsx)</label>
-                <input type="file" id="atualizador-file" accept=".xlsx, .xls">
-            </div>
-            <div id="atualizador-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
-            <div class="actions">
-                <button type="button" id="atualizador-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
-                <button type="button" id="atualizador-confirmar" class="btn-save" disabled>2. Confirmar Re-sync</button>
-            </div>
-        </div>
-
         <!-- Card de Importação de Dados - Alura Mensal -->
         <div class="card">
             <div class="modal-header">
@@ -2535,25 +2509,9 @@
     });
 
     // =========================================================================
-    // Atualizador (Re-sync) — Resultados da Alura
-    // Lê a planilha e faz upsert por "escola": atualiza escolas existentes e
-    // insere as novas, sem apagar as demais. Destino: resultados_alura_resumo.
+    // Funções compartilhadas de leitura das planilhas da Alura
     // =========================================================================
-    const ATUALIZADOR_COLUNAS = {
-        escola: { campo: 'escola', tipo: 'texto' },
-        matriculas_ativas: { campo: 'matriculas_ativas', tipo: 'inteiro' },
-        alunos_com_acessos_no_periodo: { campo: 'alunos_com_acessos_no_periodo', tipo: 'inteiro' },
-        indice_de_acessos_no_periodo: { campo: 'indice_de_acessos_no_periodo', tipo: 'percentual' },
-        total_de_exercicios_realizados: { campo: 'total_de_exercicios_realizados', tipo: 'inteiro' },
-        quantidade_media_de_tentativas_por_exercicio: { campo: 'quantidade_media_de_tentativas_por_exercicio', tipo: 'decimal' },
-        indice_de_exercicios_corretos_ate_2a_tentativa: { campo: 'indice_de_exercicios_corretos_ate_2a_tentativa', tipo: 'decimal' },
-        media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram: { campo: 'media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram', tipo: 'decimal' },
-        media_das_avaliacoes_mensais: { campo: 'media_das_avaliacoes_mensais', tipo: 'decimal' },
-        indice_de_realizacao_das_avaliacoes_mensais: { campo: 'indice_de_realizacao_das_avaliacoes_mensais', tipo: 'percentual' },
-        media_nas_questoes_discursivas: { campo: 'media_nas_questoes_discursivas', tipo: 'decimal' }
-    };
-
-    function atualizadorNormalizar(texto) {
+    function normalizarColunaAlura(texto) {
         return String(texto == null ? '' : texto).trim().toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^a-z0-9]/g, '_')
@@ -2562,7 +2520,7 @@
     }
 
     // Converte valor da planilha para o tipo gravado no banco
-    function atualizadorValor(valor, tipo) {
+    function converterValorAlura(valor, tipo) {
         if (valor === null || valor === undefined || String(valor).trim() === '') return null;
         if (tipo === 'texto') return String(valor).trim();
 
@@ -2573,7 +2531,6 @@
         }
 
         let texto = String(valor).trim();
-        const temPct = texto.includes('%');
         texto = texto.replace(/%/g, '').replace(/\s/g, '');
         // 1.234,56 -> 1234.56  |  1,99 -> 1.99
         texto = texto.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
@@ -2583,88 +2540,6 @@
         if (tipo === 'percentual') return n / 100;
         return n;
     }
-
-    let dadosAtualizador = [];
-
-    document.getElementById('atualizador-ler').addEventListener('click', () => {
-        const ano = parseInt(document.getElementById('atualizador-ano').value);
-        const file = document.getElementById('atualizador-file').files[0];
-        const preview = document.getElementById('atualizador-preview');
-        const confirmar = document.getElementById('atualizador-confirmar');
-        preview.style.display = 'none'; confirmar.disabled = true; dadosAtualizador = [];
-
-        if (!ano) return alert('Selecione o ano referente à planilha da Alura.');
-        if (!file) return alert('Selecione a planilha de Resultados da Alura (.xlsx).');
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-                const aba = wb.SheetNames[0];
-                const linhas = XLSX.utils.sheet_to_json(wb.Sheets[aba], { defval: null });
-                if (!linhas.length) throw new Error('A planilha está vazia.');
-
-                // Monta o mapeamento cabeçalho -> coluna do banco
-                const cabecalhos = Object.keys(linhas[0]);
-                const mapeamento = {};
-                const naoMapeados = [];
-                cabecalhos.forEach(cab => {
-                    const chave = atualizadorNormalizar(cab);
-                    if (ATUALIZADOR_COLUNAS[chave]) mapeamento[cab] = ATUALIZADOR_COLUNAS[chave];
-                    else naoMapeados.push(cab);
-                });
-
-                if (!mapeamento.escola) throw new Error('Não foi possível identificar a coluna "Escola" na planilha.');
-
-                dadosAtualizador = linhas.map(linha => {
-                    const item = { ano: ano };
-                    Object.entries(mapeamento).forEach(([cab, def]) => {
-                        item[def.campo] = atualizadorValor(linha[cab], def.tipo);
-                    });
-                    return item;
-                }).filter(x => x.escola);
-
-                if (!dadosAtualizador.length) throw new Error('Nenhuma escola válida foi encontrada na planilha.');
-
-                const aviso = naoMapeados.length
-                    ? ` <span style="color:#b45309;">Colunas ignoradas (sem correspondência no banco): ${naoMapeados.join(', ')}.</span>`
-                    : '';
-
-                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosAtualizador.length} escolas encontradas na aba "${aba}" para ${ano}. ` +
-                    `Ao confirmar, escolas existentes serão atualizadas e novas serão inseridas (chave: Escola).${aviso}`;
-                preview.style.display = 'block';
-                confirmar.disabled = false;
-            } catch (err) {
-                console.error('Erro na leitura do Atualizador:', err);
-                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`;
-                preview.style.display = 'block';
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
-    document.getElementById('atualizador-confirmar').addEventListener('click', async () => {
-        const preview = document.getElementById('atualizador-preview');
-        const confirmar = document.getElementById('atualizador-confirmar');
-        if (!dadosAtualizador.length) return;
-        confirmar.disabled = true; confirmar.textContent = 'Re-sincronizando...';
-        try {
-            const { error } = await supabaseClient
-                .from('resultados_alura_resumo')
-                .upsert(dadosAtualizador, { onConflict: 'escola' });
-            if (error) throw error;
-
-            preview.innerHTML = `<span style="color:green;"><strong>Re-sync realizado com sucesso!</strong> ${dadosAtualizador.length} registro(s) atualizados/inseridos na tabela resultados_alura_resumo.</span>`;
-            document.getElementById('atualizador-file').value = '';
-            dadosAtualizador = [];
-        } catch (err) {
-            console.error('Erro no re-sync:', err);
-            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_alura_resumo foi criada (supabase-atualizador-alura.sql).</span>`;
-            confirmar.disabled = false;
-        } finally {
-            confirmar.textContent = '2. Confirmar Re-sync';
-        }
-    });
 
     // =========================================================================
     // Importador de Planilhas Mensais — Alura
@@ -2714,7 +2589,7 @@
     function aluraMensalValor(valor, tipo) {
         if (tipo === 'percentual') return aluraMensalPercentual(valor, 1.5);
         if (tipo === 'indice_corretos') return aluraMensalPercentual(valor, 10);
-        return atualizadorValor(valor, tipo);
+        return converterValorAlura(valor, tipo);
     }
 
     let dadosAluraMensalProcessados = [];
@@ -2759,7 +2634,7 @@
                 const mapeamento = {};
                 const naoMapeados = [];
                 cabecalhos.forEach(cab => {
-                    const normalizado = atualizadorNormalizar(cab);
+                    const normalizado = normalizarColunaAlura(cab);
                     const chave = ALURA_MENSAL_APELIDOS[normalizado] || normalizado;
                     if (ALURA_MENSAL_COLUNAS[chave]) mapeamento[cab] = ALURA_MENSAL_COLUNAS[chave];
                     else naoMapeados.push(cab);
