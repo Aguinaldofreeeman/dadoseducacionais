@@ -965,7 +965,9 @@
         dadosMatificMensalProcessados = [];
         contextoMatificMensal = null;
         const confirmar = document.getElementById('matific-mensal-confirmar');
+        const preview = document.getElementById('matific-mensal-preview');
         if (confirmar) confirmar.disabled = true;
+        if (preview) preview.style.display = 'none';
     };
     ['matific-mensal-ano', 'matific-mensal-mes', 'matific-mensal-semanas', 'matific-mensal-file'].forEach(id => {
         const el = document.getElementById(id);
