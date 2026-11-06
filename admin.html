@@ -1724,6 +1724,7 @@
                 ? (periodoNoArquivo[1] ? periodoNoArquivo[1] + ' - ' : '') +
                     periodoNoArquivo[2].replace(/[.]/g, '/').replace(/\s+/g, ' ').trim()
                 : '';
+        const nomeArquivoLabel = String(nomeArquivo || '').replace(/\.[^.]+$/, '').trim();
         let linhaCabecalho = -1;
         let colunas = {};
         let ausentes = [];
@@ -1781,7 +1782,7 @@
             if (tipo === 'presenca') {
                 registro.periodo = String(registro.periodo ?? '').trim();
                 if (!registro.periodo) registro.periodo = periodoInferido;
-                registro.periodo_label = String(registro.periodo_label || registro.periodo).trim();
+                registro.periodo_label = String(registro.periodo_label || nomeArquivoLabel || registro.periodo).trim();
                 registro.codigo_escola = String(registro.codigo_escola ?? '').trim();
                 if (!registro.codigo_escola) {
                     const correspondencia = registro.escola.match(/^(.*?)\s*-\s*(\d+)$/);
