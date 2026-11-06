@@ -115,7 +115,10 @@ $('#cards').innerHTML=[['Presença',pc(S.pres),'Média ponderada, '+FN[fx(S.pres
 line('#chart-presenca',[{v:reg.map(g=>g.pres),c:'#94a3b8',dash:1},{v:ser.map(g=>g.pres),c:'#0d9488'}],PER,1);line('#chart-aulas',[{v:reg.map(g=>g.ad),c:'#94a3b8',dash:1},{v:ser.map(g=>g.ad),c:'#4f46e5'}],PER,0);
 $('#resumo-presenca').textContent=pc(S.pres);$('#delta-presenca').innerHTML=dl(pr?S.pres-pr.pres:null);$('#resumo-aulas').textContent=pc(S.ad);$('#delta-aulas').innerHTML=dl(pr?S.ad-pr.ad:null);
 rank('#ranking-presenca',l,'pres',pc,R.pres,1);rank('#ranking-aulas',l,'ad',pc,R.ad,0);sema(l);peiP(filt(CUR,0,1));table()}
-function init(){BY={};LAB={};ROWS.forEach(x=>{(BY[x.per]=BY[x.per]||[]).push(x);if(x.pl)LAB[x.per]=x.pl});PER=Object.keys(BY);if(PER.every(p=>/^\d{4}[-/]\d{2}/.test(p)))PER.sort();
+function init(){BY={};LAB={};ROWS.forEach(x=>{(BY[x.per]=BY[x.per]||[]).push(x);if(x.pl)LAB[x.per]=x.pl});
+PER=Object.keys(BY).filter(p=>/semana/i.test(LAB[p]||p));if(!PER.length)PER=Object.keys(BY);
+const semNum=p=>{const m=String(p).match(/(\d+)/);return m?+m[1]:1e9};
+PER.sort((a,b)=>semNum(a)-semNum(b));
 selP.innerHTML=PER.map(p=>`<option value="${esc(p)}">${esc(LAB[p]||p)}</option>`).join('');selP.value=PER[PER.length-1];
 const U=k=>[...new Set(ROWS.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')),O=a=>a.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
 selE.innerHTML='<option value="">Todas as escolas</option>'+O(U('escola'));sup.innerHTML='<option value="">Todos(as) os(as) supervisores(as)</option>'+O(U('sup'));render()}
