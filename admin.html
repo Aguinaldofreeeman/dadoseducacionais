@@ -212,6 +212,54 @@
                 <button type="button" id="matific-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Matific Mensal -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilhas Mensais - Matific</h3>
+            </div>
+            <div class="form-group">
+                <label for="matific-mensal-ano">Ano Letivo Referente à Planilha</label>
+                <select id="matific-mensal-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Cada planilha corresponde a um mês. Reimportar o mesmo mês substitui os resultados anteriores daquele mês.</span>
+            </div>
+            <div class="form-group">
+                <label for="matific-mensal-mes">Mês de Referência</label>
+                <select id="matific-mensal-mes">
+                    <option value="">Selecione o mês...</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="matific-mensal-semanas">Semanas Consideradas no Mês</label>
+                <input type="number" id="matific-mensal-semanas" min="1" max="6" step="0.5" value="4">
+                <span class="help-text">Usado para calcular o índice semanal (atividades concluídas ÷ matrículas ÷ semanas). Ex.: fevereiro com 4 semanas; julho com 1 semana parcial.</span>
+            </div>
+            <div class="form-group">
+                <label for="matific-mensal-file">Arquivo Excel Mensal do Matific (.xlsx)</label>
+                <input type="file" id="matific-mensal-file" accept=".xlsx, .xls">
+            </div>
+            <div id="matific-mensal-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="matific-mensal-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="matific-mensal-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <!-- Card de Importação de Dados - SARESP -->
         <div class="card">
             <div class="modal-header">
@@ -903,6 +951,99 @@
         } catch (err) {
             console.error('Erro na importação Matific:', err);
             preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_matific foi criada no Supabase.</span>`;
+            confirmar.disabled = false;
+        } finally { confirmar.textContent = '2. Confirmar Importação'; }
+    });
+
+    // =========================================================================
+    // Importador da Planilha Mensal do Matific
+    // =========================================================================
+    let dadosMatificMensalProcessados = [];
+
+    document.getElementById('matific-mensal-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('matific-mensal-ano').value);
+        const mes = parseInt(document.getElementById('matific-mensal-mes').value);
+        const semanas = parseFloat(document.getElementById('matific-mensal-semanas').value);
+        const file = document.getElementById('matific-mensal-file').files[0];
+        const preview = document.getElementById('matific-mensal-preview');
+        const confirmar = document.getElementById('matific-mensal-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true; dadosMatificMensalProcessados = [];
+        if (!ano) return alert('Selecione o ano referente à planilha mensal do Matific.');
+        if (!mes) return alert('Selecione o mês referente à planilha mensal do Matific.');
+        if (!Number.isFinite(semanas) || semanas < 1) return alert('Informe o número de semanas consideradas no mês (mínimo 1).');
+        if (!file) return alert('Selecione o arquivo Excel mensal do Matific.');
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const aba = wb.Sheets[wb.SheetNames[0]];
+                const linhas = XLSX.utils.sheet_to_json(aba, { defval: null, raw: true });
+                const registros = linhas.map(linha => {
+                    const item = {};
+                    Object.entries(linha).forEach(([cabecalho, valor]) => {
+                        const chave = normalizarMatific(cabecalho);
+                        const campo = String(cabecalho).includes('%') && chave === 'alunos_ativos_no_periodo'
+                            ? 'percentual_alunos_ativos_no_periodo'
+                            : campoMatific[chave];
+                        if (!campo) return;
+                        item[campo] = campo === 'escola' ? String(valor || '').trim() : numeroMatific(valor);
+                    });
+                    return item;
+                }).filter(x => x.escola && !/^total$/i.test(x.escola) && !/^filtros aplicados/i.test(x.escola));
+
+                if (!registros.length) throw new Error('Não foram encontradas linhas de escolas. Confira os cabeçalhos da exportação mensal do Matific.');
+                const obrigatorios = ['total_matriculas', 'alunos_ativos_no_periodo', 'total_de_atividades_iniciadas', 'total_de_atividades_concluidas'];
+                const faltando = obrigatorios.filter(c => registros.every(x => x[c] == null));
+                if (faltando.length) throw new Error('Colunas não identificadas: ' + faltando.join(', ') + '.');
+                const nomes = registros.map(x => x.escola);
+                const duplicadas = [...new Set(nomes.filter((n, i) => nomes.indexOf(n) !== i))];
+                if (duplicadas.length) throw new Error('Escolas duplicadas na planilha: ' + duplicadas.join(', ') + '.');
+
+                dadosMatificMensalProcessados = registros.map(item => {
+                    const matriculas = Number(item.total_matriculas) || 0;
+                    const ativos = Number(item.alunos_ativos_no_periodo) || 0;
+                    const concluidas = Number(item.total_de_atividades_concluidas) || 0;
+                    if (item.percentual_alunos_ativos_no_periodo == null) {
+                        item.percentual_alunos_ativos_no_periodo = matriculas ? ativos / matriculas : 0;
+                    }
+                    // O painel mensal usa o índice semanal: concluídas / matrículas / semanas.
+                    item.indice_de_atividades_concluidas_por_aluno = matriculas ? concluidas / matriculas / semanas : 0;
+                    item.ano = ano;
+                    item.mes = mes;
+                    item.semanas = semanas;
+                    return item;
+                });
+
+                const mesNome = document.getElementById('matific-mensal-mes').selectedOptions[0].textContent;
+                const plural = semanas === 1 ? 'semana' : 'semanas';
+                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosMatificMensalProcessados.length} escolas encontradas na aba "${wb.SheetNames[0]}" para ${mesNome}/${ano} (${semanas} ${plural}).<br><small>O índice semanal foi calculado como atividades concluídas ÷ matrículas ÷ semanas.</small>`;
+                preview.style.display = 'block'; confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura Matific mensal:', err);
+                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`; preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('matific-mensal-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('matific-mensal-preview');
+        const confirmar = document.getElementById('matific-mensal-confirmar');
+        if (!dadosMatificMensalProcessados.length) return;
+        const ano = parseInt(document.getElementById('matific-mensal-ano').value);
+        const mes = parseInt(document.getElementById('matific-mensal-mes').value);
+        const mesNome = document.getElementById('matific-mensal-mes').selectedOptions[0].textContent;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const { error: erroDelete } = await supabaseClient.from('resultados_matific_mensal').delete().eq('ano', ano).eq('mes', mes);
+            if (erroDelete) throw new Error(`Não foi possível substituir os dados anteriores do mês: ${erroDelete.message}`);
+            const { error } = await supabaseClient.from('resultados_matific_mensal').insert(dadosMatificMensalProcessados);
+            if (error) throw error;
+            preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosMatificMensalProcessados.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_matific_mensal.</span>`;
+            document.getElementById('matific-mensal-file').value = ''; dadosMatificMensalProcessados = [];
+        } catch (err) {
+            console.error('Erro na importação Matific mensal:', err);
+            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_matific_mensal foi criada no Supabase.</span>`;
             confirmar.disabled = false;
         } finally { confirmar.textContent = '2. Confirmar Importação'; }
     });
