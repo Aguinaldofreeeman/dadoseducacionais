@@ -158,6 +158,51 @@
             </div>
         </div>
 
+        <!-- Card de Importação de Dados - Alura Mensal -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilhas Mensais - Alura</h3>
+            </div>
+            <div class="form-group">
+                <label for="alura-mensal-ano">Ano Letivo Referente à Planilha</label>
+                <select id="alura-mensal-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <span class="help-text">Cada planilha corresponde a um mês. Reimportar o mesmo mês substitui os resultados anteriores daquele mês. Colunas esperadas: Escola, Matrículas Ativas, Alunos com Acessos no Período, Índice de Acessos no Período, Total de Exercícios Realizados, Quantidade Média de Tentativas por Exercício, Índice de Exercícios Corretos até 2ª Tentativa, Média das Avaliações Mensais entre Alunos que não Zeraram, Média das Avaliações Mensais, Índice de Realização das Avaliações Mensais e Média nas Questões Discursivas.</span>
+            </div>
+            <div class="form-group">
+                <label for="alura-mensal-mes">Mês de Referência</label>
+                <select id="alura-mensal-mes">
+                    <option value="">Selecione o mês...</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="alura-mensal-file">Planilha Mensal da Alura (.xlsx)</label>
+                <input type="file" id="alura-mensal-file" accept=".xlsx, .xls">
+            </div>
+            <div id="alura-mensal-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="alura-mensal-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="alura-mensal-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
+
         <!-- Card de Importação de Dados - Prova Paulista -->
         <div class="card">
             <div class="modal-header">
@@ -2618,6 +2663,180 @@
             confirmar.disabled = false;
         } finally {
             confirmar.textContent = '2. Confirmar Re-sync';
+        }
+    });
+
+    // =========================================================================
+    // Importador de Planilhas Mensais — Alura
+    // Lê a planilha mensal da Alura e grava em resultados_alura_mensal com a
+    // chave (ano, mes, escola). Reimportar substitui apenas aquele mês.
+    // =========================================================================
+    const ALURA_MENSAL_COLUNAS = {
+        escola: { campo: 'escola', tipo: 'texto' },
+        matriculas_ativas: { campo: 'matriculas_ativas', tipo: 'inteiro' },
+        alunos_com_acessos_no_periodo: { campo: 'alunos_com_acessos_no_periodo', tipo: 'inteiro' },
+        indice_de_acessos_no_periodo: { campo: 'indice_de_acessos_no_periodo', tipo: 'percentual' },
+        total_de_exercicios_realizados: { campo: 'total_de_exercicios_realizados', tipo: 'inteiro' },
+        quantidade_media_de_tentativas_por_exercicio: { campo: 'quantidade_media_de_tentativas_por_exercicio', tipo: 'decimal' },
+        indice_de_exercicios_corretos_ate_2a_tentativa: { campo: 'indice_de_exercicios_corretos_ate_2a_tentativa', tipo: 'indice_corretos' },
+        media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram: { campo: 'media_das_avaliacoes_mensais_entre_alunos_que_nao_zeraram', tipo: 'decimal' },
+        media_das_avaliacoes_mensais: { campo: 'media_das_avaliacoes_mensais', tipo: 'decimal' },
+        indice_de_realizacao_das_avaliacoes_mensais: { campo: 'indice_de_realizacao_das_avaliacoes_mensais', tipo: 'percentual' },
+        media_nas_questoes_discursivas: { campo: 'media_nas_questoes_discursivas', tipo: 'decimal' }
+    };
+
+    // Aceita variações de grafia que aparecem nas exportações da Alura
+    const ALURA_MENSAL_APELIDOS = {
+        nome_da_escola: 'escola',
+        indice_de_exercicios_corretos_ate_2_tentativa: 'indice_de_exercicios_corretos_ate_2a_tentativa',
+        indice_de_exercicios_corretos_ate_a_2_tentativa: 'indice_de_exercicios_corretos_ate_2a_tentativa'
+    };
+
+    // Converte percentuais em fração (0,9364), aceitando 93,64 / "93,64%" / 0,9364.
+    // O limite separa valores já fracionários de valores em escala percentual.
+    function aluraMensalPercentual(valor, limite) {
+        if (valor === null || valor === undefined || String(valor).trim() === '') return null;
+        const corte = limite == null ? 1.5 : limite;
+        if (typeof valor === 'number') {
+            return Number.isFinite(valor) ? (valor > corte ? valor / 100 : valor) : null;
+        }
+        const texto = String(valor).trim();
+        const temPct = texto.includes('%');
+        const n = parseFloat(texto.replace(/%/g, '').replace(/\s/g, '')
+            .replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+        if (!Number.isFinite(n)) return null;
+        if (temPct) return n / 100;
+        return n > corte ? n / 100 : n;
+    }
+
+    // Converte um valor conforme o tipo; percentuais usam a regra própria acima.
+    // "indice_corretos" pode passar de 1,5 legitimamente (ex.: 2,6), por isso usa limite maior.
+    function aluraMensalValor(valor, tipo) {
+        if (tipo === 'percentual') return aluraMensalPercentual(valor, 1.5);
+        if (tipo === 'indice_corretos') return aluraMensalPercentual(valor, 10);
+        return atualizadorValor(valor, tipo);
+    }
+
+    let dadosAluraMensalProcessados = [];
+    let contextoAluraMensal = null;
+
+    const invalidarAluraMensal = () => {
+        dadosAluraMensalProcessados = [];
+        contextoAluraMensal = null;
+        const confirmar = document.getElementById('alura-mensal-confirmar');
+        const preview = document.getElementById('alura-mensal-preview');
+        if (confirmar) confirmar.disabled = true;
+        if (preview) preview.style.display = 'none';
+    };
+    ['alura-mensal-ano', 'alura-mensal-mes', 'alura-mensal-file'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', invalidarAluraMensal);
+    });
+
+    document.getElementById('alura-mensal-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('alura-mensal-ano').value);
+        const mes = parseInt(document.getElementById('alura-mensal-mes').value);
+        const file = document.getElementById('alura-mensal-file').files[0];
+        const preview = document.getElementById('alura-mensal-preview');
+        const confirmar = document.getElementById('alura-mensal-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true;
+        dadosAluraMensalProcessados = []; contextoAluraMensal = null;
+
+        if (!ano) return alert('Selecione o ano referente à planilha mensal da Alura.');
+        if (!mes) return alert('Selecione o mês referente à planilha mensal da Alura.');
+        if (!file) return alert('Selecione a planilha mensal da Alura (.xlsx).');
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const aba = wb.SheetNames[0];
+                const linhas = XLSX.utils.sheet_to_json(wb.Sheets[aba], { defval: null, raw: true });
+                if (!linhas.length) throw new Error('A planilha está vazia.');
+
+                // Mapeia os cabeçalhos da planilha para as colunas do banco
+                const cabecalhos = Object.keys(linhas[0]);
+                const mapeamento = {};
+                const naoMapeados = [];
+                cabecalhos.forEach(cab => {
+                    const normalizado = atualizadorNormalizar(cab);
+                    const chave = ALURA_MENSAL_APELIDOS[normalizado] || normalizado;
+                    if (ALURA_MENSAL_COLUNAS[chave]) mapeamento[cab] = ALURA_MENSAL_COLUNAS[chave];
+                    else naoMapeados.push(cab);
+                });
+
+                if (!Object.values(mapeamento).some(def => def.campo === 'escola')) {
+                    throw new Error('Não foi possível identificar a coluna "Escola" na planilha.');
+                }
+
+                dadosAluraMensalProcessados = linhas.map(linha => {
+                    const item = { ano: ano, mes: mes };
+                    Object.entries(mapeamento).forEach(([cab, def]) => {
+                        item[def.campo] = aluraMensalValor(linha[cab], def.tipo);
+                    });
+                    return item;
+                }).filter(x => x.escola
+                    && !/^total\b/i.test(x.escola)
+                    && !/^filtros aplicados/i.test(x.escola));
+
+                if (!dadosAluraMensalProcessados.length) {
+                    throw new Error('Nenhuma escola válida foi encontrada na planilha.');
+                }
+
+                const obrigatorios = ['matriculas_ativas', 'alunos_com_acessos_no_periodo', 'total_de_exercicios_realizados'];
+                const faltando = obrigatorios.filter(c => dadosAluraMensalProcessados.every(x => x[c] == null));
+                if (faltando.length) throw new Error('Colunas não identificadas: ' + faltando.join(', ') + '.');
+
+                const nomes = dadosAluraMensalProcessados.map(x => x.escola);
+                const duplicadas = [...new Set(nomes.filter((n, i) => nomes.indexOf(n) !== i))];
+                if (duplicadas.length) throw new Error('Escolas duplicadas na planilha: ' + duplicadas.join(', ') + '.');
+
+                const mesNome = document.getElementById('alura-mensal-mes').selectedOptions[0].textContent;
+                contextoAluraMensal = { ano, mes, mesNome };
+                const aviso = naoMapeados.length
+                    ? ` <span style="color:#b45309;">Colunas ignoradas (sem correspondência no banco): ${naoMapeados.join(', ')}.</span>`
+                    : '';
+                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosAluraMensalProcessados.length} escolas encontradas na aba "${aba}" para ${mesNome}/${ano}. ` +
+                    `Ao confirmar, os dados anteriores desse mês serão substituídos.${aviso}`;
+                preview.style.display = 'block';
+                confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura Alura mensal:', err);
+                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`;
+                preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('alura-mensal-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('alura-mensal-preview');
+        const confirmar = document.getElementById('alura-mensal-confirmar');
+        if (!dadosAluraMensalProcessados.length || !contextoAluraMensal) return;
+        const { ano, mes, mesNome } = contextoAluraMensal;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const { error: erroDelete } = await supabaseClient
+                .from('resultados_alura_mensal')
+                .delete()
+                .eq('ano', ano)
+                .eq('mes', mes);
+            if (erroDelete) throw new Error(`Não foi possível substituir os dados anteriores do mês: ${erroDelete.message}`);
+
+            const { error } = await supabaseClient
+                .from('resultados_alura_mensal')
+                .insert(dadosAluraMensalProcessados);
+            if (error) throw error;
+
+            preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosAluraMensalProcessados.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_alura_mensal.</span>`;
+            document.getElementById('alura-mensal-file').value = '';
+            dadosAluraMensalProcessados = []; contextoAluraMensal = null;
+        } catch (err) {
+            console.error('Erro na importação Alura mensal:', err);
+            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_alura_mensal foi criada (supabase-resultados-alura-mensal.sql).</span>`;
+            confirmar.disabled = false;
+        } finally {
+            confirmar.textContent = '2. Confirmar Importação';
         }
     });
 
