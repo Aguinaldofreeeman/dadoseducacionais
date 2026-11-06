@@ -123,7 +123,7 @@ function init(){BY={};LAB={};ROWS.forEach(x=>{(BY[x.per]=BY[x.per]||[]).push(x);
 PER=Object.keys(BY).filter(p=>/semana/i.test(LAB[p]||p));if(!PER.length)PER=Object.keys(BY);
 const semNum=p=>{const m=String(p).match(/(\d+)/);return m?+m[1]:1e9};
 PER.sort((a,b)=>semNum(a)-semNum(b));
-selP.innerHTML=PER.map(p=>`<option value="${esc(p)}">${esc(LAB[p]||p)}</option>`).join('');selP.value=PER[PER.length-1];
+selP.innerHTML=PER.slice().reverse().map(p=>`<option value="${esc(p)}">${esc(LAB[p]||p)}</option>`).join('');selP.value=PER[PER.length-1];
 const U=k=>[...new Set(ROWS.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')),O=a=>a.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
 selE.innerHTML='<option value="">Todas as escolas</option>'+O(U('escola'));sup.innerHTML='<option value="">Todos(as) os(as) supervisores(as)</option>'+O(U('sup'));render()}
 [selP,selE,fai,selPei,sup,vis].forEach(el=>el.addEventListener('change',render));q.addEventListener('input',render);
