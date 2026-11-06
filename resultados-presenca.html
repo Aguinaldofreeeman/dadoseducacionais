@@ -24,7 +24,6 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
 .fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:160px}
-.msel{position:relative;flex:1;min-width:160px}.msel-btn{width:100%;padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);text-align:left;cursor:pointer}.msel-btn:after{content:'▾';float:right;opacity:.6}.msel-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.25);padding:8px;z-index:20;max-height:320px;overflow:auto}.msel-panel[hidden]{display:none}.msel-actions{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:12px;color:#475569}.msel-actions button{border:1px solid #cbd5e1;background:#f1f5f9;color:#0f172a;border-radius:6px;padding:4px 10px;cursor:pointer;font:12px inherit}.msel-opts label{display:flex;gap:8px;align-items:center;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13px;color:#0f172a}.msel-opts label:hover{background:#f1f5f9}@media(max-width:550px){.msel{min-width:100%}}
 #status-filtro{font-size:12px;color:var(--m);margin:8px 2px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
 .panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p,.ch p{font-size:13px;color:var(--m);margin:0 0 14px}.ch{display:flex;justify-content:space-between;gap:12px}.ch h2{margin:0 0 4px}.cs{text-align:right;white-space:nowrap}.cs strong{display:block;font-size:24px;color:var(--p)}
@@ -48,7 +47,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <div class="legend"><span>(%) de Presença</span><span><i class="sq r"></i>Menor que 85%</span><span><i class="sq y"></i>Maior ou igual a 85% e menor que 90%</span><span><i class="sq g"></i>Maior ou igual a 90%</span></div>
 <section class="cards" id="cards"></section>
 <section class="panel fp"><div class="filters">
-  <div class="msel"><button type="button" id="filtro-periodo" class="msel-btn" aria-haspopup="true" aria-expanded="false">Período</button><div class="msel-panel" id="filtro-periodo-panel" hidden><div class="msel-actions"><button type="button" id="msel-todas">Todas</button><button type="button" id="msel-nenhuma">Nenhuma</button><span id="msel-cont"></span></div><div class="msel-opts" id="filtro-periodo-opts"></div></div></div>
+<select id="filtro-periodo" title="Período"></select>
 <select id="filtro-escola"><option value="">Todas as escolas</option></select>
 <input id="filtro-busca" type="search" placeholder="Nome ou código da escola">
 <select id="filtro-faixa"><option value="">Todas as faixas de presença</option><option value="g">Verde (90% ou mais)</option><option value="y">Amarelo (85% a menos de 90%)</option><option value="r">Vermelho (menos de 85%)</option></select>
@@ -84,11 +83,11 @@ async function carregarLinhas(){
 }
 const pick=(r,k)=>{for(const n of k)if(r[n]!=null&&r[n]!=='')return r[n]},num=v=>(typeof v==='string'?(v.includes(',')?+v.replace('%','').replace(/\./g,'').replace(',','.'):parseFloat(v)):+v)||0;
 function norm(r){const g=(...k)=>pick(r,k),m=num(g('matriculas','matriculas_ativas','total_matriculas')),p=num(g('presenca','percentual_presenca','perc_presenca')),pv=num(g('aulas_previstas','previstas')),a=num(g('aulas_dadas_percentual','perc_aulas_dadas','aulas_dadas','dadas'));
-  return{per:String(g('periodo','mes','referencia')??'Período único'),pl:String(g('periodo_label','periodo label','nome do periodo')??''),escola:String(g('escola','nome_escola','unidade_escolar')??''),cod:g('codigo','cod_escola','codigo_escola')??'',pei:/^(1|true|sim|s|pei)$/i.test(String(g('pei','escola_pei')??'')),mat:m,pres:p<=1.0001?p*100:p,prev:pv,ad:a>2?a:a*100,turmas:num(g('turmas','total_turmas')),matrizes:g('matrizes','matriz','total_matrizes')??'',sup:String(g('supervisor','supervisora','supervisor_a')??'')}}
+  return{per:String(g('periodo','mes','referencia')??'Período único'),pl:String(g('periodo_label','periodo label','nome do periodo')??''),escola:String(g('escola','nome_escola','unidade_escolar')??''),cod:g('codigo','cod_escola','codigo_escola')??'',pei:/^(1|true|sim|s|pei)$/i.test(String(g('pei','escola_pei')??'')),mat:m,pres:p<=1.0001?p*100:p,prev:pv,ad:a>100&&pv?a/pv*100:a<=1.0001?a*100:a,turmas:num(g('turmas','total_turmas')),matrizes:g('matrizes','matriz','total_matrizes')??'',sup:String(g('supervisor','supervisora','supervisor_a')??'')}}
 /* ===== Painel ===== */
 const $=s=>document.querySelector(s),F=(v,d)=>(+v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}),nf=n=>Math.round(n).toLocaleString('pt-BR'),pc=v=>F(v,1)+'%',esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),sn=s=>s.replace(/ - \d+$/,''),fx=p=>p>=90?'g':p>=85?'y':'r',COR={g:'#16803c',y:'#facc15',r:'#dc2626'},FN={g:'Verde',y:'Amarelo',r:'Vermelho'};
 const selP=$('#filtro-periodo'),selE=$('#filtro-escola'),q=$('#filtro-busca'),fai=$('#filtro-faixa'),selPei=$('#filtro-pei'),sup=$('#filtro-sup'),vis=$('#filtro-ranking');
-let ROWS=[],BY={},LAB={},PER=[],CUR=[],SEL=new Set(),ts={k:'pres',d:-1};
+let ROWS=[],BY={},LAB={},PER=[],CUR=[],ts={k:'pres',d:-1};
 const dl=(d,suf='')=>d==null?'<span class="empty">–</span>':'<span class="dl '+(d>.0001?'up':d<-.0001?'dn':'')+'">'+(d>.0001?'▲ ':d<-.0001?'▼ ':'')+F(Math.abs(d),1)+' p.p.'+suf+'</span>';
 function agg(l){const s=k=>l.reduce((a,x)=>a+x[k],0),m=s('mat'),w=x=>x.prev||1,sw=l.reduce((a,x)=>a+w(x),0)||1;return{n:l.length,mat:m,turmas:s('turmas'),pei:l.filter(x=>x.pei).length,pres:m?l.reduce((a,x)=>a+x.pres*x.mat,0)/m:0,ad:l.reduce((a,x)=>a+x.ad*w(x),0)/sw}}
 function filt(rows,noF,noP){const t=q.value.trim().toLowerCase(),e=selE.value,f=fai.value,pe=selPei.value,s=sup.value;return rows.filter(x=>(!e||x.escola===e)&&(!t||(x.escola+' '+x.cod).toLowerCase().includes(t))&&(noF||!f||fx(x.pres)===f)&&(noP||!pe||(pe==='s')===x.pei)&&(!s||x.sup===s))}
@@ -107,48 +106,25 @@ const sorted=l=>[...l].sort((a,b)=>TX.includes(ts.k)?ts.d*String(a[ts.k]).locale
 let LT=[];
 function table(){$('thead').innerHTML='<tr>'+COLS.map(c=>`<th data-k="${c[0]}">${c[1]}${ts.k===c[0]?(ts.d>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
 $('#tabela-resultados').innerHTML=sorted(LT).map(x=>`<tr><td>${esc(x.escola)}</td><td>${esc(x.cod)}</td><td>${x.pei?'Sim':'Não'}</td><td>${nf(x.mat)}</td><td><span class="bd ${fx(x.pres)}">${pc(x.pres)}</span></td><td>${dl(x.dp)}</td><td>${nf(x.prev)}</td><td>${pc(x.ad)}</td><td>${dl(x.da)}</td><td>${nf(x.turmas)}</td><td>${esc(x.matrizes)}</td><td>${esc(x.sup)}</td></tr>`).join('')}
-function render(){const sels=PER.filter(p=>SEL.has(p));construirCUR();const p=sels.length?sels[sels.length-1]:null;const R=agg(CUR),l=filt(CUR),S=agg(l),ser=PER.map(t=>agg(filt(BY[t],1))),reg=PER.map(t=>agg(BY[t])),fI=sels.length?PER.indexOf(sels[0]):0,lI=sels.length?PER.indexOf(sels[sels.length-1]):0,pr=sels.length===1?(fI>0?ser[fI-1]:null):ser[fI];
-LT=l.map(x=>({...x}));
-let sub;
-if(sels.length===1)sub='Período '+(LAB[sels[0]]||sels[0])+': ';
-else if(sels.length>1)sub='Período consolidado ('+sels.length+' semanas: '+(LAB[sels[0]]||sels[0])+' a '+(LAB[sels[sels.length-1]]||sels[sels.length-1])+'): ';
-else sub='Nenhuma semana selecionada: ';
-$('#avgSub').textContent=sub+R.n+' escolas, '+nf(R.mat)+' matrículas ativas.';
+function render(){const p=selP.value,i=PER.indexOf(p);CUR=BY[p]||[];const R=agg(CUR),l=filt(CUR),S=agg(l),pm=new Map((BY[PER[i-1]]||[]).map(x=>[x.escola,x])),ser=PER.map(t=>agg(filt(BY[t],1))),reg=PER.map(t=>agg(BY[t])),pr=i>0?ser[i-1]:null;
+LT=l.map(x=>{const o=pm.get(x.escola);return{...x,dp:o?x.pres-o.pres:null,da:o?x.ad-o.ad:null}});
+$('#avgSub').textContent='Período '+(LAB[p]||p)+': '+R.n+' escolas, '+nf(R.mat)+' matrículas ativas.';
 $('#avg').innerHTML=[['Presença',pc(R.pres)+` <span class="bd ${fx(R.pres)}">${FN[fx(R.pres)]}</span>`,R.pres,'Média ponderada por matrículas'],['Aulas dadas',pc(R.ad),R.ad,'Média ponderada por aulas previstas'],['Escolas em verde',R.n?CUR.filter(x=>fx(x.pres)==='g').length+' de '+R.n:'-',R.n?CUR.filter(x=>fx(x.pres)==='g').length/R.n*100:0,'Presença de 90% ou mais'],['Escolas em vermelho',CUR.filter(x=>fx(x.pres)==='r').length+' de '+R.n,R.n?CUR.filter(x=>fx(x.pres)==='r').length/R.n*100:0,'Presença abaixo de 85%'],['Matrículas ativas',nf(R.mat),null,nf(R.mat/(R.n||1))+' por escola'],['Turmas',nf(R.turmas),null,F(R.mat/(R.turmas||1),1)+' alunos por turma'],['Escolas PEI',R.pei+' de '+R.n,R.n?R.pei/R.n*100:0,'Unidades no período']].map(x=>`<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div>${x[2]==null?'':`<div class="bar"><i style="width:${x[2]}%"></i></div>`}<div class="d">${x[3]}</div></div>`).join('');
 $('#status-filtro').textContent=l.length+' de '+R.n+' escolas no recorte atual.';
 $('#cards').innerHTML=[['Presença',pc(S.pres),'Média ponderada, '+FN[fx(S.pres)],dl(S.pres-R.pres,' vs região'),COR[fx(S.pres)]],['Aulas dadas',pc(S.ad),'Média ponderada',dl(S.ad-R.ad,' vs região')],['Escolas',nf(S.n),'de '+nf(R.n)+' na região',''],['Matrículas ativas',nf(S.mat),pc(S.mat/(R.mat||1)*100)+' da região',''],['Turmas',nf(S.turmas),F(S.mat/(S.turmas||1),1)+' matrículas por turma',''],['Escolas PEI',nf(S.pei),'de '+nf(S.n)+' no recorte','']].map(x=>`<article class="card"${x[4]?` style="border-left-color:${x[4]}"`:''}><div class="k">${x[0]}</div><div class="v">${x[1]}</div><div class="d">${x[2]}</div>${x[3]}</article>`).join('');
 line('#chart-presenca',[{v:reg.map(g=>g.pres),c:'#94a3b8',dash:1},{v:ser.map(g=>g.pres),c:'#0d9488'}],PER,1);line('#chart-aulas',[{v:reg.map(g=>g.ad),c:'#94a3b8',dash:1},{v:ser.map(g=>g.ad),c:'#4f46e5'}],PER,0);
-$('#resumo-presenca').textContent=pc(ser[lI].pres);$('#delta-presenca').innerHTML=dl(pr?ser[lI].pres-pr.pres:null);$('#resumo-aulas').textContent=pc(ser[lI].ad);$('#delta-aulas').innerHTML=dl(pr?ser[lI].ad-pr.ad:null);
+$('#resumo-presenca').textContent=pc(S.pres);$('#delta-presenca').innerHTML=dl(pr?S.pres-pr.pres:null);$('#resumo-aulas').textContent=pc(S.ad);$('#delta-aulas').innerHTML=dl(pr?S.ad-pr.ad:null);
 rank('#ranking-presenca',l,'pres',pc,R.pres,1);rank('#ranking-aulas',l,'ad',pc,R.ad,0);sema(l);peiP(filt(CUR,0,1));table()}
-function construirCUR(){
-  const sels=PER.filter(p=>SEL.has(p));CUR=[];
-  if(!sels.length)return;
-  if(sels.length===1){
-    const p=sels[0],i=PER.indexOf(p),pm=i>0?BY[PER[i-1]]:null,pmMap=new Map((pm||[]).map(x=>[x.cod,x]));
-    CUR=(BY[p]||[]).map(x=>({...x,dp:pmMap.has(x.cod)?x.pres-pmMap.get(x.cod).pres:null,da:pmMap.has(x.cod)?x.ad-pmMap.get(x.cod).ad:null}));return;
-  }
-  const first=sels[0],last=sels[sels.length-1],fr=BY[first]||[],ls=BY[last]||[],frM=new Map(fr.map(x=>[x.cod,x])),lsM=new Map(ls.map(x=>[x.cod,x])),g={};
-  ROWS.filter(x=>SEL.has(x.per)).forEach(x=>{(g[x.cod]=g[x.cod]||[]).push(x)});
-  CUR=Object.values(g).map(l=>{l.sort((a,b)=>PER.indexOf(a.per)-PER.indexOf(b.per));const lastR=l[l.length-1],sm=l.reduce((a,x)=>a+x.mat,0),sp=l.reduce((a,x)=>a+x.pres*x.mat,0),sv=l.reduce((a,x)=>a+x.prev,0),sa=l.reduce((a,x)=>a+x.ad*(x.prev||0),0),r={per:'consolidado',pl:'',escola:lastR.escola,cod:lastR.cod,pei:lastR.pei,mat:lastR.mat,pres:sm?sp/sm:0,prev:sv,ad:sv?sa/sv:0,turmas:lastR.turmas,matrizes:lastR.matrizes,sup:lastR.sup};const f=frM.get(r.cod),t=lsM.get(r.cod);r.dp=(f&&t)?t.pres-f.pres:null;r.da=(f&&t)?t.ad-f.ad:null;return r;});
-}
-function atualizarBotao(){const n=SEL.size;$('#msel-cont').textContent=n+'/'+PER.length;(n===0?$('#filtro-periodo').textContent='Período (nenhuma)':n===1?$('#filtro-periodo').textContent='Período: '+(LAB[PER.find(p=>SEL.has(p))]||''):$('#filtro-periodo').textContent='Período: '+n+' semanas selecionadas');}
-function syncChecks(){[...document.querySelectorAll('#filtro-periodo-opts input[type=checkbox]')].forEach(c=>c.checked=SEL.has(c.value));}
 function init(){BY={};LAB={};ROWS.forEach(x=>{(BY[x.per]=BY[x.per]||[]).push(x);if(x.pl)LAB[x.per]=x.pl});
 PER=Object.keys(BY).filter(p=>/semana/i.test(LAB[p]||p));if(!PER.length)PER=Object.keys(BY);
 const semNum=p=>{const m=String(p).match(/(\d+)/);return m?+m[1]:1e9};
 PER.sort((a,b)=>semNum(a)-semNum(b));
-SEL=new Set([PER[PER.length-1]]);
-$('#filtro-periodo-opts').innerHTML=PER.map(p=>`<label><input type="checkbox" value="${esc(p)}" ${SEL.has(p)?'checked':''}> ${esc(LAB[p]||p)}</label>`).join('');
-atualizarBotao();
+selP.innerHTML=PER.map(p=>`<option value="${esc(p)}">${esc(LAB[p]||p)}</option>`).join('');selP.value=PER[PER.length-1];
 const U=k=>[...new Set(ROWS.map(x=>x[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')),O=a=>a.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
 selE.innerHTML='<option value="">Todas as escolas</option>'+O(U('escola'));sup.innerHTML='<option value="">Todos(as) os(as) supervisores(as)</option>'+O(U('sup'));render()}
-[selE,fai,selPei,sup,vis].forEach(el=>el.addEventListener('change',render));q.addEventListener('input',render);
-$('#filtro-periodo-opts').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){e.target.checked?SEL.add(e.target.value):SEL.delete(e.target.value);atualizarBotao();render();}});
-$('#msel-todas').onclick=()=>{PER.forEach(p=>SEL.add(p));syncChecks();atualizarBotao();render()};
-$('#msel-nenhuma').onclick=()=>{SEL.clear();syncChecks();atualizarBotao();render()};
-$('#filtro-periodo').addEventListener('click',e=>{e.stopPropagation();const pn=$('#filtro-periodo-panel');pn.hidden=!pn.hidden;$('#filtro-periodo').setAttribute('aria-expanded',String(!pn.hidden));});
-$('#limpar-filtros').onclick=()=>{[selE,q,fai,selPei,sup].forEach(e=>e.value='');SEL=new Set([PER[PER.length-1]]);syncChecks();atualizarBotao();vis.value='top';render()};
-document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:TX.includes(k)?1:-1};table()};if(!$('#filtro-periodo-panel').hidden&&!e.target.closest('.msel'))$('#filtro-periodo-panel').hidden=true;});
+[selP,selE,fai,selPei,sup,vis].forEach(el=>el.addEventListener('change',render));q.addEventListener('input',render);
+$('#limpar-filtros').onclick=()=>{[selE,q,fai,selPei,sup].forEach(e=>e.value='');selP.value=PER[PER.length-1];vis.value='top';render()};
+document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:TX.includes(k)?1:-1};table()}});
 $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.cod,x.pei?'Sim':'Não',x.mat,F(x.pres,1),x.dp==null?'':F(x.dp,1),x.prev,F(x.ad,1),x.da==null?'':F(x.da,1),x.turmas,x.matrizes,x.sup].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='presenca-escolas.csv';a.click()};
 (async()=>{try{if(typeof supabaseClient!=='undefined'){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){location.href='index.html';return}}
 ROWS=(await carregarLinhas()).map(norm).filter(x=>x.escola);if(!ROWS.length)throw new Error('nenhuma linha');init()}catch(e){$('#status-filtro').textContent='Não foi possível carregar os dados ('+e.message+'). Ajuste a função carregarLinhas() no início do script.';console.error(e)}})();
