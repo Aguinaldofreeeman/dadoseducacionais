@@ -72,7 +72,12 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <script>
 /* ===== FONTE DE DADOS: se os nomes abaixo diferirem dos seus, ajuste aqui ===== */
 async function carregarLinhas(){
-  if(typeof supabaseClient!=='undefined'){try{const {data,error}=await supabaseClient.from('resultados_presenca').select('*');if(!error&&Array.isArray(data)&&data.length)return data;if(error)console.warn('Supabase resultados_presenca falhou, usando dados embutidos:',error.message)}catch(e){console.warn('Supabase indisponível, usando dados embutidos:',e.message)}}
+  if(typeof supabaseClient!=='undefined'){try{
+    const tam=1000;let tudo=[],de=0;
+    for(;;){const {data,error}=await supabaseClient.from('resultados_presenca').select('*').range(de,de+tam-1);if(error)throw error;if(!Array.isArray(data)||!data.length)break;tudo=tudo.concat(data);if(data.length<tam)break;de+=tam;}
+    if(tudo.length)return tudo;
+    console.warn('Supabase resultados_presenca vazio, usando dados embutidos.');
+  }catch(e){console.warn('Supabase resultados_presenca falhou, usando dados embutidos:',e.message)}}
   const g=window.DADOS_PRESENCA||window.dadosPresenca;if(Array.isArray(g)&&g.length)return g;
   throw new Error('nenhuma fonte de dados disponível (nem Supabase, nem embutida)');
 }
