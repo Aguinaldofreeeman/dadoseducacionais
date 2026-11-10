@@ -92,20 +92,25 @@ $('tbody').innerHTML=sorted(LT).map(x=>`<tr><td>${esc(x.escola)}</td><td>${nf(x.
 function render(){const l=base(),S=agg(l);LT=l;$('#sub').textContent=l.length+' de '+R.n+' escolas no recorte atual.';
 $('#cards').innerHTML=[['Índice de apoios realizados',d2(S.indice)+` <span class="bd ${fx(S.indice)}" style="vertical-align:middle">${FN[fx(S.indice)]}</span>`,'Apoios ÷ equipe gestora',dl(S.indice-R.indice,d2,' vs região'),COR[fx(S.indice)]],['Apoios realizados',nf(S.apoios),nf(S.apoios/(S.n||1))+' por escola',''],['Professores apoiados',nf(S.apoiados),pc(S.cob)+' dos '+nf(S.profs)+' professores',dl((S.cob-R.cob)/100*100,x=>F(x,1),' p.p. vs região')],['Apoios não finalizados',nf(S.nao),'No recorte atual',''],['Equipe gestora e avaliadores',nf(S.eq)+' / '+nf(S.aval),'Equipe gestora / avaliadores',''],['Escolas',nf(S.n),'de '+nf(R.n)+' na região','']].map(x=>`<article class="card"${x[4]?` style="border-left-color:${x[4]}"`:''}><div class="k">${x[0]}</div><div class="v">${x[1]}</div><div class="d">${x[2]}</div>${x[3]}</article>`).join('');
 rank('#r1',l,'indice',d2,R.indice,1);rank('#r2',l,'cob',pc,R.cob,0);scatter(l);sema(l);hist(l);table()}
-function montar(){ROWS=D.rows.map(MAP);R=agg(ROWS);$('#hsub').textContent='Unidade Regional de Ensino de Marília'+(D.ano?' — ano '+D.ano:'')+', semana '+D.periodo;
+function montar(){ROWS=D.rows.map(MAP);R=agg(ROWS);$('#hsub').textContent=D.consolidado?'Unidade Regional de Ensino de Marília — consolidado de todas as planilhas':'Unidade Regional de Ensino de Marília'+(D.ano?' — ano '+D.ano:'')+', semana '+D.periodo;
 const c=k=>ROWS.filter(x=>fx(x.indice)===k).length,N=R.n;
-$('#avgSub').textContent=N+' escolas, '+nf(R.apoios)+' apoios realizados na semana '+D.periodo+'.';
+$('#avgSub').textContent=D.consolidado?N+' escolas, '+nf(R.apoios)+' apoios realizados no consolidado de '+D.numSemanas+' planilhas.':N+' escolas, '+nf(R.apoios)+' apoios realizados na semana '+D.periodo+'.';
 $('#avg').innerHTML=[['Índice de apoios realizados',d2(R.indice)+` <span class="bd ${fx(R.indice)}">${FN[fx(R.indice)]}</span>`,null,'Apoios ÷ equipe gestora. Média simples das escolas: '+d2(R.media)],['Apoios realizados',nf(R.apoios),null,nf(R.apoios/N)+' por escola'],['Professores apoiados',nf(R.apoiados),R.cob,pc(R.cob)+' dos '+nf(R.profs)+' professores'],['Apoios não finalizados',nf(R.nao),null,'Total da região'],['Escolas no verde',c('g')+' de '+N,c('g')/N*100,'Índice de 3 ou mais'],['Escolas no amarelo',c('y')+' de '+N,c('y')/N*100,'Índice de 2 a menos de 3'],['Escolas no vermelho',c('r')+' de '+N,c('r')/N*100,'Índice abaixo de 2']].map(x=>`<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div>${x[2]==null?'':`<div class="bar"><i style="width:${x[2]}%"></i></div>`}<div class="d">${x[3]}</div></div>`).join('');
 selE.innerHTML='<option value="">Todas as escolas</option>'+[...ROWS].sort((a,b)=>a.escola.localeCompare(b.escola,'pt-BR')).map(x=>`<option value="${esc(x.escola)}">${esc(x.escola)}</option>`).join('');
-const sem=ROWS.filter(x=>x.equipe==null).map(x=>sn(x.escola));
+const sem=D.consolidado?[]:ROWS.filter(x=>x.equipe==null).map(x=>sn(x.escola));
 $('#fonte').innerHTML=(D.origem==='supabase'?'Fonte: Supabase (resultados_apoio_presencial), importada via admin.html.':'Fonte: exportação da planilha de apoios.')+' Filtros: '+esc(D.filtros||'não informados na importação')+'.'+(sem.length?'<br>Sem o total da equipe gestora na planilha: '+esc(sem.join(' e '))+'. O índice informado foi mantido; para o índice regional, a equipe dessas escolas foi calculada como apoios ÷ índice.':'');
 render()}
 montar();
 function aplicarSemana(chave){if(!GRUPOS||!chave)return;const g=GRUPOS[chave];if(!g)return;D={rows:g.rows,periodo:g.periodo,filtros:g.filtros,ano:g.ano,label:g.label,origem:'supabase'};montar()}
+function aplicarConsolidado(){if(!GRUPOS)return;const todas=Object.values(GRUPOS),numSemanas=todas.length,porEscola={};
+  todas.forEach(g=>g.rows.forEach(a=>{const r=porEscola[a[0]]??(porEscola[a[0]]=[a[0],0,0,0,0,0,null,[]]);
+    r[1]+=a[1]||0;r[2]+=a[2]||0;r[3]+=a[3]||0;r[4]=Math.max(r[4],a[4]||0);r[5]=Math.max(r[5],a[5]||0);
+    if(a[6]!=null)r[6]=Math.max(r[6]??0,a[6]);if(a[7]!=null)r[7].push(a[7]);}));
+  D={rows:Object.values(porEscola).map(r=>{const eq=r[6],ids=r[7];return [r[0],r[1],r[2],r[3],r[4],r[5],eq,eq?r[1]/eq:(ids.length?ids.reduce((x,y)=>x+y,0)/ids.length:null)]}),periodo:'consolidado',filtros:'consolidação automática de todas as planilhas importadas',ano:null,label:null,consolidado:true,numSemanas,origem:'supabase'};montar()}
 [selE,fai,vis].forEach(e=>e.addEventListener('change',render));
 const selP=$('#selP');if(!GRUPOS)selP.innerHTML='<option value="">'+esc(D.periodo)+'</option>';
-selP.addEventListener('change',()=>aplicarSemana(selP.value));
-$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='top';if(GRUPOS&&selP.options.length){selP.value=selP.options[0].value;aplicarSemana(selP.value)}else render()};
+selP.addEventListener('change',()=>{if(selP.value==='__consolidado__')aplicarConsolidado();else aplicarSemana(selP.value)});
+$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='top';if(GRUPOS&&selP.options.length){const op=[...selP.options].find(o=>o.value&&o.value!=='__consolidado__');if(op){selP.value=op.value;aplicarSemana(selP.value);return}}render()};
 document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='escola'?1:-1};table()}});
 $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.apoios,x.nao,x.apoiados,x.profs,F(x.cob,1),x.aval,x.equipe??'',F(x.indice,2)].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='apoios-escolas.csv';a.click()};
 </script>
@@ -129,7 +134,7 @@ $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=
   const m=g[chaves[0]];
   D={rows:m.rows,periodo:m.periodo,filtros:m.filtros||'não informados na importação',ano:m.ano,label:m.label,origem:'supabase'};
   const anos=new Set(chaves.map(k=>g[k].ano));
-  selP.innerHTML=chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<option value="${esc(k)}" title="${esc(x.ano+' · '+x.periodo)}">${esc(txt)}</option>`}).join('');
+  selP.innerHTML=(chaves.length>1?'<option value="__consolidado__">Consolidado — todas as planilhas</option>':'')+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<option value="${esc(k)}" title="${esc(x.ano+' · '+x.periodo)}">${esc(txt)}</option>`}).join('');
   selP.style.display='';selP.value=chaves[0];
   montar();
 }catch(e){console.warn('Falha ao buscar resultados_apoio_presencial:',e.message)}})();
