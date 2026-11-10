@@ -51,7 +51,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <select id="selE"><option value="">Todas as escolas</option></select>
 <select id="selP" title="Semana — nome do arquivo da planilha"></select>
 <select id="fai"><option value="">Todas as faixas do índice</option><option value="g">Verde (3 ou mais)</option><option value="y">Amarelo (2 a menos de 3)</option><option value="r">Vermelho (menos de 2)</option></select>
-<select id="vis"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select>
+<select id="vis"><option value="all" selected>All / Todos</option><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option></select>
 <button type="button" class="btn" id="reset">Limpar filtros</button></div><div id="sub"></div></section>
 <section class="grid">
 <article class="panel"><h2>Ranking do índice de apoios realizados</h2><p>Cor pela faixa do índice. Clique numa escola para filtrar. A marca vermelha indica o índice regional.</p><div id="r1" class="rank"></div></article>
@@ -109,8 +109,9 @@ function aplicarConsolidado(){if(!GRUPOS)return;const todas=Object.values(GRUPOS
   D={rows:Object.values(porEscola).map(r=>{const eq=r[6],ids=r[7];return [r[0],r[1],r[2],r[3],r[4],r[5],eq,eq?r[1]/eq:(ids.length?ids.reduce((x,y)=>x+y,0)/ids.length:null)]}),periodo:'consolidado',filtros:'consolidação automática de todas as planilhas importadas',ano:null,label:null,consolidado:true,numSemanas,origem:'supabase'};montar()}
 [selE,fai,vis].forEach(e=>e.addEventListener('change',render));
 const selP=$('#selP');if(!GRUPOS)selP.innerHTML='<option value="">'+esc(D.periodo)+'</option>';
-selP.addEventListener('change',()=>{if(selP.value==='__consolidado__')aplicarConsolidado();else aplicarSemana(selP.value)});
-$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='top';if(GRUPOS&&selP.options.length){const op=[...selP.options].find(o=>o.value&&o.value!=='__consolidado__');if(op){selP.value=op.value;aplicarSemana(selP.value);return}}render()};
+selP.addEventListener('change',aplicarSelecaoSemana);
+function aplicarSelecaoSemana(){if(selP.value==='__consolidado__')aplicarConsolidado();else aplicarSemana(selP.value)}
+$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='all';if(GRUPOS&&selP.options.length){if([...selP.options].some(o=>o.value==='__consolidado__'))selP.value='__consolidado__';aplicarSelecaoSemana()}else render()};
 document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='escola'?1:-1};table()}});
 $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.apoios,x.nao,x.apoiados,x.profs,F(x.cob,1),x.aval,x.equipe??'',F(x.indice,2)].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='apoios-escolas.csv';a.click()};
 </script>
@@ -131,12 +132,9 @@ $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=
   });
   GRUPOS=g;
   const chaves=Object.keys(g).sort((a,b)=>{const A=a.split('|'),B=b.split('|');return Number(B[0])-Number(A[0])||B[1].localeCompare(A[1],'pt-BR')});
-  const m=g[chaves[0]];
-  D={rows:m.rows,periodo:m.periodo,filtros:m.filtros||'não informados na importação',ano:m.ano,label:m.label,origem:'supabase'};
   const anos=new Set(chaves.map(k=>g[k].ano));
-  selP.innerHTML=(chaves.length>1?'<option value="__consolidado__">Consolidado — todas as planilhas</option>':'')+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<option value="${esc(k)}" title="${esc(x.ano+' · '+x.periodo)}">${esc(txt)}</option>`}).join('');
-  selP.style.display='';selP.value=chaves[0];
-  montar();
+  selP.innerHTML='<option value="__consolidado__">Consolidado — todas as planilhas</option>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<option value="${esc(k)}" title="${esc(x.ano+' · '+x.periodo)}">${esc(txt)}</option>`}).join('');
+  selP.style.display='';selP.value='__consolidado__';aplicarConsolidado();
 }catch(e){console.warn('Falha ao buscar resultados_apoio_presencial:',e.message)}})();
 </script>
 </body>
