@@ -25,8 +25,8 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
 .mse{position:relative;flex:1;min-width:230px}.mse-btn{width:100%;text-align:left;padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.mse-btn::after{content:"▾"}.mse-list{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:30;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sh);max-height:320px;overflow:auto;padding:6px}
-.mse.open .mse-list{display:block}.mse-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap}
+.mse-btn::after{content:"▾"}.mse-list{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:30;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sh);max-height:300px;overflow:auto;padding:4px}
+.mse.open .mse-list{display:block}.mse-item{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap}
 .mse-item:hover{background:var(--bg)}.mse-item input{accent-color:var(--a);cursor:pointer;margin:0}
 #sub{font-size:12px;color:var(--m);margin:8px 2px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.stack{display:grid;gap:18px;align-content:start}
@@ -53,10 +53,10 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <section class="cards" id="cards"></section>
 <section class="panel fp"><div class="filters">
 <select id="selE"><option value="">Todas as escolas</option></select>
-<div class="mse" id="selPWrap"><button type="button" class="mse-btn" id="selPBtn">Consolidado — todas as planilhas</button><div class="mse-list" id="selPList"></div></div>
+<div class="mse" id="selPWrap"><button type="button" class="mse-btn" id="selPBtn">Consolidado</button><div class="mse-list" id="selPList"></div></div>
 <select id="fai"><option value="">Todas as faixas do índice</option><option value="g">Verde (3 ou mais)</option><option value="y">Amarelo (2 a menos de 3)</option><option value="r">Vermelho (menos de 2)</option></select>
 <select id="vis"><option value="all" selected>All / Todos</option><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option></select>
-<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg" style="margin:6px 2px 0">Semanas: abra a lista e <b>marque várias</b> para agregá-las; “Consolidado — todas as planilhas” equivale a todas marcadas.</p><div id="sub"></div></section>
+<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg" style="margin:6px 2px 0">Semanas: abra a lista e <b>marque várias</b> para agregá-las; “Consolidado” equivale a todas marcadas.</p><div id="sub"></div></section>
 <section class="grid">
 <article class="panel"><h2>Ranking do índice de apoios realizados</h2><p>Cor pela faixa do índice. Clique numa escola para filtrar. A marca vermelha indica o índice regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Índice e cobertura de professores</h2><p>Cada bolha é uma escola; o tamanho mostra o total de professores. As faixas de fundo seguem o semáforo do índice.</p><div id="sc"></div><div class="leg">A linha vermelha vertical marca a cobertura regional de professores apoiados.</div></article>
@@ -120,7 +120,7 @@ if(!GRUPOS){selP.innerHTML='<label class="mse-item"><input type="checkbox" value
 selPBtn.addEventListener('click',e=>{e.stopPropagation();selPWrap.classList.toggle('open')});
 document.addEventListener('click',e=>{if(!selPWrap.contains(e.target))selPWrap.classList.remove('open')});
 selP.addEventListener('change',e=>aplicarSelecaoSemana(e.target));
-function atualizarBotaoSemana(){selPBtn.textContent=D.consolidado?'Consolidado — todas as planilhas':D.multi?D.numSemanas+' semanas selecionadas':(D.label||D.periodo)}
+function atualizarBotaoSemana(){selPBtn.textContent=D.consolidado?'Consolidado':D.multi?D.numSemanas+' semanas selecionadas':(D.label||D.periodo)}
 function aplicarSelecaoSemana(origem){if(!GRUPOS)return;
   const caixas=[...selP.querySelectorAll('input[type=checkbox]')],valores=caixas.filter(c=>c.checked&&c.value!=='__consolidado__').map(c=>c.value),todas=Object.keys(GRUPOS);
   if(origem&&origem.value==='__consolidado__'&&origem.checked||!valores.length||valores.length>=todas.length){caixas.forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSemanas(todas);return}
@@ -159,7 +159,7 @@ $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=
   const numSem=s=>{const m=String(s).match(/^(\d+)\s*-/);return m?+m[1]:0};
   const chaves=Object.keys(g).sort((a,b)=>{const A=a.split('|'),B=b.split('|');return Number(B[0])-Number(A[0])||numSem(B[1])-numSem(A[1])||B[1].localeCompare(A[1],'pt-BR')});
   const anos=new Set(chaves.map(k=>g[k].ano));
-  selP.innerHTML='<label class="mse-item"><input type="checkbox" value="__consolidado__" checked> Consolidado — todas as planilhas</label>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<label class="mse-item" title="${esc(x.ano+' · '+x.periodo)}"><input type="checkbox" value="${esc(k)}"> ${esc(txt)}</label>`}).join('');
+  selP.innerHTML='<label class="mse-item"><input type="checkbox" value="__consolidado__" checked> Consolidado</label>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<label class="mse-item" title="${esc(x.ano+' · '+x.periodo)}"><input type="checkbox" value="${esc(k)}"> ${esc(txt)}</label>`}).join('');
   selPWrap.style.display='';aplicarSemanas(chaves);
 }catch(e){console.warn('Falha ao buscar resultados_apoio_presencial:',e.message)}})();
 </script>
