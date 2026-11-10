@@ -119,12 +119,13 @@ const selP=$('#selPList'),selPBtn=$('#selPBtn'),selPWrap=$('#selPWrap');
 if(!GRUPOS){selP.innerHTML='<label class="mse-item"><input type="checkbox" value="" checked disabled> '+esc(D.periodo)+'</label>';selPBtn.textContent=esc(D.periodo)}
 selPBtn.addEventListener('click',e=>{e.stopPropagation();selPWrap.classList.toggle('open')});
 document.addEventListener('click',e=>{if(!selPWrap.contains(e.target))selPWrap.classList.remove('open')});
-selP.addEventListener('change',aplicarSelecaoSemana);
+selP.addEventListener('change',e=>aplicarSelecaoSemana(e.target));
 function atualizarBotaoSemana(){selPBtn.textContent=D.consolidado?'Consolidado — todas as planilhas':D.multi?D.numSemanas+' semanas selecionadas':(D.label||D.periodo)}
-function aplicarSelecaoSemana(){if(!GRUPOS)return;
-  const caixas=[...selP.querySelectorAll('input[type=checkbox]')],valores=caixas.filter(c=>c.checked).map(c=>c.value),todas=Object.keys(GRUPOS);
-  if(!valores.length||valores.includes('__consolidado__')||valores.filter(v=>v!=='__consolidado__').length>=todas.length){caixas.forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSemanas(todas);return}
-  aplicarSemanas(valores.filter(v=>v!=='__consolidado__'))}
+function aplicarSelecaoSemana(origem){if(!GRUPOS)return;
+  const caixas=[...selP.querySelectorAll('input[type=checkbox]')],valores=caixas.filter(c=>c.checked&&c.value!=='__consolidado__').map(c=>c.value),todas=Object.keys(GRUPOS);
+  if(origem&&origem.value==='__consolidado__'&&origem.checked||!valores.length||valores.length>=todas.length){caixas.forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSemanas(todas);return}
+  const cons=caixas.find(c=>c.value==='__consolidado__');if(cons)cons.checked=false;
+  aplicarSemanas(valores)}
 $('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='all';if(GRUPOS&&selP.querySelectorAll('input[type=checkbox]').length){[...selP.querySelectorAll('input[type=checkbox]')].forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSelecaoSemana()}else render()};
 document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='escola'?1:-1};table()}});
 $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.apoios,x.nao,x.apoiados,x.profs,F(x.cob,1),x.aval,x.equipe??'',F(x.indice,2)].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='apoios-escolas.csv';a.click()};
