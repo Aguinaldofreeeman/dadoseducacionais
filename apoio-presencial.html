@@ -1,41 +1,135 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Apoio Presencial</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Apoios Realizados</title>
 <style>
 :root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
 @media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
 *{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
 header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}
+.btn{padding:9px 14px;border-radius:8px;color:#fff;text-decoration:none;font:14px inherit;background:var(--p);border:0;cursor:pointer}header .btn{background:#ffffff26}header .btn:hover{background:#ffffff40}
 main{max-width:1320px;margin:auto;padding:22px 30px 40px}
-.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh);padding:20px;margin-bottom:18px}
-.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
-.empty{font-size:13px;color:var(--m)}
-.foot{font-size:12px;color:var(--m);margin-top:18px}
-@media(max-width:550px){header{padding:16px}main{padding:14px}}
+.g{background:#16803c;color:#fff}.y{background:#facc15;color:#422006}.r{background:#dc2626;color:#fff}
+.sq{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px}.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:12px}
+.avg{background:linear-gradient(120deg,#17365d,#134e6f);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:14px;box-shadow:var(--sh)}
+.avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 6px;display:flex;align-items:center;gap:8px}.avg .d{font-size:12px;opacity:.75;margin-top:6px}
+.bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}.avg .bar{background:#ffffff30}.avg .bar i{background:#5eead4}
+.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}
+.legend{background:#0f2a47;color:#fff;border-radius:10px;padding:10px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;font-size:14px}.legend .sq{width:20px;height:20px;margin-right:8px;vertical-align:middle}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+.card,.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh)}.card{padding:16px 18px;border-left:4px solid var(--a)}
+.card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}
+.dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
+.fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
+#sub{font-size:12px;color:var(--m);margin:8px 2px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.stack{display:grid;gap:18px;align-content:start}
+.panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
+.rank{display:grid;gap:4px;align-content:start;max-height:460px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 62px;gap:10px;align-items:center;font-size:13px;cursor:pointer;padding:4px;border-radius:8px}.row:hover{background:var(--bg)}
+.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
+.f{display:grid;grid-template-columns:150px 1fr 120px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
+.hist{display:flex;gap:10px;align-items:flex-end;min-height:150px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:11px;color:var(--m);text-align:center}.col i{width:100%;border-radius:6px 6px 0 0;min-height:2px}.col b{color:var(--t);font-size:12px}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .gl{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle{cursor:pointer}
+.tw{overflow:auto;max-height:480px}table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:var(--bg)}
+.empty,.fonte,.leg{font-size:12px;color:var(--m)}.fonte{margin-top:18px;line-height:1.6}.leg{margin-top:8px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.f{grid-template-columns:120px 1fr 100px}.fp{position:static}}
+@media(max-width:550px){header{padding:16px}main{padding:14px}.filters select,.filters input{min-width:100%}}
 </style>
 <link rel="stylesheet" href="css/home-button.css">
 </head>
 <body>
-<header><div><h1>Apoio Presencial</h1><p>Unidade Regional de Ensino de Marília</p></div><a class="home-button" href="index.html">Início</a></header>
+<header><div><h1>Dashboard de Apoios Realizados</h1><p id="hsub"></p></div><a class="home-button" href="index.html">Início</a></header>
 <main>
-<article class="panel">
-<h2>Visão geral</h2>
-<p>Registro e acompanhamento do apoio presencial às escolas da unidade regional.</p>
-<p class="empty">Página em construção. Os dados e painéis do Apoio Presencial serão disponibilizados aqui.</p>
-</article>
-<p class="foot">Fonte: a definir.</p>
+<section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub"></p><div class="items" id="avg"></div></section>
+<div class="legend"><span>Índice de apoios realizados</span><span><i class="sq r"></i>Menor que 2</span><span><i class="sq y"></i>Maior ou igual a 2 e menor que 3</span><span><i class="sq g"></i>Maior ou igual a 3</span></div>
+<section class="cards" id="cards"></section>
+<section class="panel fp"><div class="filters">
+<select id="selP" title="Ano e semana" style="display:none"></select>
+<select id="selE"><option value="">Todas as escolas</option></select>
+<input id="q" type="search" placeholder="Buscar escola ou código">
+<select id="fai"><option value="">Todas as faixas do índice</option><option value="g">Verde (3 ou mais)</option><option value="y">Amarelo (2 a menos de 3)</option><option value="r">Vermelho (menos de 2)</option></select>
+<select id="vis"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select>
+<button type="button" class="btn" id="reset">Limpar filtros</button></div><div id="sub"></div></section>
+<section class="grid">
+<article class="panel"><h2>Ranking do índice de apoios realizados</h2><p>Cor pela faixa do índice. Clique numa escola para filtrar. A marca vermelha indica o índice regional.</p><div id="r1" class="rank"></div></article>
+<article class="panel"><h2>Índice e cobertura de professores</h2><p>Cada bolha é uma escola; o tamanho mostra o total de professores. As faixas de fundo seguem o semáforo do índice.</p><div id="sc"></div><div class="leg">A linha vermelha vertical marca a cobertura regional de professores apoiados.</div></article>
+<article class="panel"><h2>Ranking de professores apoiados</h2><p>Percentual de professores apoiados sobre o total de professores. A marca vermelha indica a cobertura regional.</p><div id="r2" class="rank"></div></article>
+<div class="stack">
+<article class="panel"><h2>Semáforo do índice</h2><p>Escolas e apoios realizados em cada faixa, no recorte atual.</p><div id="sem"></div></article>
+<article class="panel"><h2>Distribuição do índice</h2><p>Quantas escolas há em cada faixa de valor.</p><div id="hs" class="hist"></div></article>
+</div>
+</section>
+<article class="panel"><h2>Resultados por escola</h2><p>Clique no título de uma coluna para ordenar. A ordenação inicial é pelo índice.</p><div class="tw"><table><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv">Exportar CSV</button></p></article>
+<p class="fonte" id="fonte"></p>
 </main>
+<script>
+let D={"rows":[["SEBASTIAO MONACO VEREADOR - 44568",18,0,17,50,6,2,9],["JOSE AUGUSTO BARTHOLO - 33686",6,0,5,13,2,1,6],["ALCYR DA ROSA LIMA PROF - 33406",15,0,13,35,4,3,5],["ANTONIO AUGUSTO NETTO - 33832",15,0,9,47,4,3,5],["BICUDO MONSENHOR - 33753",15,0,14,41,5,3,5],["CARLOTA DE NEGREIROS ROCHA PROFA - 33736",9,0,8,19,3,2,4.5],["DIRCE BELLUZZO DE CAMPOS PROFA - 33558",9,0,9,22,2,null,4.5],["IZIDORO DAUN - 33455",9,0,9,20,2,2,4.5],["JOAO WALFREDO ROTHERMUND PADRE - 907650",9,0,7,19,3,2,4.5],["JOSE BONIFACIO DO COUTO - 33376",9,0,8,25,3,2,4.5],["NELY CARBONIERI DE ANDRADE PROFA - 33424",9,0,9,20,2,2,4.5],["VITU GIORGI DONA - 33790",9,0,5,25,4,2,4.5],["CULTURA E LIBERDADE - 33625",34,0,28,49,9,9,3.7777777777777777],["ANTONIO REGINATO PROF - 43242",15,0,13,43,5,4,3.75],["JARDIM ALCIR RAINERI - 474629",15,0,14,27,5,4,3.75],["JOSE ALFREDO DE ALMEIDA - 43254",11,0,9,35,3,3,3.6666666666666665],["WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679",11,0,7,14,3,3,3.6666666666666665],["EDSON VIANEI ALVES PROF - 923000",10,0,8,14,3,3,3.3333333333333335],["AMELIA LOPES ANDERS PROFA - 914198",16,0,14,38,3,5,3.2],["MARIA IZABEL SAMPAIO VIDAL - 33819",16,0,9,41,5,5,3.2],["ABEL AUGUSTO FRAGATA - 33820",9,0,9,18,3,3,3],["ANTONIO DAUN - 33467",6,0,4,8,2,2,3],["ANTONIO DE BAPTISTA PROF - 33561",9,0,8,25,3,3,3],["ANTONIO GOMES DE OLIVEIRA PROF - 33741",9,0,7,19,3,3,3],["BALTAZAR DE GODOY MOREIRA PROF - 33856",15,0,11,36,4,5,3],["BENITO MARTINELLI PROF - 903693",15,0,14,36,4,5,3],["CASTRO ALVES - 33613",9,0,8,14,3,3,3],["EDUARDO DE SOUZA PORTO CEL - 33522",9,0,9,12,3,3,3],["EMICO MATSUMOTO GEOGRAFA - 446920",9,0,9,14,2,3,3],["ERMELINDA CLARICE SANCHES PROFA - 33479",9,0,9,19,3,3,3],["GABRIEL MONTEIRO DA SILVA - 33674",9,0,7,15,3,3,3],["GERALDO ZANCOPE PROF - 33716",9,0,9,19,3,3,3],["GRACIEMA BAGANHA RIBEIRO - 33534",12,0,9,26,4,4,3],["HILMAR MACHADO DE OLIVEIRA - 33492",12,0,10,28,4,4,3],["JARDIM SANTA ANTONIETA - 462688",9,0,7,15,3,3,3],["JOSE AMBROSIO DOS SANTOS - 33650",6,0,5,8,2,2,3],["JOSE CARLOS MONTEIRO - 26414",9,0,9,20,3,3,3],["LOURENCO DE ALMEIDA SENNE DR - 33704",9,0,9,14,3,3,3],["LYDIA YVONE GOMES MARQUES PROFA - 33388",9,0,9,20,2,3,3],["MARIA STELLA DE CERQUEIRA CESAR PROFA - 36250",9,0,9,18,3,3,3],["MAURICIO MILANI - 47703",9,0,9,20,3,3,3],["NASIB CURY - 917990",9,0,8,14,3,3,3],["NEUZA MARIA MARANA FEIJAO PROFA - 33777",9,0,8,24,3,3,3],["NORMA MONICO TRUZZI PROFA - 33443",6,0,6,18,2,2,3],["PIRMINO ANTONIO SCHMIDT MONSENHOR - 33789",6,0,6,10,1,2,3],["RAFAEL PAES DE BARROS DOUTOR - 33510",12,0,9,20,4,4,3],["RUTH MAMEDE DE GODOY PROFA - 33637",6,0,5,15,2,2,3],["SYLVIA RIBEIRO DE CARVALHO PROFA - 47843",9,0,9,26,3,null,3],["HATSUE TOYOTA - 903673",8,0,8,21,3,3,2.6666666666666665],["REIKO UEMURA TSUNOKAWA PROFA - 907662",8,0,7,29,3,3,2.6666666666666665],["MARIA CECILIA FERRAZ DE FREITAS PROFA - 47855",5,0,5,34,3,2,2.5],["ORACINA CORREA DE MORAES RODINE PROFA - 43655",12,0,11,37,4,5,2.4],["BENTO DE ABREU SAMPAIO VIDAL - 33662",7,0,7,16,3,3,2.3333333333333335],["NELSON CABRINI PROF - 33698",9,0,7,30,3,4,2.25],["AMILCARE MATTEI PROF - 33728",6,0,6,24,2,3,2],["WALDEMAR MONIZ DA ROCHA BARROS DR - 33765",5,0,5,19,1,3,1.6666666666666667],["17 DE SETEMBRO - 33881",2,0,2,14,1,2,1]],"periodo":"04 - 22/02 a 28/02","filtros":"NM_DIRETORIA é MARILIA; Intervalo_Ultima_Semana é 04 - 22/02 a 28/02; CD_ESCOLA não está em branco; Semana_do_Ano não é (Em branco), 28, 29 ou 30; CD_DIRETORIA é 21003"};
+let ROWS=[],GRUPOS=null,MAP=a=>({escola:a[0],apoios:a[1],nao:a[2],apoiados:a[3],profs:a[4],aval:a[5]||0,equipe:a[6],indice:a[7]??(a[6]>0?a[1]/a[6]:0),eq:a[6]??(a[7]>0?a[1]/a[7]:0),cob:a[4]?a[3]/a[4]*100:0});
+const $=s=>document.querySelector(s),F=(v,d)=>(+v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}),nf=n=>Math.round(n).toLocaleString('pt-BR'),pc=v=>F(v,1)+'%',d2=v=>F(v,2),esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),sn=s=>s.replace(/ - \d+$/,''),fx=v=>v>=3?'g':v>=2?'y':'r',COR={g:'#16803c',y:'#facc15',r:'#dc2626'},FN={g:'Verde',y:'Amarelo',r:'Vermelho'};
+const selE=$('#selE'),q=$('#q'),fai=$('#fai'),vis=$('#vis');let ts={k:'indice',d:-1},LT=[];
+function agg(l){const s=k=>l.reduce((a,x)=>a+x[k],0),eq=s('eq'),pf=s('profs');return{n:l.length,apoios:s('apoios'),nao:s('nao'),apoiados:s('apoiados'),profs:pf,aval:s('aval'),eq,indice:eq?s('apoios')/eq:0,media:l.length?s('indice')/l.length:0,cob:pf?s('apoiados')/pf*100:0}}
+let R=null;const dl=(d,f,suf='')=>Math.abs(d)<1e-9?'<span class="dl">igual à região</span>':'<span class="dl '+(d>0?'up':'dn')+'">'+(d>0?'▲ ':'▼ ')+f(Math.abs(d))+suf+'</span>';
+const base=()=>{const t=q.value.trim().toLowerCase(),e=selE.value,f=fai.value;return ROWS.filter(x=>(!e||x.escola===e)&&(!t||x.escola.toLowerCase().includes(t))&&(!f||fx(x.indice)===f))};
+function rank(id,l,k,fmt,ref,sem){const md=vis.value,asc=md==='bot',a=[...l].sort((x,y)=>asc?x[k]-y[k]:y[k]-x[k]).slice(0,md==='all'?l.length:10),mx=Math.max(...ROWS.map(x=>x[k]))||1;
+$(id).innerHTML=a.length?a.map((x,i)=>`<div class="row" data-e="${esc(x.escola)}"><span class="pos">${i+1}</span><div><div class="school" title="${esc(x.escola)}">${esc(sn(x.escola))}</div><div class="bar"><i style="width:${x[k]/mx*100}%${sem?';background:'+COR[fx(x[k])]:''}"></i><u style="left:${ref/mx*100}%"></u></div></div><b>${fmt(x[k])}</b></div>`).join(''):'<p class="empty">Nenhuma escola encontrada.</p>'}
+function scatter(l){const W=620,H=330,L=44,P=14,T=12,B=40,x0=Math.floor(Math.min(...ROWS.map(x=>x.cob))/10)*10,y1=Math.ceil(Math.max(...ROWS.map(x=>x.indice))),X=v=>L+(v-x0)/(100-x0)*(W-L-P),Y=v=>H-B-v/y1*(H-T-B),on=new Set(l.map(x=>x.escola)),st=y1>6?2:1;let s=`<svg viewBox="0 0 ${W} ${H}">`;
+[[0,2,'r'],[2,3,'y'],[3,y1,'g']].forEach(([a,b,c])=>s+=`<rect x="${L}" y="${Y(b)}" width="${W-L-P}" height="${Y(a)-Y(b)}" fill="${COR[c]}" opacity=".13"/>`);
+for(let v=0;v<=y1;v+=st)s+=`<line x1="${L}" x2="${W-P}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
+for(let v=x0;v<=100;v+=10)s+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${v}%</text>`;
+s+=`<line x1="${X(R.cob)}" x2="${X(R.cob)}" y1="${T}" y2="${H-B}" class="ref"/>`;
+s+=[...ROWS].sort((a,b)=>b.profs-a.profs).map(x=>`<circle data-e="${esc(x.escola)}" cx="${X(x.cob)}" cy="${Y(x.indice)}" r="${4+Math.sqrt(x.profs)/1.6}" fill="${COR[fx(x.indice)]}" stroke="#0f172a" stroke-opacity=".35" opacity="${on.has(x.escola)?.85:.12}"><title>${esc(sn(x.escola))}\nÍndice ${d2(x.indice)}, ${pc(x.cob)} dos professores apoiados, ${nf(x.profs)} professores</title></circle>`).join('');
+$('#sc').innerHTML=s+`<text x="${W/2}" y="${H-4}" text-anchor="middle">% de professores apoiados</text><text transform="translate(12 ${H/2}) rotate(-90)" text-anchor="middle">Índice de apoios realizados</text></svg>`}
+function sema(l){const T=l.length||1,A=agg(l).apoios||1;$('#sem').innerHTML=[['g','3 ou mais'],['y','2 a menos de 3'],['r','abaixo de 2']].map(([c,d])=>{const a=l.filter(x=>fx(x.indice)===c),ap=a.reduce((s,x)=>s+x.apoios,0);return`<div class="f"><b><i class="sq ${c}"></i> ${FN[c]}<small>${d}</small></b><div class="bar big"><i style="width:${a.length/T*100}%;background:${COR[c]}"></i></div><strong>${a.length} escolas<small>${pc(ap/A*100)} dos apoios</small></strong></div>`}).join('')}
+function hist(l){const E=[0,2,3,4,5,99],lab=['abaixo de 2','2 a menos de 3','3 a menos de 4','4 a menos de 5','5 ou mais'],c=lab.map((_,i)=>l.filter(x=>x.indice>=E[i]&&x.indice<E[i+1]).length),mx=Math.max(...c,1);
+$('#hs').innerHTML=c.map((n,i)=>`<div class="col"><b>${n}</b><i style="height:${Math.round(n/mx*110)}px;background:${COR[fx(E[i])]}"></i><span>${lab[i]}</span></div>`).join('')}
+const COLS=[['escola','Escola'],['apoios','Apoios realizados'],['nao','Apoios não finalizados'],['apoiados','Professores apoiados'],['profs','Total professores'],['cob','% professores apoiados'],['aval','Total avaliadores'],['equipe','Total equipe gestora'],['indice','Índice de apoios realizados']];
+const sorted=l=>[...l].sort((a,b)=>ts.k==='escola'?ts.d*a.escola.localeCompare(b.escola,'pt-BR'):ts.d*((a[ts.k]??-1e9)-(b[ts.k]??-1e9)));
+function table(){$('thead').innerHTML='<tr>'+COLS.map(c=>`<th data-k="${c[0]}">${c[1]}${ts.k===c[0]?(ts.d>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+$('tbody').innerHTML=sorted(LT).map(x=>`<tr><td>${esc(x.escola)}</td><td>${nf(x.apoios)}</td><td>${nf(x.nao)}</td><td>${nf(x.apoiados)}</td><td>${nf(x.profs)}</td><td>${pc(x.cob)}</td><td>${nf(x.aval)}</td><td>${x.equipe==null?'–':nf(x.equipe)}</td><td><span class="bd ${fx(x.indice)}">${d2(x.indice)}</span></td></tr>`).join('')}
+function render(){const l=base(),S=agg(l);LT=l;$('#sub').textContent=l.length+' de '+R.n+' escolas no recorte atual.';
+$('#cards').innerHTML=[['Índice de apoios realizados',d2(S.indice)+` <span class="bd ${fx(S.indice)}" style="vertical-align:middle">${FN[fx(S.indice)]}</span>`,'Apoios ÷ equipe gestora',dl(S.indice-R.indice,d2,' vs região'),COR[fx(S.indice)]],['Apoios realizados',nf(S.apoios),nf(S.apoios/(S.n||1))+' por escola',''],['Professores apoiados',nf(S.apoiados),pc(S.cob)+' dos '+nf(S.profs)+' professores',dl((S.cob-R.cob)/100*100,x=>F(x,1),' p.p. vs região')],['Apoios não finalizados',nf(S.nao),'No recorte atual',''],['Equipe gestora e avaliadores',nf(S.eq)+' / '+nf(S.aval),'Equipe gestora / avaliadores',''],['Escolas',nf(S.n),'de '+nf(R.n)+' na região','']].map(x=>`<article class="card"${x[4]?` style="border-left-color:${x[4]}"`:''}><div class="k">${x[0]}</div><div class="v">${x[1]}</div><div class="d">${x[2]}</div>${x[3]}</article>`).join('');
+rank('#r1',l,'indice',d2,R.indice,1);rank('#r2',l,'cob',pc,R.cob,0);scatter(l);sema(l);hist(l);table()}
+function montar(){ROWS=D.rows.map(MAP);R=agg(ROWS);$('#hsub').textContent='Unidade Regional de Ensino de Marília'+(D.ano?' — ano '+D.ano:'')+', semana '+D.periodo;
+const c=k=>ROWS.filter(x=>fx(x.indice)===k).length,N=R.n;
+$('#avgSub').textContent=N+' escolas, '+nf(R.apoios)+' apoios realizados na semana '+D.periodo+'.';
+$('#avg').innerHTML=[['Índice de apoios realizados',d2(R.indice)+` <span class="bd ${fx(R.indice)}">${FN[fx(R.indice)]}</span>`,null,'Apoios ÷ equipe gestora. Média simples das escolas: '+d2(R.media)],['Apoios realizados',nf(R.apoios),null,nf(R.apoios/N)+' por escola'],['Professores apoiados',nf(R.apoiados),R.cob,pc(R.cob)+' dos '+nf(R.profs)+' professores'],['Apoios não finalizados',nf(R.nao),null,'Total da região'],['Escolas no verde',c('g')+' de '+N,c('g')/N*100,'Índice de 3 ou mais'],['Escolas no amarelo',c('y')+' de '+N,c('y')/N*100,'Índice de 2 a menos de 3'],['Escolas no vermelho',c('r')+' de '+N,c('r')/N*100,'Índice abaixo de 2']].map(x=>`<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div>${x[2]==null?'':`<div class="bar"><i style="width:${x[2]}%"></i></div>`}<div class="d">${x[3]}</div></div>`).join('');
+selE.innerHTML='<option value="">Todas as escolas</option>'+[...ROWS].sort((a,b)=>a.escola.localeCompare(b.escola,'pt-BR')).map(x=>`<option value="${esc(x.escola)}">${esc(x.escola)}</option>`).join('');
+const sem=ROWS.filter(x=>x.equipe==null).map(x=>sn(x.escola));
+$('#fonte').innerHTML=(D.origem==='supabase'?'Fonte: Supabase (resultados_apoio_presencial), importada via admin.html.':'Fonte: exportação da planilha de apoios.')+' Filtros: '+esc(D.filtros||'não informados na importação')+'.'+(sem.length?'<br>Sem o total da equipe gestora na planilha: '+esc(sem.join(' e '))+'. O índice informado foi mantido; para o índice regional, a equipe dessas escolas foi calculada como apoios ÷ índice.':'');
+render()}
+montar();
+[selE,fai,vis].forEach(e=>e.addEventListener('change',render));q.addEventListener('input',render);
+const selP=$('#selP');selP.addEventListener('change',()=>{if(!selP.value||!GRUPOS)return;const g=GRUPOS[selP.value];if(!g)return;D={rows:g.rows,periodo:g.periodo,filtros:g.filtros,ano:g.ano,origem:'supabase'};montar()});
+$('#reset').onclick=()=>{q.value='';selE.value='';fai.value='';vis.value='top';render()};
+document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='escola'?1:-1};table()}});
+$('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.apoios,x.nao,x.apoiados,x.profs,F(x.cob,1),x.aval,x.equipe??'',F(x.indice,2)].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='apoios-escolas.csv';a.click()};
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
 (async()=>{try{
-  if(typeof supabaseClient!=='undefined'){
-    const {data:{session}}=await supabaseClient.auth.getSession();
-    if(!session){location.href='index.html';return}
-  }
-}catch(e){console.warn('Sessão não verificada:',e.message)}})();
+  if(typeof supabaseClient==='undefined')return;
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session){location.href='index.html';return}
+  const {data,error}=await supabaseClient.from('resultados_apoio_presencial').select('*');
+  if(error||!Array.isArray(data)||!data.length)return;
+  const g={};
+  data.forEach(r0=>{
+    const periodo=String(r0.periodo||''),chave=r0.ano+'|'+periodo;
+    if(!g[chave])g[chave]={ano:r0.ano,periodo,filtros:r0.filtros||'',rows:[]};
+    g[chave].rows.push([String(r0.escola||'')+(r0.codigo_escola?' - '+r0.codigo_escola:''),+r0.apoios||0,+r0.nao_finalizados||0,+r0.apoiados||0,+r0.professores||0,+r0.avaliadores||0,r0.equipe_gestora==null?null:+r0.equipe_gestora,r0.indice==null?null:+r0.indice]);
+  });
+  GRUPOS=g;
+  const chaves=Object.keys(g).sort((a,b)=>{const A=a.split('|'),B=b.split('|');return Number(B[0])-Number(A[0])||B[1].localeCompare(A[1],'pt-BR')});
+  const m=g[chaves[0]];
+  D={rows:m.rows,periodo:m.periodo,filtros:m.filtros||'não informados na importação',ano:m.ano,origem:'supabase'};
+  if(chaves.length>1){selP.innerHTML=chaves.map(k=>`<option value="${esc(k)}">${g[k].ano} · ${esc(g[k].periodo)}</option>`).join('');selP.style.display='';selP.value=chaves[0]}
+  montar();
+}catch(e){console.warn('Falha ao buscar resultados_apoio_presencial:',e.message)}})();
 </script>
 </body>
 </html>
