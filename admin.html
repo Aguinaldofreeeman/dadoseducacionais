@@ -368,7 +368,7 @@
             <div class="form-group">
                 <label for="apoio-file">Planilha de apoios realizados (.xlsx, .xls ou .csv)</label>
                 <input type="file" id="apoio-file" accept=".xlsx,.xls,.csv">
-                <span class="help-text">Aceita as colunas escola (com código no formato "NOME - CÓDIGO"), apoios realizados, apoios não finalizados, professores apoiados, total de professores, avaliadores, total da equipe gestora e índice de apoios realizados. A semana é lida da coluna período, do filtro IntervaloSemanaAtual/Intervalo_Ultima_Semana ou do nome do arquivo. Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
+                <span class="help-text">Aceita as colunas escolas (com código no formato "NOME - CÓDIGO"), apoios realizados, apoios não finalizados, professores apoiados, total de professores, total de avaliadores, total da equipe gestora e índice de apoios realizados. A semana é lida da coluna período, do filtro IntervaloSemanaAtual/Intervalo_Ultima_Semana ou do nome do arquivo — que também é usado como título da semana no painel (ex.: "Apoios 22-02 a 28-02.xlsx"). Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
             </div>
             <div id="apoio-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
             <div class="actions">
@@ -1879,7 +1879,7 @@
                     'semana', 'semana de referencia', 'semana referencia',
                     'intervalo ultima semana', 'intervalo semana atual', 'competencia'
                 ],
-                escola: ['escola', 'unidade escolar', 'nome da escola', 'nm_escola'],
+                escola: ['escola', 'escolas', 'unidade escolar', 'unidades escolares', 'nome da escola', 'nome das escolas', 'nm_escola'],
                 codigo_escola: [
                     'codigo_escola', 'codigo da escola', 'codigo escola', 'codigo da unidade escolar',
                     'codigo unidade escolar', 'codigo da ue', 'codigo ue', 'cod escola',
@@ -1950,13 +1950,13 @@
             /intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
         );
         const periodoNoArquivo = String(nomeArquivo).match(
-            /(?:semana\s*(\d+)\s*[-–—]\s*)?(\d{1,2}[./]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./]\d{1,2})/i
+            /(?:semana\s*(\d+)\s*[-–—]\s*)?(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i
         );
         const periodoInferido = intervaloSemana
             ? intervaloSemana[1].trim()
             : periodoNoArquivo
                 ? (periodoNoArquivo[1] ? periodoNoArquivo[1] + ' - ' : '') +
-                    periodoNoArquivo[2].replace(/[.]/g, '/').replace(/\s+/g, ' ').trim()
+                    periodoNoArquivo[2].replace(/[.-]/g, '/').replace(/\s+/g, ' ').trim()
                 : '';
         const nomeArquivoLabel = String(nomeArquivo || '').replace(/\.[^.]+$/, '').trim();
         let linhaCabecalho = -1;
@@ -2022,7 +2022,7 @@
             if (tipo === 'presenca' || tipo === 'apoio') {
                 registro.periodo = String(registro.periodo ?? '').trim();
                 if (!registro.periodo) registro.periodo = periodoInferido;
-                if (tipo === 'presenca') registro.periodo_label = String(registro.periodo_label || nomeArquivoLabel || registro.periodo).trim();
+                registro.periodo_label = String(registro.periodo_label || nomeArquivoLabel || registro.periodo).trim();
                 registro.codigo_escola = String(registro.codigo_escola ?? '').trim();
                 if (!registro.codigo_escola) {
                     const correspondencia = registro.escola.match(/^(.*?)\s*-\s*(\d+)$/);

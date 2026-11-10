@@ -5,6 +5,7 @@ create table if not exists public.resultados_apoio_presencial (
   id uuid primary key default gen_random_uuid(),
   ano integer not null,
   periodo text not null,
+  periodo_label text,
   escola text not null,
   codigo_escola text not null,
   apoios integer,
