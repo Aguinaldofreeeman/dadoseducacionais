@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Apoio Presencial</title>
+<style>
+:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
+header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}
+main{max-width:1320px;margin:auto;padding:22px 30px 40px}
+.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh);padding:20px;margin-bottom:18px}
+.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
+.empty{font-size:13px;color:var(--m)}
+.foot{font-size:12px;color:var(--m);margin-top:18px}
+@media(max-width:550px){header{padding:16px}main{padding:14px}}
+</style>
+<link rel="stylesheet" href="css/home-button.css">
+</head>
+<body>
+<header><div><h1>Apoio Presencial</h1><p>Unidade Regional de Ensino de Marília</p></div><a class="home-button" href="index.html">Início</a></header>
+<main>
+<article class="panel">
+<h2>Visão geral</h2>
+<p>Registro e acompanhamento do apoio presencial às escolas da unidade regional.</p>
+<p class="empty">Página em construção. Os dados e painéis do Apoio Presencial serão disponibilizados aqui.</p>
+</article>
+<p class="foot">Fonte: a definir.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+(async()=>{try{
+  if(typeof supabaseClient!=='undefined'){
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    if(!session){location.href='index.html';return}
+  }
+}catch(e){console.warn('Sessão não verificada:',e.message)}})();
+</script>
+</body>
+</html>
