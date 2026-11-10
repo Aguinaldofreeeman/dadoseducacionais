@@ -17,6 +17,7 @@ create table if not exists public.resultados_apoio_presencial (
   indice numeric,
   filtros text,
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   unique (ano, periodo, codigo_escola)
 );
 
@@ -58,5 +59,13 @@ create policy "Update apenas ADM em resultados_apoio_presencial" on public.resul
 
 grant select on public.resultados_apoio_presencial to anon, authenticated;
 grant insert, update on public.resultados_apoio_presencial to authenticated;
+
+-- Marca a última atualização de cada registro (exibida no painel como "Atualizado em").
+create or replace function public.apoio_presencial_set_updated_at() returns trigger
+language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
+
+drop trigger if exists apoio_presencial_set_updated_at on public.resultados_apoio_presencial;
+create trigger apoio_presencial_set_updated_at before update on public.resultados_apoio_presencial
+for each row execute function public.apoio_presencial_set_updated_at();
 
 notify pgrst, 'reload schema';

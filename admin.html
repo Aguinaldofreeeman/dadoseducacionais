@@ -1949,15 +1949,20 @@
         const intervaloSemana = metadados.match(
             /intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
         );
+        const intervaloComData = intervaloSemana && /\d{1,2}[./-]\d{1,2}/.test(intervaloSemana[1])
+            ? intervaloSemana
+            : null;
         const periodoNoArquivo = String(nomeArquivo).match(
-            /(?:semana\s*(\d+)\s*[-–—]\s*)?(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i
+            /(?:semana\s*(\d+)\s*[-–—]\s*|(\d+)\s*[-–—]\s*)?(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i
         );
-        const periodoInferido = intervaloSemana
-            ? intervaloSemana[1].trim()
+        const periodoInferido = intervaloComData
+            ? intervaloComData[1].trim()
             : periodoNoArquivo
-                ? (periodoNoArquivo[1] ? periodoNoArquivo[1] + ' - ' : '') +
-                    periodoNoArquivo[2].replace(/[.-]/g, '/').replace(/\s+/g, ' ').trim()
-                : '';
+                ? ((periodoNoArquivo[1] || periodoNoArquivo[2] ? (periodoNoArquivo[1] || periodoNoArquivo[2]) + ' - ' : '') +
+                    periodoNoArquivo[3].replace(/[.-]/g, '/').replace(/\s+/g, ' ').trim())
+                : intervaloSemana
+                    ? intervaloSemana[1].trim()
+                    : '';
         const nomeArquivoLabel = String(nomeArquivo || '').replace(/\.[^.]+$/, '').trim();
         let linhaCabecalho = -1;
         let colunas = {};
