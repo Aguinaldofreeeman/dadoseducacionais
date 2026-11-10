@@ -24,6 +24,10 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
 .fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
+.mse{position:relative;flex:1;min-width:230px}.mse-btn{width:100%;text-align:left;padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.mse-btn::after{content:"▾"}.mse-list{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:30;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sh);max-height:320px;overflow:auto;padding:6px}
+.mse.open .mse-list{display:block}.mse-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap}
+.mse-item:hover{background:var(--bg)}.mse-item input{accent-color:var(--a);cursor:pointer;margin:0}
 #sub{font-size:12px;color:var(--m);margin:8px 2px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.stack{display:grid;gap:18px;align-content:start}
 .panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
@@ -49,10 +53,10 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <section class="cards" id="cards"></section>
 <section class="panel fp"><div class="filters">
 <select id="selE"><option value="">Todas as escolas</option></select>
-<select id="selP" title="Semanas — Ctrl+clique para marcar várias" multiple size="6"></select>
+<div class="mse" id="selPWrap"><button type="button" class="mse-btn" id="selPBtn">Consolidado — todas as planilhas</button><div class="mse-list" id="selPList"></div></div>
 <select id="fai"><option value="">Todas as faixas do índice</option><option value="g">Verde (3 ou mais)</option><option value="y">Amarelo (2 a menos de 3)</option><option value="r">Vermelho (menos de 2)</option></select>
 <select id="vis"><option value="all" selected>All / Todos</option><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option></select>
-<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg" style="margin:6px 2px 0">Semanas: <b>Ctrl+clique</b> marca várias para agregá-las; “Consolidado — todas as planilhas” equivale a todas marcadas.</p><div id="sub"></div></section>
+<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg" style="margin:6px 2px 0">Semanas: abra a lista e <b>marque várias</b> para agregá-las; “Consolidado — todas as planilhas” equivale a todas marcadas.</p><div id="sub"></div></section>
 <section class="grid">
 <article class="panel"><h2>Ranking do índice de apoios realizados</h2><p>Cor pela faixa do índice. Clique numa escola para filtrar. A marca vermelha indica o índice regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Índice e cobertura de professores</h2><p>Cada bolha é uma escola; o tamanho mostra o total de professores. As faixas de fundo seguem o semáforo do índice.</p><div id="sc"></div><div class="leg">A linha vermelha vertical marca a cobertura regional de professores apoiados.</div></article>
@@ -109,15 +113,19 @@ function aplicarSemanas(chaves){if(!GRUPOS||!chaves||!chaves.length)return;const
   semanas.forEach(g=>g.rows.forEach(a=>{const r=porEscola[a[0]]??(porEscola[a[0]]=[a[0],0,0,0,0,0,null,[],[]]);
     r[1]+=a[1]||0;r[2]+=a[2]||0;r[3]+=a[3]||0;r[4]=Math.max(r[4],a[4]||0);r[5]=Math.max(r[5],a[5]||0);
     if(a[6]!=null)r[6]=Math.max(r[6]??0,a[6]);if(a[7]!=null)r[7].push(a[7]);r[8].push(a[4]?a[3]/a[4]*100:0);}));
-  D={rows:Object.values(porEscola).map(r=>{const eq=r[6],ids=r[7];return [r[0],r[1],r[2],r[3],r[4],r[5],eq,eq?r[1]/eq:(ids.length?ids.reduce((x,y)=>x+y,0)/ids.length:null),r[8].length?r[8].reduce((x,y)=>x+y,0)/r[8].length:0]}),periodo:todas?'consolidado':(numSemanas===1?semanas[0].periodo:'agregado'),filtros:todas?'consolidação automática de todas as planilhas importadas':(numSemanas===1?semanas[0].filtros:'agregado de '+numSemanas+' semanas selecionadas'),ano:numSemanas===1?semanas[0].ano:null,label:numSemanas===1?semanas[0].label:null,consolidado:todas,multi:!todas&&numSemanas>1,numSemanas,origem:'supabase'};montar()}
+  D={rows:Object.values(porEscola).map(r=>{const eq=r[6],ids=r[7];return [r[0],r[1],r[2],r[3],r[4],r[5],eq,eq?r[1]/eq:(ids.length?ids.reduce((x,y)=>x+y,0)/ids.length:null),r[8].length?r[8].reduce((x,y)=>x+y,0)/r[8].length:0]}),periodo:todas?'consolidado':(numSemanas===1?semanas[0].periodo:'agregado'),filtros:todas?'consolidação automática de todas as planilhas importadas':(numSemanas===1?semanas[0].filtros:'agregado de '+numSemanas+' semanas selecionadas'),ano:numSemanas===1?semanas[0].ano:null,label:numSemanas===1?semanas[0].label:null,consolidado:todas,multi:!todas&&numSemanas>1,numSemanas,origem:'supabase'};atualizarBotaoSemana();montar()}
 [selE,fai,vis].forEach(e=>e.addEventListener('change',render));
-const selP=$('#selP');if(!GRUPOS)selP.innerHTML='<option value="">'+esc(D.periodo)+'</option>';
+const selP=$('#selPList'),selPBtn=$('#selPBtn'),selPWrap=$('#selPWrap');
+if(!GRUPOS){selP.innerHTML='<label class="mse-item"><input type="checkbox" value="" checked disabled> '+esc(D.periodo)+'</label>';selPBtn.textContent=esc(D.periodo)}
+selPBtn.addEventListener('click',e=>{e.stopPropagation();selPWrap.classList.toggle('open')});
+document.addEventListener('click',e=>{if(!selPWrap.contains(e.target))selPWrap.classList.remove('open')});
 selP.addEventListener('change',aplicarSelecaoSemana);
-function aplicarSelecaoSemana(){if(!GRUPOS||!selP.options.length)return;
-  const valores=[...selP.selectedOptions].map(o=>o.value),todas=Object.keys(GRUPOS);
-  if(!valores.length||valores.includes('__consolidado__')||valores.filter(v=>v&&v!=='__consolidado__').length>=todas.length){[...selP.options].forEach(o=>{o.selected=o.value==='__consolidado__'});aplicarSemanas(todas);return}
-  aplicarSemanas(valores.filter(v=>v&&v!=='__consolidado__'))}
-$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='all';if(GRUPOS&&selP.options.length){[...selP.options].forEach(o=>{o.selected=o.value==='__consolidado__'});aplicarSelecaoSemana()}else render()};
+function atualizarBotaoSemana(){selPBtn.textContent=D.consolidado?'Consolidado — todas as planilhas':D.multi?D.numSemanas+' semanas selecionadas':(D.label||D.periodo)}
+function aplicarSelecaoSemana(){if(!GRUPOS)return;
+  const caixas=[...selP.querySelectorAll('input[type=checkbox]')],valores=caixas.filter(c=>c.checked).map(c=>c.value),todas=Object.keys(GRUPOS);
+  if(!valores.length||valores.includes('__consolidado__')||valores.filter(v=>v!=='__consolidado__').length>=todas.length){caixas.forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSemanas(todas);return}
+  aplicarSemanas(valores.filter(v=>v!=='__consolidado__'))}
+$('#reset').onclick=()=>{selE.value='';fai.value='';vis.value='all';if(GRUPOS&&selP.querySelectorAll('input[type=checkbox]').length){[...selP.querySelectorAll('input[type=checkbox]')].forEach(c=>{c.checked=c.value==='__consolidado__'});aplicarSelecaoSemana()}else render()};
 document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){selE.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='escola'?1:-1};table()}});
 $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=>[x.escola,x.apoios,x.nao,x.apoiados,x.profs,F(x.cob,1),x.aval,x.equipe??'',F(x.indice,2)].join(';'))].join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='apoios-escolas.csv';a.click()};
 </script>
@@ -150,8 +158,8 @@ $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=
   const numSem=s=>{const m=String(s).match(/^(\d+)\s*-/);return m?+m[1]:0};
   const chaves=Object.keys(g).sort((a,b)=>{const A=a.split('|'),B=b.split('|');return Number(B[0])-Number(A[0])||numSem(B[1])-numSem(A[1])||B[1].localeCompare(A[1],'pt-BR')});
   const anos=new Set(chaves.map(k=>g[k].ano));
-  selP.innerHTML='<option value="__consolidado__">Consolidado — todas as planilhas</option>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<option value="${esc(k)}" title="${esc(x.ano+' · '+x.periodo)}">${esc(txt)}</option>`}).join('');
-  selP.style.display='';selP.options[0].selected=true;aplicarSemanas(chaves);
+  selP.innerHTML='<label class="mse-item"><input type="checkbox" value="__consolidado__" checked> Consolidado — todas as planilhas</label>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<label class="mse-item" title="${esc(x.ano+' · '+x.periodo)}"><input type="checkbox" value="${esc(k)}"> ${esc(txt)}</label>`}).join('');
+  selPWrap.style.display='';aplicarSemanas(chaves);
 }catch(e){console.warn('Falha ao buscar resultados_apoio_presencial:',e.message)}})();
 </script>
 </body>
