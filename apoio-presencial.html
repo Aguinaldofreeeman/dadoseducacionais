@@ -23,11 +23,11 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}
 .dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
 .fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input:not([type=checkbox]){padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
 .mse{position:relative;flex:1;min-width:230px}.mse-btn{width:100%;text-align:left;padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .mse-btn::after{content:"▾"}.mse-list{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:30;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sh);max-height:300px;overflow:auto;padding:4px}
 .mse.open .mse-list{display:block}.mse-item{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap}
-.mse-item:hover{background:var(--bg)}.mse-item input{accent-color:var(--a);cursor:pointer;margin:0}
+.mse-item:hover{background:var(--bg)}.mse-item input{accent-color:var(--a);cursor:pointer;margin:0;width:14px;height:14px;flex:0 0 auto}
 #sub{font-size:12px;color:var(--m);margin:8px 2px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.stack{display:grid;gap:18px;align-content:start}
 .panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
