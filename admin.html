@@ -540,7 +540,13 @@
     }
     function buscarCodigoEscola(nome) {
         const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').trim();
-        return (window.ESCOLAS_CODIGO && window.ESCOLAS_CODIGO[norm(nome)]) || null;
+        if (!window.ESCOLAS_CODIGO) return null;
+        const chave = norm(nome);
+        if (window.ESCOLAS_CODIGO[chave]) return window.ESCOLAS_CODIGO[chave];
+        // Fallback fuzzy: contensão única (evita mapear errado)
+        const candidatos = Object.keys(window.ESCOLAS_CODIGO).filter(k => k.includes(chave) || chave.includes(k));
+        if (candidatos.length === 1) return window.ESCOLAS_CODIGO[candidatos[0]];
+        return null;
     }
     // Proteção de rota: exige sessão ativa e perfil de Administrador (ADM)
     async function verificarSessao() {
@@ -2057,7 +2063,7 @@
                 }
                 if (!registro.periodo || !registro.codigo_escola) {
                     throw new Error(
-                        `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
+                        `Linha ${i + 1}: não foi possível identificar o período ou o código da escola (\"${registro.escola || ''}\", período \"${registro.periodo || ''}\")` +
                         'Informe as colunas periodo e codigo_escola ou inclua o código no fim do nome ' +
                         'da escola e o filtro IntervaloSemanaAtual no arquivo.'
                     );
@@ -2084,7 +2090,7 @@
                     if (codigoEncontrado) registro.codigo_escola = codigoEncontrado;
                 }
                 if (!registro.codigo_escola) {
-                    throw new Error(`Linha ${i + 1}: informe codigo_escola ou use "ESCOLA - CÓDIGO" na coluna escola.`);
+                    throw new Error(`Linha ${i + 1}: não foi possível identificar o código da escola \"${registro.escola}\". Cadastre-a em 'escolas' ou use \"ESCOLA - CÓDIGO\" na coluna escola.`);
                 }
             }
 
