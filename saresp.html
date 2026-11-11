@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -219,10 +218,6 @@
       border-top: 2px solid #17365d
     }
 
-    .contato {
-      font-size: 12px;
-      color: #526174
-    }
 
     @media(max-width:600px) {
       header {
@@ -237,17 +232,21 @@
         min-width: 100%
       }
     }
+  
+    .th-sortable { cursor: pointer; user-select: none; position: relative; }
+    .th-sortable:hover { background: #0f2744; }
+    .th-sortable .sort-arrow { font-size: 10px; margin-left: 4px; opacity: .7; }
+    .th-sortable.active { background: #0f2744; }
+    .regional td { background: #f1f5f9; font-weight: bold; color: #17365d; border-top: 2px solid #17365d; }
   </style>
 </head>
-
 <body>
   <header>
     <div>
       <h1>SARESP — Metas Ouro e Diamante</h1>
       <p>Unidade Regional de Ensino de Marília</p>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="home-button">Início</a><a
-        href="dashboard-saresp.html" class="btn" style="background:#b7791f">Dashboard SARESP</a></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><a href="index.html" class="home-button">Início</a><a href="dashboard-saresp.html" class="btn" style="background:#b7791f">Dashboard SARESP</a></div>
   </header>
   <main>
     <p class="intro">Nota Final consolidada de 2025, conquista das metas e alvos por escola para 2026.</p>
@@ -258,66 +257,79 @@
           <h2>Metas por escola</h2>
           <p id="sub"></p>
         </div>
-        <div class="filters"><select id="select-escola" aria-label="Filtrar escola">
+        <div class="filters">
+          <select id="select-escola" aria-label="Filtrar escola">
             <option value="">Todas as Escolas</option>
-          </select><select id="status">
+          </select>
+          <select id="status">
             <option value="">Todas as conquistas</option>
             <option value="ouro">Conquistou Ouro</option>
             <option value="diamante">Conquistou Diamante</option>
             <option value="na">Não atingiu a meta 2025</option>
             <option value="sistema">Sistema · EJA multisseriado</option>
-          </select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="order">
-            <option value="nota">Nota 2025 (maior)</option>
-            <option value="pp3bim">Prova Paulista 3º BIM (maior %)</option>
-            <option value="metaOuro">Meta Ouro 26-27</option>
-            <option value="nome">Escola (A–Z)</option>
-          </select></div>
+          </select>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Escola</th>
-              <th>Conquista 2025</th>
-              <th>Nota Final 2025</th>
-              <th>Meta Ouro 26-27</th>
-              <th>Meta Diamante 26-27</th>
-              <th>PP 3º BIM (% acertos)</th>
-              <th>Contato</th>
+              <th class="th-sortable" data-k="escola">Escola <span class="sort-arrow">▼</span></th>
+              <th class="th-sortable" data-k="status">Conquista 2025 <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="nota">Nota Final 2025 <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="metaOuro">Meta Ouro 26-27 <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="metaDiamante">Meta Diamante 26-27 <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="pp3bim">PP 3º BIM (% acertos) <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="diretor">Diretor <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-k="supervisao">Supervisão <span class="sort-arrow"></span></th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
     </section>
-    <p class="note" id="rodape">
-
-    </p>
+    <p class="note" id="rodape"></p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    const BAKE = { "regional": { "nota": 4.1, "metaOuro": 4.6, "metaDiamante": 4.9 }, "escolas": [{ "escola": "17 DE SETEMBRO - 33881", "nota": 5.2, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Jefferson", "metaOuro": 5.8, "metaDiamante": 6.2, "pp3bim": 0.552 }, { "escola": "ABEL AUGUSTO FRAGATA - 33820", "nota": 6.5, "status": "na", "conquistaTexto": "...", "contato": "Vanessa", "metaOuro": 7, "metaDiamante": 7.3, "pp3bim": 0.815 }, { "escola": "ALCYR DA ROSA LIMA PROF - 33406", "nota": 3.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Patricia", "metaOuro": 4, "metaDiamante": 4.2, "pp3bim": 0.428 }, { "escola": "AMELIA LOPES ANDERS PROFA - 914198", "nota": 3.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Denise", "metaOuro": 4.1, "metaDiamante": 4.3, "pp3bim": 0.434 }, { "escola": "AMILCARE MATTEI PROF - 33728", "nota": 3.8, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Luciane", "metaOuro": 4.3, "metaDiamante": 4.6, "pp3bim": 0.541 }, { "escola": "ANTONIO AUGUSTO NETTO - 33832", "nota": 3.5, "status": "na", "conquistaTexto": "......", "contato": "Marina", "metaOuro": 4, "metaDiamante": 4.2, "pp3bim": 0.48 }, { "escola": "ANTONIO DAUN - 33467", "nota": 4.2, "status": "na", "conquistaTexto": "....", "contato": "Thais", "metaOuro": 4.8, "metaDiamante": 5.1, "pp3bim": 0.514 }, { "escola": "ANTONIO DE BAPTISTA PROF - 33561", "nota": 3.9, "status": "na", "conquistaTexto": "....", "contato": "Ana Claudia IFA", "metaOuro": 4.2, "metaDiamante": 4.4, "pp3bim": 0.539 }, { "escola": "ANTONIO GOMES DE OLIVEIRA PROF - 33741", "nota": 7.1, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Madalena", "metaOuro": 7.7, "metaDiamante": 8.2, "pp3bim": 0.754 }, { "escola": "ANTONIO REGINATO PROF - 43242", "nota": 4.1, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Angela", "metaOuro": 4.6, "metaDiamante": 4.8, "pp3bim": 0.588 }, { "escola": "BALTAZAR DE GODOY MOREIRA PROF - 33856", "nota": 3.8, "status": "na", "conquistaTexto": ".....", "contato": "David IFA", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": 0.473 }, { "escola": "BENITO MARTINELLI PROF - 903693", "nota": 3.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Vander", "metaOuro": 4, "metaDiamante": 4.2, "pp3bim": 0.433 }, { "escola": "BENTO DE ABREU SAMPAIO VIDAL - 33662", "nota": 7.2, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Erica", "metaOuro": 7.8, "metaDiamante": 8.2, "pp3bim": 0.701 }, { "escola": "BICUDO MONSENHOR - 33753", "nota": 4.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Grazielle", "metaOuro": 5.1, "metaDiamante": 5.5, "pp3bim": 0.502 }, { "escola": "CARLOTA DE NEGREIROS ROCHA PROFA - 33736", "nota": 7.5, "status": "na", "conquistaTexto": ".....", "contato": "Agda Sup.", "metaOuro": 8, "metaDiamante": 8.4, "pp3bim": 0.784 }, { "escola": "CASTRO ALVES - 33613", "nota": 5.5, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Elaine", "metaOuro": 6, "metaDiamante": 6.3, "pp3bim": 0.635 }, { "escola": "CEL JTO A EE BALTAZAR DE GODOY MOREIRA PROF - 985508", "nota": 3.8, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": null }, { "escola": "CEL JTO A EE CULTURA E LIBERDADE - 459768", "nota": 4.1, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": null }, { "escola": "CENTRO ATEND SOCIO-EDUC ADOLESCENTE DE MARILIA - CI - 559581", "nota": 3.9, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.4, "metaDiamante": 4.7, "pp3bim": null }, { "escola": "CENTRO ATEND SOCIO-EDUC AO ADOLESCENTE DE MARILIA - CIP - 148519", "nota": 3.9, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.4, "metaDiamante": 4.7, "pp3bim": null }, { "escola": "CENTRO DE DETENÇÃO PROVISÓRIA DE ÁLVARO DE CARVALHO - 7986", "nota": 3.4, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 3.8, "metaDiamante": 4, "pp3bim": null }, { "escola": "CENTRO DE RESSOCIALIZACAO DE MARILIA - 453262", "nota": 4, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": null }, { "escola": "CULTURA E LIBERDADE - 33625", "nota": 4.1, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Lara", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": 0.472 }, { "escola": "DIRCE BELLUZZO DE CAMPOS PROFA - 33558", "nota": 3.8, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Alexandre", "metaOuro": 4.2, "metaDiamante": 4.4, "pp3bim": 0.472 }, { "escola": "EDSON VIANEI ALVES PROF - 923000", "nota": 4.3, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Barbara", "metaOuro": 4.8, "metaDiamante": 5.2, "pp3bim": 0.558 }, { "escola": "EDUARDO DE SOUZA PORTO CEL - 33522", "nota": 4.5, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Flávia", "metaOuro": 5.1, "metaDiamante": 5.5, "pp3bim": 0.491 }, { "escola": "EMICO MATSUMOTO GEOGRAFA - 446920", "nota": 5.2, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Ligia", "metaOuro": 5.8, "metaDiamante": 6.2, "pp3bim": 0.552 }, { "escola": "EPF JTO À CULTURA E LIBERDADE - 11761", "nota": 4.1, "status": "sistema", "conquistaTexto": "....", "contato": ".....", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": null }, { "escola": "EPF JTO À HILMAR MACHADO DE OLIVEIRA - 11637", "nota": 3.5, "status": "sistema", "conquistaTexto": ".....", "contato": "....", "metaOuro": 3.9, "metaDiamante": 4.1, "pp3bim": null }, { "escola": "ERMELINDA CLARICE SANCHES PROFA - 33479", "nota": 3.8, "status": "na", "conquistaTexto": "N/A", "contato": "Debora", "metaOuro": 4.3, "metaDiamante": 4.6, "pp3bim": 0.433 }, { "escola": "GABRIEL MONTEIRO DA SILVA - 33674", "nota": 5.8, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Ana Laura", "metaOuro": 6.4, "metaDiamante": 6.8, "pp3bim": 0.597 }, { "escola": "GERALDO ZANCOPE PROF - 33716", "nota": 5.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Fernanda", "metaOuro": 6.2, "metaDiamante": 6.7, "pp3bim": 0.769 }, { "escola": "GRACIEMA BAGANHA RIBEIRO - 33534", "nota": 3.9, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Jussara", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": 0.487 }, { "escola": "HATSUE TOYOTA - 903673", "nota": 4.5, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Rita", "metaOuro": 5.1, "metaDiamante": 5.5, "pp3bim": 0.51 }, { "escola": "HEMOCENTRO DA FACULDADE DE MEDICINA MARILIA CL HOSPITALAR - 440361", "nota": 7.5, "status": "sistema", "conquistaTexto": "....", "contato": "....", "metaOuro": 8, "metaDiamante": 8.4, "pp3bim": null }, { "escola": "HILMAR MACHADO DE OLIVEIRA - 33492", "nota": 3.5, "status": "na", "conquistaTexto": "N/A", "contato": "Veronica", "metaOuro": 3.9, "metaDiamante": 4.1, "pp3bim": 0.523 }, { "escola": "HOSPITAL DAS CLINICAS DE MARILIA CLASSE HOSPITALAR - 559180", "nota": 7.5, "status": "sistema", "conquistaTexto": "...", "contato": "....", "metaOuro": 8, "metaDiamante": 8.4, "pp3bim": null }, { "escola": "HOSPITAL IRMANDADE STA CASA DE MISERICORDIA CL HOSPITALAR - 447912", "nota": 7.5, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 8, "metaDiamante": 8.4, "pp3bim": null }, { "escola": "IZIDORO DAUN - 33455", "nota": 3.9, "status": "na", "conquistaTexto": "N/A", "contato": "Jose Augusto", "metaOuro": 4.2, "metaDiamante": 4.4, "pp3bim": 0.49 }, { "escola": "JARDIM ALCIR RAINERI - 474629", "nota": 4.1, "status": "na", "conquistaTexto": "N/A", "contato": "Aline", "metaOuro": 4.6, "metaDiamante": 4.8, "pp3bim": 0.476 }, { "escola": "JARDIM SANTA ANTONIETA - 462688", "nota": 4.7, "status": "na", "conquistaTexto": "N/A", "contato": "Rodrigo", "metaOuro": 5.3, "metaDiamante": 5.7, "pp3bim": 0.528 }, { "escola": "JOAO WALFREDO ROTHERMUND PADRE - 907650", "nota": 4, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Fernanda", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": 0.5 }, { "escola": "JOSE ALFREDO DE ALMEIDA - 43254", "nota": 3.5, "status": "na", "conquistaTexto": "N/A", "contato": "Renata", "metaOuro": 3.9, "metaDiamante": 4, "pp3bim": 0.431 }, { "escola": "JOSE AMBROSIO DOS SANTOS - 33650", "nota": 3.8, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Eduardo", "metaOuro": 4.3, "metaDiamante": 4.6, "pp3bim": 0.563 }, { "escola": "JOSE AUGUSTO BARTHOLO - 33686", "nota": 5.1, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Marisa", "metaOuro": 5.7, "metaDiamante": 6.1, "pp3bim": 0.518 }, { "escola": "JOSE BONIFACIO DO COUTO - 33376", "nota": 3.6, "status": "na", "conquistaTexto": "N/A", "contato": "Adriano", "metaOuro": 4.1, "metaDiamante": 4.4, "pp3bim": 0.527 }, { "escola": "JOSE CARLOS MONTEIRO - 26414", "nota": 3.7, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Sandra", "metaOuro": 4.1, "metaDiamante": 4.3, "pp3bim": 0.469 }, { "escola": "LOURENCO DE ALMEIDA SENNE DR - 33704", "nota": 5.7, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Maristela", "metaOuro": 6.3, "metaDiamante": 6.7, "pp3bim": 0.625 }, { "escola": "LYDIA YVONE GOMES MARQUES PROFA - 33388", "nota": 3.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Sandra", "metaOuro": 4, "metaDiamante": 4.1, "pp3bim": 0.505 }, { "escola": "MARIA CECILIA FERRAZ DE FREITAS PROFA - 47855", "nota": 3.8, "status": "na", "conquistaTexto": "N/A", "contato": "Nice", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": 0.46 }, { "escola": "MARIA IZABEL SAMPAIO VIDAL - 33819", "nota": 4, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Juliana", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": 0.453 }, { "escola": "MARIA STELLA DE CERQUEIRA CESAR PROFA - 36250", "nota": 6.6, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Adriana", "metaOuro": 7.2, "metaDiamante": 7.7, "pp3bim": 0.788 }, { "escola": "MAURICIO MILANI - 47703", "nota": 3.8, "status": "ouro", "conquistaTexto": "Ouro", "contato": "João Marcos", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": 0.429 }, { "escola": "NASIB CURY - 917990", "nota": 4.6, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Ana Carla", "metaOuro": 5.2, "metaDiamante": 5.6, "pp3bim": 0.458 }, { "escola": "NELSON CABRINI PROF - 33698", "nota": 3.9, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Monica", "metaOuro": 4.4, "metaDiamante": 4.7, "pp3bim": 0.501 }, { "escola": "NELY CARBONIERI DE ANDRADE PROFA - 33424", "nota": 4.6, "status": "na", "conquistaTexto": "N/A", "contato": "Rodrigo", "metaOuro": 5.2, "metaDiamante": 5.5, "pp3bim": 0.482 }, { "escola": "NEUZA MARIA MARANA FEIJAO PROFA - 33777", "nota": 4.2, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Sandra", "metaOuro": 4.7, "metaDiamante": 5, "pp3bim": 0.533 }, { "escola": "NORMA MONICO TRUZZI PROFA - 33443", "nota": 4, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Suzana", "metaOuro": 4.4, "metaDiamante": 4.6, "pp3bim": 0.601 }, { "escola": "ORACINA CORREA DE MORAES RODINE PROFA - 43655", "nota": 4.1, "status": "na", "conquistaTexto": "N/A", "contato": "Eduardo", "metaOuro": 4.4, "metaDiamante": 4.7, "pp3bim": 0.445 }, { "escola": "PENITENCIARIA DE MARILIA - 453237", "nota": 4, "status": "sistema", "conquistaTexto": "....", "contato": "....", "metaOuro": 4.5, "metaDiamante": 4.8, "pp3bim": null }, { "escola": "PENITENCIÁRIA I DE GÁLIA - 9890", "nota": 3.9, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": null }, { "escola": "PENITENCIARIA II DE GALIA - 9892", "nota": 3.9, "status": "sistema", "conquistaTexto": "....", "contato": "....", "metaOuro": 4.3, "metaDiamante": 4.5, "pp3bim": null }, { "escola": "PENITENCIARIA VALENTIM ALVES DA SILVA - 453158", "nota": 3.4, "status": "sistema", "conquistaTexto": "...", "contato": "...", "metaOuro": 3.8, "metaDiamante": 4, "pp3bim": null }, { "escola": "PIRMINO ANTONIO SCHMIDT MONSENHOR - 33789", "nota": 5.2, "status": "sistema", "conquistaTexto": "...", "contato": "Rose", "metaOuro": 5.7, "metaDiamante": 5.7, "pp3bim": null }, { "escola": "RAFAEL PAES DE BARROS DOUTOR - 33510", "nota": 3.4, "status": "na", "conquistaTexto": "N/A", "contato": "Marsy", "metaOuro": 3.8, "metaDiamante": 4, "pp3bim": 0.412 }, { "escola": "REIKO UEMURA TSUNOKAWA PROFA - 907662", "nota": 4.1, "status": "na", "conquistaTexto": "N/A", "contato": "Neto", "metaOuro": 4.6, "metaDiamante": 4.9, "pp3bim": 0.496 }, { "escola": "RUTH MAMEDE DE GODOY PROFA - 33637", "nota": 4, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Regina", "metaOuro": 4.5, "metaDiamante": 4.7, "pp3bim": 0.595 }, { "escola": "SEBASTIAO MONACO VEREADOR - 44568", "nota": 3.6, "status": "na", "conquistaTexto": "N/A", "contato": "Josiane", "metaOuro": 4.1, "metaDiamante": 4.3, "pp3bim": 0.49 }, { "escola": "SYLVIA RIBEIRO DE CARVALHO PROFA - 47843", "nota": 4.2, "status": "na", "conquistaTexto": "N/A", "contato": "Ana Paula  IFA", "metaOuro": 4.7, "metaDiamante": 5.1, "pp3bim": 0.516 }, { "escola": "VITU GIORGI DONA - 33790", "nota": 3.9, "status": "diamante", "conquistaTexto": "Diamante", "contato": "Roberto", "metaOuro": 4.3, "metaDiamante": 4.6, "pp3bim": 0.473 }, { "escola": "WALDEMAR MONIZ DA ROCHA BARROS DR - 33765", "nota": 5, "status": "na", "conquistaTexto": "N/A", "contato": "Alexandre", "metaOuro": 5.6, "metaDiamante": 6, "pp3bim": 0.516 }, { "escola": "WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679", "nota": 5.3, "status": "ouro", "conquistaTexto": "Ouro", "contato": "Leandro", "metaOuro": 5.9, "metaDiamante": 6.3, "pp3bim": 0.57 }] };
+    const BAKE = {"regional":{"nota":4.1,"metaOuro":4.6,"metaDiamante":4.9},"escolas":[{"escola":"17 DE SETEMBRO - 33881","status":"ouro","conquistaTexto":"Ouro","nota":5.2,"metaOuro":5.8,"metaDiamante":6.2,"pp3bim":0.552,"diretor":"SIMONE CRISTINA SAVÉRIO RIBEIRO","supervisao":"Ana Flávia Nascimento Querino da Silva"},{"escola":"ABEL AUGUSTO FRAGATA - 33820","status":"na","conquistaTexto":"...","nota":6.5,"metaOuro":7,"metaDiamante":7.3,"pp3bim":0.815,"diretor":"VANESSA ALVES DO PRADO","supervisao":"Aparecido de Oliveira"},{"escola":"ALCYR DA ROSA LIMA PROF - 33406","status":"ouro","conquistaTexto":"Ouro","nota":3.6,"metaOuro":4,"metaDiamante":4.2,"pp3bim":0.428,"diretor":"EDVANDRO MENEZES SILVA","supervisao":"Eduardo César Corrêa César Corrêa"},{"escola":"AMELIA LOPES ANDERS PROFA - 914198","status":"ouro","conquistaTexto":"Ouro","nota":3.6,"metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.434,"diretor":"DAIANA DE SOUZA OLIVEIRA","supervisao":"Everton Júnior da Silva"},{"escola":"AMILCARE MATTEI PROF - 33728","status":"diamante","conquistaTexto":"Diamante","nota":3.8,"metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.541,"diretor":"ANA DOLORES ZUCCOLIN DE MELLO","supervisao":"Sandra Telles Pelegrine"},{"escola":"ANTONIO AUGUSTO NETTO - 33832","status":"na","conquistaTexto":"......","nota":3.5,"metaOuro":4,"metaDiamante":4.2,"pp3bim":0.48,"diretor":"MARINA SFERRI MENEGHELLO GOMES","supervisao":"Gisele Gelmi"},{"escola":"ANTONIO DAUN - 33467","status":"na","conquistaTexto":"....","nota":4.2,"metaOuro":4.8,"metaDiamante":5.1,"pp3bim":0.514,"diretor":"RENATO TERUEL JÚNIOR","supervisao":"Rosemary Bossoni"},{"escola":"ANTONIO DE BAPTISTA PROF - 33561","status":"na","conquistaTexto":"....","nota":3.9,"metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.539,"diretor":"ANA CLAUDIA ABDALLA DOS REIS BRANDT","supervisao":"Leandro Teixeira Cruz Alves"},{"escola":"ANTONIO GOMES DE OLIVEIRA PROF - 33741","status":"diamante","conquistaTexto":"Diamante","nota":7.1,"metaOuro":7.7,"metaDiamante":8.2,"pp3bim":0.754,"diretor":"MADALENA SALINA SANCHES","supervisao":"Nelson Luiz Teixeira"},{"escola":"ANTONIO REGINATO PROF - 43242","status":"ouro","conquistaTexto":"Ouro","nota":4.1,"metaOuro":4.6,"metaDiamante":4.8,"pp3bim":0.588,"diretor":"Everton Júnior da Silva JÚNIOR DA SILVA","supervisao":"Camila Rodrigues da Silva"},{"escola":"BALTAZAR DE GODOY MOREIRA PROF - 33856","status":"na","conquistaTexto":".....","nota":3.8,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.473,"diretor":"ODAIR VIEIRA DA SILVA","supervisao":"Aparecido de Oliveira"},{"escola":"BENITO MARTINELLI PROF - 903693","status":"ouro","conquistaTexto":"Ouro","nota":3.6,"metaOuro":4,"metaDiamante":4.2,"pp3bim":0.433,"diretor":"IVONE ROSSETO M. DA COSTA","supervisao":"Aguida Maria Pereira"},{"escola":"BENTO DE ABREU SAMPAIO VIDAL - 33662","status":"diamante","conquistaTexto":"Diamante","nota":7.2,"metaOuro":7.8,"metaDiamante":8.2,"pp3bim":0.701,"diretor":"ÉRIKA DUARTE SCHIMITH GIAXA","supervisao":"Bárbara Cibelli S. Monteagudo"},{"escola":"BICUDO MONSENHOR - 33753","status":"ouro","conquistaTexto":"Ouro","nota":4.6,"metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.502,"diretor":"ITALO BERTOCINI","supervisao":"Leandro Ramiro"},{"escola":"CARLOTA DE NEGREIROS ROCHA PROFA - 33736","status":"na","conquistaTexto":".....","nota":7.5,"metaOuro":8,"metaDiamante":8.4,"pp3bim":0.784,"diretor":"ELIJANE DOS SANTOS SILVA","supervisao":"Aguida Maria Pereira"},{"escola":"CASTRO ALVES - 33613","status":"ouro","conquistaTexto":"Ouro","nota":5.5,"metaOuro":6,"metaDiamante":6.3,"pp3bim":0.635,"diretor":"ANDRÉ LUIZ SIQUEIRA DA SILVA","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"CEL JTO A EE BALTAZAR DE GODOY MOREIRA PROF - 985508","status":"sistema","conquistaTexto":"...","nota":3.8,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null,"diretor":"ODAIR VIEIRA DA SILVA","supervisao":"Aparecido de Oliveira"},{"escola":"CEL JTO A EE CULTURA E LIBERDADE - 459768","status":"sistema","conquistaTexto":"...","nota":4.1,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null,"diretor":"LUIZ FREDERICO FAIA DESTRO","supervisao":"Gisele Gelmi"},{"escola":"CENTRO ATEND SOCIO-EDUC ADOLESCENTE DE MARILIA - CI - 559581","status":"sistema","conquistaTexto":"...","nota":3.9,"metaOuro":4.4,"metaDiamante":4.7,"pp3bim":null,"diretor":"CATHARINA EDNA RODRIGUEZ","supervisao":"Leandro Ramiro"},{"escola":"CENTRO ATEND SOCIO-EDUC AO ADOLESCENTE DE MARILIA - CIP - 148519","status":"sistema","conquistaTexto":"...","nota":3.9,"metaOuro":4.4,"metaDiamante":4.7,"pp3bim":null,"diretor":"CATHARINA EDNA RODRIGUEZ","supervisao":"Leandro Ramiro"},{"escola":"CENTRO DE DETENÇÃO PROVISÓRIA DE ÁLVARO DE CARVALHO - 7986","status":"sistema","conquistaTexto":"...","nota":3.4,"metaOuro":3.8,"metaDiamante":4,"pp3bim":null,"diretor":"TEREZA CRISTINA MAGALHÃES DE MORAES","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"CENTRO DE RESSOCIALIZACAO DE MARILIA - 453262","status":"sistema","conquistaTexto":"...","nota":4,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null,"diretor":"ALINE RODRIGUES DOS SANTOS","supervisao":"Paula Cristina Januário Lima"},{"escola":"CULTURA E LIBERDADE - 33625","status":"ouro","conquistaTexto":"Ouro","nota":4.1,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":0.472,"diretor":"LUIZ FREDERICO FAIA DESTRO","supervisao":"Gisele Gelmi"},{"escola":"DIRCE BELLUZZO DE CAMPOS PROFA - 33558","status":"ouro","conquistaTexto":"Ouro","nota":3.8,"metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.472,"diretor":"CÍNTIA OLIVEIRA DE SOUZA","supervisao":"Sandra Telles Pelegrine"},{"escola":"EDSON VIANEI ALVES PROF - 923000","status":"ouro","conquistaTexto":"Ouro","nota":4.3,"metaOuro":4.8,"metaDiamante":5.2,"pp3bim":0.558,"diretor":"BÁRBARA MORAES ANDRADE BERTONCINI","supervisao":"Camila Rodrigues da Silva"},{"escola":"EDUARDO DE SOUZA PORTO CEL - 33522","status":"ouro","conquistaTexto":"Ouro","nota":4.5,"metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.491,"diretor":"LETÍCIA FERNANDA CESÁRIO DOS SANTOS","supervisao":"Aguida Maria Pereira"},{"escola":"EMICO MATSUMOTO GEOGRAFA - 446920","status":"ouro","conquistaTexto":"Ouro","nota":5.2,"metaOuro":5.8,"metaDiamante":6.2,"pp3bim":0.552,"diretor":"MARLI RODRIGUES DE SOUZA","supervisao":"Gisele Gelmi"},{"escola":"EPF JTO À CULTURA E LIBERDADE - 11761","status":"sistema","conquistaTexto":"....","nota":4.1,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null,"diretor":"LUIZ FREDERICO FAIA DESTRO","supervisao":"Gisele Gelmi"},{"escola":"EPF JTO À HILMAR MACHADO DE OLIVEIRA - 11637","status":"sistema","conquistaTexto":".....","nota":3.5,"metaOuro":3.9,"metaDiamante":4.1,"pp3bim":null,"diretor":"VERÔNICA NANCI PERES LEDIS","supervisao":"Eduardo César Corrêa César Corrêa"},{"escola":"ERMELINDA CLARICE SANCHES PROFA - 33479","status":"na","conquistaTexto":"N/A","nota":3.8,"metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.433,"diretor":"WILLIAN TAVARES MOREIRA","supervisao":"Nelson Luiz Teixeira"},{"escola":"GABRIEL MONTEIRO DA SILVA - 33674","status":"diamante","conquistaTexto":"Diamante","nota":5.8,"metaOuro":6.4,"metaDiamante":6.8,"pp3bim":0.597,"diretor":"ANA LAURA JEREMIAS UREL","supervisao":"Roseli Alves Meira"},{"escola":"GERALDO ZANCOPE PROF - 33716","status":"ouro","conquistaTexto":"Ouro","nota":5.6,"metaOuro":6.2,"metaDiamante":6.7,"pp3bim":0.769,"diretor":"ADRIANA CRISTINA MACHADO LOURENÇO","supervisao":"Roseli Alves Meira"},{"escola":"GRACIEMA BAGANHA RIBEIRO - 33534","status":"ouro","conquistaTexto":"Ouro","nota":3.9,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.487,"diretor":"JUSSARA MARIA CAZZO RINALDI","supervisao":"Rosemary Bossoni"},{"escola":"HATSUE TOYOTA - 903673","status":"ouro","conquistaTexto":"Ouro","nota":4.5,"metaOuro":5.1,"metaDiamante":5.5,"pp3bim":0.51,"diretor":"RITA DE CÁSSIA LORENZETTI","supervisao":"Paula Cristina Januário Lima"},{"escola":"HEMOCENTRO DA FACULDADE DE MEDICINA MARILIA CL HOSPITALAR - 440361","status":"sistema","conquistaTexto":"....","nota":7.5,"metaOuro":8,"metaDiamante":8.4,"pp3bim":null,"diretor":"ELIJANE DOS SANTOS SILVA","supervisao":"Aguida Maria Pereira"},{"escola":"HILMAR MACHADO DE OLIVEIRA - 33492","status":"na","conquistaTexto":"N/A","nota":3.5,"metaOuro":3.9,"metaDiamante":4.1,"pp3bim":0.523,"diretor":"VERÔNICA NANCI PERES LEDIS","supervisao":"Eduardo César Corrêa César Corrêa"},{"escola":"HOSPITAL DAS CLINICAS DE MARILIA CLASSE HOSPITALAR - 559180","status":"sistema","conquistaTexto":"...","nota":7.5,"metaOuro":8,"metaDiamante":8.4,"pp3bim":null,"diretor":"ELIJANE DOS SANTOS SILVA","supervisao":"Aguida Maria Pereira"},{"escola":"HOSPITAL IRMANDADE STA CASA DE MISERICORDIA CL HOSPITALAR - 447912","status":"sistema","conquistaTexto":"...","nota":7.5,"metaOuro":8,"metaDiamante":8.4,"pp3bim":null,"diretor":"ELIJANE DOS SANTOS SILVA","supervisao":"Aguida Maria Pereira"},{"escola":"IZIDORO DAUN - 33455","status":"na","conquistaTexto":"N/A","nota":3.9,"metaOuro":4.2,"metaDiamante":4.4,"pp3bim":0.49,"diretor":"JOSÉ AUGUSTO RABELO BEUTTENMULLER","supervisao":"Paula Cristina Januário Lima"},{"escola":"JARDIM ALCIR RAINERI - 474629","status":"na","conquistaTexto":"N/A","nota":4.1,"metaOuro":4.6,"metaDiamante":4.8,"pp3bim":0.476,"diretor":"ALINE DA SILVA OLIVEIRA","supervisao":"Roseli Alves Meira"},{"escola":"JARDIM SANTA ANTONIETA - 462688","status":"na","conquistaTexto":"N/A","nota":4.7,"metaOuro":5.3,"metaDiamante":5.7,"pp3bim":0.528,"diretor":"EDILAINE APARECIDA RUI GALINDO","supervisao":"Gisele Gelmi"},{"escola":"JOAO WALFREDO ROTHERMUND PADRE - 907650","status":"ouro","conquistaTexto":"Ouro","nota":4,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":0.5,"diretor":"ALINE RODRIGUES DOS SANTOS","supervisao":"Paula Cristina Januário Lima"},{"escola":"JOSE ALFREDO DE ALMEIDA - 43254","status":"na","conquistaTexto":"N/A","nota":3.5,"metaOuro":3.9,"metaDiamante":4,"pp3bim":0.431,"diretor":"RENATA PONTOLI DE OLIVEIRA","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"JOSE AMBROSIO DOS SANTOS - 33650","status":"diamante","conquistaTexto":"Diamante","nota":3.8,"metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.563,"diretor":"DENIZE APARECIDA ANDRADE","supervisao":"Leandro Teixeira Cruz Alves"},{"escola":"JOSE AUGUSTO BARTHOLO - 33686","status":"diamante","conquistaTexto":"Diamante","nota":5.1,"metaOuro":5.7,"metaDiamante":6.1,"pp3bim":0.518,"diretor":"MARISA FATIMA A. DOS SANTOS RODRUIGUES","supervisao":"Leandro Ramiro"},{"escola":"JOSE BONIFACIO DO COUTO - 33376","status":"na","conquistaTexto":"N/A","nota":3.6,"metaOuro":4.1,"metaDiamante":4.4,"pp3bim":0.527,"diretor":"ADRIANO Aparecido de Oliveira DO NASCIMENTO","supervisao":"Ana Flávia Nascimento Querino da Silva"},{"escola":"JOSE CARLOS MONTEIRO - 26414","status":"ouro","conquistaTexto":"Ouro","nota":3.7,"metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.469,"diretor":"SÉRGIO DE OLIVEIRA P. GARCIA","supervisao":"Everton Júnior da Silva"},{"escola":"LOURENCO DE ALMEIDA SENNE DR - 33704","status":"diamante","conquistaTexto":"Diamante","nota":5.7,"metaOuro":6.3,"metaDiamante":6.7,"pp3bim":0.625,"diretor":"MARISTELA D'ANDREA BAVELONI ARCURI","supervisao":"Rosemary Bossoni"},{"escola":"LYDIA YVONE GOMES MARQUES PROFA - 33388","status":"ouro","conquistaTexto":"Ouro","nota":3.6,"metaOuro":4,"metaDiamante":4.1,"pp3bim":0.505,"diretor":"Sandra Telles Pelegrine TENÓRIO DA CONCEIÇÃO DOS SANTOS","supervisao":"Ana Flávia Nascimento Querino da Silva"},{"escola":"MARIA CECILIA FERRAZ DE FREITAS PROFA - 47855","status":"na","conquistaTexto":"N/A","nota":3.8,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.46,"diretor":"ANA Paula Cristina Januário Lima DE OLIVEIRA BUSA","supervisao":"Nelson Luiz Teixeira"},{"escola":"MARIA IZABEL SAMPAIO VIDAL - 33819","status":"ouro","conquistaTexto":"Ouro","nota":4,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.453,"diretor":"ELLEN CARINA BORANGA BRANDI","supervisao":"Aparecido de Oliveira"},{"escola":"MARIA STELLA DE CERQUEIRA CESAR PROFA - 36250","status":"diamante","conquistaTexto":"Diamante","nota":6.6,"metaOuro":7.2,"metaDiamante":7.7,"pp3bim":0.788,"diretor":"ADRIANA SOUZA SIMÕES","supervisao":"Everton Júnior da Silva"},{"escola":"MAURICIO MILANI - 47703","status":"ouro","conquistaTexto":"Ouro","nota":3.8,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":0.429,"diretor":"JOÃO MARCOS GARCIA VIEIRA","supervisao":"Camila Rodrigues da Silva"},{"escola":"NASIB CURY - 917990","status":"ouro","conquistaTexto":"Ouro","nota":4.6,"metaOuro":5.2,"metaDiamante":5.6,"pp3bim":0.458,"diretor":"ANA CARLA DE OLIVEIRA BIEL","supervisao":"Roseli Alves Meira"},{"escola":"NELSON CABRINI PROF - 33698","status":"ouro","conquistaTexto":"Ouro","nota":3.9,"metaOuro":4.4,"metaDiamante":4.7,"pp3bim":0.501,"diretor":"CATHARINA EDNA RODRIGUEZ","supervisao":"Leandro Ramiro"},{"escola":"NELY CARBONIERI DE ANDRADE PROFA - 33424","status":"na","conquistaTexto":"N/A","nota":4.6,"metaOuro":5.2,"metaDiamante":5.5,"pp3bim":0.482,"diretor":"JULIANA ABIBI","supervisao":"Aguida Maria Pereira"},{"escola":"NEUZA MARIA MARANA FEIJAO PROFA - 33777","status":"ouro","conquistaTexto":"Ouro","nota":4.2,"metaOuro":4.7,"metaDiamante":5,"pp3bim":0.533,"diretor":"ANA LUIZA BERNARDO GUIMARÃES","supervisao":"Nelson Luiz Teixeira"},{"escola":"NORMA MONICO TRUZZI PROFA - 33443","status":"diamante","conquistaTexto":"Diamante","nota":4,"metaOuro":4.4,"metaDiamante":4.6,"pp3bim":0.601,"diretor":"LUCIANA RIVABEN PIOVEZAN","supervisao":"Paula Cristina Januário Lima"},{"escola":"ORACINA CORREA DE MORAES RODINE PROFA - 43655","status":"na","conquistaTexto":"N/A","nota":4.1,"metaOuro":4.4,"metaDiamante":4.7,"pp3bim":0.445,"diretor":"BENILTON GARCIA DE Paula Cristina Januário Lima","supervisao":"Eduardo César Corrêa César Corrêa"},{"escola":"PENITENCIARIA DE MARILIA - 453237","status":"sistema","conquistaTexto":"....","nota":4,"metaOuro":4.5,"metaDiamante":4.8,"pp3bim":null,"diretor":"ALINE RODRIGUES DOS SANTOS","supervisao":"Paula Cristina Januário Lima"},{"escola":"PENITENCIÁRIA I DE GÁLIA - 9890","status":"sistema","conquistaTexto":"...","nota":3.9,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null,"diretor":"JUSSARA MARIA CAZZO RINALDI","supervisao":"Rosemary Bossoni"},{"escola":"PENITENCIARIA II DE GALIA - 9892","status":"sistema","conquistaTexto":"....","nota":3.9,"metaOuro":4.3,"metaDiamante":4.5,"pp3bim":null,"diretor":"JUSSARA MARIA CAZZO RINALDI","supervisao":"Rosemary Bossoni"},{"escola":"PENITENCIARIA VALENTIM ALVES DA SILVA - 453158","status":"sistema","conquistaTexto":"...","nota":3.4,"metaOuro":3.8,"metaDiamante":4,"pp3bim":null,"diretor":"TEREZA CRISTINA MAGALHÃES DE MORAES","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"PIRMINO ANTONIO SCHMIDT MONSENHOR - 33789","status":"sistema","conquistaTexto":"...","nota":5.2,"metaOuro":5.7,"metaDiamante":5.7,"pp3bim":null,"diretor":"Sandra Telles Pelegrine VALÉRIA SPILA CALDEIRA","supervisao":"Rosemary Bossoni"},{"escola":"RAFAEL PAES DE BARROS DOUTOR - 33510","status":"na","conquistaTexto":"N/A","nota":3.4,"metaOuro":3.8,"metaDiamante":4,"pp3bim":0.412,"diretor":"TEREZA CRISTINA MAGALHÃES DE MORAES","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"REIKO UEMURA TSUNOKAWA PROFA - 907662","status":"na","conquistaTexto":"N/A","nota":4.1,"metaOuro":4.6,"metaDiamante":4.9,"pp3bim":0.496,"diretor":"ANTONIO MARCOS MENDES JANUARIO","supervisao":"Bárbara Cibelli S. Monteagudo"},{"escola":"RUTH MAMEDE DE GODOY PROFA - 33637","status":"ouro","conquistaTexto":"Ouro","nota":4,"metaOuro":4.5,"metaDiamante":4.7,"pp3bim":0.595,"diretor":"CRISTIANE HINO FATTORI","supervisao":"Camila Rodrigues da Silva"},{"escola":"SEBASTIAO MONACO VEREADOR - 44568","status":"na","conquistaTexto":"N/A","nota":3.6,"metaOuro":4.1,"metaDiamante":4.3,"pp3bim":0.49,"diretor":"POLLYANA CRISTINA RIBEIRO","supervisao":"Ana Flávia Nascimento Querino da Silva"},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA - 47843","status":"na","conquistaTexto":"N/A","nota":4.2,"metaOuro":4.7,"metaDiamante":5.1,"pp3bim":0.516,"diretor":"ANA Paula Cristina Januário Lima GATTI COLOMBO TEIXEIRA","supervisao":"Sandra Telles Pelegrine"},{"escola":"VITU GIORGI DONA - 33790","status":"diamante","conquistaTexto":"Diamante","nota":3.9,"metaOuro":4.3,"metaDiamante":4.6,"pp3bim":0.473,"diretor":"ROSILENE PEREIRA DA SILVA","supervisao":"Beatriz Muzi Bortoli Rodrigues"},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR - 33765","status":"na","conquistaTexto":"N/A","nota":5,"metaOuro":5.6,"metaDiamante":6,"pp3bim":0.516,"diretor":"ALEXANDRE SIMÃO","supervisao":"Aparecido de Oliveira"},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA - 43679","status":"ouro","conquistaTexto":"Ouro","nota":5.3,"metaOuro":5.9,"metaDiamante":6.3,"pp3bim":0.57,"diretor":"LUCELI APARECIDA CALLÉ","supervisao":"Leandro Teixeira Cruz Alves"}]};
     let DATA = BAKE;
     const nf1 = v => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const pc = v => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
     const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const ROTULO = { ouro: 'Ouro', diamante: 'Diamante', na: 'Não atingiu a meta', sistema: 'Sistema · EJA' };
     const TITULO = { ouro: 'Conquistou a meta Ouro em 2025', diamante: 'Conquistou a meta Diamante em 2025', na: 'Não atingiu a meta 2025', sistema: 'Unidade do sistema EJA multisseriado (não disputa a classificação regular)' };
-    const q = document.querySelector('#q'), ordem = document.querySelector('#order'), statusSel = document.querySelector('#status'), selectEscola = document.querySelector('#select-escola'), rows = document.querySelector('#rows'), sub = document.querySelector('#sub'), cards = document.querySelector('#cards'), rodape = document.querySelector('#rodape');
+    const STATUS_ORDEM = { diamante: 0, ouro: 1, na: 2, sistema: 3 };
+    const CONECTORES = new Set(['de','da','do','das','dos','e','di','d','o','a']);
+    const iniciais = nome => String(nome || '').trim().split(/\s+/).filter(p => p && !CONECTORES.has(p.toLowerCase())).map(p => p[0].toUpperCase() + '.').join(' ');
+    function statusDe(s) {
+      if (!s || s === '—') return null;
+      const t = String(s).toLowerCase();
+      if (t.includes('diamante')) return 'diamante';
+      if (t.includes('ouro')) return 'ouro';
+      if (t.includes('sistema')) return 'sistema';
+      return 'na';
+    }
+    const selectEscola = document.querySelector('#select-escola'), statusSel = document.querySelector('#status'), rows = document.querySelector('#rows'), sub = document.querySelector('#sub'), cards = document.querySelector('#cards'), rodape = document.querySelector('#rodape');
+    let sortState = { key: 'nota', dir: -1 };
     function aPartirDeBanco(linhas) {
       const reg = linhas.filter(x => /^MARILIA$/i.test(x.escola))[0] || {};
-      const escolas = linhas.filter(x => !/^MARILIA$/i.test(x.escola)).map(r => ({
-        escola: r.escola,
-        nota: r.nota == null ? null : Number(r.nota),
-        status: r.status || 'na',
-        conquistaTexto: r.conquista_texto || '',
-        contato: r.contato || '',
-        metaOuro: r.meta_ouro == null ? null : Number(r.meta_ouro),
-        metaDiamante: r.meta_diamante == null ? null : Number(r.meta_diamante),
-        pp3bim: r.pp3bim == null ? null : Number(r.pp3bim)
-      }));
-      return { ano: (linhas[0] && linhas[0].ano) || null, regional: { nota: reg.nota == null ? null : Number(reg.nota), metaOuro: reg.meta_ouro == null ? null : Number(reg.meta_ouro), metaDiamante: reg.meta_diamante == null ? null : Number(reg.meta_diamante) }, escolas };
+      const escolas = linhas.filter(x => !/^MARILIA$/i.test(x.escola)).map(r => {
+        const ct = r.conquista_2025 || '';
+        return {
+          escola: r.escola,
+          conquistaTexto: ct,
+          status: statusDe(ct) || 'na',
+          nota: r.nota_final_2025 == null ? null : Number(r.nota_final_2025),
+          metaOuro: r.meta_ouro_2026_27 == null ? null : Number(r.meta_ouro_2026_27),
+          metaDiamante: r.meta_diamante_2026_27 == null ? null : Number(r.meta_diamante_2026_27),
+          pp3bim: r.pp_3bim_acertos == null ? null : Number(r.pp_3bim_acertos),
+          diretor: r.diretor || '',
+          supervisao: r.supervisor || ''
+        };
+      });
+      return { regional: { nota: reg.nota_final_2025 == null ? null : Number(reg.nota_final_2025), metaOuro: reg.meta_ouro_2026_27 == null ? null : Number(reg.meta_ouro_2026_27), metaDiamante: reg.meta_diamante_2026_27 == null ? null : Number(reg.meta_diamante_2026_27) }, escolas };
     }
     function inicializar() {
       const R = DATA.regional, E = DATA.escolas;
@@ -331,29 +343,54 @@
       if ([...selectEscola.options].some(o => o.value === atual)) selectEscola.value = atual;
       render();
     }
+    function valor(x, k) {
+      if (k === 'diretor') return iniciais(x.diretor);
+      if (k === 'supervisao') return x.supervisao || '';
+      if (k === 'status') return ROTULO[x.status] || '';
+      return x[k];
+    }
+    function comparar(a, b, k, dir) {
+      const va = valor(a, k), vb = valor(b, k);
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      let r = 0;
+      if (k === 'escola' || k === 'diretor' || k === 'supervisao' || k === 'status') r = String(va).localeCompare(String(vb), 'pt-BR');
+      else r = (Number(va) || 0) - (Number(vb) || 0);
+      return dir * r;
+    }
     function render() {
       const E = DATA.escolas, R = DATA.regional;
-      const term = q.value.trim().toLowerCase(), alvo = selectEscola.value, st = statusSel.value, crit = ordem.value;
-      const a = E.filter(x => (!alvo || x.escola === alvo) && (!st || x.status === st) && x.escola.toLowerCase().includes(term));
-      if (crit === 'nome') a.sort((x, y) => x.escola.localeCompare(y.escola, 'pt-BR'));
-      else a.sort((x, y) => (y[crit] != null ? y[crit] : -1) - (x[crit] != null ? x[crit] : -1));
-      sub.textContent = a.length + ' de ' + E.length + ' unidades · ' + (st ? ROTULO[st] : 'sem filtro de conquista') + ' · ordenado por ' + (ordem.options[ordem.selectedIndex].text.toLowerCase()) + '.';
-      rows.innerHTML = '<tr class="regional"><td>MARILIA · Regional</td><td>—</td><td class="num">' + nf1(R.nota) + '</td><td class="num">' + nf1(R.metaOuro) + '</td><td class="num">' + nf1(R.metaDiamante) + '</td><td class="num">—</td><td></td></tr>' + a.map(x => '<tr><td>' + esc(x.escola) + '</td><td><span class="tag ' + x.status + '" title="' + esc(TITULO[x.status]) + '">' + esc(ROTULO[x.status]) + '</span></td><td class="num">' + nf1(x.nota) + '</td><td class="num">' + nf1(x.metaOuro) + '</td><td class="num">' + nf1(x.metaDiamante) + '</td><td class="num">' + (x.pp3bim != null ? pc(x.pp3bim) : '—') + '</td><td class="contato">' + esc(x.contato) + '</td></tr>').join('');
+      const alvo = selectEscola.value, st = statusSel.value, crit = sortState.key;
+      const a = E.filter(x => (!alvo || x.escola === alvo) && (!st || x.status === st));
+      a.sort((x, y) => comparar(x, y, crit, sortState.dir));
+      sub.textContent = a.length + ' de ' + E.length + ' unidades · ' + (st ? ROTULO[st] : 'sem filtro de conquista') + ' · ordenado por ' + (document.querySelector('th[data-k="' + crit + '"]') ? document.querySelector('th[data-k="' + crit + '"]').textContent.trim().replace(/[▲▼]/g, '').trim() : crit) + ' (' + (sortState.dir === -1 ? 'decrescente' : 'crescente') + ').';
+      const seta = (k) => sortState.key === k ? (sortState.dir === -1 ? '▼' : '▲') : '';
+      document.querySelectorAll('th[data-k]').forEach(th => {
+        const sp = th.querySelector('.sort-arrow');
+        if (sp) sp.textContent = seta(th.dataset.k);
+        th.classList.toggle('active', th.dataset.k === sortState.key);
+      });
+      rows.innerHTML = a.map(x => '<tr><td>' + esc(x.escola) + '</td><td><span class="tag ' + x.status + '" title="' + esc(TITULO[x.status]) + '">' + esc(ROTULO[x.status]) + '</span></td><td class="num">' + nf1(x.nota) + '</td><td class="num">' + nf1(x.metaOuro) + '</td><td class="num">' + nf1(x.metaDiamante) + '</td><td class="num">' + (x.pp3bim != null ? pc(x.pp3bim) : '—') + '</td><td class="diretor" title="' + esc(x.diretor) + '">' + esc(iniciais(x.diretor)) + '</td><td class="supervisao">' + esc(x.supervisao) + '</td></tr>').join('') + '<tr class="regional"><td>MARILIA · Regional</td><td>—</td><td class="num">' + nf1(R.nota) + '</td><td class="num">' + nf1(R.metaOuro) + '</td><td class="num">' + nf1(R.metaDiamante) + '</td><td class="num">—</td><td></td><td></td></tr>';
     }
     async function carregarSupabase() {
       try {
-        const { data: anos, error: erroAno } = await supabaseClient.from('resultados_saresp').select('ano').order('ano', { ascending: false }).limit(1);
-        if (erroAno || !anos || !anos.length) return;
-        const { data, error } = await supabaseClient.from('resultados_saresp').select('*').eq('ano', anos[0].ano);
+        const { data, error } = await supabaseClient.from('resultados_saresp').select('*');
         if (error || !data || data.length < 15) return;
         DATA = aPartirDeBanco(data);
         rodape.textContent = 'Dados carregados do Supabase.';
         inicializar();
       } catch (err) { console.warn('Falha ao buscar resultados_saresp:', err.message); }
     }
-    q.oninput = render; ordem.onchange = render; statusSel.onchange = render; selectEscola.onchange = render; inicializar();
+    statusSel.onchange = render; selectEscola.onchange = render;
+    document.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      if (sortState.key === k) sortState.dir = -sortState.dir;
+      else sortState = { key: k, dir: k === 'escola' || k === 'diretor' || k === 'supervisao' || k === 'status' ? 1 : -1 };
+      render();
+    }));
+    inicializar();
     (async () => { const { data: { session } } = await supabaseClient.auth.getSession(); if (!session) { location.href = 'index.html'; return; } carregarSupabase(); })();
   </script>
 </body>
-
 </html>
