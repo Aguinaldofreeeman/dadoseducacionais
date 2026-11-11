@@ -2044,6 +2044,7 @@
 
             registro.escola = String(registro.escola ?? '').trim();
             if (!registro.escola) continue;
+            if (/^total$/i.test(registro.escola)) continue;
 
             if (tipo === 'presenca' || tipo === 'apoio') {
                 registro.periodo = String(registro.periodo ?? '').trim();
