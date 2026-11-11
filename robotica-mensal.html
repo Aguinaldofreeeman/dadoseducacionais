@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Robótica Marília · 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/home-button.css">
+<style>
+/* Layout: seletor de meses fixo no topo, KPIs, evolução mensal, ranking, dispersão,
+   escola em foco, mapa de calor de todos os meses e tabela completa. */
+:root{
+  --bg:#F1F4F9; --surface:#FFFFFF; --surface2:#F6F8FC; --ink:#122033; --muted:#566779; --line:#DFE5EE;
+  --accent:#2B52D1; --accent-soft:#E5EBFC;
+  --g:#4CB37A; --y:#F2C230; --r:#E5645C; --n:#C9D2DF; --on-status:#14231B;
+  --shadow:0 1px 2px rgba(18,32,51,.06),0 4px 16px rgba(18,32,51,.05);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1118; --surface:#141C26; --surface2:#1A2430; --ink:#E7EDF4; --muted:#93A4B6; --line:#243142;
+    --accent:#8FAAFF; --accent-soft:#1E2A4C;
+    --g:#52C487; --y:#F0C84A; --r:#F0746C; --n:#3A4A5E;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1118; --surface:#141C26; --surface2:#1A2430; --ink:#E7EDF4; --muted:#93A4B6; --line:#243142;
+  --accent:#8FAAFF; --accent-soft:#1E2A4C;
+  --g:#52C487; --y:#F0C84A; --r:#F0746C; --n:#3A4A5E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;padding-top:4px}
+header.top h1{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:700;letter-spacing:-.02em}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:16px 18px 0}
+.card-h h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.card-h .hint{color:var(--muted);font-size:12.5px}
+.card-b{padding:12px 18px 18px}
+
+/* faixa de filtros */
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;padding:12px 14px;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f>label,.f>.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.inp{height:36px;border:1px solid var(--line);background:var(--surface2);border-radius:9px;padding:0 10px;min-width:0}
+.inp:hover{border-color:var(--muted)}
+.f-q{flex:1 1 200px}.f-q .inp{width:100%}
+.f-m{flex:0 1 250px}.f-m .inp{width:100%}
+.f-r{flex:0 1 145px}
+.f-r input[type=range]{width:100%;accent-color:var(--accent);height:36px;margin:0}
+.f-r .val{font-weight:600;font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-weight:600;font-size:13px}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip .dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.25)}
+.chip .n{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.85}
+.btn{height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.scale{display:none;width:100%;gap:14px;align-items:flex-end;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:12px}
+.scale.open{display:flex}
+.scale .inp{width:96px}
+.scale p{margin:0;color:var(--muted);font-size:12.5px;max-width:52ch}
+
+/* seletor de meses */
+.period{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;width:100%;border-bottom:1px dashed var(--line);padding-bottom:12px}
+.months{display:flex;gap:5px;flex-wrap:wrap}
+.mchip{height:34px;min-width:48px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;
+  font-weight:600;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mchip:hover:not(:disabled){border-color:var(--muted);color:var(--ink)}
+.mchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+:root[data-theme="dark"] .mchip[aria-pressed="true"]{color:#0B1118}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mchip[aria-pressed="true"]{color:#0B1118}}
+.mchip:disabled{opacity:.32;cursor:not-allowed;border-style:dashed}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.preset{height:34px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted)}
+.preset:hover{color:var(--accent);border-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface2)}
+.seg button{border:0;background:none;padding:0 11px;height:34px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.pinfo{flex:1 1 100%;margin:8px 0 0;font-size:12.5px;color:var(--muted)}
+.pinfo b{color:var(--ink);font-weight:700}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .s{color:var(--muted);font-size:12.5px}
+.dist{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px;margin:8px 0 4px;background:var(--line)}
+.dist i{display:block;min-width:0}
+.c-g{background:var(--g)}.c-y{background:var(--y)}.c-r{background:var(--r)}.c-n{background:var(--n)}
+.up{color:#0F766E}.dn{color:#B42318}
+:root[data-theme="dark"] .up{color:#5EEAD4}
+:root[data-theme="dark"] .dn{color:#FCA5A5}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .up{color:#5EEAD4}
+  :root:not([data-theme="light"]) .dn{color:#FCA5A5}
+}
+
+/* grade */
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+/* legenda */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
+
+/* ranking */
+.rk{display:flex;flex-direction:column;gap:3px}
+.rk-row{display:grid;grid-template-columns:22px minmax(120px,1.1fr) minmax(80px,1.4fr) minmax(80px,auto);align-items:center;gap:10px;width:100%;
+  padding:5px 8px;border:1px solid transparent;border-radius:9px;background:none;text-align:left;cursor:pointer}
+.rk-row:hover{background:var(--surface2)}
+.rk-row.sel{background:var(--accent-soft);border-color:var(--accent)}
+.rk-n{color:var(--muted);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.rk-name{min-width:0;font-weight:600;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-name small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.rk-track{position:relative;height:16px;background:var(--surface2);border-radius:4px}
+.rk-fill{position:absolute;inset:0 auto 0 0;border-radius:0 4px 4px 0;border:1px solid rgba(0,0,0,.22);border-left:0}
+.rk-cut{position:absolute;top:-3px;bottom:-3px;width:0;border-left:1.5px dashed var(--muted);opacity:.8}
+.rk-val{display:flex;align-items:center;justify-content:flex-end;gap:7px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.spark{width:58px;height:18px;flex:none;color:var(--accent);opacity:.85}
+@media (max-width:560px){.rk-row{grid-template-columns:18px minmax(0,1fr) auto}.rk-track{display:none}}
+
+/* dispersão */
+.sc{width:100%;height:auto;display:block}
+.sc text{font-family:var(--f-body)}
+.sc .pt{cursor:pointer}
+.sc .pt:hover{stroke:var(--ink);stroke-width:2}
+
+/* evolução */
+.trend{width:100%;height:auto;display:block}
+.trend text{font-family:var(--f-body)}
+.trend .pt{cursor:pointer}
+.trend .pt:hover{stroke:var(--ink);stroke-width:2}
+.readout{min-height:1.3em;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;padding:2px 18px 10px}
+
+/* foco */
+.focus-h{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.focus-h h3{font-size:20px;line-height:1.15}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:700;color:var(--on-status);border:1px solid rgba(0,0,0,.2);white-space:nowrap}
+.cod{color:var(--muted);font-size:12.5px}
+.fm{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.fm div{background:var(--surface2);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:1px}
+.fm .l{font-size:11px;color:var(--muted);font-weight:600}
+.fm .v{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.fm .d{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);padding:24px 6px;text-align:center}
+
+/* tabela */
+.tw{overflow-x:auto;border-top:1px solid var(--line);margin-top:12px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--surface2);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;vertical-align:bottom;white-space:normal;min-width:84px}
+th:hover{color:var(--ink)}
+th[aria-sort]{color:var(--accent)}
+th.l,td.l{text-align:left}
+td.l{white-space:normal;min-width:230px;position:sticky;left:0;background:var(--surface);z-index:1;font-weight:600}
+th.l{position:sticky;left:0;z-index:2;min-width:230px}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface2)}
+tbody tr:hover td.l{background:var(--surface2)}
+tbody tr.sel td{background:var(--accent-soft)}
+td.mat{background:var(--accent-soft)}
+td.st{color:var(--on-status);font-weight:700}
+tfoot td{font-weight:700;background:var(--surface2);border-bottom:0}
+tfoot td.l{background:var(--surface2)}
+.note{color:var(--muted);font-size:12px;padding:10px 18px 14px}
+.note b{color:var(--ink)}
+
+/* mapa de calor */
+.heat{overflow-x:auto;margin-top:4px}
+.heat table{font-size:12px;width:auto;min-width:100%}
+.heat th,.heat td{padding:5px 6px;text-align:center;border-bottom:1px solid var(--line);min-width:46px}
+.heat th.l,.heat td.l{text-align:left;position:sticky;left:0;background:var(--surface);min-width:190px;max-width:220px;font-weight:600;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heat thead th{position:sticky;top:0;background:var(--surface2);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;z-index:2}
+.heat thead th.on{color:var(--accent)}
+.heat thead th.off{opacity:.45}
+.heat tbody td .cell{display:block;border-radius:5px;padding:3px 2px;font-weight:600;color:var(--on-status);font-variant-numeric:tabular-nums}
+.heat tbody td.off .cell{opacity:.30}
+.heat tbody td.na{color:var(--muted);opacity:.4}
+.heat tbody tr.sel td{background:var(--accent-soft)}
+.heat tbody tr:hover td{background:var(--surface2)}
+.heat tbody tr:hover td.l{background:var(--surface2)}
+
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:9px 11px;border-radius:10px;font-size:12px;line-height:1.5;max-width:280px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+#tip b{display:block;font-size:13px;margin-bottom:2px}
+#tip span{opacity:.75}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;z-index:60}
+@media (prefers-reduced-motion:no-preference){.rk-fill{transition:width .35s ease}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Programa de Robótica · Marília</div>
+      <h1>Atividades por escola</h1>
+      <p>Escolha um mês ou combine vários meses de 2026. O painel mostra o período escolhido, compara com o primeiro mês e deixa você acompanhar cada escola mês a mês.</p>
+    </div>
+    <a class="home-button" href="index.html">Início</a>
+    <a class="btn home-button" href="#" id="robota-mensal-btn">Robótica Mensal</a>
+  </header>
+  <script>
+    (function () {
+      'use strict';
+      var btn = document.getElementById('robota-mensal-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        // Reset to default view: last two available months, "Período somado"
+        st.meses = HAVE.slice(-2);
+        st.visao = 'periodo';
+        st.metrica = 'nota';
+        st.sort = { key: st.metrica, dir: -1 };
+        // Update localStorage
+        try { localStorage.setItem('robotica26', JSON.stringify({ meses: st.meses, metrica: st.metrica, visao: st.visoa })); } catch (e) { }
+        render();
+        var txt = 'Exibindo os dados embutidos de ' + periodLabel() + ' (a tabela resultados_robotica_mensal ainda não respondeu).';
+        var status = document.getElementById('data-status');
+        if (status) { status.textContent = txt; status.hidden = false; }
+      });
+    })();
+  </script>
+  <p id="data-status" class="note" role="status" hidden></p>
+
+  <section class="card filters" aria-label="Período e filtros">
+    <div class="period">
+      <div class="f">
+        <span class="lbl" id="monthsLbl">Meses de 2026</span>
+        <div class="months" id="months" role="group" aria-label="Meses de 2026"></div>
+      </div>
+      <div class="f">
+        <span class="lbl">Atalhos</span>
+        <div class="presets">
+          <button type="button" class="preset" data-preset="ult2">Últimos 2</button>
+          <button type="button" class="preset" data-preset="bim1">1º semestre</button>
+          <button type="button" class="preset" data-preset="bim2">2º semestre</button>
+          <button type="button" class="preset" data-preset="ano">Ano todo</button>
+          <button type="button" class="preset" data-preset="limpar">Mês mais recente</button>
+        </div>
+      </div>
+      <div class="f">
+        <span class="lbl">Visão da tabela</span>
+        <div class="seg" id="visao" role="group" aria-label="Visão da tabela">
+          <button type="button" data-v="periodo" aria-pressed="true">Período somado</button>
+          <button type="button" data-v="mensal" aria-pressed="false">Mês a mês</button>
+        </div>
+      </div>
+      <p class="pinfo" id="pinfo"></p>
+    </div>
+
+    <div class="f f-q">
+        <label for="escola-select">Escola</label>
+        <select id="escola-select" class="inp">
+            <option value="">Todas as escolas</option>
+        </select>
+    </div>
+    <div class="f f-q" style="display:none">
+        <label for="q">Buscar escola ou código</label>
+        <input id="q" class="inp" type="search" placeholder="Ex.: Bicudo, 33753" autocomplete="off">
+    </div>
+    <div class="f f-m"><label for="metric">Colorir e ordenar por</label><select id="metric" class="inp"></select></div>
+    <div class="f"><span class="lbl">Faixa de cor</span><div class="chips" id="chips"></div></div>
+    <div class="f f-r"><label for="minMat">Matrículas mínimas · <span class="val num" id="minMatV">0</span></label><input id="minMat" type="range" min="0" max="500" step="50" value="0"></div>
+    <div class="f f-r"><label for="minNota">Nota mínima · <span class="val num" id="minNotaV">0</span></label><input id="minNota" type="range" min="0" max="8" step="0.5" value="0"></div>
+    <div class="f"><span class="lbl">&nbsp;</span><div class="chips"><button class="btn" id="scaleBtn" type="button" aria-expanded="false">Ajustar escala</button><button class="btn" id="reset" type="button">Limpar</button></div></div>
+    <div class="scale" id="scale">
+      <div class="f"><label for="tG">Verde a partir de</label><input id="tG" class="inp num" type="number" step="0.01" min="0" max="2"></div>
+      <div class="f"><label for="tR">Vermelho abaixo de</label><input id="tR" class="inp num" type="number" step="0.01" min="0" max="2"></div>
+      <p>Limites do <b>índice de atividades por aluno</b> (a coluna da planilha). Na planilha as cores aparecem em 3 grupos: acima de 0,46 verde, entre 0,17 e 0,34 amarelo, abaixo de 0,16 vermelho. Os limites aqui ficam no meio dos intervalos e você pode mudar. Os demais indicadores são coloridos por terços.</p>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Resumo do período"></section>
+
+  <section class="card" aria-labelledby="trT">
+    <div class="card-h"><h2 id="trT">Evolução mês a mês</h2><span class="hint" id="trHint"></span></div>
+    <div class="card-b" style="padding-bottom:0"><svg class="trend" id="trend" viewBox="0 0 980 250" role="img" aria-label="Evolução mensal do indicador"></svg></div>
+    <div class="readout" id="readout" aria-live="polite"></div>
+  </section>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="rkT">
+      <div class="card-h"><h2 id="rkT">Ranking das escolas</h2><button class="btn" id="flip" type="button" style="height:30px;padding:0 10px;font-size:12.5px">Inverter ordem</button></div>
+      <div class="card-b"><div class="legend" id="legend"></div><div class="rk" id="rk"></div></div>
+    </section>
+    <div class="col">
+      <section class="card" aria-labelledby="scT">
+        <div class="card-h"><h2 id="scT">Índice × nota média</h2><span class="hint">Bolha = matrículas ativas</span></div>
+        <div class="card-b"><svg class="sc" id="sc" viewBox="0 0 560 370" role="img" aria-label="Dispersão do índice de atividades por aluno contra a nota média, uma bolha por escola"></svg></div>
+      </section>
+      <section class="card" aria-labelledby="fcT">
+        <div class="card-h"><h2 id="fcT">Escola em foco</h2></div>
+        <div class="card-b" id="focus"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="hmT">
+    <div class="card-h">
+      <h2 id="hmT">Mapa de calor · todos os meses</h2>
+      <span class="hint">Clique no mês para incluir ou tirar do período · clique na escola para ver o detalhe</span>
+    </div>
+    <div class="heat" id="heat"></div>
+    <div class="note" id="hmNote"></div>
+  </section>
+
+  <section class="card" aria-labelledby="tbT">
+    <div class="card-h"><h2 id="tbT">Tabela completa</h2><span><span class="hint" id="tbHint"></span> <button class="btn" id="copy" type="button" style="height:30px;padding:0 10px;font-size:12.5px;margin-left:8px">Copiar para Excel</button></span></div>
+    <div class="tw" id="tw"></div>
+    <div class="note" id="tbNote"></div>
+  </section>
+
+  <footer class="note" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);text-align:center;">
+    <span id="footAtualizado">Atualizado em novembro de 2026</span>. Fonte: Escola Total.
+  </footer>
+</div>
+<div id="tip" hidden></div>
+<div id="toast" hidden>Tabela copiada</div>
+
+<script id="dados-robotica-mensal" type="application/json">{"ano":2026,"escolas":[{"escola":"17 DE SETEMBRO","codigo":"33881"},{"escola":"AMILCARE MATTEI PROF","codigo":"33728"},{"escola":"ANTONIO DAUN","codigo":"33467"},{"escola":"BICUDO MONSENHOR","codigo":"33753"},{"escola":"CASTRO ALVES","codigo":"33613"},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000"},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522"},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920"},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674"},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534"},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688"},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650"},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704"},{"escola":"NASIB CURY","codigo":"917990"},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424"},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443"},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843"},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765"},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679"}],"semanas":{"2":4,"3":5,"4":4,"5":5,"6":4,"7":4,"8":4,"9":5,"10":4},"totais":{"2":{"mat":4693.0,"pub":1077.0,"rasc":1.0,"corr":1.0,"dev":0.0,"conc":1075.0,"acerto":0.7106363214119833,"indice":0.05725,"nota":6.758655522173007},"3":{"mat":4693.0,"pub":7150.0,"rasc":9.0,"corr":22.0,"dev":0.0,"conc":7119.0,"acerto":0.7079714205659848,"indice":0.3044,"nota":6.978065013457261},"4":{"mat":4693.0,"pub":3401.0,"rasc":10.0,"corr":13.0,"dev":0.0,"conc":3378.0,"acerto":0.7159693576900412,"indice":0.18075,"nota":7.096553069388109},"5":{"mat":4693.0,"pub":5185.0,"rasc":11.0,"corr":25.0,"dev":0.0,"conc":5149.0,"acerto":0.7834878544469176,"indice":0.2204,"nota":7.268276604444065},"6":{"mat":4693.0,"pub":4421.0,"rasc":15.0,"corr":25.0,"dev":0.0,"conc":4381.0,"acerto":0.7770266591038004,"indice":0.23475,"nota":7.912258027451712},"7":{"mat":4693.0,"pub":193.0,"rasc":1.0,"corr":1.0,"dev":0.0,"conc":191.0,"acerto":0.6848051948051948,"indice":0.01025,"nota":5.8443261052286575},"8":{"mat":4693.0,"pub":4605.0,"rasc":14.0,"corr":2.0,"dev":0.0,"conc":4589.0,"acerto":0.6933438314509123,"indice":0.2445,"nota":6.885021760349828},"9":{"mat":4693.0,"pub":8366.0,"rasc":47.0,"corr":19.0,"dev":0.0,"conc":8300.0,"acerto":0.7386028839825286,"indice":0.35459999999999997,"nota":7.429525723623382},"10":{"mat":4693.0,"pub":3786.0,"rasc":38.0,"corr":20.0,"dev":0.0,"conc":3728.0,"acerto":0.7784216101694914,"indice":0.19975,"nota":7.663323182628377}},"meses":{"2":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":16.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":16.0,"acerto":0.40625,"indice":0.099,"nota":6.9642857142857135},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":66.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":66.0,"acerto":0.6818181818181818,"indice":0.284,"nota":7.473132131026869},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":21.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":20.0,"acerto":0.6666666666666666,"indice":0.032,"nota":6.944444444444443},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":8.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":8.0,"acerto":0.8125,"indice":0.038,"nota":8.125},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":143.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":143.0,"acerto":0.7027972027972028,"indice":0.171,"nota":7.039258580925248},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":286.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":286.0,"acerto":0.8548951048951049,"indice":0.273,"nota":7.710029635770819},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":55.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":55.0,"acerto":0.7363636363636363,"indice":0.833,"nota":7.530270655270655},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":101.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":101.0,"acerto":0.4405940594059406,"indice":0.432,"nota":4.585007440476191},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":261.0,"rasc":0.0,"corr":1.0,"dev":0.0,"conc":260.0,"acerto":0.6967370441458733,"indice":0.375,"nota":6.3365484153527625},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":108.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":108.0,"acerto":0.7314814814814815,"indice":0.26266666666666666,"nota":6.051217301217301},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":12.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":12.0,"acerto":0.20833333333333334,"indice":0.039,"nota":2.0833333333333335},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null}],"3":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":475.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":475.0,"acerto":0.6936842105263158,"indice":0.40259999999999996,"nota":6.993298909476071},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":194.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":194.0,"acerto":0.5644329896907216,"indice":0.479,"nota":5.753088849556241},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":1260.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":1256.0,"acerto":0.7924603174603174,"indice":0.45759999999999995,"nota":7.98112529113849},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":189.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":189.0,"acerto":0.7857142857142857,"indice":0.16299999999999998,"nota":8.056570165945166},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":673.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":672.0,"acerto":0.6901931649331352,"indice":0.643,"nota":7.44385565933225},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":424.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":424.0,"acerto":0.8042452830188679,"indice":0.4,"nota":8.144313811228074},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":514.0,"rasc":0.0,"corr":11.0,"dev":0.0,"conc":503.0,"acerto":0.7576354679802956,"indice":0.4918,"nota":6.442427846777078},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":129.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":129.0,"acerto":0.5968992248062015,"indice":0.11275,"nota":5.2572518855413595},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":370.0,"rasc":0.0,"corr":7.0,"dev":0.0,"conc":363.0,"acerto":0.5811732605729877,"indice":0.30925,"nota":6.444444444444444},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":639.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":639.0,"acerto":0.877151799687011,"indice":0.4878,"nota":7.760225466937283},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":185.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":185.0,"acerto":0.8297297297297297,"indice":0.70075,"nota":8.400019753493854},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":570.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":570.0,"acerto":0.6035087719298246,"indice":0.41,"nota":6.96692987275882},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":425.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":425.0,"acerto":0.4929411764705882,"indice":0.3632,"nota":4.86575135104547},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":379.0,"rasc":0.0,"corr":4.0,"dev":0.0,"conc":375.0,"acerto":0.6259946949602122,"indice":0.2178,"nota":6.5095263926533296},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":105.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":105.0,"acerto":0.6761904761904762,"indice":0.1532,"nota":6.1073908730158735},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":189.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":189.0,"acerto":0.7671957671957672,"indice":0.14275,"nota":6.5987020226150666},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":357.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":353.0,"acerto":0.6428571428571429,"indice":0.22999999999999998,"nota":6.574683562964813},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":73.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":73.0,"acerto":0.5273972602739726,"indice":0.111,"nota":5.935314685314684}],"4":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":119.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":119.0,"acerto":0.7394957983193278,"indice":0.126,"nota":7.859504913076341},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":53.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":53.0,"acerto":0.8773584905660378,"indice":0.134,"nota":8.368055555555557},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":36.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":36.0,"acerto":0.75,"indice":0.148,"nota":8.858082706766918},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":481.0,"rasc":0.0,"corr":1.0,"dev":0.0,"conc":480.0,"acerto":0.850156087408949,"indice":0.219,"nota":7.905425841315546},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":369.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":367.0,"acerto":0.7073170731707317,"indice":0.3955,"nota":6.997381091131092},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":163.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":163.0,"acerto":0.7822085889570553,"indice":0.195,"nota":7.955647591631571},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":12.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":12.0,"acerto":0.9583333333333334,"indice":0.019,"nota":8.75},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":61.0,"rasc":1.0,"corr":1.0,"dev":0.0,"conc":59.0,"acerto":0.768595041322314,"indice":0.07175,"nota":5.595238095238095},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":179.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":179.0,"acerto":0.5614525139664804,"indice":0.1565,"nota":5.3714902526667245},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":224.0,"rasc":1.0,"corr":11.0,"dev":0.0,"conc":212.0,"acerto":0.6880733944954128,"indice":0.1865,"nota":5.981801994301994},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":167.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":167.0,"acerto":0.9011976047904192,"indice":0.15925,"nota":8.42318521496329},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":329.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":328.0,"acerto":0.7674772036474165,"indice":0.295,"nota":6.480301681353826},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":125.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":125.0,"acerto":0.752,"indice":0.17800000000000002,"nota":7.376358695652176},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":499.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":498.0,"acerto":0.5781563126252505,"indice":0.35775,"nota":7.1055946368446365},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":55.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":55.0,"acerto":0.38181818181818183,"indice":0.10025,"nota":4.459183673469388},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":208.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":208.0,"acerto":0.7091346153846154,"indice":0.157,"nota":6.997219193433586},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":105.0,"rasc":3.0,"corr":0.0,"dev":0.0,"conc":102.0,"acerto":0.8095238095238095,"indice":0.11066666666666668,"nota":7.188910286336757},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":216.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":215.0,"acerto":0.5740740740740741,"indice":0.2455,"nota":5.511892551892553}],"5":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":272.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":271.0,"acerto":0.6349264705882356,"indice":0.22959999999999997,"nota":6.190445470022652},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":25.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":25.0,"acerto":0.96,"indice":0.0315,"nota":9.909090909090908},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":68.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":68.0,"acerto":0.7061764705882353,"indice":0.27999999999999997,"nota":8.138651507468815},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":882.0,"rasc":1.0,"corr":9.0,"dev":0.0,"conc":872.0,"acerto":0.8998688711516533,"indice":0.321,"nota":8.820308039581397},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":193.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":193.0,"acerto":0.7565544041450777,"indice":0.1664,"nota":6.622737622067094},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":499.0,"rasc":3.0,"corr":0.0,"dev":0.0,"conc":496.0,"acerto":0.8007314629258517,"indice":0.4746,"nota":7.151488409353009},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":168.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":167.0,"acerto":0.8988095238095238,"indice":0.15760000000000002,"nota":9.312773579077927},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":351.0,"rasc":1.0,"corr":16.0,"dev":0.0,"conc":334.0,"acerto":0.8856642335766425,"indice":0.5583333333333333,"nota":7.803320685918612},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":203.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":203.0,"acerto":0.6674630541871921,"indice":0.142,"nota":5.651859035964112},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":139.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":139.0,"acerto":0.6213309352517985,"indice":0.093,"nota":4.310705094145108},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":639.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":637.0,"acerto":0.899827856025039,"indice":0.4862,"nota":8.525485078299178},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":68.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":66.0,"acerto":0.8455882352941176,"indice":0.3333333333333333,"nota":7.944805194805196},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":341.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":341.0,"acerto":0.7198680351906157,"indice":0.2454,"nota":6.604293104802847},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":510.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":510.0,"acerto":0.622166666666667,"indice":0.43579999999999997,"nota":5.176700616494456},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":333.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":333.0,"acerto":0.5971321321321322,"indice":0.1914,"nota":6.2416575273045645},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":109.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":109.0,"acerto":0.8468750000000002,"indice":0.1592,"nota":7.6920896623924975},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":198.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":198.0,"acerto":0.7955555555555556,"indice":0.1196,"nota":5.977406983043809},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":166.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":166.0,"acerto":0.8373192771084338,"indice":0.1082,"nota":7.927034712144817},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":21.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":21.0,"acerto":0.6428571428571429,"indice":0.032,"nota":7.93452380952381}],"6":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":270.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":270.0,"acerto":0.6492592592592592,"indice":0.286,"nota":7.203503800785574},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":88.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":88.0,"acerto":0.875,"indice":0.222,"nota":9.030092592592592},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":163.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":163.0,"acerto":0.6983742331288344,"indice":0.6706666666666666,"nota":8.528109629328776},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":684.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":680.0,"acerto":0.8667470760233918,"indice":0.30975,"nota":8.875413175116615},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":207.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":207.0,"acerto":0.8099758454106278,"indice":0.223,"nota":7.809872383558631},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":185.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":183.0,"acerto":0.8368648648648648,"indice":0.219,"nota":7.867300686662847},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":414.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":414.0,"acerto":0.7467874396135269,"indice":0.48825,"nota":8.19914614940806},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":280.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":278.0,"acerto":0.8939999999999999,"indice":0.3325,"nota":7.382550328382349},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":252.0,"rasc":3.0,"corr":0.0,"dev":0.0,"conc":249.0,"acerto":0.6005158730158731,"indice":0.21775,"nota":6.295340406433087},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":214.0,"rasc":2.0,"corr":25.0,"dev":0.0,"conc":187.0,"acerto":0.5577306733167082,"indice":0.17725,"nota":6.087450370172266},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":379.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":379.0,"acerto":0.9102638522427442,"indice":0.48233333333333334,"nota":8.403782673994147},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":34.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":33.0,"acerto":0.8382352941176471,"indice":0.25,"nota":8.180555555555555},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":233.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":233.0,"acerto":0.7759442060085836,"indice":0.2095,"nota":7.219813776627935},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":93.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":93.0,"acerto":0.7597311827956987,"indice":0.09925,"nota":8.173353913964498},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":343.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":343.0,"acerto":0.7259475218658892,"indice":0.2465,"nota":7.039018208151806},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":7.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":7.0,"acerto":0.8807142857142857,"indice":0.016999999999999998,"nota":8.95833333954215},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":358.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":358.0,"acerto":0.8645111731843576,"indice":0.2705,"nota":8.602839058590748},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":7.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":7.0,"acerto":0.6914285714285714,"indice":0.023,"nota":8.111111164093018},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":210.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":209.0,"acerto":0.6008809523809524,"indice":0.954,"nota":6.029795852627743}],"7":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":3.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":3.0,"acerto":0.7766666666666667,"indice":0.013,"nota":7.500000037252903},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":5.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":5.0,"acerto":0.567,"indice":0.0029999999999999996,"nota":6.388888905445734},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":4.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":4.0,"acerto":0.70875,"indice":0.017,"nota":7.083333358168602},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":2.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":2.0,"acerto":0.41500000000000004,"indice":0.009,"nota":4.166666716337204},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":70.0,"rasc":0.0,"corr":1.0,"dev":0.0,"conc":69.0,"acerto":0.9376258992805754,"indice":0.1675,"nota":9.608183553095396},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":4.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":4.0,"acerto":0.25,"indice":0.007,"nota":2.5},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":1.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":1.0,"acerto":0.0,"indice":0.003,"nota":0.0},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":1.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":1.0,"acerto":0.665,"indice":0.004,"nota":6.666666716337204},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":9.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":9.0,"acerto":0.4255555555555556,"indice":0.010666666666666666,"nota":4.500000014901161},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":6.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":5.0,"acerto":0.6666666666666666,"indice":0.0105,"nota":8.0},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":24.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":24.0,"acerto":0.4025,"indice":0.023000000000000003,"nota":3.9972222541769344},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":24.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":24.0,"acerto":0.555625,"indice":0.024333333333333332,"nota":5.486111123528746},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":40.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":40.0,"acerto":0.6335,"indice":0.04575,"nota":6.587301632832912}],"8":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":247.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":245.0,"acerto":0.48253036437246966,"indice":0.2595,"nota":4.90643637014563},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":14.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":14.0,"acerto":0.8571428571428571,"indice":0.04325,"nota":8.0},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":949.0,"rasc":5.0,"corr":0.0,"dev":0.0,"conc":944.0,"acerto":0.785036880927292,"indice":0.42975,"nota":8.607799566056505},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":350.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":350.0,"acerto":0.6942857142857143,"indice":0.37725,"nota":6.9456575026057745},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":172.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":170.0,"acerto":0.6569767441860465,"indice":0.20325,"nota":5.763750676582809},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":430.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":429.0,"acerto":0.6500348837209302,"indice":0.506,"nota":6.026851553839361},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":324.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":322.0,"acerto":0.8194444444444444,"indice":0.38525,"nota":7.579280913526554},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":184.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":184.0,"acerto":0.5362771739130434,"indice":0.21433333333333335,"nota":5.423221218056486},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":1.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":1.0,"acerto":1.0,"indice":0.003,"nota":10.0},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":503.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":502.0,"acerto":0.774493041749503,"indice":0.479,"nota":7.806673298852617},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":79.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":78.0,"acerto":0.6708860759493671,"indice":0.591,"nota":7.453137140637142},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":521.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":521.0,"acerto":0.5960076775431862,"indice":0.4685,"nota":6.200174970096155},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":83.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":83.0,"acerto":0.6225903614457832,"indice":0.08875,"nota":6.721866114908814},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":303.0,"rasc":0.0,"corr":2.0,"dev":0.0,"conc":301.0,"acerto":0.6153476821192053,"indice":0.21775,"nota":5.552825754435233},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":38.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":38.0,"acerto":0.8552631578947368,"indice":0.1385,"nota":8.541666666666668},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":123.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":123.0,"acerto":0.806422764227642,"indice":0.093,"nota":8.044611232202637},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":155.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":155.0,"acerto":0.7258064516129032,"indice":0.16833333333333333,"nota":7.475379572118702},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":129.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":129.0,"acerto":0.623953488372093,"indice":0.19633333333333333,"nota":6.23345790574834}],"9":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":428.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":427.0,"acerto":0.6576985981308413,"indice":0.3618,"nota":7.1700698273837915},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":258.0,"rasc":8.0,"corr":0.0,"dev":0.0,"conc":250.0,"acerto":0.7189922480620154,"indice":0.31575,"nota":7.881058044519581},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":494.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":493.0,"acerto":0.8333400809716599,"indice":1.2172,"nota":7.3808305487269585},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":1391.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":1387.0,"acerto":0.7931667864845435,"indice":0.5052,"nota":8.121981027630955},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":571.0,"rasc":3.0,"corr":19.0,"dev":0.0,"conc":549.0,"acerto":0.6684416740872662,"indice":0.4896,"nota":5.90486885972021},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":243.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":243.0,"acerto":0.7229835390946502,"indice":0.2326,"nota":7.625954755761787},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":298.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":294.0,"acerto":0.7936241610738256,"indice":0.2774,"nota":7.850370424954342},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":491.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":489.0,"acerto":0.8275560081466394,"indice":0.46799999999999997,"nota":7.874578596903512},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":83.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":83.0,"acerto":0.46789156626506023,"indice":0.0725,"nota":3.4947090057468917},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":91.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":91.0,"acerto":0.6465384615384615,"indice":0.10133333333333333,"nota":4.580409361605058},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":818.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":816.0,"acerto":0.8526833740831294,"indice":0.623,"nota":8.47534960403432},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":84.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":83.0,"acerto":0.75,"indice":0.3145,"nota":8.394063452886982},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":607.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":605.0,"acerto":0.7166392092257001,"indice":0.43520000000000003,"nota":6.487227913795833},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":397.0,"rasc":3.0,"corr":0.0,"dev":0.0,"conc":394.0,"acerto":0.6561712846347607,"indice":0.3368,"nota":6.738682152153791},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":151.0,"rasc":5.0,"corr":0.0,"dev":0.0,"conc":146.0,"acerto":0.6070529801324502,"indice":0.08399999999999999,"nota":6.679032100716352},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":262.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":262.0,"acerto":0.767175572519084,"indice":0.38239999999999996,"nota":7.738141025641026},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":1294.0,"rasc":8.0,"corr":0.0,"dev":0.0,"conc":1286.0,"acerto":0.7220517774343124,"indice":0.7769999999999999,"nota":8.067658272278912},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":361.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":360.0,"acerto":0.5304709141274239,"indice":0.2346,"nota":5.808621718423397},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":44.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":42.0,"acerto":0.5492045454545454,"indice":0.048,"nota":6.176190477183887}],"10":[{"escola":"17 DE SETEMBRO","codigo":"33881","mat":236.0,"pub":166.0,"rasc":1.0,"corr":0.0,"dev":0.0,"conc":165.0,"acerto":0.7249096385542169,"indice":0.17475,"nota":8.020333833485108},{"escola":"AMILCARE MATTEI PROF","codigo":"33728","mat":198.0,"pub":9.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":9.0,"acerto":0.8888888888888888,"indice":0.0225,"nota":8.75},{"escola":"ANTONIO DAUN","codigo":"33467","mat":81.0,"pub":48.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":48.0,"acerto":0.663125,"indice":0.19766666666666666,"nota":7.1513605601832175},{"escola":"BICUDO MONSENHOR","codigo":"33753","mat":549.0,"pub":559.0,"rasc":5.0,"corr":0.0,"dev":0.0,"conc":554.0,"acerto":0.8348211091234348,"indice":0.25225,"nota":8.103940270861717},{"escola":"CASTRO ALVES","codigo":"33613","mat":232.0,"pub":256.0,"rasc":2.0,"corr":19.0,"dev":0.0,"conc":235.0,"acerto":0.6091886409736309,"indice":0.27375,"nota":5.978715732478648},{"escola":"EDSON VIANEI ALVES PROF","codigo":"923000","mat":209.0,"pub":134.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":134.0,"acerto":0.8805970149253731,"indice":0.21366666666666667,"nota":8.984578275754748},{"escola":"EDUARDO DE SOUZA PORTO CEL","codigo":"33522","mat":212.0,"pub":244.0,"rasc":11.0,"corr":0.0,"dev":0.0,"conc":233.0,"acerto":0.659139344262295,"indice":0.27475,"nota":7.48522409012973},{"escola":"EMICO MATSUMOTO GEOGRAFA","codigo":"446920","mat":209.0,"pub":141.0,"rasc":2.0,"corr":1.0,"dev":0.0,"conc":138.0,"acerto":0.7781850533807829,"indice":0.22166666666666668,"nota":8.042574786531748},{"escola":"GABRIEL MONTEIRO DA SILVA","codigo":"33674","mat":286.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null},{"escola":"GRACIEMA BAGANHA RIBEIRO","codigo":"33534","mat":299.0,"pub":4.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":4.0,"acerto":0.125,"indice":0.013,"nota":1.25},{"escola":"JARDIM SANTA ANTONIETA","codigo":"462688","mat":262.0,"pub":766.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":764.0,"acerto":0.8894712793733682,"indice":0.729,"nota":8.720791967966846},{"escola":"JOSE AMBROSIO DOS SANTOS","codigo":"33650","mat":66.0,"pub":30.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":30.0,"acerto":0.9,"indice":0.2275,"nota":8.368055555555557},{"escola":"LOURENCO DE ALMEIDA SENNE DR","codigo":"33704","mat":278.0,"pub":432.0,"rasc":4.0,"corr":0.0,"dev":0.0,"conc":428.0,"acerto":0.6886574074074074,"indice":0.385,"nota":6.945790273978533},{"escola":"NASIB CURY","codigo":"917990","mat":234.0,"pub":83.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":83.0,"acerto":0.7269277108433735,"indice":0.08875,"nota":6.561634200375963},{"escola":"NELY CARBONIERI DE ANDRADE PROFA","codigo":"33424","mat":348.0,"pub":20.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":20.0,"acerto":0.5664999999999999,"indice":0.01425,"nota":5.958333343267441},{"escola":"NORMA MONICO TRUZZI PROFA","codigo":"33443","mat":137.0,"pub":121.0,"rasc":2.0,"corr":0.0,"dev":0.0,"conc":119.0,"acerto":0.768595041322314,"indice":0.21725,"nota":7.144427001569858},{"escola":"SYLVIA RIBEIRO DE CARVALHO PROFA","codigo":"47843","mat":331.0,"pub":313.0,"rasc":0.0,"corr":0.0,"dev":0.0,"conc":313.0,"acerto":0.8109584664536741,"indice":0.3153333333333333,"nota":7.453213457034264},{"escola":"WALDEMAR MONIZ DA ROCHA BARROS DR","codigo":"33765","mat":307.0,"pub":460.0,"rasc":9.0,"corr":0.0,"dev":0.0,"conc":451.0,"acerto":0.7594130434782609,"indice":0.36725,"nota":8.05309098579979},{"escola":"WANDA HELENA TOPPAN NOGUEIRA PROFA","codigo":"43679","mat":219.0,"pub":null,"rasc":null,"corr":null,"dev":null,"conc":null,"acerto":null,"indice":null,"nota":null}]}}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ */
+  /* Dados embutidos (2026) e estado                                     */
+  /* ------------------------------------------------------------------ */
+  var BASE = JSON.parse(document.getElementById("dados-robotica-mensal").textContent);
+  var ANO = Number(BASE.ano) || 2026;
+  var MN = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  var MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  var SEM = Object.assign({}, BASE.semanas || {});   // semanas de cada mês
+  var TO = Object.assign({}, BASE.totais || {});     // linha "Total" oficial de cada mês
+
+  var ABBR = { PROF: "Prof.", PROFA: "Profa.", DR: "Dr.", CEL: "Cel." };
+  var SMALL = { de: 1, da: 1, do: 1, dos: 1, das: 1, e: 1 };
+
+  function pretty(s) {
+    return String(s || "").split(/\s+/).map(function (w, i) {
+      if (ABBR[w]) return ABBR[w];
+      var l = w.toLowerCase();
+      return (i > 0 && SMALL[l]) ? l : l.charAt(0).toUpperCase() + l.slice(1);
+    }).join(" ");
+  }
+  function norm(s) {
+    return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  }
+  var nf0 = function (v) { return Math.round(v).toLocaleString("pt-BR"); };
+  var nf1 = function (v) { return v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }); };
+  var nf2 = function (v) { return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var nf3 = function (v) { return v.toLocaleString("pt-BR", { minimumFractionDigits: 3, maximumFractionDigits: 3 }); };
+  var pct = function (v) { return (v * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%"; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var $ = function (s) { return document.querySelector(s); };
+
+  var DATA = [];      // uma entrada por escola
+  var HAVE = [];      // meses que possuem planilha
+  var A = new Map();  // id -> agregado no período escolhido
+
+  function montarDosEmbutidos() {
+    var mapa = new Map();
+    Object.keys(BASE.meses).forEach(function (mes) {
+      var m = Number(mes);
+      (BASE.meses[mes] || []).forEach(function (r) {
+        var key = r.codigo ? String(r.codigo) : norm(r.escola);
+        var o = mapa.get(key);
+        if (!o) {
+          o = { codigo: String(r.codigo || ""), nome: pretty(r.escola), meses: {} };
+          mapa.set(key, o);
+        }
+        if (r.pub != null || r.conc != null) o.meses[m] = r;
+      });
+    });
+    DATA = Array.from(mapa.values()).sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
+    DATA.forEach(function (s, i) { s.id = i; });
+    HAVE = Object.keys(BASE.meses).map(Number).filter(function (m) {
+      return (BASE.meses[String(m)] || []).length > 0;
+    }).sort(function (a, b) { return a - b; });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Agregação                                                           */
+  /* ------------------------------------------------------------------ */
+  function matriculaRef(s, meses) {
+    for (var i = meses.length - 1; i >= 0; i--) {
+      var r = s.meses[meses[i]];
+      if (r && r.mat != null) return Number(r.mat);
+    }
+    var chaves = Object.keys(s.meses).map(Number).sort(function (a, b) { return b - a; });
+    for (var k = 0; k < chaves.length; k++) {
+      var rr = s.meses[chaves[k]];
+      if (rr && rr.mat != null) return Number(rr.mat);
+    }
+    return 0;
+  }
+
+  function aggEscola(s, meses) {
+    meses = meses || st.meses;
+    var rs = [];
+    meses.forEach(function (m) { if (s.meses[m]) rs.push(s.meses[m]); });
+    var soma = function (k) {
+      return rs.reduce(function (a, r) { return a + (Number(r[k]) || 0); }, 0);
+    };
+    var conc = soma("conc"), pub = soma("pub");
+    var pesoTotal = conc > 0 ? conc : pub;
+    var pond = function (k) {
+      if (!pesoTotal) return null;
+      var num = 0;
+      rs.forEach(function (r) {
+        var p = (Number(r.conc) || Number(r.pub) || 0);
+        if (r[k] != null) num += Number(r[k]) * p;
+      });
+      return num / pesoTotal;
+    };
+    var mat = matriculaRef(s, meses);
+    var semanas = meses.reduce(function (a, m) { return a + (Number(SEM[m]) || 0); }, 0);
+    var temDados = rs.some(function (r) { return r.pub != null || r.conc != null; });
+    return {
+      mat: mat,
+      pub: temDados ? pub : null,
+      rasc: temDados ? soma("rasc") : null,
+      corr: temDados ? soma("corr") : null,
+      dev: temDados ? soma("dev") : null,
+      conc: temDados ? conc : null,
+      acerto: temDados ? pond("acerto") : null,
+      indice: temDados ? pond("indice") : null,
+      nota: temDados ? pond("nota") : null,
+      poraluno: (temDados && mat) ? conc / mat : null,
+      semanas: semanas
+    };
+  }
+
+  function valorRedeMes(m, k) {
+    var t = TO[m];
+    if (!t) return null;
+    if (k === "poraluno") return t.mat ? t.conc / t.mat : null;
+    return t[k] == null ? null : Number(t[k]);
+  }
+
+  function aggLista(list, meses, oficial) {
+    if (oficial && list.length === DATA.length) {
+      var ts = [];
+      for (var mi = 0; mi < meses.length; mi++) {
+        if (!TO[meses[mi]]) { ts = []; break; }
+        ts.push(TO[meses[mi]]);
+      }
+      if (ts.length) {
+        var somaOficial = function (k) {
+          return ts.reduce(function (a, t) { return a + (Number(t[k]) || 0); }, 0);
+        };
+        var concOficial = somaOficial("conc"), pubOficial = somaOficial("pub");
+        var pesoOficial = 0, acumOficial = { acerto: 0, indice: 0, nota: 0 };
+        ts.forEach(function (t) {
+          if (Number(t.conc) > 0) {
+            pesoOficial += Number(t.conc);
+            ["acerto", "indice", "nota"].forEach(function (k) {
+              if (t[k] != null) acumOficial[k] += Number(t[k]) * Number(t.conc);
+            });
+          }
+        });
+        var ultimoTotal = ts[ts.length - 1];
+        return {
+          mat: ultimoTotal.mat, pub: pubOficial, rasc: somaOficial("rasc"),
+          corr: somaOficial("corr"), dev: somaOficial("dev"), conc: concOficial,
+          acerto: pesoOficial ? acumOficial.acerto / pesoOficial : null,
+          indice: pesoOficial ? acumOficial.indice / pesoOficial : null,
+          nota: pesoOficial ? acumOficial.nota / pesoOficial : null,
+          poraluno: ultimoTotal.mat ? concOficial / ultimoTotal.mat : null,
+          semanas: meses.reduce(function (a, m) { return a + (Number(SEM[m]) || 0); }, 0),
+          oficial: true
+        };
+      }
+    }
+    var o = { mat: 0, pub: 0, rasc: 0, corr: 0, dev: 0, conc: 0, acerto: null, indice: null, nota: null, poraluno: null, semanas: 0 };
+    var peso = 0, acum = { acerto: 0, indice: 0, nota: 0 };
+    list.forEach(function (s) {
+      var a = A.get(s.id);
+      if (!a) return;
+      o.mat += a.mat || 0; o.pub += a.pub || 0; o.rasc += a.rasc || 0;
+      o.corr += a.corr || 0; o.dev += a.dev || 0; o.conc += a.conc || 0;
+      o.semanas = Math.max(o.semanas, a.semanas || 0);
+      if (a.conc > 0) {
+        peso += a.conc;
+        ["acerto", "indice", "nota"].forEach(function (k) { if (a[k] != null) acum[k] += a[k] * a.conc; });
+      }
+    });
+    if (peso) {
+      o.acerto = acum.acerto / peso;
+      o.indice = acum.indice / peso;
+      o.nota = acum.nota / peso;
+    }
+    o.poraluno = o.mat ? o.conc / o.mat : null;
+    return o;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Métricas                                                            */
+  /* ------------------------------------------------------------------ */
+  var M = {
+    indice:   { label: "Índice de atividades por aluno", short: "Índice",    fmt: nf3, get: function (a) { return a.indice; } },
+    nota:     { label: "Nota média",                     short: "Nota média", fmt: nf1, get: function (a) { return a.nota; } },
+    acerto:   { label: "Taxa de acertos das questões",   short: "Acertos",    fmt: pct, get: function (a) { return a.acerto; } },
+    poraluno: { label: "Concluídas por aluno no período", short: "Concl./aluno", fmt: nf2, get: function (a) { return a.poraluno; } },
+    conc:     { label: "Atividades concluídas",          short: "Concluídas", fmt: nf0, get: function (a) { return a.conc; } },
+    pub:      { label: "Atividades publicadas",          short: "Publicadas", fmt: nf0, get: function (a) { return a.pub; } },
+    mat:      { label: "Matrículas ativas",              short: "Matrículas", fmt: nf0, get: function (a) { return a.mat; } }
+  };
+  var CUT = {};   // terços por métrica (calculados a cada render)
+
+  function calcCortes() {
+    Object.keys(M).forEach(function (k) {
+      var v = DATA.map(function (s) { return M[k].get(A.get(s.id)); })
+        .filter(function (x) { return x != null && isFinite(x); })
+        .sort(function (a, b) { return a - b; });
+      CUT[k] = v.length ? [v[Math.floor(v.length / 3)], v[Math.floor(2 * v.length / 3)]] : [0, 0];
+    });
+  }
+  function cut(k) { return CUT[k] || [0, 0]; }
+
+  function clsVal(v, k) {
+    if (v == null || !isFinite(v)) return "n";
+    if (k === "indice") return v >= st.tG ? "g" : (v < st.tR ? "r" : "y");
+    var c = cut(k);
+    return v >= c[1] ? "g" : (v < c[0] ? "r" : "y");
+  }
+  function cls(a, k) { return clsVal(M[k || st.metrica].get(a), k || st.metrica); }
+
+  var FX = { g: "Verde", y: "Amarelo", r: "Vermelho", n: "Sem dado" };
+  var LV = { g: "Alto", y: "Médio", r: "Baixo", n: "Sem dado" };
+
+  function rules(k) {
+    k = k || st.metrica;
+    var f = M[k].fmt;
+    if (k === "indice") return { g: "≥ " + nf2(st.tG), y: nf2(st.tR) + " a " + nf2(st.tG), r: "< " + nf2(st.tR) };
+    var c = cut(k);
+    return { g: "≥ " + f(c[1]) + " (terço superior)", y: f(c[0]) + " a " + f(c[1]), r: "< " + f(c[0]) + " (terço inferior)" };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Estado                                                              */
+  /* ------------------------------------------------------------------ */
+  var st = {
+    meses: [],
+    metrica: "indice",
+    visao: "periodo",
+    q: "",
+    faixa: "todas",
+    minMat: 0,
+    minNota: 0,
+    tG: 0.40,
+    tR: 0.17,
+    asc: false,
+    sel: null,
+    sort: { key: "indice", dir: -1 }
+  };
+
+  function salvar() {
+    try {
+      localStorage.setItem("robotica26", JSON.stringify({ meses: st.meses, metrica: st.metrica, visao: st.visao }));
+    } catch (e) { }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Filtros                                                             */
+  /* ------------------------------------------------------------------ */
+  function filtrados(ignorarFaixa) {
+    var selValue = $("#escola-select").value.trim().toLowerCase();
+    return DATA.filter(function (s) {
+      var a = A.get(s.id);
+      if (!a) return false;
+      var okQ = !selValue || s.nome.toLowerCase().indexOf(selValue) >= 0 || s.codigo.indexOf(selValue) >= 0;
+      var okMat = (a.mat || 0) >= st.minMat;
+      var okNota = st.minNota === 0 || (a.nota != null && a.nota >= st.minNota);
+      var okFaixa = ignorarFaixa || st.faixa === "todas" || cls(a) === st.faixa;
+      return okQ && okMat && okNota && okFaixa;
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Tooltip                                                             */
+  /* ------------------------------------------------------------------ */
+  var tip = $("#tip");
+  function tipHtml(s) {
+    var a = A.get(s.id), c = cls(a);
+    return "<b>" + esc(s.nome) + "</b><span>" + esc(s.codigo) + " · " + FX[c] + " (" + LV[c] + ") em " + esc(M[st.metrica].short.toLowerCase()) + "</span><br>" +
+      "Índice " + (a.indice == null ? "–" : nf3(a.indice)) + " · Nota " + (a.nota == null ? "–" : nf1(a.nota)) + "<br>" +
+      "Acertos " + (a.acerto == null ? "–" : pct(a.acerto)) + " · " + nf0(a.mat) + " matrículas<br>" +
+      nf0(a.conc) + " concluídas no período";
+  }
+  function moveTip(e) {
+    var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    var x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
+  }
+  function bindTip(root) {
+    root.addEventListener("mousemove", function (e) {
+      var t = e.target.closest("[data-id]");
+      if (!t) { tip.hidden = true; return; }
+      var s = DATA[+t.dataset.id];
+      if (!s) { tip.hidden = true; return; }
+      tip.innerHTML = tipHtml(s); tip.hidden = false; moveTip(e);
+    });
+    root.addEventListener("mouseleave", function () { tip.hidden = true; });
+    root.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-id]");
+      if (t) { st.sel = +t.dataset.id; render(); }
+    });
+    root.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        var t = e.target.closest("[data-id]");
+        if (t) { e.preventDefault(); st.sel = +t.dataset.id; render(); }
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Período                                                             */
+  /* ------------------------------------------------------------------ */
+  function periodLabel() {
+    var ms = st.meses;
+    if (!ms.length) return "—";
+    if (ms.length === 1) return MN[ms[0] - 1] + " de " + ANO;
+    var seguidos = ms.every(function (m, i) { return i === 0 || m === ms[i - 1] + 1; });
+    if (seguidos) return MN[ms[0] - 1] + " a " + MN[ms[ms.length - 1] - 1] + " de " + ANO;
+    return ms.map(function (m) { return MS[m - 1]; }).join(", ") + " de " + ANO;
+  }
+  function totalSemanas() {
+    return st.meses.reduce(function (a, m) { return a + (Number(SEM[m]) || 0); }, 0);
+  }
+  function renderPinfo() {
+    var n = st.meses.length, sem = totalSemanas();
+    var txt = "<b>" + periodLabel() + "</b> · " + n + (n === 1 ? " mês" : " meses") + " · " + sem + " semanas";
+    if (n > 1) {
+      var t = TO[st.meses[st.meses.length - 1]], f = TO[st.meses[0]];
+      if (t && f) {
+        var d = (t.indice - f.indice);
+        txt += " · índice da rede " + nf3(f.indice) + " → " + nf3(t.indice) +
+          ' <span class="' + (d >= 0 ? "up" : "dn") + '">(' + (d >= 0 ? "+" : "−") + nf3(Math.abs(d)) + ")</span>";
+      }
+    } else {
+      txt += " · os KPIs usam a linha Total da planilha";
+    }
+    $("#pinfo").innerHTML = txt;
+    $("#monthsLbl").textContent = "Meses de " + ANO;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* KPIs                                                                */
+  /* ------------------------------------------------------------------ */
+  function deltaTxt(k, primeiro, ultimo) {
+    if (primeiro == null || ultimo == null) return "";
+    var d = ultimo - primeiro;
+    var sinal = d > 0 ? "▲ +" : d < 0 ? "▼ −" : "• ";
+    var abs = Math.abs(d);
+    var txt = k === "acerto" ? nf1(abs * 100) + " p.p." : M[k].fmt(abs);
+    if (d === 0) txt = "0";
+    return '<span class="' + (d > 0 ? "up" : d < 0 ? "dn" : "") + '">' + sinal + txt + "</span>";
+  }
+
+  function renderKPIs(lista) {
+    // Caso "Total (planilha)": mostra KPIs do período sobre todas as escolas
+    if (typeof lista === "object" && lista.all === true) {
+      var a = aggLista(DATA, st.meses, true);
+      var n = DATA.length;
+      var none = !n;
+      var cnt = { g: 0, y: 0, r: 0, n: 0 };
+      DATA.forEach(function (s) { cnt[cls(A.get(s.id))]++; });
+      var tile = function (k, valor, sub) {
+        return '<div class="card kpi"><span class="k">' + M[k].label + "</span>" +
+          '<span class="v">' + (none || valor == null ? "—" : M[k].fmt(valor)) + "</span>" +
+          '<span class="s">' + sub + "</span></div>";
+      };
+      var dist = n ? '<div class="dist" role="img" aria-label="' + cnt.g + " verdes, " + cnt.y + " amarelas, " + cnt.r + " vermelhas, " + cnt.n + ' sem dado">' +
+        ["g", "y", "r", "n"].map(function (c) { return cnt[c] ? '<i class="c-' + c + '" style="flex:' + cnt[c] + '"></i>' : ""; }).join("") + "</div>" : "";
+      var primeiroMes = st.meses[0], ultimoMes = st.meses[st.meses.length - 1];
+      var multi = st.meses.length > 1;
+      var subDelta = function (k) {
+        if (!multi) return "";
+        return " · " + MS[ultimoMes - 1] + " vs " + MS[primeiroMes - 1] + ": " + deltaTxt(k, valorRedeMes(primeiroMes, k), valorRedeMes(ultimoMes, k));
+      };
+      $("#kpis").innerHTML =
+        '<div class="card kpi"><span class="k">Escolas</span><span class="v">' + n +
+        '<span style="font-size:15px;color:var(--muted);font-weight:500"> de ' + DATA.length + "</span></span>" + dist +
+        '<span class="s">' + cnt.g + " verdes · " + cnt.y + " amarelas · " + cnt.r + " vermelhas" + (cnt.n ? " · " + cnt.n + " sem dado" : "") + "</span></div>" +
+        tile("mat", a.mat, none ? "" : "último mês do período (não somado)") +
+        tile("pub", a.pub, none ? "" : (a.mat ? nf2(a.pub / a.mat) + " por aluno no período" : "")) +
+        '<div class="card kpi"><span class="k">Em rascunho ou correção</span><span class="v">' +
+          (none ? "—" : nf0((a.rasc || 0) + (a.corr || 0))) + '</span><span class="s">' +
+          (none ? "" : nf0(a.rasc || 0) + " rascunho · " + nf0(a.corr || 0) + " em correção · " + nf0(a.dev || 0) + " devolvidas") + "</span></div>" +
+        tile("acerto", a.acerto, none ? "" : "das questões respondidas" + subDelta("acerto")) +
+        tile("nota", a.nota, none ? "" : "escala de 0 a 10" + subDelta("nota")) +
+        '<div class="card kpi"><span class="k">Índice por aluno</span><span class="v">' +
+          (none || a.indice == null ? "—" : nf3(a.indice)) + '</span><span class="s">' + (none ? "" : "média ponderada pelas atividades · " + totalSemanas() + " semanas" + subDelta("indice")) + "</span></div>";
+      return;
+    }
+    // Caso normal
+    var of = lista.length === DATA.length;
+    var a = aggLista(lista, st.meses, of);
+    var n = lista.length;
+    var none = !n;
+    var cnt = { g: 0, y: 0, r: 0, n: 0 };
+    lista.forEach(function (s) { cnt[cls(A.get(s.id))]++; });
+
+    var tile = function (k, valor, sub) {
+      return '<div class="card kpi"><span class="k">' + M[k].label + "</span>" +
+        '<span class="v">' + (none || valor == null ? "—" : M[k].fmt(valor)) + "</span>" +
+        '<span class="s">' + sub + "</span></div>";
+    };
+    var dist = n ? '<div class="dist" role="img" aria-label="' + cnt.g + " verdes, " + cnt.y + " amarelas, " + cnt.r + " vermelhas, " + cnt.n + ' sem dado">' +
+      ["g", "y", "r", "n"].map(function (c) { return cnt[c] ? '<i class="c-' + c + '" style="flex:' + cnt[c] + '"></i>' : ""; }).join("") + "</div>" : "";
+
+    var primeiroMes = st.meses[0], ultimoMes = st.meses[st.meses.length - 1];
+    var multi = st.meses.length > 1;
+    var subDelta = function (k) {
+      if (!multi) return "";
+      return " · " + MS[ultimoMes - 1] + " vs " + MS[primeiroMes - 1] + ": " + deltaTxt(k, valorRedeMes(primeiroMes, k), valorRedeMes(ultimoMes, k));
+    };
+    var subIndice = multi
+      ? "média ponderada pelas atividades · " + totalSemanas() + " semanas" + subDelta("indice")
+      : "índice semanal da planilha" + subDelta("indice");
+
+    $("#kpis").innerHTML =
+      '<div class="card kpi"><span class="k">Escolas</span><span class="v">' + n +
+      '<span style="font-size:15px;color:var(--muted);font-weight:500"> de ' + DATA.length + "</span></span>" + dist +
+      '<span class="s">' + cnt.g + " verdes · " + cnt.y + " amarelas · " + cnt.r + " vermelhas" + (cnt.n ? " · " + cnt.n + " sem dado" : "") + "</span></div>" +
+      tile("mat", a.mat, none ? "" : "último mês do período (não somado)") +
+      tile("pub", a.pub, none ? "" : (a.mat ? nf2(a.pub / a.mat) + " por aluno no período" : "")) +
+      tile("conc", a.conc, none ? "" : (a.pub ? pct(a.conc / a.pub) + " das publicadas" : "")) +
+      '<div class="card kpi"><span class="k">Em rascunho ou correção</span><span class="v">' +
+        (none ? "—" : nf0((a.rasc || 0) + (a.corr || 0))) + '</span><span class="s">' +
+        (none ? "" : nf0(a.rasc || 0) + " rascunho · " + nf0(a.corr || 0) + " em correção · " + nf0(a.dev || 0) + " devolvidas") + "</span></div>" +
+      tile("acerto", a.acerto, none ? "" : "das questões respondidas" + subDelta("acerto")) +
+      tile("nota", a.nota, none ? "" : "escala de 0 a 10" + subDelta("nota")) +
+      '<div class="card kpi"><span class="k">Índice por aluno</span><span class="v">' +
+        (none || a.indice == null ? "—" : nf3(a.indice)) + '</span><span class="s">' + (none ? "" : subIndice) + "</span></div>";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Chips e ranking                                                     */
+  /* ------------------------------------------------------------------ */
+  function renderChips() {
+    var base = filtrados(true);
+    var c = { todas: base.length, g: 0, y: 0, r: 0 };
+    base.forEach(function (s) { c[cls(A.get(s.id))]++; });
+    var itens = [["todas", "Todas", null], ["g", "Verde", "g"], ["y", "Amarelo", "y"], ["r", "Vermelho", "r"]];
+    $("#chips").innerHTML = itens.map(function (it) {
+      return '<button type="button" class="chip" data-f="' + it[0] + '" aria-pressed="' + (st.faixa === it[0]) + '">' +
+        (it[2] ? '<span class="dot c-' + it[2] + '"></span>' : "") + it[1] +
+        '<span class="n">' + c[it[0]] + "</span></button>";
+    }).join("");
+  }
+
+  function sparkline(s, k) {
+    var vals = HAVE.map(function (m) { return s.meses[m] ? M[k].get(s.meses[m]) : null; });
+    var known = vals.filter(function (v) { return v != null && isFinite(v); });
+    if (known.length < 2) return "";
+    var max = Math.max.apply(null, known), min = Math.min.apply(null, known);
+    var W = 58, H = 18, n = vals.length;
+    var x = function (i) { return i * (W / (n - 1)); };
+    var y = function (v) { return max === min ? H / 2 : H - ((v - min) / (max - min)) * (H - 4) - 2; };
+    var d = "", pen = false;
+    vals.forEach(function (v, i) {
+      if (v == null || !isFinite(v)) { pen = false; return; }
+      d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1) + " "; pen = true;
+    });
+    return '<svg class="spark" viewBox="0 0 ' + W + " " + H + '" aria-hidden="true"><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  }
+
+  function renderRanking(lista) {
+    var m = M[st.metrica], r = rules();
+    $("#legend").innerHTML = ["g", "y", "r"].map(function (c) {
+      return '<span><i class="c-' + c + '"></i>' + LV[c] + ": " + r[c] + "</span>";
+    }).join("") + '<span><i class="c-n"></i>Sem dado no período</span>';
+
+    var list = lista.slice().sort(function (a, b) {
+      var va = m.get(A.get(a.id)), vb = m.get(A.get(b.id));
+      if (va == null) va = -Infinity; if (vb == null) vb = -Infinity;
+      return (vb - va) * (st.asc ? -1 : 1);
+    });
+    if (!list.length) { $("#rk").innerHTML = '<div class="empty">Nenhuma escola com esses filtros.</div>'; return; }
+
+    var max = 0;
+    DATA.forEach(function (s) { var v = m.get(A.get(s.id)); if (v != null && v > max) max = v; });
+    max = max || 1;
+    var cuts = st.metrica === "indice"
+      ? [st.tR, st.tG].map(function (v) { return '<i class="rk-cut" style="left:' + Math.min(100, v / max * 100) + '%"></i>'; }).join("")
+      : "";
+
+    $("#rk").innerHTML = list.map(function (s, i) {
+      var a = A.get(s.id), v = m.get(a), c = cls(a);
+      return '<button type="button" class="rk-row' + (s.id === st.sel ? " sel" : "") + '" data-id="' + s.id + '">' +
+        '<span class="rk-n">' + (i + 1) + "</span>" +
+        '<span class="rk-name" title="' + esc(s.nome) + '">' + esc(s.nome) + "<small>" + esc(s.codigo) + "</small></span>" +
+        '<span class="rk-track"><i class="rk-fill c-' + c + '" style="width:' + (v == null ? 0 : Math.max(0, v) / max * 100) + '%"></i>' + cuts + "</span>" +
+        '<span class="rk-val">' + sparkline(s, st.metrica) + "<span>" + (v == null ? "–" : m.fmt(v)) + "</span></span></button>";
+    }).join("");
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Dispersão                                                           */
+  /* ------------------------------------------------------------------ */
+  function renderScatter(lista) {
+    var W = 560, H = 370, mg = { l: 46, r: 18, t: 14, b: 46 }, iw = W - mg.l - mg.r, ih = H - mg.t - mg.b;
+    var indices = DATA.map(function (s) { var a = A.get(s.id); return a.indice; }).filter(function (v) { return v != null && isFinite(v); });
+    var notas = DATA.map(function (s) { var a = A.get(s.id); return a.nota; }).filter(function (v) { return v != null && isFinite(v); });
+    var xmax = Math.max(0.5, Math.ceil(Math.max.apply(null, indices.concat([0.5])) * 10) / 10);
+    var ymin = Math.max(0, Math.floor((Math.min.apply(null, notas.concat([7])) - 0.5)));
+    var ymax = Math.min(10, Math.ceil(Math.max.apply(null, notas.concat([7])) + 0.5));
+    var X = function (v) { return mg.l + Math.min(v, xmax) / xmax * iw; };
+    var Y = function (v) { return mg.t + (1 - (v - ymin) / (ymax - ymin)) * ih; };
+    var o = "";
+    if (st.metrica === "indice") {
+      o += '<rect x="' + X(0) + '" y="' + mg.t + '" width="' + (X(st.tR) - X(0)) + '" height="' + ih + '" fill="var(--r)" opacity=".12"/>';
+      o += '<rect x="' + X(st.tR) + '" y="' + mg.t + '" width="' + Math.max(0, X(st.tG) - X(st.tR)) + '" height="' + ih + '" fill="var(--y)" opacity=".12"/>';
+      o += '<rect x="' + X(st.tG) + '" y="' + mg.t + '" width="' + (X(xmax) - X(st.tG)) + '" height="' + ih + '" fill="var(--g)" opacity=".12"/>';
+    }
+    var passo = xmax > 0.8 ? 0.2 : 0.1;
+    for (var v = 0; v <= xmax + 1e-9; v += passo) {
+      o += '<line x1="' + X(v) + '" x2="' + X(v) + '" y1="' + mg.t + '" y2="' + (mg.t + ih) + '" stroke="var(--line)"/>' +
+        '<text x="' + X(v) + '" y="' + (mg.t + ih + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + nf1(v) + "</text>";
+    }
+    for (var vy = ymin; vy <= ymax; vy++) {
+      o += '<line x1="' + mg.l + '" x2="' + (mg.l + iw) + '" y1="' + Y(vy) + '" y2="' + Y(vy) + '" stroke="var(--line)"/>' +
+        '<text x="' + (mg.l - 8) + '" y="' + (Y(vy) + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + vy + "</text>";
+    }
+    o += '<text x="' + (mg.l + iw / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="12" fill="var(--muted)">Índice de atividades por aluno</text>';
+    o += '<text transform="translate(12 ' + (mg.t + ih / 2) + ') rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">Nota média</text>';
+
+    var pontos = lista.filter(function (s) {
+      var a = A.get(s.id); return a.indice != null && a.nota != null;
+    });
+    if (pontos.length > 1) {
+      var mx = pontos.reduce(function (t, s) { return t + A.get(s.id).indice; }, 0) / pontos.length;
+      var my = pontos.reduce(function (t, s) { return t + A.get(s.id).nota; }, 0) / pontos.length;
+      o += '<line x1="' + X(mx) + '" x2="' + X(mx) + '" y1="' + mg.t + '" y2="' + (mg.t + ih) + '" stroke="var(--muted)" stroke-dasharray="4 4"/>';
+      o += '<line x1="' + mg.l + '" x2="' + (mg.l + iw) + '" y1="' + Y(my) + '" y2="' + Y(my) + '" stroke="var(--muted)" stroke-dasharray="4 4"/>';
+      o += '<text x="' + (mg.l + iw - 2) + '" y="' + (Y(my) - 5) + '" text-anchor="end" font-size="10.5" fill="var(--muted)">média ' + nf1(my) + "</text>";
+      o += '<text x="' + (X(mx) + 4) + '" y="' + (mg.t + 11) + '" font-size="10.5" fill="var(--muted)">média ' + nf2(mx) + "</text>";
+    }
+    var matMax = Math.max.apply(null, DATA.map(function (s) { return A.get(s.id).mat || 0; })) || 1;
+    var rad = function (s) { return 5 + Math.sqrt((A.get(s.id).mat || 0) / matMax) * 10; };
+    pontos.slice().sort(function (a, b) { return (A.get(b.id).mat || 0) - (A.get(a.id).mat || 0); }).forEach(function (s) {
+      var a = A.get(s.id);
+      o += '<circle class="pt" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.nome) + ': índice ' + nf3(a.indice) + ', nota ' + nf1(a.nota) + '" cx="' + X(a.indice) + '" cy="' + Y(a.nota) + '" r="' + rad(s) + '" style="fill:var(--' + cls(a) + ')" fill-opacity=".92" stroke="var(--surface)" stroke-width="2"/>';
+    });
+    var s = DATA[st.sel];
+    if (s && pontos.indexOf(s) >= 0) {
+      var aa = A.get(s.id), cx = X(aa.indice), cy = Y(aa.nota), r = rad(s), left = cx > mg.l + iw * 0.6;
+      o += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 4) + '" fill="none" stroke="var(--accent)" stroke-width="2.5" pointer-events="none"/>';
+      o += '<text x="' + (left ? cx - r - 8 : cx + r + 8) + '" y="' + (cy + 4) + '" text-anchor="' + (left ? "end" : "start") + '" font-size="12" font-weight="700" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke" pointer-events="none">' + esc(s.nome) + "</text>";
+    }
+    $("#sc").innerHTML = o;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Evolução mensal                                                     */
+  /* ------------------------------------------------------------------ */
+  function renderTrend() {
+    var W = 980, H = 250, L = 56, R = 18, T = 16, B = 34;
+    var escolhida = st.sel != null ? DATA[st.sel] : null;
+    var k = st.metrica;
+    var rede = HAVE.map(function (m) { return valorRedeMes(m, k); });
+    var serie = HAVE.map(function (m) {
+      if (!escolhida) return valorRedeMes(m, k);
+      return escolhida.meses[m] ? M[k].get(escolhida.meses[m]) : null;
+    });
+    var todos = rede.concat(serie).filter(function (v) { return v != null && isFinite(v); });
+    if (!todos.length) { $("#trend").innerHTML = ""; $("#trHint").textContent = ""; return; }
+    var mx = Math.max.apply(null, todos) * 1.08 || 1;
+    var x = function (m) { return L + (W - L - R) * ((m - 1) / 11); };
+    var y = function (v) { return T + (H - T - B) * (1 - v / mx); };
+    var o = "";
+    for (var t = 0; t <= 4; t++) {
+      var val = mx * t / 4, yy = y(val);
+      o += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--line)"/>' +
+        '<text x="' + (L - 8) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + M[k].fmt(val) + "</text>";
+    }
+    MS.forEach(function (m, i) {
+      var ativo = HAVE.indexOf(i + 1) >= 0;
+      o += '<text x="' + x(i + 1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--muted)" style="' + (ativo ? "" : "opacity:.35") + '">' + m + "</text>";
+    });
+    o += '<text x="' + L + '" y="' + (T - 2) + '" font-size="11" fill="var(--muted)">' + esc(M[k].short) + "</text>";
+
+    var path = function (vals, cor, dash) {
+      var d = "", pen = false;
+      HAVE.forEach(function (m, i) {
+        var v = vals[i];
+        if (v == null || !isFinite(v)) { pen = false; return; }
+        d += (pen ? "L" : "M") + x(m).toFixed(1) + " " + y(v).toFixed(1) + " "; pen = true;
+      });
+      return d ? '<path d="' + d + '" fill="none" stroke="' + cor + '" stroke-width="2" stroke-linejoin="round"' + (dash ? ' stroke-dasharray="5 4"' : "") + "/>" : "";
+    };
+
+    if (escolhida) o += path(rede, "var(--muted)", true);
+    o += path(serie, "var(--accent)", false);
+
+    HAVE.forEach(function (m, i) {
+      var v = serie[i];
+      if (v == null || !isFinite(v)) return;
+      var on = st.meses.indexOf(m) >= 0;
+      o += '<circle cx="' + x(m) + '" cy="' + y(v) + '" r="' + (on ? 5.5 : 4.2) + '" fill="' + (on ? "var(--accent)" : "var(--surface)") + '" stroke="' + (on ? "var(--surface)" : "var(--accent)") + '" stroke-width="2"/>';
+      o += '<circle class="pt" data-m="' + m + '" cx="' + x(m) + '" cy="' + y(v) + '" r="15" fill="transparent" tabindex="0" role="button" aria-label="' + MN[m - 1] + ": " + M[k].fmt(v) + '"/>';
+    });
+    $("#trend").innerHTML = o;
+    $("#trHint").textContent = (escolhida ? escolhida.nome + " (linha cheia) · rede (tracejada)" : "Rede de escolas") + " · " + M[k].label + " · clique num ponto para incluir ou tirar o mês";
+    $("#readout").innerHTML = "";
+  }
+
+  function marcarLeitura(m) {
+    var k = st.metrica;
+    var s = st.sel != null ? DATA[st.sel] : null;
+    var v = s ? (s.meses[m] ? M[k].get(s.meses[m]) : null) : valorRedeMes(m, k);
+    $("#readout").innerHTML = MN[m - 1] + " · " + (s ? esc(s.nome) + ": " : "rede: ") + "<b>" + (v == null ? "–" : M[k].fmt(v)) + "</b>";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Escola em foco                                                      */
+  /* ------------------------------------------------------------------ */
+  function renderFocus() {
+    var s = DATA[st.sel], el = $("#focus"), k = st.metrica;
+    if (!s) { el.innerHTML = '<div class="empty">Clique numa escola do ranking, da tabela ou do gráfico para ver o detalhe.</div>'; return; }
+    var a = A.get(s.id), c = cls(a), m = M[k];
+    var serie = HAVE.map(function (mes) { return s.meses[mes] ? M[k].get(s.meses[mes]) : null; });
+    var validos = serie.map(function (v, i) { return v == null ? null : { m: HAVE[i], v: v }; }).filter(Boolean);
+    var melhor = validos.slice().sort(function (p, q) { return q.v - p.v; })[0];
+    var pior = validos.slice().sort(function (p, q) { return p.v - q.v; })[0];
+    var mesAtual = st.meses[st.meses.length - 1];
+    var anterior = st.meses.length > 1 ? st.meses[0] : (HAVE[HAVE.indexOf(mesAtual) - 1] || null);
+
+    var row = function (key) {
+      var mm = M[key], v = mm.get(a);
+      return '<div><span class="l">' + mm.short + "</span><span class=\"v\">" + (v == null ? "–" : mm.fmt(v)) + '</span><span class="d">' + (v == null ? "sem dado" : "no período") + "</span></div>";
+    };
+    var tendencia = "";
+    if (anterior && s.meses[anterior] && s.meses[mesAtual]) {
+      var d = M[k].get(s.meses[mesAtual]) - M[k].get(s.meses[anterior]);
+      tendencia = '<div><span class="l">' + MS[mesAtual - 1] + " vs " + MS[anterior - 1] + "</span>" +
+        '<span class="v ' + (d > 0 ? "up" : d < 0 ? "dn" : "") + '">' + (d > 0 ? "+" : d < 0 ? "−" : "•") +
+        (k === "acerto" ? nf1(Math.abs(d) * 100) + " p.p." : M[k].fmt(Math.abs(d))) + "</span>" +
+        '<span class="d">' + esc(M[k].short.toLowerCase()) + "</span></div>";
+    }
+
+    el.innerHTML = '<div class="focus-h"><div><h3>' + esc(s.nome) + '</h3><span class="cod">Código ' + esc(s.codigo) + " · " + periodLabel() + "</span></div>" +
+      '<span class="pill c-' + c + '">' + FX[c] + " · " + LV[c] + "</span></div>" +
+      '<div class="fm">' + ["indice", "nota", "acerto", "mat", "pub", "conc"].map(row).join("") + tendencia +
+      '<div><span class="l">Concluídas por aluno</span><span class="v">' + (a.poraluno == null ? "–" : nf2(a.poraluno)) + '</span><span class="d">' + (a.semanas ? a.semanas + " semanas no período" : "") + "</span></div>" +
+      '<div><span class="l">Melhor mês</span><span class="v">' + (melhor ? MS[melhor.m - 1] : "–") + '</span><span class="d">' + (melhor ? m.fmt(melhor.v) : "") + "</span></div>" +
+      '<div><span class="l">Pior mês</span><span class="v">' + (pior ? MS[pior.m - 1] : "–") + '</span><span class="d">' + (pior ? m.fmt(pior.v) : "") + "</span></div>" +
+      "</div>" +
+      '<div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '<span class="cod">' + esc(M[k].short) + " em " + ANO + '</span>' + bigSparkline(serie, k) + "</div>";
+  }
+
+  function bigSparkline(serie, k) {
+    var known = serie.filter(function (v) { return v != null && isFinite(v); });
+    if (known.length < 2) return '<span class="cod">sem série suficiente</span>';
+    var max = Math.max.apply(null, known), min = Math.min.apply(null, known);
+    var W = 240, H = 56, n = serie.length;
+    var x = function (i) { return 4 + i * ((W - 8) / (n - 1)); };
+    var y = function (v) { return max === min ? H / 2 : H - ((v - min) / (max - min)) * (H - 10) - 5; };
+    var d = "", pen = false;
+    serie.forEach(function (v, i) {
+      if (v == null || !isFinite(v)) { pen = false; return; }
+      d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1) + " "; pen = true;
+    });
+    var dots = serie.map(function (v, i) {
+      if (v == null) return "";
+      var on = st.meses.indexOf(HAVE[i]) >= 0;
+      return '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="' + (on ? 3.2 : 2) + '" fill="' + (on ? "var(--accent)" : "var(--muted)") + '"/>';
+    }).join("");
+    return '<svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" aria-hidden="true"><path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>' + dots + "</svg>";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Mapa de calor                                                       */
+  /* ------------------------------------------------------------------ */
+  function renderHeat() {
+    var k = st.metrica, m = M[k];
+    var ordem = DATA.slice().sort(function (a, b) {
+      var va = M[k].get(A.get(a.id)), vb = M[k].get(A.get(b.id));
+      if (va == null) va = -Infinity; if (vb == null) vb = -Infinity;
+      return vb - va;
+    });
+    var head = "";
+    for (var mes = 1; mes <= 12; mes++) {
+      var tem = HAVE.indexOf(mes) >= 0;
+      var on = st.meses.indexOf(mes) >= 0;
+      head += '<th class="' + (tem ? (on ? "on" : "") : "off") + '" data-m="' + mes + '" ' + (tem ? 'role="button" tabindex="0"' : "") + ' title="' + (tem ? MN[mes - 1] + ": clique para incluir ou tirar" : "Sem planilha") + '">' + MS[mes - 1] + "</th>";
+    }
+    var body = ordem.map(function (s) {
+      var cells = "";
+      for (var mes2 = 1; mes2 <= 12; mes2++) {
+        var r = s.meses[mes2];
+        if (!r) { cells += '<td class="na off">–</td>'; continue; }
+        var v = M[k].get(r);
+        var c = clsVal(v, k);
+        var on2 = st.meses.indexOf(mes2) >= 0;
+        cells += '<td class="' + (on2 ? "" : "off") + '"><span class="cell c-' + c + '">' + (v == null ? "–" : m.fmt(v)) + "</span></td>";
+      }
+      return '<tr data-id="' + s.id + '"' + (s.id === st.sel ? ' class="sel"' : "") + '><td class="l" title="' + esc(s.nome) + '">' + esc(s.nome) + "</td>" + cells + "</tr>";
+    }).join("");
+
+    $("#heat").innerHTML = '<table><thead><tr><th class="l">Escola</th>' + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    $("#hmNote").innerHTML = "Cores pela mesma regra do ranking. Meses sem planilha aparecem apagados. " +
+      (k === "indice" ? "Índice = atividades concluídas ÷ alunos ativos ÷ semanas do mês." : "");
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Tabela                                                              */
+  /* ------------------------------------------------------------------ */
+  var COLS = [
+    { k: "nome", l: "Escola", left: true, get: function (s) { return s.nome; }, fmt: function (s) { return '<span class="nm">' + esc(s.nome) + '</span><br><span class="cod" style="font-weight:400">' + esc(s.codigo) + "</span>"; } },
+    { k: "mat", l: "Matrículas ativas", get: function (a) { return a.mat; }, fmt: function (a) { return a.mat == null ? "–" : nf0(a.mat); }, cls: "mat" },
+    { k: "pub", l: "Atividades publicadas", get: function (a) { return a.pub; }, fmt: function (a) { return a.pub == null ? "–" : nf0(a.pub); } },
+    { k: "rasc", l: "Em rascunho", get: function (a) { return a.rasc; }, fmt: function (a) { return a.rasc == null ? "–" : nf0(a.rasc); } },
+    { k: "corr", l: "Em correção", get: function (a) { return a.corr; }, fmt: function (a) { return a.corr == null ? "–" : nf0(a.corr); } },
+    { k: "dev", l: "Devolvidas", get: function (a) { return a.dev; }, fmt: function (a) { return a.dev == null ? "–" : nf0(a.dev); } },
+    { k: "conc", l: "Concluídas", get: function (a) { return a.conc; }, fmt: function (a) { return a.conc == null ? "–" : nf0(a.conc); } },
+    { k: "acerto", l: "Taxa de acertos", get: function (a) { return a.acerto; }, fmt: function (a) { return a.acerto == null ? "–" : pct(a.acerto); } },
+    { k: "indice", l: "Índice por aluno", get: function (a) { return a.indice; }, fmt: function (a) { return a.indice == null ? "–" : nf3(a.indice); } },
+    { k: "nota", l: "Nota média", get: function (a) { return a.nota; }, fmt: function (a) { return a.nota == null ? "–" : nf1(a.nota); } },
+    { k: "poraluno", l: "Concl. por aluno", get: function (a) { return a.poraluno; }, fmt: function (a) { return a.poraluno == null ? "–" : nf2(a.poraluno); } }
+  ];
+
+  function renderTable(lista) {
+    var multi = st.meses.length > 1;
+    var n;
+    // Caso especial: "Total (planilha)" selecionado
+    if (typeof lista === "object" && lista.all === true) {
+      n = DATA.length;
+      $("#tbHint").textContent = n + " de " + DATA.length + " escolas · " + periodLabel();
+      // Renderiza apenas o rodapé total, sem corpo de escolas
+      var of = n === DATA.length;
+      var tot = aggLista(DATA, st.meses, of);
+      var head = COLS.map(function (c) {
+        return '<th class="' + (c.left ? "l" : "") + '" data-k="' + c.k + '" ' + (c.k === key ? 'aria-sort="' + (dir > 0 ? "ascending" : "descending") + '"' : "") + ">" +
+          c.l + (c.k === key ? (dir > 0 ? " ▲" : " ▼") : "") + "</th>";
+      }).join("");
+      var body = "";
+      var foot = '<tfoot><tr>' + COLS.map(function (c) {
+        if (c.k === "nome") return '<td class="l">Total (planilha)</td>';
+        var v = c.get(tot);
+        if (v == null || !isFinite(v)) return "<td>–</td>";
+        return "<td>" + c.fmt(tot) + "</td>";
+      }).join("") + "</tr></tfoot>";
+      $("#tw").innerHTML = "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody>" + foot + "</table>";
+      $("#tbNote").innerHTML = "Matrículas: último mês do período (não são somadas entre meses). Publicadas, concluídas, rascunho, correção e devolvidas são somadas. " +
+        "Acertos, nota e índice são ponderados pelas atividades concluídas. Sem filtros, o total usa as linhas <b>Total</b> das planilhas de cada mês.";
+      return;
+    }
+    // Caso normal: filtrado por escola ou busca
+    n = lista.length;
+
+    if (st.visao === "mensal" && multi) {
+      renderTabelaMensal(lista);
+      return;
+    }
+
+    var key = st.sort.key, dir = st.sort.dir;
+    var col = COLS.filter(function (c) { return c.k === key; })[0] || COLS.filter(function (c) { return c.k === "indice"; })[0];
+    var rows = lista.slice().sort(function (a, b) {
+      if (key === "nome") return a.nome.localeCompare(b.nome, "pt-BR") * dir;
+      var va = col.get(A.get(a.id)), vb = col.get(A.get(b.id));
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      return (va - vb) * dir;
+    });
+
+    var of = n === DATA.length;
+    var tot = aggLista(lista, st.meses, of);
+    var head = COLS.map(function (c) {
+      return '<th class="' + (c.left ? "l" : "") + '" data-k="' + c.k + '" ' + (c.k === key ? 'aria-sort="' + (dir > 0 ? "ascending" : "descending") + '"' : "") + ">" +
+        c.l + (c.k === key ? (dir > 0 ? " ▲" : " ▼") : "") + "</th>";
+    }).join("");
+
+    var body = rows.map(function (s) {
+      var a = A.get(s.id);
+      return '<tr data-id="' + s.id + '" class="' + (s.id === st.sel ? "sel" : "") + '">' + COLS.map(function (c) {
+        if (c.k === "nome") return '<td class="l">' + c.fmt(s) + "</td>";
+        if (c.k === st.metrica) return '<td class="st c-' + cls(a) + '">' + c.fmt(a) + "</td>";
+        return '<td class="' + (c.cls || "") + '">' + c.fmt(a) + "</td>";
+      }).join("") + "</tr>";
+    }).join("");
+
+    var foot = '<tfoot><tr>' + COLS.map(function (c) {
+      if (c.k === "nome") return '<td class="l">' + (n === DATA.length ? (of ? (multi ? "Total (planilhas)" : "Total (planilha)") : "Total do período") : "Total do filtro") + "</td>";
+      var v = c.get(tot);
+      if (v == null || !isFinite(v)) return "<td>–</td>";
+      return "<td>" + c.fmt(tot) + "</td>";
+    }).join("") + "</tr></tfoot>";
+
+    $("#tw").innerHTML = "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody>" + foot + "</table>";
+    $("#tbNote").innerHTML = "Matrículas: último mês do período (não são somadas entre meses). Publicadas, concluídas, rascunho, correção e devolvidas são somadas. " +
+      "Acertos, nota e índice são ponderados pelas atividades concluídas." +
+      (of ? " Sem filtros, o total usa as linhas <b>Total</b> das planilhas de cada mês." : "");
+  }
+
+  function renderTabelaMensal(lista) {
+    var k = st.metrica, m = M[k];
+    var ms = st.meses;
+    var key = st.sort.key, dir = st.sort.dir;
+    var rows = lista.slice().sort(function (a, b) {
+      if (key === "nome") return a.nome.localeCompare(b.nome, "pt-BR") * dir;
+      var mm = Number(key);
+      if (ms.indexOf(mm) >= 0) {
+        var va = a.meses[mm] ? m.get(a.meses[mm]) : null;
+        var vb = b.meses[mm] ? m.get(b.meses[mm]) : null;
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        return (va - vb) * dir;
+      }
+      var da = valorMes(a, ms[ms.length - 1], k) == null || valorMes(a, ms[0], k) == null ? null : valorMes(a, ms[ms.length - 1], k) - valorMes(a, ms[0], k);
+      var db = valorMes(b, ms[ms.length - 1], k) == null || valorMes(b, ms[0], k) == null ? null : valorMes(b, ms[ms.length - 1], k) - valorMes(b, ms[0], k);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return (da - db) * dir;
+    });
+
+    var head = '<th class="l" data-k="nome" ' + (key === "nome" ? 'aria-sort="' + (dir > 0 ? "ascending" : "descending") + '"' : "") + ">Escola" + (key === "nome" ? (dir > 0 ? " ▲" : " ▼") : "") + "</th>" +
+      ms.map(function (mm) {
+        return '<th data-k="' + mm + '" ' + (String(key) === String(mm) ? 'aria-sort="' + (dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + MS[mm - 1] + (String(key) === String(mm) ? (dir > 0 ? " ▲" : " ▼") : "") + "</th>";
+      }).join("") +
+      '<th data-k="delta" ' + (key === "delta" ? 'aria-sort="' + (dir > 0 ? "ascending" : "descending") + '"' : "") + ">Variação " + MS[ms[0] - 1] + "→" + MS[ms[ms.length - 1] - 1] + "</th>";
+
+    var body = rows.map(function (s) {
+      var primeira = valorMes(s, ms[0], k), ultima = valorMes(s, ms[ms.length - 1], k);
+      var d = (primeira == null || ultima == null) ? null : ultima - primeira;
+      return '<tr data-id="' + s.id + '" class="' + (s.id === st.sel ? "sel" : "") + '"><td class="l"><span class="nm">' + esc(s.nome) + '</span><br><span class="cod" style="font-weight:400">' + esc(s.codigo) + "</span></td>" +
+        ms.map(function (mm) {
+          var v = valorMes(s, mm, k);
+          return "<td>" + (v == null ? "–" : m.fmt(v)) + "</td>";
+        }).join("") +
+        "<td>" + (d == null ? "–" : '<span class="' + (d > 0 ? "up" : d < 0 ? "dn" : "") + '">' + (d > 0 ? "▲ +" : d < 0 ? "▼ −" : "• ") + (k === "acerto" ? nf1(Math.abs(d) * 100) + " p.p." : m.fmt(Math.abs(d))) + "</span>") + "</td></tr>";
+    }).join("");
+
+    var totCells = ms.map(function (mm) {
+      var v = valorRedeMes(mm, k);
+      return "<td>" + (v == null ? "–" : m.fmt(v)) + "</td>";
+    }).join("");
+    var v1 = valorRedeMes(ms[0], k), v2 = valorRedeMes(ms[ms.length - 1], k);
+    var dt = (v1 == null || v2 == null) ? null : v2 - v1;
+    var foot = '<tfoot><tr><td class="l">Rede (' + DATA.length + " escolas)</td>" + totCells +
+      "<td>" + (dt == null ? "–" : (dt > 0 ? "▲ +" : dt < 0 ? "▼ −" : "• ") + (k === "acerto" ? nf1(Math.abs(dt) * 100) + " p.p." : m.fmt(Math.abs(dt)))) + "</td></tr></tfoot>";
+
+    $("#tw").innerHTML = "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody>" + foot + "</table>";
+    $("#tbNote").innerHTML = "Cada coluna é um mês do período · indicador: <b>" + esc(m.label) + "</b>. A variação compara o primeiro com o último mês escolhido.";
+  }
+
+  function valorMes(s, mes, k) {
+    var r = s.meses[mes];
+    if (!r) return null;
+    var v = M[k].get(r);
+    return v == null || !isFinite(v) ? null : v;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Render geral                                                        */
+  /* ------------------------------------------------------------------ */
+  function render() {
+    if (!st.meses.length) st.meses = HAVE.slice(-1);
+    A = new Map();
+    DATA.forEach(function (s) { A.set(s.id, aggEscola(s, st.meses)); });
+    calcCortes();
+
+    var lista = filtrados();
+    if (st.sel != null && !lista.some(function (s) { return s.id === st.sel; })) {
+      var alt = lista[0] || DATA[0];
+      st.sel = alt ? alt.id : null;
+    }
+
+    renderPeriodoChips();
+    renderPinfo();
+    renderKPIs(lista);
+    renderChips();
+    renderRanking(lista);
+    renderScatter(lista);
+    renderFocus();
+    renderTrend();
+    renderHeat();
+    renderTable(lista);
+    salvar();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Controles                                                           */
+  /* ------------------------------------------------------------------ */
+  function renderPeriodoChips() {
+    $("#months").innerHTML = MS.map(function (s, i) {
+      var m = i + 1, tem = HAVE.indexOf(m) >= 0;
+      return '<button type="button" class="mchip" data-m="' + m + '" aria-pressed="' + (st.meses.indexOf(m) >= 0) + '" ' +
+        (tem ? "" : 'disabled title="Ainda sem planilha de ' + MN[i] + '"') + ">" + s + "</button>";
+    }).join("");
+    $("#visao").querySelectorAll("button").forEach(function (b) {
+      var precisaMulti = b.dataset.v === "mensal";
+      b.disabled = precisaMulti && st.meses.length < 2;
+      b.setAttribute("aria-pressed", st.visao === b.dataset.v);
+    });
+  }
+
+  function toggleMes(m) {
+    if (HAVE.indexOf(m) < 0) return;
+    if (st.meses.indexOf(m) >= 0) {
+      if (st.meses.length === 1) return;    // pelo menos um mês selecionado
+      st.meses = st.meses.filter(function (x) { return x !== m; });
+    } else {
+      st.meses = st.meses.concat(m).sort(function (a, b) { return a - b; });
+    }
+    if (st.meses.length < 2) st.visao = "periodo";
+    render();
+  }
+
+  $("#months").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-m]"); if (!b || b.disabled) return;
+    toggleMes(Number(b.dataset.m));
+  });
+  $("#months").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var b = e.target.closest("[data-m]"); if (!b || b.disabled) return;
+    e.preventDefault(); toggleMes(Number(b.dataset.m));
+  });
+
+  document.querySelectorAll("[data-preset]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var p = b.dataset.preset;
+      var semestre1 = HAVE.filter(function (m) { return m <= 6; });
+      var semestre2 = HAVE.filter(function (m) { return m >= 7; });
+      if (p === "ult2") st.meses = HAVE.slice(-2);
+      else if (p === "bim1") st.meses = semestre1.length ? semestre1 : HAVE.slice(0, 2);
+      else if (p === "bim2") st.meses = semestre2.length ? semestre2 : HAVE.slice(-2);
+      else if (p === "ano") st.meses = HAVE.slice();
+      else st.meses = HAVE.slice(-1);
+      if (st.meses.length < 2) st.visao = "periodo";
+      render();
+    });
+  });
+
+  $("#visao").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-v]"); if (!b || b.disabled) return;
+    st.visao = b.dataset.v;
+    st.sort = { key: st.visao === "mensal" ? st.meses[st.meses.length - 1] : st.metrica, dir: -1 };
+    render();
+  });
+
+  $("#metric").innerHTML = Object.keys(M).map(function (k) { return '<option value="' + k + '">' + M[k].label + "</option>"; }).join("");
+
+  $("#escola-select").addEventListener("change", function (e) {
+        st.q = "";
+        render();
+    });
+    $("#q").addEventListener("input", function (e) { st.q = e.target.value; render(); });
+  $("#metric").addEventListener("change", function (e) {
+    st.metrica = e.target.value;
+    if (COLS.some(function (c) { return c.k === st.metrica; })) st.sort = { key: st.metrica, dir: -1 };
+    st.asc = false; render();
+  });
+  $("#minMat").addEventListener("input", function (e) { st.minMat = +e.target.value; $("#minMatV").textContent = nf0(st.minMat); render(); });
+  $("#minNota").addEventListener("input", function (e) { st.minNota = +e.target.value; $("#minNotaV").textContent = nf1(st.minNota); render(); });
+  $("#chips").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-f]"); if (b) { st.faixa = b.dataset.f; render(); }
+  });
+  $("#flip").addEventListener("click", function () { st.asc = !st.asc; render(); });
+  $("#scaleBtn").addEventListener("click", function (e) {
+    var o = $("#scale").classList.toggle("open");
+    e.currentTarget.setAttribute("aria-expanded", o);
+  });
+  function limiares() {
+    var g = parseFloat($("#tG").value), r = parseFloat($("#tR").value);
+    if (!isNaN(g) && !isNaN(r) && r <= g) { st.tG = g; st.tR = r; render(); }
+  }
+  $("#tG").addEventListener("input", limiares);
+  $("#tR").addEventListener("input", limiares);
+
+  $("#reset").addEventListener("click", function () {
+    st.q = ""; st.faixa = "todas"; st.minMat = 0; st.minNota = 0;
+    st.metrica = "indice"; st.asc = false; st.tG = 0.40; st.tR = 0.17;
+    st.sort = { key: "indice", dir: -1 };
+    st.meses = HAVE.slice(-2); st.visao = "periodo";
+    $("#q").value = ""; $("#minMat").value = 0; $("#minNota").value = 0;
+    $("#minMatV").textContent = "0"; $("#minNotaV").textContent = "0";
+    $("#metric").value = "indice"; $("#tG").value = 0.4; $("#tR").value = 0.17;
+    render();
+  });
+
+  $("#tw").addEventListener("click", function (e) {
+    var th = e.target.closest("th[data-k]");
+    if (th) {
+      var k = th.dataset.k;
+      if (k === "delta") { st.sort = { key: "delta", dir: -st.sort.dir }; render(); return; }
+      var chave = st.visao === "mensal" && k !== "nome" ? Number(k) : k;
+      st.sort = st.sort.key === chave ? { key: chave, dir: -st.sort.dir } : { key: chave, dir: chave === "nome" ? 1 : -1 };
+      render(); return;
+    }
+    var tr = e.target.closest("tr[data-id]");
+    if (tr) { st.sel = +tr.dataset.id; render(); }
+  });
+
+  $("#heat").addEventListener("click", function (e) {
+    var th = e.target.closest("th[data-m]");
+    if (th) { toggleMes(Number(th.dataset.m)); return; }
+    var tr = e.target.closest("tr[data-id]");
+    if (tr) { st.sel = +tr.dataset.id; render(); }
+  });
+  $("#heat").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var th = e.target.closest("th[data-m]");
+    if (th) { e.preventDefault(); toggleMes(Number(th.dataset.m)); }
+  });
+
+  $("#trend").addEventListener("click", function (e) {
+    var p = e.target.closest(".pt"); if (p) toggleMes(Number(p.dataset.m));
+  });
+  $("#trend").addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("pt")) { e.preventDefault(); toggleMes(Number(e.target.dataset.m)); }
+  });
+  $("#trend").addEventListener("mouseover", function (e) { var p = e.target.closest(".pt"); if (p) marcarLeitura(Number(p.dataset.m)); });
+  $("#trend").addEventListener("focusin", function (e) { var p = e.target.closest(".pt"); if (p) marcarLeitura(Number(p.dataset.m)); });
+
+  $("#copy").addEventListener("click", function () {
+    var lista = filtrados(), tsv = "", k = st.metrica, m = M[k];
+    if (st.visao === "mensal" && st.meses.length > 1) {
+      tsv = ["Escola", "Código"].concat(st.meses.map(function (mm) { return MS[mm - 1]; })).concat(["Variação"]).join("\t") + "\n";
+      tsv += lista.map(function (s) {
+        var v1 = valorMes(s, st.meses[0], k), v2 = valorMes(s, st.meses[st.meses.length - 1], k);
+        var d = (v1 == null || v2 == null) ? "" : String((v2 - v1).toFixed(3)).replace(".", ",");
+        return [s.nome, s.codigo].concat(st.meses.map(function (mm) {
+          var v = valorMes(s, mm, k);
+          return v == null ? "" : String(v.toFixed(3)).replace(".", ",");
+        })).concat([d]).join("\t");
+      }).join("\n");
+    } else {
+      tsv = ["Escola", "Código"].concat(COLS.slice(1).map(function (c) { return c.l; })).join("\t") + "\n";
+      tsv += lista.map(function (s) {
+        var a = A.get(s.id);
+        return [s.nome, s.codigo].concat(COLS.slice(1).map(function (c) {
+          var v = c.get(a);
+          return v == null ? "" : (typeof v === "number" ? String(v).replace(".", ",") : v);
+        })).join("\t");
+      }).join("\n");
+    }
+    var done = function () { var t = $("#toast"); t.hidden = false; setTimeout(function () { t.hidden = true; }, 1800); };
+    var fb = function () {
+      var ta = document.createElement("textarea"); ta.value = tsv; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { }
+      ta.remove();
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(tsv).then(done, fb); else fb();
+  });
+
+  bindTip($("#rk")); bindTip($("#sc")); bindTip($("#heat"));
+
+  /* ------------------------------------------------------------------ */
+  /* Supabase (opcional): resultados_robotica_mensal                     */
+  /* ------------------------------------------------------------------ */
+  function montarDoSupabase(linhas) {
+    var mapa = new Map();
+    var somas = {};
+    linhas.forEach(function (r) {
+      var mes = Number(r.mes);
+      if (!(mes >= 1 && mes <= 12)) return;
+      var cod = String(r.codigo_escola || "").trim();
+      var key = cod || norm(r.escola);
+      var o = mapa.get(key);
+      if (!o) { o = { codigo: cod, nome: pretty(r.escola), meses: {} }; mapa.set(key, o); }
+      if (r.semanas != null) SEM[mes] = Number(r.semanas);
+      if (r.mat != null || r.conc != null) {
+        o.meses[mes] = {
+          mat: r.mat == null ? null : Number(r.mat),
+          pub: r.pub == null ? null : Number(r.pub),
+          rasc: Number(r.rasc) || 0,
+          corr: Number(r.corr) || 0,
+          dev: Number(r.dev) || 0,
+          conc: r.conc == null ? null : Number(r.conc),
+          acerto: r.acerto == null ? null : Number(r.acerto),
+          indice: r.indice == null ? null : Number(r.indice),
+          nota: r.nota == null ? null : Number(r.nota)
+        };
+        var s = somas[mes] || (somas[mes] = {
+          mat: 0, pub: 0, rasc: 0, corr: 0, dev: 0, conc: 0,
+          acerto: 0, nota: 0, peso: 0
+        });
+        s.mat += Number(r.mat) || 0;
+        s.pub += Number(r.pub) || 0;
+        s.rasc += Number(r.rasc) || 0;
+        s.corr += Number(r.corr) || 0;
+        s.dev += Number(r.dev) || 0;
+        s.conc += Number(r.conc) || 0;
+        if (Number(r.conc) > 0) {
+          s.peso += Number(r.conc);
+          if (r.acerto != null) s.acerto += Number(r.acerto) * Number(r.conc);
+          if (r.nota != null) s.nota += Number(r.nota) * Number(r.conc);
+        }
+      }
+    });
+    // Para meses que ainda não têm linha "Total" embutida (ex.: nov/dez
+    // importados pelo admin), reconstrói a referência da rede somando as
+    // escolas. O índice usa a mesma fórmula da planilha.
+    Object.keys(somas).forEach(function (m) {
+      if (TO[m]) return;
+      var s = somas[m], sem = Number(SEM[m]) || 0;
+      TO[m] = {
+        mat: s.mat, pub: s.pub, rasc: s.rasc, corr: s.corr, dev: s.dev, conc: s.conc,
+        acerto: s.peso ? s.acerto / s.peso : null,
+        indice: (s.mat && sem) ? s.conc / s.mat / sem : null,
+        nota: s.peso ? s.nota / s.peso : null
+      };
+    });
+    DATA = Array.from(mapa.values()).sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
+    DATA.forEach(function (s, i) { s.id = i; });
+    HAVE = [];
+    for (var m = 1; m <= 12; m++) {
+      if (DATA.some(function (s) { return s.meses[m]; })) HAVE.push(m);
+    }
+  }
+
+  async function carregarDoSupabase() {
+    var status = $("#data-status");
+    if (typeof supabaseClient === "undefined") return false;
+    try {
+      var resp = await supabaseClient.from("resultados_robotica_mensal")
+        .select("*").eq("ano", ANO).order("mes", { ascending: true }).range(0, 4999);
+      if (resp.error) throw resp.error;
+      if (!resp.data || !resp.data.length) throw new Error("sem dados");
+      montarDoSupabase(resp.data);
+      status.textContent = "Dados de " + ANO + " carregados do Supabase (" + HAVE.length + " meses).";
+      status.hidden = false;
+      return true;
+    } catch (e) {
+      console.warn("Robótica mensal: usando os dados embutidos.", e.message);
+      status.textContent = "Exibindo os dados embutidos de fev–out/2026 (a tabela resultados_robotica_mensal ainda não respondeu).";
+      status.hidden = false;
+      return false;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Início                                                              */
+  /* ------------------------------------------------------------------ */
+  (async function iniciar() {
+    montarDosEmbutidos();
+    await carregarDoSupabase();
+    if (!DATA.length) montarDosEmbutidos();
+
+    var salvo = null;
+    try { salvo = JSON.parse(localStorage.getItem("robotica26") || "null"); } catch (e) { }
+    if (salvo && Array.isArray(salvo.meses)) {
+      st.meses = salvo.meses.filter(function (m) { return HAVE.indexOf(m) >= 0; });
+      if (salvo.metrica && M[salvo.metrica]) st.metrica = salvo.metrica;
+      if (salvo.visao === "mensal") st.visao = "mensal";
+    }
+    if (!st.meses.length) st.meses = HAVE.slice(-2);
+    if (st.meses.length < 2) st.visao = "periodo";
+
+    // Popular select de escolas
+    var sel = $("#escola-select");
+    var primeira = "";
+    DATA.forEach(function (s) {
+        var opt = document.createElement("option");
+        opt.value = s.codigo || s.nome;
+        opt.textContent = pretty(s.nome);
+        if (!opt.value && !primeira) primeira = s.nome; // remember first name for possible default
+        sel.appendChild(opt);
+    });
+    // Seleção inicial: todas as escolas (valor vazio)
+    sel.value = "";
+    // Se quiser remembered a escolha anterior, desserialize do localStorage depois do render
+
+    $("#metric").value = st.metrica;
+    $("#tG").value = st.tG; $("#tR").value = st.tR;
+    $("#monthsLbl").textContent = "Meses de " + ANO;
+
+    // escola inicial: melhor índice no período
+    A = new Map();
+    DATA.forEach(function (s) { A.set(s.id, aggEscola(s, st.meses)); });
+    var melhor = DATA.slice().sort(function (a, b) {
+      var va = A.get(a.id).indice, vb = A.get(b.id).indice;
+      if (va == null) return 1; if (vb == null) return -1; return vb - va;
+    })[0];
+    st.sel = melhor ? melhor.id : null;
+
+    render();
+    // Handler para botão "Robótica Mensal" ao lado do Início
+    var btn = document.getElementById('robota-mensal-btn');
+    if (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        st.meses = HAVE.slice(-2);
+        st.visao = 'periodo';
+        st.metrica = 'nota';
+        st.sort = { key: st.metrica, dir: -1 };
+        try { localStorage.setItem('robotica26', JSON.stringify({ meses: st.meses, metrica: st.metrica, visao: st.visao })); } catch (e) { }
+        render();
+        var txt = 'Exibindo os dados embutidos de ' + periodLabel() + ' (a tabela resultados_robotica_mensal ainda não respondeu).';
+        var status = document.getElementById('data-status');
+        if (status) { status.textContent = txt; status.hidden = false; }
+      });
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>

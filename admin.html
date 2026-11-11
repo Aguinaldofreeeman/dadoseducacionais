@@ -378,17 +378,63 @@
         </div>
         <div class="card">
             <div class="modal-header">
-                <h3>Importar Robótica</h3>
+                <h3>Importar CSV - Robótica</h3>
             </div>
             <div class="form-group">
-                <label for="robotica-file">Arquivo de Robótica (.csv, .xlsx ou .xls)</label>
-                <input type="file" id="robotica-file" accept=".csv,.xlsx,.xls">
+                <label for="robotica-file">Arquivo de Robótica (.csv, .xlsx, .xls)</label>
+                <input type="file" id="robotica-file" accept=".csv, .xlsx, .xls">
                 <span class="help-text">Use as colunas escola (ou escola - código), codigo_escola, mat, pub, rasc, corr, dev, conc, acerto, indice e nota. A importação substitui todos os resultados existentes.</span>
             </div>
             <div id="robotica-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
             <div class="actions">
                 <button type="button" id="robotica-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
                 <button type="button" id="robotica-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha - Robótica Mensal</h3>
+            </div>
+            <div class="form-group">
+                <label for="robotica_mensal-ano">Ano Letivo Referente à Planilha</label>
+                <select id="robotica_mensal-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="robotica_mensal-mes">Mês Referente à Planilha</label>
+                <select id="robotica_mensal-mes">
+                    <option value="">Selecione o mês...</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="robotica_mensal-semanas">Semanas do Mês</label>
+                <input type="number" id="robotica_mensal-semanas" min="1" max="6" step="1" value="4">
+                <span class="help-text">Quantidade de semanas letivas usada no cálculo do índice (4 ou 5 na maioria dos meses). É gravada junto com os dados do mês.</span>
+            </div>
+            <div class="form-group">
+                <label for="robotica_mensal-file">Planilha mensal da Robótica (.xlsx, .xls ou .csv)</label>
+                <input type="file" id="robotica_mensal-file" accept=".xlsx,.xls,.csv">
+                <span class="help-text">Use a exportação com as colunas Escola (com o código no formato "NOME - CÓDIGO"), Matrículas Ativas, Atividades Publicadas, Atividades Em Rascunho, Atividades Em Correção, Atividades Devolvidas, Atividades Concluídas, Taxa de Acertos das Questões, Índice de Atividades Realizadas por Aluno e Nota Média. A linha "Total" é ignorada. A importação substitui apenas os dados do mês e ano selecionados, preservando os demais meses.</span>
+            </div>
+            <div id="robotica_mensal-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="robotica_mensal-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="robotica_mensal-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
         <!-- Card Novo Usuário -->
@@ -543,7 +589,6 @@
         if (!window.ESCOLAS_CODIGO) return null;
         const chave = norm(nome);
         if (window.ESCOLAS_CODIGO[chave]) return window.ESCOLAS_CODIGO[chave];
-        // Fallback fuzzy: contensão única (evita mapear errado)
         const candidatos = Object.keys(window.ESCOLAS_CODIGO).filter(k => k.includes(chave) || chave.includes(k));
         if (candidatos.length === 1) return window.ESCOLAS_CODIGO[candidatos[0]];
         return null;
@@ -1877,17 +1922,36 @@
             campos: {
                 escola: ['escola', 'unidade escolar', 'nome da escola'],
                 codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
-                mat: ['mat', 'matriculas ativas', 'matriculas'],
-                pub: ['pub', 'atividades publicadas', 'publicadas'],
-                rasc: ['rasc', 'rascunhos', 'atividades em rascunho'],
-                corr: ['corr', 'corrigidas', 'atividades corrigidas', 'atividades em correcao', 'atividades em correção', 'em correcao', 'em correção'],
-                dev: ['dev', 'devolvidas', 'atividades devolvidas'],
-                conc: ['conc', 'concluidas', 'atividades concluidas'],
-                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', 'taxa de acertos das questoes'],
-                indice: ['indice', 'indice de atividades por aluno', 'indice de atividades realizadas por aluno', 'atividades realizadas por aluno'],
-                nota: ['nota', 'nota media']
+                mat: ['mat', 'matriculas ativas', 'matriculas', 'matriculas escolares'],
+                pub: ['pub', 'atividades publicadas', 'publicadas', 'atividades publicadas'],
+                rasc: ['rasc', 'rascunhos', 'atividades em rascunho', 'atividades em rascunho'],
+                corr: ['corr', 'corrigidas', 'atividades corrigidas', 'atividades em correção', 'atividades correcao'],
+                dev: ['dev', 'devolvidas', 'atividades devolvidas', 'atividades devolvidas'],
+                conc: ['conc', 'concluidas', 'atividades concluidas', 'atividades concluidas'],
+                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', 'taxa de acertos das questoes', 'taxa de acertos das questões'],
+                indice: ['indice', 'indice de atividades por aluno', 'indice de atividades realizadas por aluno', 'índice de atividades por aluno'],
+                nota: ['nota', 'nota media', 'nota média', 'nota media das atividades']
             },
             obrigatorios: ['escola', 'mat', 'pub', 'rasc', 'corr', 'dev', 'conc', 'acerto', 'indice', 'nota'],
+            inteiros: ['mat', 'pub', 'rasc', 'corr', 'dev', 'conc'],
+            numericos: ['acerto', 'indice', 'nota']
+        },
+        robotica_mensal: {
+            tabela: 'resultados_robotica_mensal',
+            campos: {
+                escola: ['escola', 'unidade escolar', 'nome da escola'],
+                codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
+                mat: ['mat', 'matriculas ativas', 'matriculas', 'matriculas escolares'],
+                pub: ['pub', 'atividades publicadas', 'publicadas'],
+                rasc: ['rasc', 'rascunhos', 'atividades em rascunho'],
+                corr: ['corr', 'corrigidas', 'atividades corrigidas', 'atividades em correção'],
+                dev: ['dev', 'devolvidas', 'atividades devolvidas'],
+                conc: ['conc', 'concluidas', 'atividades concluidas'],
+                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', 'taxa de acertos das questoes', 'taxa de acertos das questões'],
+                indice: ['indice', 'indice de atividades por aluno', 'indice de atividades realizadas por aluno', 'índice de atividades por aluno', 'índice de atividades realizadas por aluno'],
+                nota: ['nota', 'nota media', 'nota média', 'nota media das atividades']
+            },
+            obrigatorios: ['escola', 'mat'],
             inteiros: ['mat', 'pub', 'rasc', 'corr', 'dev', 'conc'],
             numericos: ['acerto', 'indice', 'nota']
         },
@@ -1970,20 +2034,15 @@
         const intervaloSemana = metadados.match(
             /intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i
         );
-        const intervaloComData = intervaloSemana && /\d{1,2}[./-]\d{1,2}/.test(intervaloSemana[1])
-            ? intervaloSemana
-            : null;
         const periodoNoArquivo = String(nomeArquivo).match(
-            /(?:semana\s*(\d+)\s*[-–—]\s*|(\d+)\s*[-–—]\s*)?(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i
+            /(?:semana\s*(\d+)\s*[-–—]\s*)?(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i
         );
-        const periodoInferido = intervaloComData
-            ? intervaloComData[1].trim()
+        const periodoInferido = intervaloSemana
+            ? intervaloSemana[1].trim()
             : periodoNoArquivo
-                ? ((periodoNoArquivo[1] || periodoNoArquivo[2] ? (periodoNoArquivo[1] || periodoNoArquivo[2]) + ' - ' : '') +
-                    periodoNoArquivo[3].replace(/[.-]/g, '/').replace(/\s+/g, ' ').trim())
-                : intervaloSemana
-                    ? intervaloSemana[1].trim()
-                    : '';
+                ? (periodoNoArquivo[1] ? periodoNoArquivo[1] + ' - ' : '') +
+                    periodoNoArquivo[2].replace(/[.-]/g, '/').replace(/\s+/g, ' ').trim()
+                : '';
         const nomeArquivoLabel = String(nomeArquivo || '').replace(/\.[^.]+$/, '').trim();
         let linhaCabecalho = -1;
         let colunas = {};
@@ -2045,6 +2104,7 @@
             registro.escola = String(registro.escola ?? '').trim();
             if (!registro.escola) continue;
             if (/^total$/i.test(registro.escola)) continue;
+            if ((tipo === 'robotica' || tipo === 'robotica_mensal') && csvNormalizar(registro.escola) === 'total') continue;
 
             if (tipo === 'presenca' || tipo === 'apoio') {
                 registro.periodo = String(registro.periodo ?? '').trim();
@@ -2064,7 +2124,7 @@
                 }
                 if (!registro.periodo || !registro.codigo_escola) {
                     throw new Error(
-                        `Linha ${i + 1}: não foi possível identificar o período ou o código da escola (\"${registro.escola || ''}\", período \"${registro.periodo || ''}\")` +
+                        `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
                         'Informe as colunas periodo e codigo_escola ou inclua o código no fim do nome ' +
                         'da escola e o filtro IntervaloSemanaAtual no arquivo.'
                     );
@@ -2128,6 +2188,11 @@
         })[caractere]);
     }
 
+    const MESES_ROBOTICA = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
     function configurarImportadorCsv(tipo) {
         const config = CSV_IMPORTADORES[tipo];
         const input = document.getElementById(`${tipo}-file`);
@@ -2146,6 +2211,23 @@
                 preview.style.display = 'block';
                 return;
             }
+            if (tipo === 'robotica_mensal') {
+                const anoMensal = document.getElementById('robotica_mensal-ano')?.value;
+                const mesMensal = document.getElementById('robotica_mensal-mes')?.value;
+                const semanasMensal = Number(document.getElementById('robotica_mensal-semanas')?.value);
+                if (!anoMensal || !mesMensal) {
+                    preview.textContent = 'Selecione o ano e o mês referentes à planilha.';
+                    preview.className = 'msg error';
+                    preview.style.display = 'block';
+                    return;
+                }
+                if (!Number.isInteger(semanasMensal) || semanasMensal < 1 || semanasMensal > 6) {
+                    preview.textContent = 'Informe a quantidade de semanas do mês (entre 1 e 6).';
+                    preview.className = 'msg error';
+                    preview.style.display = 'block';
+                    return;
+                }
+            }
             if (!arquivo) {
                 preview.textContent = 'Selecione um arquivo de dados.';
                 preview.className = 'msg error';
@@ -2162,6 +2244,18 @@
                         header: 1, defval: null, raw: true, blankrows: false
                     });
                     const registros = await csvLerRegistros(linhas, config, tipo, arquivo.name);
+                    let mensalAno = null;
+                    let mensalMes = null;
+                    if (tipo === 'robotica_mensal') {
+                        mensalAno = Number(document.getElementById('robotica_mensal-ano').value);
+                        mensalMes = Number(document.getElementById('robotica_mensal-mes').value);
+                        const semanas = Number(document.getElementById('robotica_mensal-semanas').value);
+                        registros.forEach(registro => {
+                            registro.ano = mensalAno;
+                            registro.mes = mensalMes;
+                            registro.semanas = semanas;
+                        });
+                    }
                     csvDadosPendentes[tipo] = registros;
                     const amostra = registros.slice(0, 3).map(registro => {
                         const nome = tipo === 'presenca' || tipo === 'apoio'
@@ -2173,7 +2267,9 @@
                         ? 'Os registros serão adicionados aos períodos existentes; escola e período já cadastrados serão atualizados.'
                         : tipo === 'apoio'
                             ? 'Os registros serão adicionados aos anos e semanas existentes; escola, ano e semana já cadastrados serão atualizados.'
-                            : 'A confirmação substituirá todos os resultados atuais de Robótica.';
+                            : tipo === 'robotica_mensal'
+                                ? `Os registros substituirão apenas os dados de ${MESES_ROBOTICA[mensalMes - 1]} de ${mensalAno}.`
+                                : 'A confirmação substituirá todos os resultados atuais de Robótica.';
                     preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">${destinoImportacao}</span><ul>${amostra}</ul>`;
                     preview.className = 'msg';
                     preview.style.display = 'block';
@@ -2207,6 +2303,31 @@
                 }
                 registros.forEach(registro => { registro.ano = Number(anoApoio); });
             }
+            let periodoMensal = null;
+            if (tipo === 'robotica_mensal') {
+                periodoMensal = {
+                    ano: Number(document.getElementById('robotica_mensal-ano')?.value || 0),
+                    mes: Number(document.getElementById('robotica_mensal-mes')?.value || 0),
+                    semanas: Number(document.getElementById('robotica_mensal-semanas')?.value || 0)
+                };
+                if (!periodoMensal.ano || !periodoMensal.mes) {
+                    preview.textContent = 'Selecione o ano e o mês referentes à planilha.';
+                    preview.className = 'msg error';
+                    preview.style.display = 'block';
+                    return;
+                }
+                if (!Number.isInteger(periodoMensal.semanas) || periodoMensal.semanas < 1 || periodoMensal.semanas > 6) {
+                    preview.textContent = 'Informe a quantidade de semanas do mês (entre 1 e 6).';
+                    preview.className = 'msg error';
+                    preview.style.display = 'block';
+                    return;
+                }
+                registros.forEach(registro => {
+                    registro.ano = periodoMensal.ano;
+                    registro.mes = periodoMensal.mes;
+                    registro.semanas = periodoMensal.semanas;
+                });
+            }
 
             confirmar.disabled = true;
             confirmar.textContent = 'Importando...';
@@ -2217,6 +2338,15 @@
                         .from(config.tabela)
                         .delete()
                         .not('codigo_escola', 'is', null);
+                    if (erroRemocao) throw erroRemocao;
+                    dadosRemovidos = true;
+                }
+                if (tipo === 'robotica_mensal') {
+                    const { error: erroRemocao } = await supabaseClient
+                        .from(config.tabela)
+                        .delete()
+                        .eq('ano', periodoMensal.ano)
+                        .eq('mes', periodoMensal.mes);
                     if (erroRemocao) throw erroRemocao;
                     dadosRemovidos = true;
                 }
@@ -2237,7 +2367,9 @@
                     ? `Importação concluída: ${registros.length} registros adicionados ou atualizados em ${config.tabela}. Os demais períodos foram preservados.`
                     : tipo === 'apoio'
                         ? `Importação concluída: ${registros.length} registros adicionados ou atualizados em ${config.tabela} para o ano ${anoApoio}. Os demais anos e semanas foram preservados.`
-                        : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
+                        : tipo === 'robotica_mensal'
+                            ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para ${MESES_ROBOTICA[periodoMensal.mes - 1]} de ${periodoMensal.ano}. Os demais meses foram preservados.`
+                            : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
                 preview.className = 'msg success';
                 input.value = '';
                 csvDadosPendentes[tipo] = null;
@@ -2248,9 +2380,16 @@
                 const detalheErro = tabelaAusente
                     ? tipo === 'apoio'
                         ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-apoio-presencial.sql no SQL Editor desse mesmo projeto e tente novamente.`
-                        : ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Para Aluno Presente, execute supabase-resultados-presenca.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                        : tipo === 'robotica_mensal'
+                            ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-robotica-mensal.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                            : ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Para Aluno Presente, execute supabase-resultados-presenca.sql no SQL Editor desse mesmo projeto e tente novamente.`
                     : '';
-                preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${detalheErro}${dadosRemovidos ? ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.' : ''}`;
+                const avisoParcial = dadosRemovidos
+                    ? tipo === 'robotica_mensal'
+                        ? ' Os dados do mês selecionado já foram removidos e podem estar incompletos; reenvie a planilha após corrigir o problema.'
+                        : ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.'
+                    : '';
+                preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${detalheErro}${avisoParcial}`;
                 preview.className = 'msg error';
                 confirmar.disabled = false;
             } finally {
@@ -2853,6 +2992,7 @@
     configurarImportadorCsv('presenca');
     configurarImportadorCsv('apoio');
     configurarImportadorCsv('robotica');
+    configurarImportadorCsv('robotica_mensal');
 
 </script>
 </body>
