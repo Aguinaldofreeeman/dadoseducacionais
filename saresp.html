@@ -302,7 +302,7 @@
     const TITULO = { ouro: 'Conquistou a meta Ouro em 2025', diamante: 'Conquistou a meta Diamante em 2025', na: 'Não atingiu a meta 2025', sistema: 'Unidade do sistema EJA multisseriado (não disputa a classificação regular)' };
     const STATUS_ORDEM = { diamante: 0, ouro: 1, na: 2, sistema: 3 };
     const CONECTORES = new Set(['de','da','do','das','dos','e','di','d','o','a']);
-    const iniciais = nome => String(nome || '').trim().split(/\s+/).filter(p => p && !CONECTORES.has(p.toLowerCase())).map(p => p[0].toUpperCase() + '.').join(' ');
+    const titulo = nome => String(nome || '').trim().split(/\s+/).map((p, i) => { const low = p.toLowerCase(); if (i > 0 && CONECTORES.has(low)) return low; if (p.endsWith('.')) return p.toUpperCase(); return p.length ? p[0].toUpperCase() + p.slice(1).toLowerCase() : ''; }).join(' ');
     function statusDe(s) {
       if (!s || s === '—') return null;
       const t = String(s).toLowerCase();
@@ -344,7 +344,7 @@
       render();
     }
     function valor(x, k) {
-      if (k === 'diretor') return iniciais(x.diretor);
+      if (k === 'diretor') return titulo(x.diretor);
       if (k === 'supervisao') return x.supervisao || '';
       if (k === 'status') return ROTULO[x.status] || '';
       return x[k];
@@ -371,7 +371,7 @@
         if (sp) sp.textContent = seta(th.dataset.k);
         th.classList.toggle('active', th.dataset.k === sortState.key);
       });
-      rows.innerHTML = a.map(x => '<tr><td>' + esc(x.escola) + '</td><td><span class="tag ' + x.status + '" title="' + esc(TITULO[x.status]) + '">' + esc(ROTULO[x.status]) + '</span></td><td class="num">' + nf1(x.nota) + '</td><td class="num">' + nf1(x.metaOuro) + '</td><td class="num">' + nf1(x.metaDiamante) + '</td><td class="num">' + (x.pp3bim != null ? pc(x.pp3bim) : '—') + '</td><td class="diretor" title="' + esc(x.diretor) + '">' + esc(iniciais(x.diretor)) + '</td><td class="supervisao">' + esc(x.supervisao) + '</td></tr>').join('') + '<tr class="regional"><td>MARILIA · Regional</td><td>—</td><td class="num">' + nf1(R.nota) + '</td><td class="num">' + nf1(R.metaOuro) + '</td><td class="num">' + nf1(R.metaDiamante) + '</td><td class="num">—</td><td></td><td></td></tr>';
+      rows.innerHTML = a.map(x => '<tr><td>' + esc(x.escola) + '</td><td><span class="tag ' + x.status + '" title="' + esc(TITULO[x.status]) + '">' + esc(ROTULO[x.status]) + '</span></td><td class="num">' + nf1(x.nota) + '</td><td class="num">' + nf1(x.metaOuro) + '</td><td class="num">' + nf1(x.metaDiamante) + '</td><td class="num">' + (x.pp3bim != null ? pc(x.pp3bim) : '—') + '</td><td class="diretor">' + esc(titulo(x.diretor)) + '</td><td class="supervisao">' + esc(x.supervisao) + '</td></tr>').join('') + '<tr class="regional"><td>MARILIA · Regional</td><td>—</td><td class="num">' + nf1(R.nota) + '</td><td class="num">' + nf1(R.metaOuro) + '</td><td class="num">' + nf1(R.metaDiamante) + '</td><td class="num">—</td><td></td><td></td></tr>';
     }
     async function carregarSupabase() {
       try {
