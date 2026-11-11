@@ -237,7 +237,8 @@
     }
 
     function ehTotal(escola) {
-        return String(escola || '').trim().toUpperCase().startsWith('TOTAL');
+        const s = String(escola || '').trim().toUpperCase();
+        return s.startsWith('TOTAL') || s.startsWith('FILTROS APLICADOS');
     }
 
     function escolaCorresponde(escola) {
@@ -454,6 +455,7 @@
 
         selectAno.innerHTML = '<option value="">Todos os anos</option>' +
             anos.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+        if (anos.includes('2026')) selectAno.value = '2026';
         selectEscola.innerHTML = '<option value="">Todas as escolas</option>' +
             escolas.map(([chave, nome]) => '<option value="' + chave.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '">' +
                 String(nome).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</option>').join('');
