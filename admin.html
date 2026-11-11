@@ -2307,7 +2307,8 @@
                         let semanaLeia = semanaInput ? Number(semanaInput) : (periodoNoArquivo ? Number(periodoNoArquivo[1]) : null);
                         if (!semanaLeia) { preview.textContent = 'Não foi possível inferir a semana. Informe o número da semana.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
                         // parse datas do intervalo (dd/mm ou dd.mm) com o ano
-                        const rangeMatch = (intervaloStr || (periodoNoArquivo ? periodoNoArquivo[2] : '')).match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+                        let rangeMatch = intervaloStr.match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+                        if (!rangeMatch && periodoNoArquivo) rangeMatch = periodoNoArquivo[2].match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
                         let inicio = null, fim = null;
                         if (rangeMatch) {
                             const [, d1, m1, d2, m2] = rangeMatch;
