@@ -373,12 +373,12 @@
       });
       rows.innerHTML = a.map(x => '<tr><td>' + esc(x.escola) + '</td><td><span class="tag ' + x.status + '" title="' + esc(TITULO[x.status]) + '">' + esc(ROTULO[x.status]) + '</span></td><td class="num">' + nf1(x.nota) + '</td><td class="num">' + nf1(x.metaOuro) + '</td><td class="num">' + nf1(x.metaDiamante) + '</td><td class="num">' + (x.pp3bim != null ? pc(x.pp3bim) : '—') + '</td><td class="diretor">' + esc(titulo(x.diretor)) + '</td><td class="supervisao">' + esc(x.supervisao) + '</td></tr>').join('') + '<tr class="regional"><td>MARILIA · Regional</td><td>—</td><td class="num">' + nf1(R.nota) + '</td><td class="num">' + nf1(R.metaOuro) + '</td><td class="num">' + nf1(R.metaDiamante) + '</td><td class="num">—</td><td></td><td></td></tr>';
     }
-    async function carregarSupabase() {
+    async function carregar() {
       try {
-        const { data, error } = await supabaseClient.from('resultados_saresp').select('*');
+        const { data, error } = await Client.from('resultados_saresp').select('*');
         if (error || !data || data.length < 15) return;
         DATA = aPartirDeBanco(data);
-        rodape.textContent = 'Dados carregados do Supabase.';
+        rodape.textContent = 'Atualizado em 11/11/2026. Fonte: Escola Total.';
         inicializar();
       } catch (err) { console.warn('Falha ao buscar resultados_saresp:', err.message); }
     }
