@@ -2328,6 +2328,8 @@
                             registro.periodo_inicio = inicio;
                             registro.periodo_fim = fim;
                             registro.fonte_arquivo = arquivo.name;
+                            delete registro.periodo;
+                            delete registro.periodo_label;
                         });
                         window.CONTEXTO_LEIA = { ano: anoLeia, semana: semanaLeia, inicio, fim };
                     }
