@@ -389,6 +389,11 @@
                 <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
             </div>
             <div class="form-group">
+                <label for="leia-semana">Semana (número)</label>
+                <input type="number" id="leia-semana" min="1" max="53" step="1" value="">
+                <span class="help-text">Número da semana (1 a 53). Se deixar em branco, será inferido do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx" → semana 1).</span>
+            </div>
+            <div class="form-group">
                 <label for="leia-file">Planilha de Leia SP (.xlsx, .xls ou .csv)</label>
                 <input type="file" id="leia-file" accept=".xlsx,.xls,.csv">
                 <span class="help-text">Aceita as colunas Escola (com código no formato "NOME - CÓDIGO" ou codigo_escola), Total Matrículas, Alunos Ativos no Período, % Alunos Ativos no Período, (%) de Acertos das Questões, Índice de Questões Corretas por Aluno, Total de Páginas Lidas, Total de Livros Concluídos, Tempo de Leitura em Minutos e Tempo Semanal de Leitura em Minutos por Aluno. A semana é lida do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx") ou do filtro IntervaloUltimaSemana. Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
@@ -601,6 +606,7 @@
     let usuariosLocais = [];
 
     window.ESCOLAS_CODIGO = {};
+    window.CONTEXTO_LEIA = null;
     async function carregarEscolasCodigo() {
         try {
             const { data, error } = await supabaseClient.from('escolas').select('nome_padronizado, codigo_oficial').eq('ativa', true);
@@ -1943,29 +1949,23 @@
             numericos: ['presenca', 'evolucao_presenca', 'aulas_dadas', 'evolucao_aulas']
         },
         leia: {
-            tabela: 'resultados_leia_sp',
+            tabela: 'resultados_leitura_semanais',
             campos: {
-                periodo: [
-                    'periodo', 'periodo de referencia', 'periodo referencia',
-                    'semana', 'semana de referencia', 'semana referencia',
-                    'intervalo ultima semana', 'intervalo semana atual', 'competencia'
-                ],
-                periodo_label: ['periodo_label', 'periodo label', 'nome do periodo'],
                 escola: ['escola', 'unidade escolar', 'nome da escola'],
                 codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
                 total_matriculas: ['total_matriculas', 'total matriculas', 'matriculas', 'matriculas ativas'],
                 alunos_ativos: ['alunos_ativos', 'alunos ativos no periodo', 'alunos ativos'],
                 percentual_ativos: ['percentual_ativos', '% alunos ativos no periodo', 'percentual alunos ativos', '% alunos ativos'],
-                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', '(%) de acertos das questoes', 'percentual de acertos'],
-                indice: ['indice', 'indice de questoes corretas por aluno'],
+                percentual_acertos: ['percentual_acertos', '(%) de acertos das questoes', 'taxa de acerto', 'taxa de acertos', 'acerto', 'acertos'],
+                indice_questoes_corretas: ['indice_questoes_corretas', 'indice de questoes corretas por aluno', 'indice'],
                 paginas_lidas: ['paginas_lidas', 'total de paginas lidas', 'paginas lidas'],
                 livros_concluidos: ['livros_concluidos', 'total de livros concluidos', 'livros concluidos'],
                 tempo_leitura_min: ['tempo_leitura_min', 'tempo de leitura em minutos', 'tempo de leitura'],
-                tempo_semanal_por_aluno: ['tempo_semanal_por_aluno', 'tempo semanal de leitura em minutos por aluno', 'tempo semanal de leitura']
+                tempo_semanal_aluno_min: ['tempo_semanal_aluno_min', 'tempo semanal de leitura em minutos por aluno', 'tempo semanal de leitura']
             },
             obrigatorios: ['escola', 'total_matriculas'],
             inteiros: ['total_matriculas', 'alunos_ativos', 'paginas_lidas', 'livros_concluidos'],
-            numericos: ['percentual_ativos', 'acerto', 'indice', 'tempo_leitura_min', 'tempo_semanal_por_aluno']
+            numericos: ['percentual_ativos', 'percentual_acertos', 'indice_questoes_corretas', 'tempo_leitura_min', 'tempo_semanal_aluno_min']
         },
         robotica: {
             tabela: 'resultados_robotica',
@@ -2266,6 +2266,8 @@
             if (tipo === 'leia') {
                 const anoLeia = document.getElementById('leia-ano')?.value;
                 if (!anoLeia) { preview.textContent = 'Selecione o ano referente à planilha.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
+                const semanaLeia = document.getElementById('leia-semana')?.value;
+                if (semanaLeia && (!Number.isInteger(Number(semanaLeia)) || Number(semanaLeia) < 1 || Number(semanaLeia) > 53)) { preview.textContent = 'Informe a semana entre 1 e 53 (ou deixe em branco para inferir do arquivo).'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
             }
             if (tipo === 'robotica_mensal') {
                 const anoMensal = document.getElementById('robotica_mensal-ano')?.value;
@@ -2304,7 +2306,30 @@
                     let mensalMes = null;
                     if (tipo === 'leia') {
                         const anoLeia = Number(document.getElementById('leia-ano').value);
-                        registros.forEach(registro => { registro.ano = anoLeia; });
+                        const semanaInput = document.getElementById('leia-semana')?.value;
+                        const metadadosLeia = linhas.flat().map(c => String(c ?? '')).join('\n');
+                        const intervaloLeia = metadadosLeia.match(/intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i);
+                        const intervaloStr = intervaloLeia ? intervaloLeia[1].trim() : '';
+                        const periodoNoArquivo = String(arquivo.name || '').match(/(\d{1,2})\s*[-–—]\s*(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i);
+                        let semanaLeia = semanaInput ? Number(semanaInput) : (periodoNoArquivo ? Number(periodoNoArquivo[1]) : null);
+                        if (!semanaLeia) { preview.textContent = 'Não foi possível inferir a semana. Informe o número da semana.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
+                        // parse datas do intervalo (dd/mm ou dd.mm) com o ano
+                        const rangeMatch = (intervaloStr || (periodoNoArquivo ? periodoNoArquivo[2] : '')).match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+                        let inicio = null, fim = null;
+                        if (rangeMatch) {
+                            const [, d1, m1, d2, m2] = rangeMatch;
+                            inicio = anoLeia + '-' + String(m1).padStart(2,'0') + '-' + String(d1).padStart(2,'0');
+                            fim = anoLeia + '-' + String(m2).padStart(2,'0') + '-' + String(d2).padStart(2,'0');
+                        }
+                        if (!inicio || !fim) { preview.textContent = 'Não foi possível inferir o período (datas) do arquivo. Verifique o nome do arquivo ou o filtro IntervaloUltimaSemana.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
+                        registros.forEach(registro => {
+                            registro.ano = anoLeia;
+                            registro.semana_num = semanaLeia;
+                            registro.periodo_inicio = inicio;
+                            registro.periodo_fim = fim;
+                            registro.fonte_arquivo = arquivo.name;
+                        });
+                        window.CONTEXTO_LEIA = { ano: anoLeia, semana: semanaLeia, inicio, fim };
                     }
                     if (tipo === 'robotica_mensal') {
                         mensalAno = Number(document.getElementById('robotica_mensal-ano').value);
@@ -2407,6 +2432,16 @@
                         .delete()
                         .eq('ano', periodoMensal.ano)
                         .eq('mes', periodoMensal.mes);
+                    if (erroRemocao) throw erroRemocao;
+                    dadosRemovidos = true;
+                }
+                if (tipo === 'leia') {
+                    const ctx = window.CONTEXTO_LEIA;
+                    const { error: erroRemocao } = await supabaseClient
+                        .from(config.tabela)
+                        .delete()
+                        .eq('ano', ctx.ano)
+                        .eq('semana_num', ctx.semana);
                     if (erroRemocao) throw erroRemocao;
                     dadosRemovidos = true;
                 }
