@@ -529,6 +529,19 @@
 
     let usuariosLocais = [];
 
+    window.ESCOLAS_CODIGO = {};
+    async function carregarEscolasCodigo() {
+        try {
+            const { data, error } = await supabaseClient.from('escolas').select('nome_padronizado, codigo_oficial').eq('ativa', true);
+            if (error || !data) return;
+            const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').trim();
+            data.forEach(e => { if (e.nome_padronizado && e.codigo_oficial) window.ESCOLAS_CODIGO[norm(e.nome_padronizado)] = String(e.codigo_oficial).trim(); });
+        } catch (e) { console.warn('Falha ao carregar códigos de escola:', e.message); }
+    }
+    function buscarCodigoEscola(nome) {
+        const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').trim();
+        return (window.ESCOLAS_CODIGO && window.ESCOLAS_CODIGO[norm(nome)]) || null;
+    }
     // Proteção de rota: exige sessão ativa e perfil de Administrador (ADM)
     async function verificarSessao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
@@ -551,6 +564,7 @@
         }
 
         carregarUsuarios();
+        carregarEscolasCodigo();
     }
     verificarSessao();
 
@@ -1942,7 +1956,8 @@
         return numero;
     }
 
-    function csvLerRegistros(linhas, config, tipo, nomeArquivo = '') {
+    async function csvLerRegistros(linhas, config, tipo, nomeArquivo = '') {
+        if (!window.ESCOLAS_CODIGO || Object.keys(window.ESCOLAS_CODIGO).length === 0) { await carregarEscolasCodigo(); }
         const metadados = linhas.flat()
             .map(celula => String(celula ?? ''))
             .join('\n');
@@ -2036,6 +2051,10 @@
                         registro.codigo_escola = correspondencia[2];
                     }
                 }
+                if (!registro.codigo_escola) {
+                    const codigoEncontrado = buscarCodigoEscola(registro.escola);
+                    if (codigoEncontrado) registro.codigo_escola = codigoEncontrado;
+                }
                 if (!registro.periodo || !registro.codigo_escola) {
                     throw new Error(
                         `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
@@ -2059,6 +2078,10 @@
                         registro.escola = correspondencia[1].trim();
                         registro.codigo_escola = correspondencia[2];
                     }
+                }
+                if (!registro.codigo_escola) {
+                    const codigoEncontrado = buscarCodigoEscola(registro.escola);
+                    if (codigoEncontrado) registro.codigo_escola = codigoEncontrado;
                 }
                 if (!registro.codigo_escola) {
                     throw new Error(`Linha ${i + 1}: informe codigo_escola ou use "ESCOLA - CÓDIGO" na coluna escola.`);
@@ -2124,14 +2147,14 @@
             }
 
             const leitor = new FileReader();
-            leitor.onload = evento => {
+            leitor.onload = async evento => {
                 try {
                     const workbook = XLSX.read(new Uint8Array(evento.target.result), { type: 'array' });
                     const planilha = workbook.Sheets[workbook.SheetNames[0]];
                     const linhas = XLSX.utils.sheet_to_json(planilha, {
                         header: 1, defval: null, raw: true, blankrows: false
                     });
-                    const registros = csvLerRegistros(linhas, config, tipo, arquivo.name);
+                    const registros = await csvLerRegistros(linhas, config, tipo, arquivo.name);
                     csvDadosPendentes[tipo] = registros;
                     const amostra = registros.slice(0, 3).map(registro => {
                         const nome = tipo === 'presenca' || tipo === 'apoio'
