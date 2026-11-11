@@ -341,6 +341,7 @@
       const atual = selectEscola.value;
       selectEscola.innerHTML = '<option value="">Todas as Escolas</option>' + '<option disabled>— Escolas —</option>' + [...E].sort((a, b) => a.escola.localeCompare(b.escola, 'pt-BR')).map(x => '<option value="' + esc(x.escola) + '">' + esc(x.escola) + '</option>').join('');
       if ([...selectEscola.options].some(o => o.value === atual)) selectEscola.value = atual;
+      rodape.textContent = 'Atualizado em 11/11/2026. Fonte: Escola Total.';
       render();
     }
     function valor(x, k) {
