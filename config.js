@@ -10,3 +10,7 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RwMK19Fa7ZekiGB4uQxV5Q_QEcL6W0P
 
 // Cliente global disponível para todas as páginas como `supabaseClient`
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Expor no escopo global para páginas que leem `window.supabaseClient`
+// (ex.: leia-sp.html / Leitura_Marilia.html)
+window.supabaseClient = supabaseClient;
