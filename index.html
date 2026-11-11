@@ -31,7 +31,7 @@
 
         /* Grade de Módulos / Indicadores */
         .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .module-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
+        .module-card { cursor: pointer; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; }
         .module-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .module-card h3 { margin: 0 0 10px 0; color: #17365d; font-size: 18px; }
         .module-card p { margin: 0 0 18px 0; font-size: 13px; color: #64748b; line-height: 1.5; }
@@ -81,7 +81,7 @@
                         <h3>Aluno Presente</h3>
                         <p>Acompanhamento dos indicadores de presença dos estudantes.</p>
                     </div>
-                    <a href="resultados-presenca.html" class="btn-module">Acessar Aluno Presente &rarr;</a>
+                    <a href="resultados-presenca.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Aluno Presente &rarr;</a>
                 </div>
 
  <!-- Módulo 2: Apoio Presencial -->
@@ -90,7 +90,7 @@
                         <h3>Apoio Presencial</h3>
                         <p>Registro e acompanhamento do apoio presencial às escolas da unidade regional.</p>
                     </div>
-                    <a href="apoio-presencial.html" class="btn-module">Acessar Apoio Presencial &rarr;</a>
+                    <a href="apoio-presencial.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Apoio Presencial &rarr;</a>
                 </div>
 
                 
@@ -103,7 +103,7 @@
                         <h3>Prova Paulista</h3>
                         <p>Acompanhamento de desempenho, proficiências e participação por unidade escolar e turma.</p>
                     </div>
-                    <a href="resultados_prova_paulista.html" class="btn-module">Acessar Prova Paulista &rarr;</a>
+                    <a href="resultados_prova_paulista.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Prova Paulista &rarr;</a>
                 </div>
 
 
@@ -114,7 +114,7 @@
                         <h3>SARESP</h3>
                         <p>Resultados históricos e consolidados do Sistema de Avaliação do Rendimento Escolar.</p>
                     </div>
-                    <a href="saresp.html" class="btn-module">Acessar SARESP &rarr;</a>
+                    <a href="saresp.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar SARESP &rarr;</a>
                 </div>
 
 
@@ -125,7 +125,7 @@
                         <h3>Alura</h3>
                         <p>Indicadores de engajamento, matrículas ativas, acessos, avaliações e cursos concluídos.</p>
                     </div>
-                    <a href="alura.html" class="btn-module">Acessar Alura &rarr;</a>
+                    <a href="alura.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Alura &rarr;</a>
                 </div>
 
 
@@ -135,7 +135,7 @@
                         <h3>Matific</h3>
                         <p>Acompanhamento de participação, atividades e desempenho dos estudantes na plataforma Matific.</p>
                     </div>
-                    <a href="matific.html" class="btn-module">Acessar Matific &rarr;</a>
+                    <a href="matific.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Matific &rarr;</a>
                 </div>
 
                 <!-- Módulo 7: Redação Paulista -->
@@ -144,7 +144,7 @@
                         <h3>Redação Paulista</h3>
                         <p>Índice semanal e nota das produções textuais em todas as quinzenas, com painel regional, painel individual por escola, busca e ordenação por coluna.</p>
                     </div>
-                    <a href="redacao.html" class="btn-module">Acessar Redação Paulista &rarr;</a>
+                    <a href="redacao.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Redação Paulista &rarr;</a>
                 </div>
 
 
@@ -154,7 +154,7 @@
                         <h3>Robótica</h3>
                         <p>Acompanhamento das atividades e projetos de robótica educacional.</p>
                     </div>
-                    <a href="Robotica_Marilia.html" class="btn-module">Acessar Robótica &rarr;</a>
+                    <a href="Robotica_Marilia.html" class="btn-module" target="_blank" rel="noopener noreferrer">Acessar Robótica &rarr;</a>
                 </div>
 
                
@@ -237,6 +237,16 @@
     btnSair.addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
         verificarSessao();
+    });
+
+    // Abrir o módulo em nova guia ao clicar em qualquer parte do card
+    document.querySelectorAll('.module-card').forEach((card) => {
+        const link = card.querySelector('.btn-module');
+        if (!link) return;
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('a')) return;
+            window.open(link.getAttribute('href'), '_blank', 'noopener');
+        });
     });
 </script>
 </body>
