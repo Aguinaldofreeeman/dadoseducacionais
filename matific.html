@@ -25,7 +25,7 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
 .bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}
 .bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}.warn .bar i{background:var(--w)}
-.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
+.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.fn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}.fn-col h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.fn-note{font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.5}@media(max-width:620px){.fn-grid{grid-template-columns:1fr}}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
 .hist{display:flex;gap:10px;align-items:flex-end;height:150px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;color:var(--m)}
 .col i{width:100%;background:var(--a);border-radius:6px 6px 0 0;min-height:2px;opacity:.55}.col.me i{opacity:1;background:var(--p)}.col b{color:var(--t)}
 svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .g{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle{cursor:pointer}
@@ -45,7 +45,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <article class="panel"><h2 id="t1"></h2><p>Toque numa escola para filtrar. A marca vermelha indica a média regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Participação e resultado por escola</h2><p>Cada bolha é uma escola; o tamanho mostra as matrículas. As linhas vermelhas cruzam na média regional.</p><div id="sc"></div><div class="leg">Verde: índice igual ou acima da média. Amarelo: abaixo.</div></article>
 <article class="panel"><h2>Distribuição do índice</h2><p>Quantas escolas há em cada faixa de atividades concluídas por aluno.</p><div id="hs" class="hist"></div><div class="leg" id="hl"></div></article>
-<article class="panel"><h2>Funil de engajamento</h2><p>Da matrícula à conclusão, comparado à média regional.</p><div id="fn"></div></article>
+<article class="panel"><h2>Funil de engajamento</h2><p>Dois funis independentes: pessoas (matrículas → ativos) e atividades (iniciadas → concluídas), comparados à média regional.</p><div id="fn"></div></article>
 </section>
 <article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv" style="background:var(--p)">Exportar CSV</button></p></article>
 <p class="foot" id="fonte">Fonte: MATIFIC.xlsx. Filtros da exportação: Diretoria Marília, Ensino Fundamental Anos Finais.</p>
@@ -57,7 +57,7 @@ const $=s=>document.querySelector(s),nf=n=>Math.round(n).toLocaleString('pt-BR')
 const selE=$('#selectEscola'),q=$('#q'),metric=$('#metric'),tier=$('#tier'),vis=$('#vis'),fonte=$('#fonte');
 const NOME={indice:'índice concluídas/aluno',percAtivos:'% de alunos ativos',concluidas:'atividades concluídas',iniciadas:'atividades iniciadas'};
 function agg(l){const s=k=>l.reduce((a,x)=>a+x[k],0),m=s('matriculas'),a=s('ativos'),i=s('iniciadas'),c=s('concluidas');return{n:l.length,matriculas:m,ativos:a,iniciadas:i,concluidas:c,percAtivos:a/(m||1),taxa:i?c/i:0,indice:l.reduce((t,x)=>t+x.indice*x.matriculas,0)/(m||1)}}
-function aPartirDeBanco(linhas){return{ano:linhas[0].ano,escolas:linhas.map(r=>{const m=Math.round(+r.total_matriculas)||0,a=Math.round(+r.alunos_ativos_no_periodo)||0;return{escola:r.escola,matriculas:m,ativos:a,percAtivos:r.percentual_alunos_ativos_no_periodo==null?a/(m||1):Number(r.percentual_alunos_ativos_no_periodo),iniciadas:Math.round(+r.total_de_atividades_iniciadas)||0,concluidas:Math.round(+r.total_de_atividades_concluidas)||0,indice:r.indice_de_atividades_concluidas_por_aluno==null?0:Number(r.indice_de_atividades_concluidas_por_aluno)}})}}
+function aPartirDeBanco(linhas){const limpas=linhas.filter(r=>!/^(total)$/i.test(String(r.escola||'').trim()));return{ano:(limpas[0]||linhas[0]).ano,escolas:limpas.map(r=>{const m=Math.round(+r.total_matriculas)||0,a=Math.round(+r.alunos_ativos_no_periodo)||0;return{escola:r.escola,matriculas:m,ativos:a,percAtivos:r.percentual_alunos_ativos_no_periodo==null?a/(m||1):Number(r.percentual_alunos_ativos_no_periodo),iniciadas:Math.round(+r.total_de_atividades_iniciadas)||0,concluidas:Math.round(+r.total_de_atividades_concluidas)||0,indice:r.indice_de_atividades_concluidas_por_aluno==null?0:Number(r.indice_de_atividades_concluidas_por_aluno)}})}}
 const dl=(v,r,f,suf='')=>{const d=v-r;if(Math.abs(d)<1e-9)return'<span class="dl">igual à média regional</span>';return'<span class="dl '+(d>0?'up':'dn')+'">'+(d>0?'▲ ':'▼ ')+f(Math.abs(d))+suf+'</span>'};
 function base(){const t=q.value.trim().toLowerCase(),e=selE.value,f=tier.value;return DATA.escolas.filter(x=>(!e||x.escola===e)&&x.escola.toLowerCase().includes(t)&&(!f||(f==='up'?x.indice>=R.indice:x.indice<R.indice)))}
 function rank(id,k,fmt,l,asc,ref,n){const mx=Math.max(...DATA.escolas.map(x=>x[k]))||1,a=[...l].sort((x,y)=>asc?x[k]-y[k]:y[k]-x[k]).slice(0,n);$(id).innerHTML=a.length?a.map((x,i)=>`<div class="row" data-e="${esc(x.escola)}"><span class="pos">${i+1}</span><div><div class="school" title="${esc(x.escola)}">${esc(sn(x.escola))}</div><div class="bar"><i style="width:${x[k]/mx*100}%"></i><u style="left:${ref/mx*100}%"></u></div></div><b>${fmt(x[k])}</b></div>`).join(''):'<p class="empty">Nenhuma escola encontrada.</p>'}
@@ -70,8 +70,23 @@ s+=[...A].sort((a,b)=>b.matriculas-a.matriculas).map(x=>`<circle data-e="${esc(x
 $('#sc').innerHTML=s+`<text x="${W/2}" y="${H-4}" text-anchor="middle">% de alunos ativos</text><text transform="translate(12 ${H/2}) rotate(-90)" text-anchor="middle">Índice concluídas/aluno</text></svg>`}
 function hist(l){const E=[0,.5,1,1.5,2,2.5,99],lab=['até 0,5','0,5 a 1','1 a 1,5','1,5 a 2','2 a 2,5','2,5 ou mais'],c=lab.map((_,i)=>l.filter(x=>x.indice>=E[i]&&x.indice<E[i+1]).length),mx=Math.max(...c,1),ri=E.findIndex((e,i)=>R.indice>=e&&R.indice<E[i+1]);
 $('#hs').innerHTML=c.map((n,i)=>`<div class="col${i===ri?' me':''}"><b>${n}</b><i style="height:${Math.round(n/mx*100)}px"></i><span>${lab[i]}</span></div>`).join('');$('#hl').textContent='A faixa escura contém a média regional ('+dec(R.indice)+').'}
-function funnel(S){const r=[['Matrículas',S.matriculas,1],['Alunos ativos',S.ativos,S.percAtivos,R.percAtivos],['Atividades iniciadas',S.iniciadas,1],['Atividades concluídas',S.concluidas,S.taxa,R.taxa]];
-$('#fn').innerHTML=r.map(x=>`<div class="f"><b>${x[0]}</b><div class="bar big"><i style="width:${x[2]*100}%"></i>${x[3]?`<u style="left:${x[3]*100}%"></u>`:''}</div><strong>${nf(x[1])}${x[3]?`<small>${pct(x[2])}</small>`:''}</strong></div>`).join('')}
+function funnel(S){
+  const p = S.percAtivos, t = S.taxa;
+  const ipa = S.iniciadas/(S.ativos||1), cpa = S.concluidas/(S.ativos||1);
+  const bar = (w,color,marker) => '<div class="bar big"><i style="width:'+Math.min(100,w*100)+'%;background:'+color+'"></i>'+(marker!=null?'<u style="left:'+Math.min(100,marker*100)+'%"></u>':'')+'</div>';
+  let h = '<div class="fn-grid">';
+  h += '<div class="fn-col"><h4>Pessoas</h4>';
+  h += '<div class="f"><b>Matrículas</b>'+bar(1,'#0d9488',null)+'<strong>'+nf(S.matriculas)+'<small>100%</small></strong></div>';
+  h += '<div class="f"><b>Alunos ativos</b>'+bar(p,'#0d9488',R.percAtivos)+'<strong>'+nf(S.ativos)+'<small>'+pct(p)+'</small></strong></div>';
+  h += '</div>';
+  h += '<div class="fn-col"><h4>Atividades</h4>';
+  h += '<div class="f"><b>Iniciadas</b>'+bar(1,'#7c3aed',null)+'<strong>'+nf(S.iniciadas)+'<small>100%</small></strong></div>';
+  h += '<div class="f"><b>Concluídas</b>'+bar(t,'#7c3aed',R.taxa)+'<strong>'+nf(S.concluidas)+'<small>'+pct(t)+'</small></strong></div>';
+  h += '</div>';
+  h += '</div>';
+  h += '<p class="fn-note">Cada aluno matriculado iniciou em média '+(S.iniciadas/(S.matriculas||1)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' atividades e concluiu '+(S.concluidas/(S.matriculas||1)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'. Por aluno ativo: '+ipa.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' iniciadas e '+cpa.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' concluídas. Os marcadores em vermelho são a média regional; sem filtro de escola eles coincidem com a própria barra.</p>';
+  $('#fn').innerHTML = h;
+}
 const cols=[['escola','Escola'],['matriculas','Matrículas'],['percAtivos','% ativos'],['iniciadas','Iniciadas'],['concluidas','Concluídas'],['indice','Índice']];
 const sorted=l=>[...l].sort((x,y)=>ts.k==='escola'?ts.d*x.escola.localeCompare(y.escola,'pt-BR'):ts.d*(x[ts.k]-y[ts.k]));
 function table(l){$('#tb thead').innerHTML='<tr>'+cols.map(c=>`<th data-k="${c[0]}">${c[1]}${ts.k===c[0]?(ts.d>0?' ▲':' ▼'):''}</th>`).join('')+'<th style="cursor:default">Índice vs região</th></tr>';

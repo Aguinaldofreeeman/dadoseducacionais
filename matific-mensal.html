@@ -36,7 +36,7 @@ main{max-width:1320px;margin:auto;padding:22px 30px 40px}
 .pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}.row b small{display:block;font-weight:600;font-size:11px}.up{color:#0d9488}.dn{color:#d97706}
 .bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}
 .bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}.warn .bar i{background:var(--w)}
-.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
+.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.fn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}.fn-col h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.fn-note{font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.5}@media(max-width:620px){.fn-grid{grid-template-columns:1fr}}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
 .hist{display:flex;gap:10px;align-items:flex-end;height:170px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;color:var(--m);text-align:center}
 .pr{display:flex;gap:3px;align-items:flex-end;width:100%;justify-content:center}.pr i{flex:1;background:var(--a);border-radius:6px 6px 0 0;min-height:2px;opacity:.55}.pr i.o{background:var(--w);opacity:.7}.col.me .pr i:not(.o){opacity:1;background:var(--p)}.col b{color:var(--t);font-size:11px}
 svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .g{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle,svg .pt{cursor:pointer}
@@ -63,7 +63,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <article class="panel"><h2 id="t1"></h2><p>Toque numa escola para filtrar. A marca vermelha indica a média regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Participação e resultado por escola</h2><p id="scp">Cada bolha é uma escola; o tamanho mostra as matrículas. As linhas vermelhas cruzam na média regional.</p><div id="sc"></div><div class="leg" id="scl">Verde: índice igual ou acima da média. Amarelo: abaixo.</div></article>
 <article class="panel"><h2>Distribuição do índice semanal</h2><p>Quantas escolas há em cada faixa de atividades concluídas por aluno por semana.</p><div id="hs" class="hist"></div><div class="leg" id="hl"></div></article>
-<article class="panel"><h2>Funil de engajamento</h2><p>Da matrícula à conclusão, comparado à média regional.</p><div id="fn"></div></article>
+<article class="panel"><h2>Funil de engajamento</h2><p>Dois funis independentes: pessoas (matrículas → ativos) e atividades (iniciadas → concluídas), comparados à média regional.</p><div id="fn"></div></article>
 </section>
 <article class="panel" id="cpP" style="margin-bottom:18px;display:none"><h2>Comparação dos meses selecionados</h2><p id="cpd"></p><div class="tw" style="max-height:none"><table id="cpR"></table></div><div class="tw" style="max-height:480px;margin-top:16px"><table id="cpE"></table></div></article>
 <article class="panel" style="margin-bottom:18px"><h2>Mapa de calor: escola × mês</h2><p id="hmp"></p><div class="tw" style="max-height:560px"><table class="hm" id="hm"></table></div></article>
@@ -77,7 +77,7 @@ const BM={"2":{"s":4,"r":[[236,193,1494,695,0.7362],[353,65,268,90,0.0637],[403,
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],MS=MN.map(m=>m.slice(0,3));
 const mk=(e,m,a,i,c,x)=>({escola:e,matriculas:m,ativos:a,iniciadas:i,concluidas:c,indice:x,percAtivos:a/(m||1)});
 function daBase(){const meses={};for(const m in BM)meses[m]={semanas:BM[m].s,escolas:BM[m].r.map((a,i)=>mk(ESC[i],a[0],a[1],a[2],a[3],a[4]))};return{ano:2026,meses}}
-function aPartirDeBanco(linhas){const meses={};linhas.forEach(r=>{const m=+r.mes,g=meses[m]||(meses[m]={semanas:r.semanas?+r.semanas:null,escolas:[]}),mat=Math.round(+r.total_matriculas)||0,a=Math.round(+r.alunos_ativos_no_periodo)||0,o=mk(r.escola,mat,a,Math.round(+r.total_de_atividades_iniciadas)||0,Math.round(+r.total_de_atividades_concluidas)||0,r.indice_de_atividades_concluidas_por_aluno==null?0:Number(r.indice_de_atividades_concluidas_por_aluno));if(r.percentual_alunos_ativos_no_periodo!=null)o.percAtivos=Number(r.percentual_alunos_ativos_no_periodo);g.escolas.push(o)});return{ano:linhas[0].ano,meses}}
+function aPartirDeBanco(linhas){const meses={};linhas.forEach(r=>{if(/^total$/i.test(String(r.escola||'').trim())) return;const m=+r.mes,g=meses[m]||(meses[m]={semanas:r.semanas?+r.semanas:null,escolas:[]}),mat=Math.round(+r.total_matriculas)||0,a=Math.round(+r.alunos_ativos_no_periodo)||0,o=mk(r.escola,mat,a,Math.round(+r.total_de_atividades_iniciadas)||0,Math.round(+r.total_de_atividades_concluidas)||0,r.indice_de_atividades_concluidas_por_aluno==null?0:Number(r.indice_de_atividades_concluidas_por_aluno));if(r.percentual_alunos_ativos_no_periodo!=null)o.percAtivos=Number(r.percentual_alunos_ativos_no_periodo);g.escolas.push(o)});return{ano:linhas[0].ano,meses}}
 let DB=daBase(),sel=[],ES=[],R,RC,PV=new Map(),ts={k:'indice',d:-1};
 const $=s=>document.querySelector(s),nf=n=>Math.round(n).toLocaleString('pt-BR'),F=(v,d)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}),pct=v=>F(v*100,1)+'%',dec=v=>F(+v,2),pp=v=>F(v*100,1)+' p.p.',esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),sn=s=>s.replace(/ - \d+$/,'');
 const selE=$('#selectEscola'),q=$('#q'),metric=$('#metric'),tier=$('#tier'),vis=$('#vis'),fonte=$('#fonte');
@@ -103,8 +103,23 @@ $('#sc').innerHTML=s+`<text x="${W/2}" y="${H-4}" text-anchor="middle">% de alun
 $('#scp').textContent=PV.size?'Cada bolha é uma escola em '+MN[cur()-1]+'; o círculo vazio e a linha mostram onde ela estava em '+MN[cmp()-1]+'. O tamanho mostra as matrículas.':'Cada bolha é uma escola; o tamanho mostra as matrículas. As linhas vermelhas cruzam na média regional.'}
 function hist(l){const E=[0,.5,1,1.5,2,3,99],lab=['até 0,5','0,5 a 1','1 a 1,5','1,5 a 2','2 a 3','3 ou mais'],cnt=(a,i)=>a.filter(x=>x.indice>=E[i]&&x.indice<E[i+1]).length,c=lab.map((_,i)=>cnt(l,i)),po=PV.size?lab.map((_,i)=>cnt(l.map(x=>PV.get(x.escola)).filter(Boolean),i)):null,mx=Math.max(...c,...(po||[0]),1),ri=E.findIndex((e,i)=>R.indice>=e&&R.indice<E[i+1]);
 $('#hs').innerHTML=c.map((n,i)=>`<div class="col${i===ri?' me':''}"><b>${po?po[i]+' → ':''}${n}</b><div class="pr">${po?`<i class="o" style="height:${Math.round(po[i]/mx*110)}px"></i>`:''}<i style="height:${Math.round(n/mx*110)}px"></i></div><span>${lab[i]}</span></div>`).join('');$('#hl').textContent=(po?'Amarelo: '+MN[cmp()-1]+'. Verde: '+MN[cur()-1]+'. ':'')+'A faixa escura contém a média regional ('+dec(R.indice)+').'}
-function funnel(S){const r=[['Matrículas',S.matriculas,1],['Alunos ativos',S.ativos,S.percAtivos,R.percAtivos],['Atividades iniciadas',S.iniciadas,1],['Atividades concluídas',S.concluidas,S.taxa,R.taxa]];
-$('#fn').innerHTML=r.map(x=>`<div class="f"><b>${x[0]}</b><div class="bar big"><i style="width:${x[2]*100}%"></i>${x[3]?`<u style="left:${x[3]*100}%"></u>`:''}</div><strong>${nf(x[1])}${x[3]?`<small>${pct(x[2])}</small>`:''}</strong></div>`).join('')}
+function funnel(S){
+  const p = S.percAtivos, t = S.taxa;
+  const ipa = S.iniciadas/(S.ativos||1), cpa = S.concluidas/(S.ativos||1);
+  const bar = (w,color,marker) => '<div class="bar big"><i style="width:'+Math.min(100,w*100)+'%;background:'+color+'"></i>'+(marker!=null?'<u style="left:'+Math.min(100,marker*100)+'%"></u>':'')+'</div>';
+  let h = '<div class="fn-grid">';
+  h += '<div class="fn-col"><h4>Pessoas</h4>';
+  h += '<div class="f"><b>Matrículas</b>'+bar(1,'#0d9488',null)+'<strong>'+nf(S.matriculas)+'<small>100%</small></strong></div>';
+  h += '<div class="f"><b>Alunos ativos</b>'+bar(p,'#0d9488',R.percAtivos)+'<strong>'+nf(S.ativos)+'<small>'+pct(p)+'</small></strong></div>';
+  h += '</div>';
+  h += '<div class="fn-col"><h4>Atividades</h4>';
+  h += '<div class="f"><b>Iniciadas</b>'+bar(1,'#7c3aed',null)+'<strong>'+nf(S.iniciadas)+'<small>100%</small></strong></div>';
+  h += '<div class="f"><b>Concluídas</b>'+bar(t,'#7c3aed',R.taxa)+'<strong>'+nf(S.concluidas)+'<small>'+pct(t)+'</small></strong></div>';
+  h += '</div>';
+  h += '</div>';
+  h += '<p class="fn-note">Cada aluno matriculado iniciou em média '+(S.iniciadas/(S.matriculas||1)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' atividades e concluiu '+(S.concluidas/(S.matriculas||1)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'. Por aluno ativo: '+ipa.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' iniciadas e '+cpa.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' concluídas. Os marcadores em vermelho são a média regional; sem filtro de escola eles coincidem com a própria barra.</p>';
+  $('#fn').innerHTML = h;
+}
 /* evolução mensal: série do filtro atual + referência regional */
 function line(id,fmt,get,ymaxMin,step){const ms=avail(),names=new Set(base().map(x=>x.escola)),filt=names.size<ES.length||selE.value||q.value||tier.value,ser=ms.map(m=>({m,v:get(agg(L(m).filter(x=>names.has(x.escola)))),r:get(agg(L(m)))}));
 const W=520,H=230,Lm=46,Rm=12,T=14,B=30,mx=Math.ceil(Math.max(ymaxMin,...ser.map(s=>Math.max(s.v,filt?s.r:0)))*1.04/step)*step,X=m=>Lm+(m-1)/11*(W-Lm-Rm),Y=v=>H-B-v/mx*(H-T-B),sl=ch();
