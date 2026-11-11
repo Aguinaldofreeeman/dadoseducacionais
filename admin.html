@@ -388,12 +388,6 @@
                 </select>
                 <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
             </div>
-            <div class="form-group">
-                <label for="leia-semana">Semana (número)</label>
-                <input type="number" id="leia-semana" min="1" max="53" step="1" value="">
-                <span class="help-text">Número da semana (1 a 53). Se deixar em branco, será inferido do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx" → semana 1).</span>
-            </div>
-            <div class="form-group">
                 <label for="leia-file">Planilha de Leia SP (.xlsx, .xls ou .csv)</label>
                 <input type="file" id="leia-file" accept=".xlsx,.xls,.csv">
                 <span class="help-text">Aceita as colunas Escola (com código no formato "NOME - CÓDIGO" ou codigo_escola), Total Matrículas, Alunos Ativos no Período, % Alunos Ativos no Período, (%) de Acertos das Questões, Índice de Questões Corretas por Aluno, Total de Páginas Lidas, Total de Livros Concluídos, Tempo de Leitura em Minutos e Tempo Semanal de Leitura em Minutos por Aluno. A semana é lida do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx") ou do filtro IntervaloUltimaSemana. Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
@@ -2266,8 +2260,6 @@
             if (tipo === 'leia') {
                 const anoLeia = document.getElementById('leia-ano')?.value;
                 if (!anoLeia) { preview.textContent = 'Selecione o ano referente à planilha.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
-                const semanaLeia = document.getElementById('leia-semana')?.value;
-                if (semanaLeia && (!Number.isInteger(Number(semanaLeia)) || Number(semanaLeia) < 1 || Number(semanaLeia) > 53)) { preview.textContent = 'Informe a semana entre 1 e 53 (ou deixe em branco para inferir do arquivo).'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
             }
             if (tipo === 'robotica_mensal') {
                 const anoMensal = document.getElementById('robotica_mensal-ano')?.value;
@@ -2306,7 +2298,7 @@
                     let mensalMes = null;
                     if (tipo === 'leia') {
                         const anoLeia = Number(document.getElementById('leia-ano').value);
-                        const semanaInput = document.getElementById('leia-semana')?.value;
+                        const semanaInput = null; // semana sempre inferida do nome do arquivo
                         const metadadosLeia = linhas.flat().map(c => String(c ?? '')).join('\n');
                         const intervaloLeia = metadadosLeia.match(/intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i);
                         const intervaloStr = intervaloLeia ? intervaloLeia[1].trim() : '';
