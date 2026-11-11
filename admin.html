@@ -390,6 +390,7 @@
                 </select>
                 <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
             </div>
+            <div class="form-group">
                 <label for="leia-file">Planilha de Leia SP (.xlsx, .xls ou .csv)</label>
                 <input type="file" id="leia-file" accept=".xlsx,.xls,.csv">
                 <span class="help-text">Aceita as colunas Escola (com código no formato "NOME - CÓDIGO" ou codigo_escola), Total Matrículas, Alunos Ativos no Período, % Alunos Ativos no Período, (%) de Acertos das Questões, Índice de Questões Corretas por Aluno, Total de Páginas Lidas, Total de Livros Concluídos, Tempo de Leitura em Minutos e Tempo Semanal de Leitura em Minutos por Aluno. A semana é lida do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx") ou do filtro IntervaloUltimaSemana. Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
@@ -399,8 +400,6 @@
                 <button type="button" id="leia-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
                 <button type="button" id="leia-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
-        </div>
-        </div>
         </div>
         <div class="card">
             <div class="modal-header">
