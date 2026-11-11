@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leia SP — Leitura</title>
+<link rel="stylesheet" href="css/home-button.css">
+<style>
+:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--w:#f59e0b;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
+header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}.nav{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:9px 14px;border-radius:8px;color:#fff;text-decoration:none;font:14px inherit;background:#ffffff26;border:0;cursor:pointer}.btn:hover{background:#ffffff40}
+main{max-width:1320px;margin:auto;padding:22px 30px 40px}
+.filters{background:var(--c);border-radius:12px;box-shadow:var(--sh);padding:12px 16px;margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);min-width:180px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--c);border-radius:12px;box-shadow:var(--sh);padding:16px 18px;border-left:4px solid var(--a)}
+.card .k{color:var(--m);font-size:13px}.card .v{font-size:26px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m)}
+.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh);padding:20px;margin-bottom:18px}
+.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
+.rank{display:grid;gap:4px;max-height:420px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 70px;gap:10px;align-items:center;font-size:13px;padding:4px;border-radius:8px;cursor:pointer}.row:hover{background:var(--bg)}
+.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
+.tw{overflow:auto;max-height:520px}table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:var(--bg)}
+.foot{font-size:12px;color:var(--m);margin-top:18px;text-align:center}
+.empty{font-size:13px;color:var(--m);padding:20px;text-align:center}
+@media(max-width:850px){.cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+@media(max-width:550px){header{padding:16px}main{padding:14px}.filters select,.filters input{min-width:100%}}
+</style></head><body>
+<header><div><h1>Leia SP — Leitura</h1><p>Unidade Regional de Ensino de Marília · Indicadores de leitura por escola</p></div><div class="nav"><a href="index.html" class="home-button">Início</a></div></header>
+<main>
+<div class="filters">
+  <select id="selPeriodo" title="Período"><option value="">Todos os períodos</option></select>
+  <input id="q" type="search" placeholder="Buscar escola ou código">
+  <select id="vis"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select>
+  <button class="btn" id="reset">Limpar</button>
+</div>
+<div id="sub"></div>
+<section class="cards" id="cards"></section>
+<section class="panel"><h2>Ranking por índice de questões corretas por aluno</h2><p id="rkSub"></p><div id="ranking" class="rank"></div></section>
+<section class="panel"><h2>Resultados por escola</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table><thead></thead><tbody id="tb"></tbody></table></div></section>
+<p class="foot">Atualizado em 11/11/2026. Fonte: Escola Total.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s), nf=n=>Math.round(n).toLocaleString('pt-BR'), F=(v,d)=>(+v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}), pct=v=>F(v*100,1)+'%', dec=v=>F(+v,2), esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'), sn=s=>String(s||'').replace(/ - \d+$/,'');
+let ROWS=[], BY={}, PER=[], CUR=[], ts={k:'indice',d:-1}, R, S;
+const selP=$('#selPeriodo'), q=$('#q'), vis=$('#vis');
+function norm(r){const g=(...k)=>{for(const n of k)if(r[n]!=null&&r[n]!=='')return r[n]};const num=v=>(typeof v==='string'?(v.includes(',')?+v.replace('%','').replace(/\./g,'').replace(',','.'):parseFloat(v)):+v)||0;
+  return{per:String(g('periodo','mes','referencia')??'Período único'),pl:String(g('periodo_label','periodo label','nome do periodo')??''),escola:String(g('escola','nome_escola','unidade_escolar')??''),cod:g('codigo_escola','codigo','cod_escola')??'',mat:num(g('total_matriculas','matriculas','matriculas_ativas')),ativos:num(g('alunos_ativos','alunos_ativos_no_periodo')),perc:num(g('percentual_ativos','% alunos ativos no periodo','percentual_alunos_ativos')),acerto:num(g('acerto','taxa de acertos','taxa de acertos das questoes')),indice:num(g('indice','indice de questoes corretas por aluno')),pag:num(g('paginas_lidas','total de paginas lidas')),liv:num(g('livros_concluidos','total de livros concluidos')),tempo:num(g('tempo_leitura_min','tempo de leitura em minutos')),tsem:num(g('tempo_semanal_por_aluno','tempo semanal de leitura em minutos por aluno'))}}
+function agg(l){const s=k=>l.reduce((a,x)=>a+x[k],0);const m=s('mat')||1,a=s('ativos');return{n:l.length,mat:s('mat'),ativos:a,perc:a/m,acerto:l.reduce((t,x)=>t+x.acerto*x.mat,0)/m,indice:l.reduce((t,x)=>t+x.indice*x.mat,0)/m,pag:s('pag'),liv:s('liv'),tempo:s('tempo'),tsem:l.reduce((t,x)=>t+x.tsem*x.mat,0)/m}}
+function filt(rows){const t=q.value.trim().toLowerCase(),e=selP.value;return rows.filter(x=>(!e||x.per===e)&&(!t||(x.escola+' '+x.cod).toLowerCase().includes(t)))}
+function rank(l){const a=[...l].sort((x,y)=>y.indice-x.indice).slice(0,vis.value==='all'?l.length:10);const mx=Math.max(...l.map(x=>x.indice))||1;$('#ranking').innerHTML=a.length?a.map((x,i)=>`<div class="row" data-e="${esc(x.escola)}"><span class="pos">${i+1}</span><div><div class="school" title="${esc(x.escola)}">${esc(sn(x.escola))}</div><div class="bar"><i style="width:${x.indice/mx*100}%"></i></div></div><b>${dec(x.indice)}</b></div>`).join(''):'<p class="empty">Nenhuma escola encontrada.</p>'}
+function table(l){const sorted=[...l].sort((a,b)=>ts.d*((a[ts.k]??-1e9)-(b[ts.k]??-1e9))||String(a.escola).localeCompare(String(b.escola),'pt-BR'));const cols=[['escola','Escola'],['mat','Matrículas'],['ativos','Ativos'],['perc','% Ativos'],['acerto','Acerto'],['indice','Índice'],['pag','Páginas'],['liv','Livros'],['tempo','Tempo (min)'],['tsem','Tempo sem./aluno']];$('thead').innerHTML='<tr>'+cols.map(([k,label])=>'<th data-k="'+k+'">'+label+(ts.k===k?(ts.d>0?' ▲':' ▼'):'')+'</th>').join('')+'</tr>';$('#tb').innerHTML=sorted.map(x=>'<tr><td>'+esc(x.escola)+'</td><td>'+nf(x.mat)+'</td><td>'+nf(x.ativos)+'</td><td>'+pct(x.perc)+'</td><td>'+pct(x.acerto)+'</td><td><b>'+dec(x.indice)+'</b></td><td>'+nf(x.pag)+'</td><td>'+nf(x.liv)+'</td><td>'+F(x.tempo,1)+'</td><td>'+F(x.tsem,2)+'</td></tr>').join('')||'<tr><td colspan="10" class="empty">Sem dados.</td></tr>'}
+function render(){const l=filt(ROWS);S=agg(l);R=agg(ROWS.filter(x=>x.per===selP.value||!selP.value));
+  $('#sub').textContent=l.length+' de '+ROWS.filter(x=>!selP.value||x.per===selP.value).length+' escolas no filtro atual.';
+  $('#cards').innerHTML=[
+    ['Escolas',nf(S.n),'no recorte atual'],
+    ['Matrículas',nf(S.mat),'alunos matriculados'],
+    ['Alunos ativos',nf(S.ativos),pct(S.perc)+' das matrículas'],
+    ['Acerto',pct(S.acerto),'das questões'],
+    ['Índice',dec(S.indice),'questões por aluno'],
+    ['Páginas lidas',nf(S.pag),'no período'],
+    ['Livros concluídos',nf(S.liv),'no período'],
+    ['Tempo de leitura',F(S.tempo,1)+' min','total no período'],
+    ['Tempo sem./aluno',F(S.tsem,2)+' min','por aluno ativo']
+  ].map(x=>`<div class="card"><div class="k">${x[0]}</div><div class="v">${x[1]}</div><div class="d">${x[2]}</div></div>`).join('');
+  rank(l);table(l)}
+function init(){PER=[...new Set(ROWS.map(x=>x.per))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  selP.innerHTML='<option value="">Todos os períodos</option>'+PER.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(PER.length) selP.value=PER[PER.length-1];
+  render()}
+async function carregar(){
+  try{
+    const {data:anos,error:erroAno}=await supabaseClient.from('resultados_leia_sp').select('ano').order('ano',{ascending:false}).limit(1);
+    if(erroAno||!anos||!anos.length) return;
+    const {data,error}=await supabaseClient.from('resultados_leia_sp').select('*').eq('ano',anos[0].ano).range(0,4999);
+    if(error||!data||data.length<5) return;
+    ROWS=data.map(norm); if(!ROWS.length) return; init();
+  }catch(e){console.warn('Falha ao buscar resultados_leia_sp:',e.message)}
+}
+[selP,q,vis].forEach(el=>el.addEventListener('change',render)); q.addEventListener('input',render);
+$('#reset').onclick=()=>{q.value='';selP.value=PER.length?PER[PER.length-1]:'';vis.value='top';render()};
+document.addEventListener('click',e=>{const r=e.target.closest('[data-e]');if(r){q.value=r.dataset.e;render()}const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};table(filt(ROWS))}});
+(async()=>{await carregar(); if(!ROWS.length){$('#sub').textContent='Nenhum dado importado ainda. Use a Área Administrativa para importar.';document.querySelector('main').insertAdjacentHTML('beforeend','<p class="empty">Sem dados. Importe via admin.html (card Leia SP).</p>')} })();
+</script>
+</body></html>

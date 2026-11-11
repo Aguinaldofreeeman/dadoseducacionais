@@ -374,7 +374,32 @@
             <div class="actions">
                 <button type="button" id="apoio-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
                 <button type="button" id="apoio-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            <!-- Card de Importação de Dados - Leia SP -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha - Leia SP</h3>
             </div>
+            <div class="form-group">
+                <label for="leia-ano">Ano Letivo Referente à Planilha</label>
+                <select id="leia-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                </select>
+                <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
+            </div>
+            <div class="form-group">
+                <label for="leia-file">Planilha de Leia SP (.xlsx, .xls ou .csv)</label>
+                <input type="file" id="leia-file" accept=".xlsx,.xls,.csv">
+                <span class="help-text">Aceita as colunas Escola (com código no formato "NOME - CÓDIGO" ou codigo_escola), Total Matrículas, Alunos Ativos no Período, % Alunos Ativos no Período, (%) de Acertos das Questões, Índice de Questões Corretas por Aluno, Total de Páginas Lidas, Total de Livros Concluídos, Tempo de Leitura em Minutos e Tempo Semanal de Leitura em Minutos por Aluno. A semana é lida do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx") ou do filtro IntervaloUltimaSemana. Reenvios atualizam a mesma escola no ano e semana, sem apagar os outros períodos.</span>
+            </div>
+            <div id="leia-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="leia-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="leia-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
+        </div>
         </div>
         <div class="card">
             <div class="modal-header">
@@ -1917,6 +1942,31 @@
             inteiros: ['matriculas_ativas', 'aulas_previstas', 'total_turmas', 'total_matrizes'],
             numericos: ['presenca', 'evolucao_presenca', 'aulas_dadas', 'evolucao_aulas']
         },
+        leia: {
+            tabela: 'resultados_leia_sp',
+            campos: {
+                periodo: [
+                    'periodo', 'periodo de referencia', 'periodo referencia',
+                    'semana', 'semana de referencia', 'semana referencia',
+                    'intervalo ultima semana', 'intervalo semana atual', 'competencia'
+                ],
+                periodo_label: ['periodo_label', 'periodo label', 'nome do periodo'],
+                escola: ['escola', 'unidade escolar', 'nome da escola'],
+                codigo_escola: ['codigo_escola', 'codigo da escola', 'codigo', 'cod escola'],
+                total_matriculas: ['total_matriculas', 'total matriculas', 'matriculas', 'matriculas ativas'],
+                alunos_ativos: ['alunos_ativos', 'alunos ativos no periodo', 'alunos ativos'],
+                percentual_ativos: ['percentual_ativos', '% alunos ativos no periodo', 'percentual alunos ativos', '% alunos ativos'],
+                acerto: ['acerto', 'acertos', 'taxa de acerto', 'taxa de acertos', '(%) de acertos das questoes', 'percentual de acertos'],
+                indice: ['indice', 'indice de questoes corretas por aluno'],
+                paginas_lidas: ['paginas_lidas', 'total de paginas lidas', 'paginas lidas'],
+                livros_concluidos: ['livros_concluidos', 'total de livros concluidos', 'livros concluidos'],
+                tempo_leitura_min: ['tempo_leitura_min', 'tempo de leitura em minutos', 'tempo de leitura'],
+                tempo_semanal_por_aluno: ['tempo_semanal_por_aluno', 'tempo semanal de leitura em minutos por aluno', 'tempo semanal de leitura']
+            },
+            obrigatorios: ['escola', 'total_matriculas'],
+            inteiros: ['total_matriculas', 'alunos_ativos', 'paginas_lidas', 'livros_concluidos'],
+            numericos: ['percentual_ativos', 'acerto', 'indice', 'tempo_leitura_min', 'tempo_semanal_por_aluno']
+        },
         robotica: {
             tabela: 'resultados_robotica',
             campos: {
@@ -2211,6 +2261,10 @@
                 preview.style.display = 'block';
                 return;
             }
+            if (tipo === 'leia') {
+                const anoLeia = document.getElementById('leia-ano')?.value;
+                if (!anoLeia) { preview.textContent = 'Selecione o ano referente à planilha.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
+            }
             if (tipo === 'robotica_mensal') {
                 const anoMensal = document.getElementById('robotica_mensal-ano')?.value;
                 const mesMensal = document.getElementById('robotica_mensal-mes')?.value;
@@ -2246,6 +2300,10 @@
                     const registros = await csvLerRegistros(linhas, config, tipo, arquivo.name);
                     let mensalAno = null;
                     let mensalMes = null;
+                    if (tipo === 'leia') {
+                        const anoLeia = Number(document.getElementById('leia-ano').value);
+                        registros.forEach(registro => { registro.ano = anoLeia; });
+                    }
                     if (tipo === 'robotica_mensal') {
                         mensalAno = Number(document.getElementById('robotica_mensal-ano').value);
                         mensalMes = Number(document.getElementById('robotica_mensal-mes').value);
@@ -2993,6 +3051,7 @@
     configurarImportadorCsv('apoio');
     configurarImportadorCsv('robotica');
     configurarImportadorCsv('robotica_mensal');
+    configurarImportadorCsv('leia');
 
 </script>
 </body>
