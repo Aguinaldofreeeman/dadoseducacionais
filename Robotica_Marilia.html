@@ -508,8 +508,6 @@ async function carregarResultadosRobotica(){
       MAXV[k]=valores[N-1];
     }
     st.sel=DATA.reduce((melhor,registro)=>registro.indice>melhor.indice?registro:melhor,DATA[0]).id;
-    statusDados.textContent="Dados carregados do Supabase.";
-    statusDados.hidden=false;
     render();
   }catch(erro){
     console.error("Erro ao carregar resultados de Robótica do Supabase:",erro);
@@ -520,4 +518,4 @@ async function carregarResultadosRobotica(){
 carregarResultadosRobotica();
 </script>
 
-</body></html>
+<p style="font-size:12px;color:#64748b;text-align:center;margin:24px 0 0">Atualizado em 11/11/2026. Fonte: Escola Total.</p></body></html>
