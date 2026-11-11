@@ -320,6 +320,8 @@
 
         if (anoSelecionado && anos.includes(parseInt(anoSelecionado))) {
             selectAno.value = anoSelecionado;
+        } else if (anos.includes(2026)) {
+            selectAno.value = '2026';
         }
     }
 
