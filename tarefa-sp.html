@@ -492,9 +492,40 @@ main {
 
 .field.search { flex: 1 1 230px; }
 .field.search input { width: 100%; }
-.field.select-semana { flex: 0 0 190px; }
 .field.select-metrica { flex: 0 0 142px; }
 .field.select-visao { flex: 0 0 160px; }
+
+.week-strip {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-bottom: 11px;
+    margin-bottom: 11px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.chip-semana { height: 30px; padding: 0 12px; font-size: 11.5px; }
+
+.chip-semana-off {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px dashed var(--border);
+    border-radius: 99px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.week-note {
+    width: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-size: 11.5px;
+}
 
 .chip-field { display: flex; flex-direction: column; gap: 4px; }
 
@@ -1423,10 +1454,8 @@ tbody tr.inactive td { color: var(--muted); }
     .filters { gap: 9px; }
     .field.search { flex: 1 1 100%; }
     .chip-field { width: 100%; }
-    .field.select-semana,
     .field.select-metrica,
     .field.select-visao { flex: 1 1 140px; }
-    .field.select-semana select,
     .field.select-metrica select,
     .field.select-visao select { width: 100%; }
     .btn-clear { flex: 1 1 100%; }
@@ -1499,11 +1528,22 @@ tbody tr.inactive td { color: var(--muted); }
         <section class="cards" id="insights" aria-label="Leitura da semana"></section>
 
         <section class="filter-panel" aria-label="Filtros do painel">
-            <div class="filters">
-                <div class="field select-semana">
-                    <label for="semana">Semana</label>
-                    <select id="semana" aria-label="Semana importada do Tarefa SP"></select>
+            <div class="week-strip">
+                <div class="chip-field">
+                    <span class="field-label" id="chipsSemanaLabel">Semanas</span>
+                    <div class="chips" id="chipsSemana" role="group" aria-labelledby="chipsSemanaLabel"></div>
                 </div>
+                <div class="chip-field" id="presetsSemana">
+                    <span class="field-label">Seleção rápida</span>
+                    <div class="chips">
+                        <button class="chip chip-semana" type="button" data-preset="latest">Última</button>
+                        <button class="chip chip-semana" type="button" data-preset="four">4 últimas</button>
+                        <button class="chip chip-semana" type="button" data-preset="all">Todas</button>
+                    </div>
+                </div>
+                <p class="week-note" id="periodoNota"></p>
+            </div>
+            <div class="filters">
                 <div class="field search">
                     <label for="busca">Buscar escola</label>
                     <input id="busca" type="search" placeholder="Nome ou código da escola" autocomplete="off">
@@ -1664,87 +1704,102 @@ tbody tr.inactive td { color: var(--muted); }
         return partes.length === 3 ? `${partes[2]}.${partes[1]}` : '';
     };
 
-    async function listarSemanasSupabase() {
+    function mapearLinhaTarefa(registro) {
+        const ano = Number(registro.ano);
+        const semanaNum = Number(registro.semana_num);
+        const inicio = registro.periodo_inicio || '';
+        return {
+            chave: `${ano}-${semanaNum}-${inicio}`,
+            ano,
+            semanaNum,
+            inicio,
+            fim: registro.periodo_fim || '',
+            name: registro.escola,
+            code: registro.codigo_escola,
+            enroll: numeroTarefa(registro.matriculas_ativas),
+            students: numeroTarefa(registro.alunos_tarefas),
+            proposed: numeroTarefa(registro.tarefas_propostas),
+            onTime: numeroTarefa(registro.tarefas_prazo),
+            late: numeroTarefa(registro.tarefas_fora_prazo),
+            incomplete: numeroTarefa(registro.tarefas_incompletas),
+            notDone: numeroTarefa(registro.tarefas_nao_realizadas),
+            pctStudents: registro.pct_alunos_tarefas != null ? numeroTarefa(registro.pct_alunos_tarefas) : 0,
+            pctCorrect: registro.pct_acertos != null ? numeroTarefa(registro.pct_acertos) : 0
+        };
+    }
+
+    async function carregarTarefaDoSupabase() {
         if (typeof supabaseClient === 'undefined') return [];
 
         const { data, error } = await supabaseClient
             .from(TABELA_TAREFA_SP)
-            .select('ano, semana_num, semana_label, periodo_inicio, periodo_fim')
-            .order('ano', { ascending: false })
-            .order('semana_num', { ascending: false });
-        if (error) throw error;
-
-        const semanas = [];
-        const vistas = new Set();
-        (data || []).forEach((registro) => {
-            const chave = `${registro.ano}-${registro.semana_num}`;
-            if (vistas.has(chave)) return;
-            vistas.add(chave);
-            semanas.push({
-                ano: registro.ano,
-                semanaNum: registro.semana_num,
-                label: registro.semana_label || `Semana ${String(registro.semana_num).padStart(2, '0')}`,
-                inicio: registro.periodo_inicio,
-                fim: registro.periodo_fim
-            });
-        });
-        return semanas;
-    }
-
-    async function carregarTarefaDoSupabase(ano, semanaNum) {
-        if (typeof supabaseClient === 'undefined') return null;
-
-        const { data, error } = await supabaseClient
-            .from(TABELA_TAREFA_SP)
             .select('*')
-            .eq('ano', ano)
-            .eq('semana_num', semanaNum)
+            .order('periodo_inicio', { ascending: true })
             .order('escola', { ascending: true });
         if (error) throw error;
-        if (!data?.length) return null;
+        return (data || []).map(mapearLinhaTarefa);
+    }
 
-        const schools = data.map((registro) => {
-            const enroll = numeroTarefa(registro.matriculas_ativas);
-            const students = numeroTarefa(registro.alunos_tarefas);
-            const proposed = numeroTarefa(registro.tarefas_propostas);
-            const onTime = numeroTarefa(registro.tarefas_prazo);
-            const late = numeroTarefa(registro.tarefas_fora_prazo);
-            const pctCorrect = numeroTarefa(registro.pct_acertos);
-            const pctDone = registro.pct_tarefas_realizadas != null
-                ? numeroTarefa(registro.pct_tarefas_realizadas)
-                : proposed ? (onTime + late) / proposed : 0;
+    function montarSemanas(linhas) {
+        const mapa = new Map();
+        linhas.forEach((linha) => {
+            if (mapa.has(linha.chave)) return;
+            mapa.set(linha.chave, {
+                chave: linha.chave,
+                ano: linha.ano,
+                semanaNum: linha.semanaNum,
+                label: `Semana ${String(linha.semanaNum).padStart(2, '0')}`,
+                inicio: linha.inicio,
+                fim: linha.fim
+            });
+        });
+        return Array.from(mapa.values())
+            .sort((a, b) => a.inicio.localeCompare(b.inicio) || a.semanaNum - b.semanaNum);
+    }
+
+    function agregarEscolasTarefa(linhas) {
+        const grupos = new Map();
+        linhas.forEach((linha) => {
+            if (!grupos.has(linha.code)) grupos.set(linha.code, []);
+            grupos.get(linha.code).push(linha);
+        });
+
+        return Array.from(grupos.values()).map((registros) => {
+            const ordenados = [...registros].sort((a, b) => a.inicio.localeCompare(b.inicio));
+            const ultimo = ordenados[ordenados.length - 1] || {};
+            const soma = (campo) => ordenados.reduce((total, registro) => total + (registro[campo] || 0), 0);
+
+            const proposed = soma('proposed');
+            const onTime = soma('onTime');
+            const late = soma('late');
+            const concluidas = onTime + late;
+            const pctDone = proposed ? concluidas / proposed : 0;
+            const pctOnTime = proposed ? onTime / proposed : 0;
+            const pctCorrect = concluidas
+                ? ordenados.reduce(
+                    (total, registro) => total + registro.pctCorrect * ((registro.onTime || 0) + (registro.late || 0)),
+                    0
+                ) / concluidas
+                : 0;
 
             return {
-                name: registro.escola,
-                code: registro.codigo_escola,
-                enroll,
-                students,
+                name: ultimo.name,
+                code: ultimo.code,
+                enroll: ultimo.enroll || 0,
+                students: ultimo.students || 0,
                 proposed,
                 onTime,
                 late,
-                incomplete: numeroTarefa(registro.tarefas_incompletas),
-                notDone: numeroTarefa(registro.tarefas_nao_realizadas),
-                pctStudents: registro.pct_alunos_tarefas != null
-                    ? numeroTarefa(registro.pct_alunos_tarefas)
-                    : enroll ? students / enroll : 0,
-                pctOnTime: proposed ? onTime / proposed : 0,
+                incomplete: soma('incomplete'),
+                notDone: soma('notDone'),
+                pctStudents: ultimo.pctStudents || 0,
+                pctOnTime,
                 pctDone,
                 pctCorrect,
-                iq: registro.iq != null
-                    ? numeroTarefa(registro.iq)
-                    : proposed ? (0.5 * (onTime / proposed)) + (0.5 * pctCorrect) : 0
+                iq: proposed ? (0.5 * pctOnTime) + (0.5 * pctCorrect) : 0,
+                semanas: ordenados.length
             };
-        });
-
-        const inicio = dataCurtaTarefa(data[0].periodo_inicio);
-        const fim = dataCurtaTarefa(data[0].periodo_fim);
-
-        return {
-            source: 'Export Tarefa SP',
-            week: data[0].semana_label || `Semana ${String(data[0].semana_num).padStart(2, '0')}`,
-            period: inicio && fim ? `${inicio} a ${fim}` : '',
-            schools
-        };
+        }).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     }
 
     const fmtInt = new Intl.NumberFormat('pt-BR');
@@ -1755,6 +1810,7 @@ tbody tr.inactive td { color: var(--muted); }
 
     const DADOS = { schools: [], source: '', week: '', period: '' };
     const SEMANAS = [];
+    const BRUTOS = [];
 
     const estado = {
         busca: '',
@@ -1764,7 +1820,8 @@ tbody tr.inactive td { color: var(--muted); }
         visao: 'top',
         selecionada: null,
         ordenacao: 'iq',
-        direcao: 'desc'
+        direcao: 'desc',
+        semanas: []
     };
 
     const FAIXAS = [
@@ -2459,10 +2516,15 @@ tbody tr.inactive td { color: var(--muted); }
         estado.selecionada = null;
         estado.ordenacao = 'iq';
         estado.direcao = 'desc';
+        estado.semanas = SEMANAS.length ? [SEMANAS[SEMANAS.length - 1].chave] : [];
         document.getElementById('busca').value = '';
         document.getElementById('metrica').value = 'iq';
         document.getElementById('visao').value = 'top';
-        atualizarFiltros();
+        if (SEMANAS.length) {
+            aplicarSemanas();
+        } else {
+            atualizarFiltros();
+        }
     }
 
     function exportarCsv() {
@@ -2494,7 +2556,13 @@ tbody tr.inactive td { color: var(--muted); }
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'tarefa-sp-semana-01.csv';
+        const sel = semanaSelecionada();
+        const rotuloSemana = sel.length === 1
+            ? `semana-${String(sel[0].semanaNum).padStart(2, '0')}`
+            : sel.length
+                ? `semanas-${String(sel[0].semanaNum).padStart(2, '0')}-a-${String(sel[sel.length - 1].semanaNum).padStart(2, '0')}`
+                : 'semana-01';
+        link.download = `tarefa-sp-${rotuloSemana}.csv`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -2502,10 +2570,31 @@ tbody tr.inactive td { color: var(--muted); }
     }
 
     function ligarEventos() {
-        document.getElementById('semana').addEventListener('change', (evento) => {
-            const chave = evento.target.value;
-            if (!chave) return;
-            carregarDados(chave);
+        document.getElementById('chipsSemana').addEventListener('click', (evento) => {
+            const chip = evento.target.closest('[data-semana]');
+            if (!chip) return;
+            const chave = chip.dataset.semana;
+            const indice = estado.semanas.indexOf(chave);
+            if (indice >= 0) {
+                if (estado.semanas.length === 1) return;
+                estado.semanas.splice(indice, 1);
+            } else {
+                estado.semanas.push(chave);
+            }
+            estado.semanas.sort((a, b) => SEMANAS.findIndex((s) => s.chave === a) - SEMANAS.findIndex((s) => s.chave === b));
+            aplicarSemanas();
+        });
+
+        document.getElementById('presetsSemana').addEventListener('click', (evento) => {
+            const botao = evento.target.closest('[data-preset]');
+            if (!botao) return;
+            const chaves = SEMANAS.map((semana) => semana.chave);
+            const preset = botao.dataset.preset;
+            estado.semanas = preset === 'latest'
+                ? chaves.slice(-1)
+                : preset === 'four' ? chaves.slice(-4) : chaves;
+            if (!estado.semanas.length) estado.semanas = chaves.slice(-1);
+            aplicarSemanas();
         });
 
         document.getElementById('busca').addEventListener('input', (evento) => {
@@ -2627,72 +2716,111 @@ tbody tr.inactive td { color: var(--muted); }
         document.getElementById('dashboard').hidden = true;
     }
 
-    function preencherSeletorSemanas(selecionada) {
-        const seletor = document.getElementById('semana');
-        if (!seletor) return;
-        if (!SEMANAS.length) {
-            seletor.innerHTML = '<option value="">Semana 01 (arquivo local)</option>';
-            seletor.disabled = true;
-            return;
-        }
-        seletor.disabled = false;
-        seletor.innerHTML = SEMANAS.map((semana) => {
-            const periodo = semana.inicio && semana.fim
-                ? `${dataCurtaTarefa(semana.inicio)} — ${dataCurtaTarefa(semana.fim)}`
-                : '';
-            const rotulo = periodo ? `${semana.label} · ${periodo}` : semana.label;
-            return `<option value="${semana.ano}-${semana.semanaNum}">${esc(rotulo)}</option>`;
-        }).join('');
-        if (selecionada) seletor.value = selecionada;
+    function semanaSelecionada() {
+        return SEMANAS.filter((semana) => estado.semanas.indexOf(semana.chave) >= 0);
     }
 
-    async function carregarDados(semanaEscolhida) {
+    function renderChipsSemana() {
+        const container = document.getElementById('chipsSemana');
+        const presets = document.getElementById('presetsSemana');
+        const nota = document.getElementById('periodoNota');
+        if (!container) return;
+
+        if (!SEMANAS.length) {
+            container.innerHTML = '<span class="chip-semana-off">Semana 01 · arquivo local</span>';
+            container.dataset.semanas = '';
+            if (presets) presets.hidden = true;
+            if (nota) {
+                nota.textContent = 'Somente a semana embutida na página. Configure o Supabase para carregar todas as semanas importadas.';
+            }
+            return;
+        }
+
+        if (presets) presets.hidden = false;
+        const identificacao = SEMANAS.map((semana) => semana.chave).join('|');
+        if (container.dataset.semanas !== identificacao) {
+            container.innerHTML = SEMANAS.map((semana) => `
+                <button class="chip chip-semana" type="button" data-semana="${esc(semana.chave)}" aria-pressed="${estado.semanas.indexOf(semana.chave) >= 0}" title="${esc(semana.label + ' · ' + dataCurtaTarefa(semana.inicio) + ' a ' + dataCurtaTarefa(semana.fim))}">${esc(semana.label)}</button>`).join('');
+            container.dataset.semanas = identificacao;
+        }
+        container.querySelectorAll('[data-semana]').forEach((botao) => {
+            botao.setAttribute('aria-pressed', estado.semanas.indexOf(botao.dataset.semana) >= 0);
+        });
+
+        const sel = semanaSelecionada();
+        if (nota) {
+            nota.textContent = sel.length
+                ? `${sel.length} semana${sel.length > 1 ? 's' : ''} selecionada${sel.length > 1 ? 's' : ''} · de ${dataCurtaTarefa(sel[0].inicio)} a ${dataCurtaTarefa(sel[sel.length - 1].fim)} · participação e matrículas da última semana selecionada; produção somada no período.`
+                : 'Nenhuma semana selecionada.';
+        }
+    }
+
+    function aplicarSemanas() {
+        const selecionadas = new Set(estado.semanas);
+        DADOS.schools = agregarEscolasTarefa(BRUTOS.filter((linha) => selecionadas.has(linha.chave)));
+
+        const sel = semanaSelecionada();
+        DADOS.source = 'Export Tarefa SP';
+        DADOS.week = sel.length === 1
+            ? sel[0].label
+            : sel.length
+                ? `Semanas ${String(sel[0].semanaNum).padStart(2, '0')}–${String(sel[sel.length - 1].semanaNum).padStart(2, '0')}`
+                : 'Semana 01';
+        DADOS.period = sel.length
+            ? `${dataCurtaTarefa(sel[0].inicio)} a ${dataCurtaTarefa(sel[sel.length - 1].fim)}`
+            : '01.02 a 07.02';
+
+        estado.selecionada = null;
+        renderChipsSemana();
+        renderTudo();
+    }
+
+    async function carregarDados() {
         const estadoEl = document.getElementById('estado');
         estadoEl.hidden = false;
         estadoEl.classList.remove('error');
-        document.getElementById('estadoTitulo').textContent = 'Carregando a semana';
+        document.getElementById('estadoTitulo').textContent = 'Carregando as semanas';
         document.getElementById('estadoTexto').textContent = 'Buscando os dados do Tarefa SP…';
         document.getElementById('btnTentar').hidden = true;
         document.getElementById('dashboard').hidden = true;
 
         try {
-            let semanas = [];
+            let linhas = null;
             try {
-                semanas = await listarSemanasSupabase();
+                linhas = await carregarTarefaDoSupabase();
             } catch (erroSupabase) {
-                console.warn('Não foi possível carregar as semanas do Tarefa SP no Supabase; usando o JSON local.', erroSupabase);
+                console.warn('Não foi possível carregar o Tarefa SP do Supabase; usando o JSON local.', erroSupabase);
             }
 
-            let dados = null;
-            if (semanas.length) {
-                const chave = semanaEscolhida || `${semanas[0].ano}-${semanas[0].semanaNum}`;
-                const alvo = semanas.find((semana) => `${semana.ano}-${semana.semanaNum}` === chave) || semanas[0];
-                try {
-                    dados = await carregarTarefaDoSupabase(alvo.ano, alvo.semanaNum);
-                } catch (erroSemana) {
-                    console.warn('Não foi possível carregar a semana selecionada no Supabase.', erroSemana);
-                }
-                if (dados) {
-                    SEMANAS.length = 0;
-                    SEMANAS.push(...semanas);
-                    preencherSeletorSemanas(`${alvo.ano}-${alvo.semanaNum}`);
-                }
-            }
-
-            if (!dados) {
-                const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
-                if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-                dados = await resposta.json();
+            if (linhas && linhas.length) {
+                BRUTOS.length = 0;
+                BRUTOS.push(...linhas);
                 SEMANAS.length = 0;
-                preencherSeletorSemanas('');
+                SEMANAS.push(...montarSemanas(linhas));
+
+                const existentes = new Set(SEMANAS.map((semana) => semana.chave));
+                estado.semanas = estado.semanas.filter((chave) => existentes.has(chave));
+                if (!estado.semanas.length) estado.semanas = [SEMANAS[SEMANAS.length - 1].chave];
+
+                aplicarSemanas();
+                document.getElementById('dashboard').hidden = false;
+                estadoEl.hidden = true;
+                return;
             }
+
+            const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            const dados = await resposta.json();
             if (!dados.schools || !dados.schools.length) throw new Error('Base vazia');
 
+            BRUTOS.length = 0;
+            SEMANAS.length = 0;
+            estado.semanas = [];
             DADOS.schools = dados.schools;
             DADOS.source = dados.source || 'Export Tarefa SP';
             DADOS.week = dados.week || 'Semana 01';
             DADOS.period = dados.period || '01.02 a 07.02';
-            estado.selecionada = null;
+            renderChipsSemana();
             document.getElementById('dashboard').hidden = false;
             estadoEl.hidden = true;
             renderTudo();
