@@ -492,6 +492,7 @@ main {
 
 .field.search { flex: 1 1 230px; }
 .field.search input { width: 100%; }
+.field.select-semana { flex: 0 0 190px; }
 .field.select-metrica { flex: 0 0 142px; }
 .field.select-visao { flex: 0 0 160px; }
 
@@ -1422,8 +1423,10 @@ tbody tr.inactive td { color: var(--muted); }
     .filters { gap: 9px; }
     .field.search { flex: 1 1 100%; }
     .chip-field { width: 100%; }
+    .field.select-semana,
     .field.select-metrica,
     .field.select-visao { flex: 1 1 140px; }
+    .field.select-semana select,
     .field.select-metrica select,
     .field.select-visao select { width: 100%; }
     .btn-clear { flex: 1 1 100%; }
@@ -1497,6 +1500,10 @@ tbody tr.inactive td { color: var(--muted); }
 
         <section class="filter-panel" aria-label="Filtros do painel">
             <div class="filters">
+                <div class="field select-semana">
+                    <label for="semana">Semana</label>
+                    <select id="semana" aria-label="Semana importada do Tarefa SP"></select>
+                </div>
                 <div class="field search">
                     <label for="busca">Buscar escola</label>
                     <input id="busca" type="search" placeholder="Nome ou código da escola" autocomplete="off">
@@ -1657,24 +1664,41 @@ tbody tr.inactive td { color: var(--muted); }
         return partes.length === 3 ? `${partes[2]}.${partes[1]}` : '';
     };
 
-    async function carregarTarefaDoSupabase() {
-        if (typeof supabaseClient === 'undefined') return null;
+    async function listarSemanasSupabase() {
+        if (typeof supabaseClient === 'undefined') return [];
 
-        const { data: semanas, error: erroSemana } = await supabaseClient
+        const { data, error } = await supabaseClient
             .from(TABELA_TAREFA_SP)
             .select('ano, semana_num, semana_label, periodo_inicio, periodo_fim')
             .order('ano', { ascending: false })
-            .order('semana_num', { ascending: false })
-            .limit(1);
-        if (erroSemana) throw erroSemana;
-        const semana = semanas?.[0];
-        if (!semana) return null;
+            .order('semana_num', { ascending: false });
+        if (error) throw error;
+
+        const semanas = [];
+        const vistas = new Set();
+        (data || []).forEach((registro) => {
+            const chave = `${registro.ano}-${registro.semana_num}`;
+            if (vistas.has(chave)) return;
+            vistas.add(chave);
+            semanas.push({
+                ano: registro.ano,
+                semanaNum: registro.semana_num,
+                label: registro.semana_label || `Semana ${String(registro.semana_num).padStart(2, '0')}`,
+                inicio: registro.periodo_inicio,
+                fim: registro.periodo_fim
+            });
+        });
+        return semanas;
+    }
+
+    async function carregarTarefaDoSupabase(ano, semanaNum) {
+        if (typeof supabaseClient === 'undefined') return null;
 
         const { data, error } = await supabaseClient
             .from(TABELA_TAREFA_SP)
             .select('*')
-            .eq('ano', semana.ano)
-            .eq('semana_num', semana.semana_num)
+            .eq('ano', ano)
+            .eq('semana_num', semanaNum)
             .order('escola', { ascending: true });
         if (error) throw error;
         if (!data?.length) return null;
@@ -1712,14 +1736,13 @@ tbody tr.inactive td { color: var(--muted); }
             };
         });
 
-        const periodo = semana.periodo_inicio && semana.periodo_fim
-            ? `${dataCurtaTarefa(semana.periodo_inicio)} a ${dataCurtaTarefa(semana.periodo_fim)}`
-            : '';
+        const inicio = dataCurtaTarefa(data[0].periodo_inicio);
+        const fim = dataCurtaTarefa(data[0].periodo_fim);
 
         return {
             source: 'Export Tarefa SP',
-            week: semana.semana_label || `Semana ${String(semana.semana_num).padStart(2, '0')}`,
-            period: periodo,
+            week: data[0].semana_label || `Semana ${String(data[0].semana_num).padStart(2, '0')}`,
+            period: inicio && fim ? `${inicio} a ${fim}` : '',
             schools
         };
     }
@@ -1731,6 +1754,7 @@ tbody tr.inactive td { color: var(--muted); }
     const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
     const DADOS = { schools: [], source: '', week: '', period: '' };
+    const SEMANAS = [];
 
     const estado = {
         busca: '',
@@ -2478,6 +2502,12 @@ tbody tr.inactive td { color: var(--muted); }
     }
 
     function ligarEventos() {
+        document.getElementById('semana').addEventListener('change', (evento) => {
+            const chave = evento.target.value;
+            if (!chave) return;
+            carregarDados(chave);
+        });
+
         document.getElementById('busca').addEventListener('input', (evento) => {
             estado.busca = evento.target.value;
             atualizarFiltros();
@@ -2597,7 +2627,26 @@ tbody tr.inactive td { color: var(--muted); }
         document.getElementById('dashboard').hidden = true;
     }
 
-    async function carregarDados() {
+    function preencherSeletorSemanas(selecionada) {
+        const seletor = document.getElementById('semana');
+        if (!seletor) return;
+        if (!SEMANAS.length) {
+            seletor.innerHTML = '<option value="">Semana 01 (arquivo local)</option>';
+            seletor.disabled = true;
+            return;
+        }
+        seletor.disabled = false;
+        seletor.innerHTML = SEMANAS.map((semana) => {
+            const periodo = semana.inicio && semana.fim
+                ? `${dataCurtaTarefa(semana.inicio)} — ${dataCurtaTarefa(semana.fim)}`
+                : '';
+            const rotulo = periodo ? `${semana.label} · ${periodo}` : semana.label;
+            return `<option value="${semana.ano}-${semana.semanaNum}">${esc(rotulo)}</option>`;
+        }).join('');
+        if (selecionada) seletor.value = selecionada;
+    }
+
+    async function carregarDados(semanaEscolhida) {
         const estadoEl = document.getElementById('estado');
         estadoEl.hidden = false;
         estadoEl.classList.remove('error');
@@ -2607,17 +2656,35 @@ tbody tr.inactive td { color: var(--muted); }
         document.getElementById('dashboard').hidden = true;
 
         try {
-            let dados = null;
+            let semanas = [];
             try {
-                dados = await carregarTarefaDoSupabase();
+                semanas = await listarSemanasSupabase();
             } catch (erroSupabase) {
-                console.warn('Não foi possível carregar o Tarefa SP do Supabase; usando o JSON local.', erroSupabase);
+                console.warn('Não foi possível carregar as semanas do Tarefa SP no Supabase; usando o JSON local.', erroSupabase);
+            }
+
+            let dados = null;
+            if (semanas.length) {
+                const chave = semanaEscolhida || `${semanas[0].ano}-${semanas[0].semanaNum}`;
+                const alvo = semanas.find((semana) => `${semana.ano}-${semana.semanaNum}` === chave) || semanas[0];
+                try {
+                    dados = await carregarTarefaDoSupabase(alvo.ano, alvo.semanaNum);
+                } catch (erroSemana) {
+                    console.warn('Não foi possível carregar a semana selecionada no Supabase.', erroSemana);
+                }
+                if (dados) {
+                    SEMANAS.length = 0;
+                    SEMANAS.push(...semanas);
+                    preencherSeletorSemanas(`${alvo.ano}-${alvo.semanaNum}`);
+                }
             }
 
             if (!dados) {
                 const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
                 if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
                 dados = await resposta.json();
+                SEMANAS.length = 0;
+                preencherSeletorSemanas('');
             }
             if (!dados.schools || !dados.schools.length) throw new Error('Base vazia');
 
@@ -2625,6 +2692,7 @@ tbody tr.inactive td { color: var(--muted); }
             DADOS.source = dados.source || 'Export Tarefa SP';
             DADOS.week = dados.week || 'Semana 01';
             DADOS.period = dados.period || '01.02 a 07.02';
+            estado.selecionada = null;
             document.getElementById('dashboard').hidden = false;
             estadoEl.hidden = true;
             renderTudo();
