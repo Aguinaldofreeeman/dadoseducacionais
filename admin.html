@@ -401,6 +401,31 @@
                 <button type="button" id="leia-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Tarefa SP -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha - Tarefa SP</h3>
+            </div>
+            <div class="form-group">
+                <label for="tarefa-ano">Ano Letivo Referente à Planilha</label>
+                <select id="tarefa-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                </select>
+                <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
+            </div>
+            <div class="form-group">
+                <label for="tarefa-file">Planilha do Tarefa SP (.xlsx, .xls ou .csv)</label>
+                <input type="file" id="tarefa-file" accept=".xlsx,.xls,.csv">
+                <span class="help-text">Aceita a exportação com as colunas Escola (com código no formato "NOME - CÓDIGO"), Matrículas Ativas, Alunos com Tarefas Realizadas, % Alunos com Tarefas Realizadas, Tarefas Propostas, Tarefas Realizadas no Prazo, Tarefas Realizadas fora do Prazo, Tarefas Incompletas realizadas, Tarefas não Realizadas, % Tarefas Realizadas, % Acertos e Índice de Qualidade (IQ). A semana e o período são lidos do filtro IntervaloUltimaSemana ou do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx"). Reenvios atualizam a mesma escola no ano e semana, sem apagar as outras semanas.</span>
+            </div>
+            <div id="tarefa-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="tarefa-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="tarefa-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <div class="card">
             <div class="modal-header">
                 <h3>Importar CSV - Robótica</h3>
@@ -1962,6 +1987,44 @@
             inteiros: ['total_matriculas', 'alunos_ativos', 'paginas_lidas', 'livros_concluidos'],
             numericos: ['percentual_ativos', 'percentual_acertos', 'indice_questoes_corretas', 'tempo_leitura_min', 'tempo_semanal_aluno_min']
         },
+        tarefa: {
+            tabela: 'resultados_tarefa_sp',
+            campos: {
+                escola: ['escola', 'unidade escolar', 'nome da escola'],
+                codigo_escola: [
+                    'codigo_escola', 'codigo da escola', 'codigo escola', 'codigo da unidade escolar',
+                    'codigo unidade escolar', 'codigo da ue', 'codigo ue', 'cod escola',
+                    'cod. escola', 'cod ue', 'cie', 'codigo cie', 'codigo inep', 'inep'
+                ],
+                matriculas_ativas: ['matriculas_ativas', 'matriculas ativas', 'matriculas'],
+                alunos_tarefas: ['alunos_tarefas', 'alunos com tarefas realizadas', 'alunos com tarefas'],
+                pct_alunos_tarefas: [
+                    'pct_alunos_tarefas', '% alunos com tarefas realizadas',
+                    'percentual alunos com tarefas realizadas', 'percentual de alunos com tarefas realizadas',
+                    '% alunos com tarefas'
+                ],
+                tarefas_propostas: ['tarefas_propostas', 'tarefas propostas', 'total de tarefas propostas'],
+                tarefas_prazo: ['tarefas_prazo', 'tarefas realizadas no prazo', 'tarefas no prazo', 'realizadas no prazo'],
+                tarefas_fora_prazo: [
+                    'tarefas_fora_prazo', 'tarefas realizadas fora do prazo',
+                    'tarefas fora do prazo', 'realizadas fora do prazo'
+                ],
+                tarefas_incompletas: ['tarefas_incompletas', 'tarefas incompletas realizadas', 'tarefas incompletas'],
+                tarefas_nao_realizadas: ['tarefas_nao_realizadas', 'tarefas nao realizadas', 'tarefas não realizadas'],
+                pct_tarefas_realizadas: [
+                    'pct_tarefas_realizadas', '% tarefas realizadas',
+                    'percentual tarefas realizadas', 'percentual de tarefas realizadas'
+                ],
+                pct_acertos: ['pct_acertos', '% acertos', 'percentual acertos', 'percentual de acertos', 'taxa de acertos', 'taxa de acerto'],
+                iq: ['iq', 'indice de qualidade (iq)', 'indice de qualidade', 'índice de qualidade (iq)', 'índice de qualidade']
+            },
+            obrigatorios: ['escola', 'matriculas_ativas'],
+            inteiros: [
+                'matriculas_ativas', 'alunos_tarefas', 'tarefas_propostas', 'tarefas_prazo',
+                'tarefas_fora_prazo', 'tarefas_incompletas', 'tarefas_nao_realizadas'
+            ],
+            numericos: ['pct_alunos_tarefas', 'pct_tarefas_realizadas', 'pct_acertos', 'iq']
+        },
         robotica: {
             tabela: 'resultados_robotica',
             campos: {
@@ -2101,7 +2164,18 @@
             const candidatas = {};
             Object.entries(config.campos).forEach(([campo, aliases]) => {
                 const aceitos = aliases.map(csvNormalizar);
-                candidatas[campo] = cabecalho.findIndex(nome => aceitos.includes(nome));
+                const encontrados = [];
+                cabecalho.forEach((nome, indice) => {
+                    if (aceitos.includes(nome)) encontrados.push(indice);
+                });
+                // "% Alunos..." e "Alunos..." normalizam igual. Prefere a coluna
+                // com "%" para campos percentuais e a sem "%" para contagens.
+                const preferePercentual = campo.startsWith('pct_') || campo.startsWith('percentual');
+                const comPercentual = encontrados.filter(indice => String(linha[indice] ?? '').includes('%'));
+                const semPercentual = encontrados.filter(indice => !String(linha[indice] ?? '').includes('%'));
+                candidatas[campo] = preferePercentual
+                    ? (comPercentual[0] ?? encontrados[0] ?? -1)
+                    : (semPercentual[0] ?? encontrados[0] ?? -1);
             });
             const faltantes = config.obrigatorios.filter(campo => candidatas[campo] < 0);
             if (linhaCabecalho < 0) {
@@ -2151,7 +2225,7 @@
             if (/^total$/i.test(registro.escola)) continue;
             if ((tipo === 'robotica' || tipo === 'robotica_mensal') && csvNormalizar(registro.escola) === 'total') continue;
 
-            if (tipo === 'presenca' || tipo === 'apoio' || tipo === 'leia') {
+            if (tipo === 'presenca' || tipo === 'apoio' || tipo === 'leia' || tipo === 'tarefa') {
                 registro.periodo = String(registro.periodo ?? '').trim();
                 if (!registro.periodo) registro.periodo = periodoInferido;
                 registro.periodo_label = String(registro.periodo_label || nomeArquivoLabel || registro.periodo).trim();
@@ -2168,10 +2242,11 @@
                     if (codigoEncontrado) registro.codigo_escola = codigoEncontrado;
                 }
                 if (!registro.periodo || !registro.codigo_escola) {
+                    const filtroSemana = tipo === 'tarefa' ? 'IntervaloUltimaSemana' : 'IntervaloSemanaAtual';
                     throw new Error(
                         `Linha ${i + 1}: não foi possível identificar o período ou o código da escola. ` +
                         'Informe as colunas periodo e codigo_escola ou inclua o código no fim do nome ' +
-                        'da escola e o filtro IntervaloSemanaAtual no arquivo.'
+                        `da escola e o filtro ${filtroSemana} no arquivo.`
                     );
                 }
                 if (tipo === 'presenca') {
@@ -2262,6 +2337,10 @@
                 const anoLeia = document.getElementById('leia-ano')?.value;
                 if (!anoLeia) { preview.textContent = 'Selecione o ano referente à planilha.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
             }
+            if (tipo === 'tarefa') {
+                const anoTarefa = document.getElementById('tarefa-ano')?.value;
+                if (!anoTarefa) { preview.textContent = 'Selecione o ano referente à planilha.'; preview.className = 'msg error'; preview.style.display = 'block'; return; }
+            }
             if (tipo === 'robotica_mensal') {
                 const anoMensal = document.getElementById('robotica_mensal-ano')?.value;
                 const mesMensal = document.getElementById('robotica_mensal-mes')?.value;
@@ -2327,6 +2406,61 @@
                         });
                         window.CONTEXTO_LEIA = { ano: anoLeia, semana: semanaLeia, inicio, fim };
                     }
+                    if (tipo === 'tarefa') {
+                        const anoTarefa = Number(document.getElementById('tarefa-ano').value);
+                        const metadadosTarefa = linhas.flat().map(c => String(c ?? '')).join('\n');
+                        const intervaloTarefa = metadadosTarefa.match(/intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i);
+                        const intervaloTarefaStr = intervaloTarefa ? intervaloTarefa[1].trim() : '';
+                        const periodoNoArquivo = String(arquivo.name || '').match(/(\d{1,2})\s*[-–—]\s*(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i);
+                        const semanaNoIntervalo = intervaloTarefaStr.match(/^(\d{1,2})\s*[-–—]/);
+                        const semanaTarefa = semanaNoIntervalo
+                            ? Number(semanaNoIntervalo[1])
+                            : periodoNoArquivo ? Number(periodoNoArquivo[1]) : null;
+                        if (!semanaTarefa) {
+                            preview.textContent = 'Não foi possível inferir a semana. Verifique o nome do arquivo ou o filtro IntervaloUltimaSemana.';
+                            preview.className = 'msg error';
+                            preview.style.display = 'block';
+                            return;
+                        }
+                        let rangeMatch = intervaloTarefaStr.match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+                        if (!rangeMatch && periodoNoArquivo) {
+                            rangeMatch = periodoNoArquivo[2].match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+                        }
+                        if (!rangeMatch) {
+                            preview.textContent = 'Não foi possível inferir o período (datas) do arquivo. Verifique o nome do arquivo ou o filtro IntervaloUltimaSemana.';
+                            preview.className = 'msg error';
+                            preview.style.display = 'block';
+                            return;
+                        }
+                        const [, d1, m1, d2, m2] = rangeMatch;
+                        const inicio = `${anoTarefa}-${String(m1).padStart(2, '0')}-${String(d1).padStart(2, '0')}`;
+                        const fim = `${anoTarefa}-${String(m2).padStart(2, '0')}-${String(d2).padStart(2, '0')}`;
+                        const semanaLabel = `Semana ${String(semanaTarefa).padStart(2, '0')}`;
+                        registros.forEach(registro => {
+                            registro.ano = anoTarefa;
+                            registro.semana_num = semanaTarefa;
+                            registro.semana_label = semanaLabel;
+                            registro.periodo_inicio = inicio;
+                            registro.periodo_fim = fim;
+                            registro.fonte_arquivo = arquivo.name;
+                            delete registro.periodo;
+                            delete registro.periodo_label;
+                            ['pct_alunos_tarefas', 'pct_tarefas_realizadas', 'pct_acertos', 'iq'].forEach(campo => {
+                                if (registro[campo] != null && registro[campo] > 1.5) registro[campo] /= 100;
+                            });
+                            if (registro.pct_alunos_tarefas == null && registro.matriculas_ativas > 0 && registro.alunos_tarefas != null) {
+                                registro.pct_alunos_tarefas = registro.alunos_tarefas / registro.matriculas_ativas;
+                            }
+                            if (registro.pct_tarefas_realizadas == null && registro.tarefas_propostas > 0) {
+                                registro.pct_tarefas_realizadas =
+                                    ((registro.tarefas_prazo || 0) + (registro.tarefas_fora_prazo || 0)) / registro.tarefas_propostas;
+                            }
+                            if (registro.iq == null && registro.pct_acertos != null && registro.tarefas_propostas > 0) {
+                                registro.iq = 0.5 * ((registro.tarefas_prazo || 0) / registro.tarefas_propostas) + 0.5 * registro.pct_acertos;
+                            }
+                        });
+                        window.CONTEXTO_TAREFA = { ano: anoTarefa, semana: semanaTarefa, semanaLabel, inicio, fim };
+                    }
                     if (tipo === 'robotica_mensal') {
                         mensalAno = Number(document.getElementById('robotica_mensal-ano').value);
                         mensalMes = Number(document.getElementById('robotica_mensal-mes').value);
@@ -2350,7 +2484,11 @@
                             ? 'Os registros serão adicionados aos anos e semanas existentes; escola, ano e semana já cadastrados serão atualizados.'
                             : tipo === 'robotica_mensal'
                                 ? `Os registros substituirão apenas os dados de ${MESES_ROBOTICA[mensalMes - 1]} de ${mensalAno}.`
-                                : 'A confirmação substituirá todos os resultados atuais de Robótica.';
+                                : tipo === 'tarefa'
+                                    ? `Os registros substituirão apenas a ${window.CONTEXTO_TAREFA.semanaLabel} de ${window.CONTEXTO_TAREFA.ano}; as demais semanas serão preservadas.`
+                                    : tipo === 'leia'
+                                        ? `Os registros substituirão apenas a semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}; as demais semanas serão preservadas.`
+                                        : 'A confirmação substituirá todos os resultados atuais de Robótica.';
                     preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">${destinoImportacao}</span><ul>${amostra}</ul>`;
                     preview.className = 'msg';
                     preview.style.display = 'block';
@@ -2441,6 +2579,16 @@
                     if (erroRemocao) throw erroRemocao;
                     dadosRemovidos = true;
                 }
+                if (tipo === 'tarefa') {
+                    const ctx = window.CONTEXTO_TAREFA;
+                    const { error: erroRemocao } = await supabaseClient
+                        .from(config.tabela)
+                        .delete()
+                        .eq('ano', ctx.ano)
+                        .eq('semana_num', ctx.semana);
+                    if (erroRemocao) throw erroRemocao;
+                    dadosRemovidos = true;
+                }
 
                 const tamanhoLote = 250;
                 for (let i = 0; i < registros.length; i += tamanhoLote) {
@@ -2460,7 +2608,11 @@
                         ? `Importação concluída: ${registros.length} registros adicionados ou atualizados em ${config.tabela} para o ano ${anoApoio}. Os demais anos e semanas foram preservados.`
                         : tipo === 'robotica_mensal'
                             ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para ${MESES_ROBOTICA[periodoMensal.mes - 1]} de ${periodoMensal.ano}. Os demais meses foram preservados.`
-                            : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
+                            : tipo === 'tarefa'
+                                ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para a ${window.CONTEXTO_TAREFA.semanaLabel} de ${window.CONTEXTO_TAREFA.ano}. As demais semanas foram preservadas.`
+                                : tipo === 'leia'
+                                    ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para a semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}. As demais semanas foram preservadas.`
+                                    : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
                 preview.className = 'msg success';
                 input.value = '';
                 csvDadosPendentes[tipo] = null;
@@ -2473,12 +2625,18 @@
                         ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-apoio-presencial.sql no SQL Editor desse mesmo projeto e tente novamente.`
                         : tipo === 'robotica_mensal'
                             ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-robotica-mensal.sql no SQL Editor desse mesmo projeto e tente novamente.`
-                            : ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Para Aluno Presente, execute supabase-resultados-presenca.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                            : tipo === 'tarefa'
+                                ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute supabase-resultados-tarefa-sp.sql no SQL Editor desse mesmo projeto e tente novamente.`
+                                : tipo === 'leia'
+                                    ? ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Execute o SQL correspondente ao Leia SP no SQL Editor desse mesmo projeto e tente novamente.`
+                                    : ` A tabela public.${config.tabela} não foi encontrada no projeto Supabase conectado. Para Aluno Presente, execute supabase-resultados-presenca.sql no SQL Editor desse mesmo projeto e tente novamente.`
                     : '';
                 const avisoParcial = dadosRemovidos
                     ? tipo === 'robotica_mensal'
                         ? ' Os dados do mês selecionado já foram removidos e podem estar incompletos; reenvie a planilha após corrigir o problema.'
-                        : ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.'
+                        : tipo === 'tarefa' || tipo === 'leia'
+                            ? ' Os dados da semana selecionada já foram removidos e podem estar incompletos; reenvie a planilha após corrigir o problema.'
+                            : ' A tabela já foi limpa e pode conter apenas parte dos novos dados; reenvie o CSV após corrigir o problema.'
                     : '';
                 preview.textContent = `Erro ao gravar no Supabase: ${erro.message}${detalheErro}${avisoParcial}`;
                 preview.className = 'msg error';
@@ -3085,6 +3243,7 @@
     configurarImportadorCsv('robotica');
     configurarImportadorCsv('robotica_mensal');
     configurarImportadorCsv('leia');
+    configurarImportadorCsv('tarefa');
 
 </script>
 </body>

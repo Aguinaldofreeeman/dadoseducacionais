@@ -1613,6 +1613,85 @@ tbody tr.inactive td { color: var(--muted); }
 <script src="config.js"></script>
 <script>
     const FONTE_DADOS = 'dados/tarefa-sp-semana-01.json';
+    const TABELA_TAREFA_SP = 'resultados_tarefa_sp';
+
+    const numeroTarefa = (valor) => {
+        const numero = Number(valor);
+        return Number.isFinite(numero) ? numero : 0;
+    };
+
+    const dataCurtaTarefa = (data) => {
+        const texto = String(data || '');
+        const partes = texto.slice(0, 10).split('-');
+        return partes.length === 3 ? `${partes[2]}.${partes[1]}` : '';
+    };
+
+    async function carregarTarefaDoSupabase() {
+        if (typeof supabaseClient === 'undefined') return null;
+
+        const { data: semanas, error: erroSemana } = await supabaseClient
+            .from(TABELA_TAREFA_SP)
+            .select('ano, semana_num, semana_label, periodo_inicio, periodo_fim')
+            .order('ano', { ascending: false })
+            .order('semana_num', { ascending: false })
+            .limit(1);
+        if (erroSemana) throw erroSemana;
+        const semana = semanas?.[0];
+        if (!semana) return null;
+
+        const { data, error } = await supabaseClient
+            .from(TABELA_TAREFA_SP)
+            .select('*')
+            .eq('ano', semana.ano)
+            .eq('semana_num', semana.semana_num)
+            .order('escola', { ascending: true });
+        if (error) throw error;
+        if (!data?.length) return null;
+
+        const schools = data.map((registro) => {
+            const enroll = numeroTarefa(registro.matriculas_ativas);
+            const students = numeroTarefa(registro.alunos_tarefas);
+            const proposed = numeroTarefa(registro.tarefas_propostas);
+            const onTime = numeroTarefa(registro.tarefas_prazo);
+            const late = numeroTarefa(registro.tarefas_fora_prazo);
+            const pctCorrect = numeroTarefa(registro.pct_acertos);
+            const pctDone = registro.pct_tarefas_realizadas != null
+                ? numeroTarefa(registro.pct_tarefas_realizadas)
+                : proposed ? (onTime + late) / proposed : 0;
+
+            return {
+                name: registro.escola,
+                code: registro.codigo_escola,
+                enroll,
+                students,
+                proposed,
+                onTime,
+                late,
+                incomplete: numeroTarefa(registro.tarefas_incompletas),
+                notDone: numeroTarefa(registro.tarefas_nao_realizadas),
+                pctStudents: registro.pct_alunos_tarefas != null
+                    ? numeroTarefa(registro.pct_alunos_tarefas)
+                    : enroll ? students / enroll : 0,
+                pctOnTime: proposed ? onTime / proposed : 0,
+                pctDone,
+                pctCorrect,
+                iq: registro.iq != null
+                    ? numeroTarefa(registro.iq)
+                    : proposed ? (0.5 * (onTime / proposed)) + (0.5 * pctCorrect) : 0
+            };
+        });
+
+        const periodo = semana.periodo_inicio && semana.periodo_fim
+            ? `${dataCurtaTarefa(semana.periodo_inicio)} a ${dataCurtaTarefa(semana.periodo_fim)}`
+            : '';
+
+        return {
+            source: 'Export Tarefa SP',
+            week: semana.semana_label || `Semana ${String(semana.semana_num).padStart(2, '0')}`,
+            period: periodo,
+            schools
+        };
+    }
 
     const fmtInt = new Intl.NumberFormat('pt-BR');
     const pct = (v) => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
@@ -2497,9 +2576,18 @@ tbody tr.inactive td { color: var(--muted); }
         document.getElementById('dashboard').hidden = true;
 
         try {
-            const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
-            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-            const dados = await resposta.json();
+            let dados = null;
+            try {
+                dados = await carregarTarefaDoSupabase();
+            } catch (erroSupabase) {
+                console.warn('Não foi possível carregar o Tarefa SP do Supabase; usando o JSON local.', erroSupabase);
+            }
+
+            if (!dados) {
+                const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
+                if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+                dados = await resposta.json();
+            }
             if (!dados.schools || !dados.schools.length) throw new Error('Base vazia');
 
             DADOS.schools = dados.schools;
@@ -2513,7 +2601,7 @@ tbody tr.inactive td { color: var(--muted); }
             console.error(erro);
             mostrarErro(
                 'Não foi possível carregar os dados',
-                'Verifique a conexão e tente novamente. Os dados da semana ficam em dados/tarefa-sp-semana-01.json.'
+                'Verifique a conexão e tente novamente. Os dados da semana ficam no Supabase e, como fallback, em dados/tarefa-sp-semana-01.json.'
             );
         }
     }

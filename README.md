@@ -40,9 +40,10 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `provapaulista.html` | autenticado | Porta de entrada do módulo Prova Paulista |
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
 | `redacao.html` | autenticado | **Redação Paulista**: painel regional (evolução e top 10 da última quinzena), painel individual por escola (KPIs, evolução, insights e mapa de calor) e matriz escola × quinzena completa |
+| `tarefa-sp.html` | autenticado | **Tarefa SP**: participação, conclusão, acertos e IQ por escola, ranking, faixas de IQ e tabela semanal |
 | `resultados-presenca.html` | autenticado | **Aluno Presente**: presença, aulas e evolução por escola e período |
 | `Robotica_Marilia.html` | autenticado | **Robótica**: indicadores de atividades, acertos e notas por escola |
-| `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente e Robótica) |
+| `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente, Leia SP, Tarefa SP e Robótica) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
 
@@ -105,6 +106,25 @@ não deve ser lido como taxa de 0–100%) · `nota` (nota das produções textua
     linha `Filtros aplicados` indicando o intervalo) — substitui apenas aquela quinzena.
 - `redacao.html` lê a tabela e, se ela estiver vazia ou indisponível, usa o `BAKE` embutido
   (gerado de `csv/REDACAO_QUINZENAL.csv`, 50 escolas × 21 quinzenas).
+
+### `resultados_tarefa_sp` — Tarefa SP (semanal)
+
+Uma linha por **ano × semana × escola**. Estrutura criada por `supabase-resultados-tarefa-sp.sql`
+(executar uma vez no SQL Editor do projeto configurado em `config.js`).
+
+`ano` · `semana_num` · `semana_label` · `periodo_inicio` · `periodo_fim` · `codigo_escola` ·
+`escola` · `matriculas_ativas` · `alunos_tarefas` · `pct_alunos_tarefas` · `tarefas_propostas` ·
+`tarefas_prazo` · `tarefas_fora_prazo` · `tarefas_incompletas` · `tarefas_nao_realizadas` ·
+`pct_tarefas_realizadas` · `pct_acertos` · `iq` · `fonte_arquivo` · `created_at`.
+
+- Importação em `admin.html` → **Importar Planilha - Tarefa SP**. Selecione o ano, envie o
+  `.xlsx`/`.xls`/`.csv` e confirme. A semana e as datas são lidas do filtro
+  `IntervaloUltimaSemana` ou do nome do arquivo (ex.: `01 - 01.02 a 07.02.xlsx`).
+- Reimportar a mesma semana substitui apenas os registros daquele ano/semana; as demais semanas
+  são preservadas. A linha `Filtros aplicados` é ignorada e escolas sem tarefas entram com os
+  indicadores nulos (apenas matrículas).
+- `tarefa-sp.html` lê a semana mais recente da tabela e usa `dados/tarefa-sp-semana-01.json`
+  como fallback quando a tabela está vazia ou indisponível.
 
 ### `resultados_presenca` e `resultados_robotica`
 
@@ -179,6 +199,7 @@ Políticas ativas:
 | `resultados_alura` | autenticados | **ADM** | **ADM** |
 | `resultados_presenca` | autenticados | **ADM ativo** | **ADM ativo** |
 | `resultados_robotica` | autenticados | **ADM ativo** | **ADM ativo** |
+| `resultados_tarefa_sp` | público | **ADM ativo** | **ADM ativo** |
 | `perfis_usuarios` | autenticados | autenticados | autenticados |
 
 > A exclusão é liberada só para ADM porque o importador precisa limpar o ano antes de gravar.
