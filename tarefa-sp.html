@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarefa SP - Dados Educacionais</title>
+    <link rel="stylesheet" href="css/home-button.css">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
+        header { background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 22px; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        main { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
+
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .card p { font-size: 14px; color: #64748b; line-height: 1.6; }
+        .btn-action { display: inline-block; background-color: #0284c7; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; margin-top: 15px; }
+        .btn-action:hover { background-color: #0369a1; }
+        .status-box { margin-top: 20px; padding: 14px 16px; border-radius: 6px; background-color: #e0f2fe; border: 1px solid #7dd3fc; color: #075985; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tarefa SP</h1>
+        <div class="header-actions">
+            <a href="index.html" class="home-button">Início</a>
+            <button id="btn-sair" class="btn-logout">Sair</button>
+        </div>
+    </header>
+    <main>
+        <div class="card">
+            <h2>Módulo Tarefa SP</h2>
+            <p>Acompanhamento das tarefas e atividades da plataforma Tarefa SP por escola e turma da Unidade Regional de Ensino de Marília.</p>
+            <div class="status-box">
+                Página inicial do módulo. Os indicadores e filtros de Tarefa SP serão disponibilizados aqui.
+            </div>
+            <a href="index.html" class="btn-action">&larr; Voltar ao painel</a>
+        </div>
+    </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // Proteção de rota não autenticada
+    async function verificarSessao() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+        }
+    }
+    verificarSessao();
+
+    document.getElementById('btn-sair').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+</script>
+</body>
+</html>
