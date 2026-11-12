@@ -3,41 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarefa SP - Dados Educacionais</title>
-    <link rel="stylesheet" href="css/home-button.css">
+    <title>Tarefa SP — Dados Educacionais</title>
+    <meta name="description" content="Módulo Tarefa SP: tarefas e atividades da plataforma por escola e turma na Unidade Regional de Ensino de Marília.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
-        header { background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        main { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
+        :root {
+            --paper: #fbfcfa;
+            --desk: #edf1ec;
+            --ink: #13222e;
+            --graphite: #566872;
+            --rule: #d8e1d9;
+            --margin-rule: #e0b3ad;
+            --stamp: #9e2b24;
+            --teal: #0e6f66;
+        }
 
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .card p { font-size: 14px; color: #64748b; line-height: 1.6; }
-        .btn-action { display: inline-block; background-color: #0284c7; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; margin-top: 15px; }
-        .btn-action:hover { background-color: #0369a1; }
-        .status-box { margin-top: 20px; padding: 14px 16px; border-radius: 6px; background-color: #e0f2fe; border: 1px solid #7dd3fc; color: #075985; font-size: 14px; }
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--desk);
+            color: var(--ink);
+            font: 400 1rem/1.6 "Figtree", "Segoe UI", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection { background: rgba(14, 111, 102, .18); }
+
+        .topbar {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 26px 22px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            font-size: .875rem;
+        }
+
+        .back {
+            color: var(--ink);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+        }
+
+        .back:hover { border-bottom-color: var(--ink); }
+
+        .quiet {
+            appearance: none;
+            background: none;
+            border: 0;
+            padding: 6px 2px;
+            color: var(--graphite);
+            font: 500 .875rem/1 "Figtree", system-ui, sans-serif;
+            cursor: pointer;
+        }
+
+        .quiet:hover { color: var(--ink); }
+
+        .sheet {
+            position: relative;
+            max-width: 980px;
+            margin: 22px auto 56px;
+            padding: clamp(34px, 6vw, 64px) clamp(24px, 6vw, 72px) 40px clamp(46px, 9vw, 112px);
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            box-shadow: 0 1px 2px rgba(19, 34, 46, .04), 0 30px 70px -30px rgba(19, 34, 46, .22);
+        }
+
+        .margin-rule {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: clamp(26px, 6vw, 72px);
+            width: 1px;
+            background: var(--margin-rule);
+            opacity: .75;
+        }
+
+        h1, h2 {
+            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            text-wrap: balance;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(3.1rem, 9vw, 5.6rem);
+            font-weight: 700;
+            line-height: .92;
+            letter-spacing: -.035em;
+        }
+
+        .lede {
+            max-width: 46ch;
+            margin: 22px 0 0;
+            font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+            line-height: 1.55;
+            color: var(--graphite);
+        }
+
+        .stamp {
+            position: absolute;
+            top: clamp(34px, 6vw, 64px);
+            right: clamp(24px, 6vw, 72px);
+            margin: 0;
+            padding: 12px 18px 10px;
+            border: 2px solid var(--stamp);
+            border-radius: 3px;
+            color: var(--stamp);
+            text-align: center;
+            text-transform: uppercase;
+            transform: rotate(-6deg);
+            opacity: .95;
+        }
+
+        .stamp::after {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            border: 1px solid currentColor;
+            border-radius: 1px;
+            opacity: .45;
+        }
+
+        .stamp span {
+            display: block;
+            font: 700 .74rem/1.25 "Figtree", system-ui, sans-serif;
+            letter-spacing: .2em;
+        }
+
+        .stamp small {
+            display: block;
+            margin-top: 5px;
+            font: 600 .62rem/1 "Figtree", system-ui, sans-serif;
+            letter-spacing: .12em;
+            opacity: .8;
+        }
+
+        .block {
+            margin-top: 52px;
+            padding-top: 28px;
+            border-top: 1px solid var(--rule);
+        }
+
+        h2 {
+            margin: 0 0 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+
+        .pauta {
+            margin: 0;
+        }
+
+        .pauta > div {
+            display: grid;
+            grid-template-columns: minmax(180px, .85fr) minmax(0, 1.5fr);
+            gap: 10px 32px;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .pauta > div:last-child { border-bottom: 0; padding-bottom: 0; }
+
+        dt {
+            font-weight: 600;
+            font-size: .98rem;
+        }
+
+        dd {
+            margin: 0;
+            color: var(--graphite);
+            font-size: .95rem;
+        }
+
+        .block > p {
+            max-width: 62ch;
+            margin: 14px 0 0;
+            color: var(--graphite);
+        }
+
+        .sheet-foot {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px 24px;
+            margin-top: 56px;
+            padding-top: 20px;
+            border-top: 1px solid var(--rule);
+            font-size: .82rem;
+            color: var(--graphite);
+        }
+
+        .sheet-foot p { margin: 0; }
+
+        .back-inline {
+            color: var(--teal);
+            font-weight: 600;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+
+        .back-inline:hover { text-decoration-thickness: 2px; }
+
+        :focus-visible {
+            outline: 3px solid rgba(14, 111, 102, .4);
+            outline-offset: 3px;
+            border-radius: 2px;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .stamp { animation: stamp-in .5s cubic-bezier(.2, .7, .2, 1) .15s both; }
+
+            @keyframes stamp-in {
+                from { opacity: 0; transform: rotate(-10deg) scale(1.14); }
+                to { opacity: .95; transform: rotate(-6deg) scale(1); }
+            }
+        }
+
+        @media (max-width: 900px) {
+            .stamp {
+                position: static;
+                display: inline-block;
+                margin: 26px 0 0;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .margin-rule { display: none; }
+
+            .sheet { padding-left: clamp(24px, 6vw, 40px); }
+
+            .stamp { transform: rotate(-3deg); }
+
+            @keyframes stamp-in {
+                from { opacity: 0; transform: rotate(-7deg) scale(1.12); }
+                to { opacity: .95; transform: rotate(-3deg) scale(1); }
+            }
+
+            .pauta > div {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Tarefa SP</h1>
-        <div class="header-actions">
-            <a href="index.html" class="home-button">Início</a>
-            <button id="btn-sair" class="btn-logout">Sair</button>
-        </div>
-    </header>
-    <main>
-        <div class="card">
-            <h2>Módulo Tarefa SP</h2>
-            <p>Acompanhamento das tarefas e atividades da plataforma Tarefa SP por escola e turma da Unidade Regional de Ensino de Marília.</p>
-            <div class="status-box">
-                Página inicial do módulo. Os indicadores e filtros de Tarefa SP serão disponibilizados aqui.
+    <nav class="topbar">
+        <a class="back" href="index.html">&larr; Painel</a>
+        <button id="btn-sair" class="quiet" type="button">Sair</button>
+    </nav>
+
+    <main class="sheet">
+        <div class="margin-rule" aria-hidden="true"></div>
+
+        <header>
+            <h1>Tarefa SP</h1>
+            <p class="lede">Tarefas e atividades da plataforma Tarefa SP nas escolas da Unidade Regional de Ensino de Marília.</p>
+            <div class="stamp">
+                <span>Em preparação</span>
+                <small>nov. 2026</small>
             </div>
-            <a href="index.html" class="btn-action">&larr; Voltar ao painel</a>
-        </div>
+        </header>
+
+        <section class="block" aria-labelledby="reunir">
+            <h2 id="reunir">O módulo vai reunir</h2>
+            <dl class="pauta">
+                <div>
+                    <dt>Tarefas por escola</dt>
+                    <dd>Tarefas publicadas, entregues e pendentes em cada unidade.</dd>
+                </div>
+                <div>
+                    <dt>Participação das turmas</dt>
+                    <dd>Acessos e entregas por turma, com as pendências em destaque.</dd>
+                </div>
+                <div>
+                    <dt>Evolução no período</dt>
+                    <dd>Como o uso da plataforma se move ao longo das semanas.</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="block" aria-labelledby="situacao">
+            <h2 id="situacao">Situação</h2>
+            <p>A página do módulo já está no painel. Os indicadores serão publicados aqui assim que a base de dados de Tarefa SP estiver conectada.</p>
+        </section>
+
+        <footer class="sheet-foot">
+            <a class="back-inline" href="index.html">Voltar ao painel</a>
+            <p>Unidade Regional de Ensino de Marília. Atualizado em novembro de 2026.</p>
+        </footer>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
