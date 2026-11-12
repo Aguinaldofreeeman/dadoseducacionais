@@ -123,7 +123,8 @@ Uma linha por **ano × semana × escola**. Estrutura criada por `supabase-result
 - Reimportar a mesma semana substitui apenas os registros daquele ano/semana; as demais semanas
   são preservadas. A linha `Filtros aplicados` é ignorada e escolas sem tarefas entram com os
   indicadores nulos (apenas matrículas).
-- `tarefa-sp.html` lê a semana mais recente da tabela e usa `dados/tarefa-sp-semana-01.json`
+- `tarefa-sp.html` lê a semana mais recente da tabela e permite trocar entre as semanas
+  importadas pelo seletor **Semana** no painel de filtros. Usa `dados/tarefa-sp-semana-01.json`
   como fallback quando a tabela está vazia ou indisponível.
 
 ### `resultados_presenca` e `resultados_robotica`
