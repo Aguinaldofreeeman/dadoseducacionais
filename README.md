@@ -41,7 +41,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `resultados_prova_paulista.html` | autenticado | Consulta por ano, bimestre e escola |
 | `redacao.html` | autenticado | **Redação Paulista**: painel regional (evolução e top 10 da última quinzena), painel individual por escola (KPIs, evolução, insights e mapa de calor) e matriz escola × quinzena completa |
 | `tarefa-sp.html` | autenticado | **Tarefa SP**: participação, conclusão, acertos e IQ por escola, ranking, faixas de IQ e tabela semanal |
-| `leia-sp.html` | público | **Leitura em Marília**: páginas, livros e tempo de leitura por escola, evolução semanal e mapa de calor, com seleção de uma ou mais semanas |
+| `leia-sp.html` | público | **Leitura em Marília**: páginas, livros e tempo de leitura por escola, evolução semanal e mapa de calor, com seleção de uma ou mais semanas (clique = uma semana, `Ctrl` + clique = somar) |
 | `resultados-presenca.html` | autenticado | **Aluno Presente**: presença, aulas e evolução por escola e período |
 | `Robotica_Marilia.html` | autenticado | **Robótica**: indicadores de atividades, acertos e notas por escola |
 | `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente, Leia SP, Tarefa SP e Robótica) |
@@ -129,8 +129,11 @@ Uma linha por **ano × semana × escola**. Estrutura criada por `supabase-result
 - `tarefa-sp.html` lê **todas** as semanas importadas (leitura paginada, o PostgREST devolve no
   máximo 1000 linhas por requisição) e permite selecionar **uma ou mais semanas**
   pelos chips no painel de filtros (igual ao `leia-sp.html`), com as ações rápidas
-  **Última / 4 últimas / Todas**. Participação e matrículas usam a última semana selecionada;
-  tarefas propostas, no prazo, fora do prazo, IQ e acertos são agregados no período.
+  **Última / 4 últimas / Todas**. Clique numa semana para ver só ela; `Ctrl` + clique (ou os
+  atalhos) para somar semanas. Participação e matrículas são a **média das semanas
+  selecionadas**; tarefas propostas, no prazo, fora do prazo, IQ e acertos são agregados no
+  período. Os contadores dos chips de situação (Todas / IQ baixo / Baixa participação / Sem
+  registro) respeitam a semana escolhida e a busca por escola.
   Usa `dados/tarefa-sp-semana-01.json` como fallback quando a tabela está vazia ou indisponível.
 
 ### `resultados_presenca` e `resultados_robotica`

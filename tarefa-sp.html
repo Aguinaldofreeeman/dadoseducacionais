@@ -527,6 +527,22 @@ main {
     font-size: 11.5px;
 }
 
+.week-hint {
+    width: 100%;
+    margin: -4px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.week-hint kbd {
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface-2);
+    font-family: inherit;
+    font-size: 10px;
+}
+
 .chip-field { display: flex; flex-direction: column; gap: 4px; }
 
 .chips {
@@ -1542,6 +1558,7 @@ tbody tr.inactive td { color: var(--muted); }
                     </div>
                 </div>
                 <p class="week-note" id="periodoNota"></p>
+                <p class="week-hint">Clique numa semana para ver só ela · <kbd>Ctrl</kbd> + clique (ou os atalhos acima) para somar semanas.</p>
             </div>
             <div class="filters">
                 <div class="field search">
@@ -1780,6 +1797,9 @@ tbody tr.inactive td { color: var(--muted); }
             const ordenados = [...registros].sort((a, b) => a.inicio.localeCompare(b.inicio));
             const ultimo = ordenados[ordenados.length - 1] || {};
             const soma = (campo) => ordenados.reduce((total, registro) => total + (registro[campo] || 0), 0);
+            const media = (campo) => ordenados.length
+                ? ordenados.reduce((total, registro) => total + (registro[campo] || 0), 0) / ordenados.length
+                : 0;
 
             const proposed = soma('proposed');
             const onTime = soma('onTime');
@@ -1794,17 +1814,22 @@ tbody tr.inactive td { color: var(--muted); }
                 ) / concluidas
                 : 0;
 
+            // Matrículas, alunos e participação são a média das semanas selecionadas;
+            // a produção (tarefas) é somada no período.
+            const enroll = media('enroll');
+            const students = media('students');
+
             return {
                 name: ultimo.name,
                 code: ultimo.code,
-                enroll: ultimo.enroll || 0,
-                students: ultimo.students || 0,
+                enroll,
+                students,
                 proposed,
                 onTime,
                 late,
                 incomplete: soma('incomplete'),
                 notDone: soma('notDone'),
-                pctStudents: ultimo.pctStudents || 0,
+                pctStudents: enroll ? students / enroll : 0,
                 pctOnTime,
                 pctDone,
                 pctCorrect,
@@ -1814,7 +1839,7 @@ tbody tr.inactive td { color: var(--muted); }
         }).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     }
 
-    const fmtInt = new Intl.NumberFormat('pt-BR');
+    const fmtInt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
     const pct = (v) => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
     const iqf = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1946,6 +1971,7 @@ tbody tr.inactive td { color: var(--muted); }
 
     function renderResumo() {
         const n = rede();
+        const multi = estado.semanas.length > 1;
         const periodo = DADOS.period || '01.02 a 07.02';
         const semana = DADOS.week || 'Semana 01';
         document.getElementById('semanaBadge').textContent = semana;
@@ -1960,7 +1986,12 @@ tbody tr.inactive td { color: var(--muted); }
             { k: 'Tarefas concluídas', v: pct(n.pctConcluidas), p: n.pctConcluidas * 100, d: `${fmtInt.format(n.concluidas)} de ${fmtInt.format(n.propostas)} tarefas` },
             { k: 'No prazo', v: pct(n.pctNoPrazo), p: n.pctNoPrazo * 100, d: `${fmtInt.format(n.noPrazo)} entregas dentro do prazo` },
             { k: 'Acertos', v: pct(n.pctAcertos), p: n.pctAcertos * 100, d: 'Ponderado pelas tarefas concluídas' },
-            { k: 'Alunos com tarefas', v: fmtInt.format(n.alunos), p: n.pctAlunos * 100, d: `${pct(n.pctAlunos)} das matrículas` },
+            {
+                k: multi ? 'Alunos com tarefas (média/semana)' : 'Alunos com tarefas',
+                v: fmtInt.format(n.alunos),
+                p: n.pctAlunos * 100,
+                d: multi ? `${pct(n.pctAlunos)} das matrículas (média das semanas)` : `${pct(n.pctAlunos)} das matrículas`
+            },
             { k: 'Escolas com tarefas', v: n.ativas, p: (n.ativas / n.escolas) * 100, d: `de ${n.escolas} escolas da regional` }
         ];
 
@@ -2317,7 +2348,10 @@ tbody tr.inactive td { color: var(--muted); }
 
         const el = document.getElementById('ranking');
         if (!lista.length) {
-            el.innerHTML = `<li class="empty">Nenhuma escola com tarefas neste recorte.</li>`;
+            const motivo = estado.situacao !== 'all'
+                ? nomesSituacao(estado.situacao).toLowerCase()
+                : estado.busca ? `a busca "${estado.busca}"` : 'o filtro atual';
+            el.innerHTML = `<li class="empty">Nenhuma escola com ${motivo} neste recorte.</li>`;
             return;
         }
 
@@ -2454,12 +2488,13 @@ tbody tr.inactive td { color: var(--muted); }
     }
 
     function atualizarChips() {
-        const base = ativas();
+        const todas = DADOS.schools.filter(combinaBusca);
+        const base = todas.filter((s) => s.proposed > 0);
         const contagens = {
-            all: DADOS.schools.length,
+            all: todas.length,
             lowiq: base.filter((s) => s.iq < 0.35).length,
             lowpart: base.filter((s) => s.pctStudents < 0.10).length,
-            nodata: DADOS.schools.length - base.length
+            nodata: todas.length - base.length
         };
         document.querySelectorAll('#chips .chip').forEach((chip) => {
             const chave = chip.dataset.situacao;
@@ -2472,14 +2507,20 @@ tbody tr.inactive td { color: var(--muted); }
         const n = rede();
         const ativasFiltradas = ativas().filter(noCoorte).length;
         const tabelaFiltrada = DADOS.schools.filter(noCoorte).length;
-        let texto = `${ativasFiltradas} de ${n.ativas} escolas com tarefas no recorte`;
-        if (tabelaFiltrada !== ativasFiltradas) texto += ` · ${tabelaFiltrada} escolas na tabela`;
 
         const marcas = [];
         if (estado.situacao !== 'all') marcas.push(nomesSituacao(estado.situacao));
         if (estado.faixa) marcas.push(`faixa ${FAIXAS.find((f) => f.id === estado.faixa).nome}`);
         if (estado.busca) marcas.push(`busca "${estado.busca}"`);
-        if (marcas.length) texto += ` · ${marcas.join(' · ')}`;
+
+        let texto;
+        if (marcas.length && !ativasFiltradas) {
+            texto = `Nenhuma escola do recorte atende a ${marcas.join(' · ')}`;
+        } else {
+            texto = `${ativasFiltradas} de ${n.ativas} escolas com tarefas no recorte`;
+            if (tabelaFiltrada !== ativasFiltradas) texto += ` · ${tabelaFiltrada} escolas na tabela`;
+            if (marcas.length) texto += ` · ${marcas.join(' · ')}`;
+        }
 
         document.getElementById('statusFiltro').textContent = `${texto}.`;
         document.getElementById('btnLimpar').disabled = !(
@@ -2547,8 +2588,8 @@ tbody tr.inactive td { color: var(--muted); }
             return [
                 s.name,
                 s.code,
-                s.enroll,
-                s.students,
+                Math.round(s.enroll),
+                Math.round(s.students),
                 ativa ? pct(s.pctStudents) : '',
                 s.proposed,
                 s.onTime,
@@ -2586,12 +2627,17 @@ tbody tr.inactive td { color: var(--muted); }
             const chip = evento.target.closest('[data-semana]');
             if (!chip) return;
             const chave = chip.dataset.semana;
-            const indice = estado.semanas.indexOf(chave);
-            if (indice >= 0) {
-                if (estado.semanas.length === 1) return;
-                estado.semanas.splice(indice, 1);
+            const multi = evento.ctrlKey || evento.metaKey || evento.shiftKey;
+            if (multi) {
+                const indice = estado.semanas.indexOf(chave);
+                if (indice >= 0) {
+                    if (estado.semanas.length === 1) return;
+                    estado.semanas.splice(indice, 1);
+                } else {
+                    estado.semanas.push(chave);
+                }
             } else {
-                estado.semanas.push(chave);
+                estado.semanas = [chave];
             }
             estado.semanas.sort((a, b) => SEMANAS.findIndex((s) => s.chave === a) - SEMANAS.findIndex((s) => s.chave === b));
             aplicarSemanas();
@@ -2761,9 +2807,11 @@ tbody tr.inactive td { color: var(--muted); }
 
         const sel = semanaSelecionada();
         if (nota) {
-            nota.textContent = sel.length
-                ? `${sel.length} semana${sel.length > 1 ? 's' : ''} selecionada${sel.length > 1 ? 's' : ''} · de ${dataCurtaTarefa(sel[0].inicio)} a ${dataCurtaTarefa(sel[sel.length - 1].fim)} · participação e matrículas da última semana selecionada; produção somada no período.`
-                : 'Nenhuma semana selecionada.';
+            nota.textContent = sel.length === 1
+                ? `1 semana selecionada · de ${dataCurtaTarefa(sel[0].inicio)} a ${dataCurtaTarefa(sel[0].fim)} · participação, matrículas e produção da semana.`
+                : sel.length
+                    ? `${sel.length} semanas selecionadas · de ${dataCurtaTarefa(sel[0].inicio)} a ${dataCurtaTarefa(sel[sel.length - 1].fim)} · participação e matrículas: média das semanas; produção somada no período.`
+                    : 'Nenhuma semana selecionada.';
         }
     }
 
