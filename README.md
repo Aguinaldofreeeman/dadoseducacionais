@@ -120,11 +120,14 @@ Uma linha por **ano × semana × escola**. Estrutura criada por `supabase-result
 
 - Importação em `admin.html` → **Importar Planilha - Tarefa SP**. Selecione o ano, envie o
   `.xlsx`/`.xls`/`.csv` e confirme. A semana e as datas são lidas do filtro
-  `IntervaloUltimaSemana` ou do nome do arquivo (ex.: `01 - 01.02 a 07.02.xlsx`).
+  `IntervaloUltimaSemana` ou do nome do arquivo (ex.: `01 - 01.02 a 07.02.xlsx`). O campo
+  **Semana da Planilha** permite forçar o número da semana quando a detecção automática
+  falhar; a pré-visualização mostra exatamente a semana e o período que serão gravados.
 - Reimportar a mesma semana substitui apenas os registros daquele ano/semana; as demais semanas
   são preservadas. A linha `Filtros aplicados` é ignorada e escolas sem tarefas entram com os
   indicadores nulos (apenas matrículas).
-- `tarefa-sp.html` lê todas as semanas importadas e permite selecionar **uma ou mais semanas**
+- `tarefa-sp.html` lê **todas** as semanas importadas (leitura paginada, o PostgREST devolve no
+  máximo 1000 linhas por requisição) e permite selecionar **uma ou mais semanas**
   pelos chips no painel de filtros (igual ao `leia-sp.html`), com as ações rápidas
   **Última / 4 últimas / Todas**. Participação e matrículas usam a última semana selecionada;
   tarefas propostas, no prazo, fora do prazo, IQ e acertos são agregados no período.

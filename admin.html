@@ -416,6 +416,11 @@
                 <span class="help-text">Selecione o ano correspondente (2026 ou 2027) para que o sistema não misture os históricos.</span>
             </div>
             <div class="form-group">
+                <label for="tarefa-semana">Semana da Planilha (opcional)</label>
+                <input type="number" id="tarefa-semana" min="1" max="53" step="1" placeholder="Detectada automaticamente">
+                <span class="help-text">A semana é detectada pelo filtro IntervaloUltimaSemana ou pelo nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx"). Preencha aqui somente se a detecção automática não estiver correta: o número digitado tem prioridade e vale para o período gravado.</span>
+            </div>
+            <div class="form-group">
                 <label for="tarefa-file">Planilha do Tarefa SP (.xlsx, .xls ou .csv)</label>
                 <input type="file" id="tarefa-file" accept=".xlsx,.xls,.csv">
                 <span class="help-text">Aceita a exportação com as colunas Escola (com código no formato "NOME - CÓDIGO"), Matrículas Ativas, Alunos com Tarefas Realizadas, % Alunos com Tarefas Realizadas, Tarefas Propostas, Tarefas Realizadas no Prazo, Tarefas Realizadas fora do Prazo, Tarefas Incompletas realizadas, Tarefas não Realizadas, % Tarefas Realizadas, % Acertos e Índice de Qualidade (IQ). A semana e o período são lidos do filtro IntervaloUltimaSemana ou do nome do arquivo (ex.: "01 - 01.02 a 07.02.xlsx"). Reenvios atualizam a mesma escola no ano e semana, sem apagar as outras semanas.</span>
@@ -2408,23 +2413,60 @@
                     }
                     if (tipo === 'tarefa') {
                         const anoTarefa = Number(document.getElementById('tarefa-ano').value);
+                        const semanaManual = Number(document.getElementById('tarefa-semana')?.value || 0);
                         const metadadosTarefa = linhas.flat().map(c => String(c ?? '')).join('\n');
                         const intervaloTarefa = metadadosTarefa.match(/intervalo[\s_]*(?:semana[\s_]*atual|ultim[ae][\s_]*semana)\s*(?:é|e|:|=)\s*([^\r\n;]+)/i);
                         const intervaloTarefaStr = intervaloTarefa ? intervaloTarefa[1].trim() : '';
                         const periodoNoArquivo = String(arquivo.name || '').match(/(\d{1,2})\s*[-–—]\s*(\d{1,2}[./-]\d{1,2}\s*(?:a|à|-)\s*\d{1,2}[./-]\d{1,2})/i);
                         const semanaNoIntervalo = intervaloTarefaStr.match(/^(\d{1,2})\s*[-–—]/);
-                        const semanaTarefa = semanaNoIntervalo
-                            ? Number(semanaNoIntervalo[1])
-                            : periodoNoArquivo ? Number(periodoNoArquivo[1]) : null;
+                        const semanaDoIntervalo = semanaNoIntervalo ? Number(semanaNoIntervalo[1]) : null;
+                        const semanaDoArquivo = periodoNoArquivo ? Number(periodoNoArquivo[1]) : null;
+
+                        const avisosTarefa = [];
+                        const intervaloDeDatas = /(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/;
+                        const datasDoIntervalo = intervaloTarefaStr.match(intervaloDeDatas);
+                        const datasDoArquivo = periodoNoArquivo ? periodoNoArquivo[2].match(intervaloDeDatas) : null;
+
+                        let semanaTarefa = null;
+                        let usarDatasDoArquivo = false;
+                        if (semanaManual) {
+                            if (!Number.isInteger(semanaManual) || semanaManual < 1 || semanaManual > 53) {
+                                preview.textContent = 'Informe um número de semana válido (entre 1 e 53).';
+                                preview.className = 'msg error';
+                                preview.style.display = 'block';
+                                return;
+                            }
+                            semanaTarefa = semanaManual;
+                            const detectada = semanaDoIntervalo || semanaDoArquivo;
+                            if (detectada && detectada !== semanaManual) {
+                                avisosTarefa.push(`A semana digitada (${semanaManual}) difere da detectada no arquivo (${detectada}). Será gravada a semana ${semanaManual}.`);
+                                usarDatasDoArquivo = Boolean(datasDoArquivo);
+                            }
+                        } else if (semanaDoIntervalo && semanaDoArquivo && semanaDoIntervalo !== semanaDoArquivo) {
+                            semanaTarefa = semanaDoArquivo;
+                            usarDatasDoArquivo = true;
+                            avisosTarefa.push(`O filtro do arquivo indica a semana ${semanaDoIntervalo} e o nome do arquivo indica a semana ${semanaDoArquivo}. Será gravada a semana ${semanaDoArquivo} (confirme digitando a semana no campo "Semana da Planilha").`);
+                        } else {
+                            semanaTarefa = semanaDoIntervalo || semanaDoArquivo;
+                        }
                         if (!semanaTarefa) {
-                            preview.textContent = 'Não foi possível inferir a semana. Verifique o nome do arquivo ou o filtro IntervaloUltimaSemana.';
+                            preview.textContent = 'Não foi possível inferir a semana. Informe o número no campo "Semana da Planilha" ou renomeie o arquivo como "NN - DD.MM a DD.MM.xlsx".';
                             preview.className = 'msg error';
                             preview.style.display = 'block';
                             return;
                         }
-                        let rangeMatch = intervaloTarefaStr.match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
-                        if (!rangeMatch && periodoNoArquivo) {
-                            rangeMatch = periodoNoArquivo[2].match(/(\d{1,2})[./-](\d{1,2})\s*(?:a|à|-)\s*(\d{1,2})[./-](\d{1,2})/);
+
+                        let rangeMatch = null;
+                        let origemPeriodo = '';
+                        if (usarDatasDoArquivo && datasDoArquivo) {
+                            rangeMatch = datasDoArquivo;
+                            origemPeriodo = 'nome do arquivo';
+                        } else if (datasDoIntervalo) {
+                            rangeMatch = datasDoIntervalo;
+                            origemPeriodo = 'IntervaloUltimaSemana';
+                        } else if (datasDoArquivo) {
+                            rangeMatch = datasDoArquivo;
+                            origemPeriodo = 'nome do arquivo';
                         }
                         if (!rangeMatch) {
                             preview.textContent = 'Não foi possível inferir o período (datas) do arquivo. Verifique o nome do arquivo ou o filtro IntervaloUltimaSemana.';
@@ -2433,9 +2475,25 @@
                             return;
                         }
                         const [, d1, m1, d2, m2] = rangeMatch;
+                        if (Number(m1) > 12 || Number(m2) > 12 || Number(d1) > 31 || Number(d2) > 31) {
+                            preview.textContent = `O período lido (${d1}/${m1} a ${d2}/${m2}) não parece válido. Confira o nome do arquivo e o filtro IntervaloUltimaSemana.`;
+                            preview.className = 'msg error';
+                            preview.style.display = 'block';
+                            return;
+                        }
                         const inicio = `${anoTarefa}-${String(m1).padStart(2, '0')}-${String(d1).padStart(2, '0')}`;
                         const fim = `${anoTarefa}-${String(m2).padStart(2, '0')}-${String(d2).padStart(2, '0')}`;
                         const semanaLabel = `Semana ${String(semanaTarefa).padStart(2, '0')}`;
+                        const resumoTarefa = `${semanaLabel} · ${d1}/${m1} a ${d2}/${m2} de ${anoTarefa} (período lido do ${origemPeriodo})`;
+                        window.CONTEXTO_TAREFA = {
+                            ano: anoTarefa,
+                            semana: semanaTarefa,
+                            semanaLabel,
+                            inicio,
+                            fim,
+                            resumo: resumoTarefa,
+                            avisos: avisosTarefa
+                        };
                         registros.forEach(registro => {
                             registro.ano = anoTarefa;
                             registro.semana_num = semanaTarefa;
@@ -2459,7 +2517,6 @@
                                 registro.iq = 0.5 * ((registro.tarefas_prazo || 0) / registro.tarefas_propostas) + 0.5 * registro.pct_acertos;
                             }
                         });
-                        window.CONTEXTO_TAREFA = { ano: anoTarefa, semana: semanaTarefa, semanaLabel, inicio, fim };
                     }
                     if (tipo === 'robotica_mensal') {
                         mensalAno = Number(document.getElementById('robotica_mensal-ano').value);
@@ -2485,11 +2542,14 @@
                             : tipo === 'robotica_mensal'
                                 ? `Os registros substituirão apenas os dados de ${MESES_ROBOTICA[mensalMes - 1]} de ${mensalAno}.`
                                 : tipo === 'tarefa'
-                                    ? `Os registros substituirão apenas a ${window.CONTEXTO_TAREFA.semanaLabel} de ${window.CONTEXTO_TAREFA.ano}; as demais semanas serão preservadas.`
+                                    ? `Será gravado em ${window.CONTEXTO_TAREFA.resumo}. Apenas essa semana é substituída; as demais semanas são preservadas.`
                                     : tipo === 'leia'
                                         ? `Os registros substituirão apenas a semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}; as demais semanas serão preservadas.`
                                         : 'A confirmação substituirá todos os resultados atuais de Robótica.';
-                    preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">${destinoImportacao}</span><ul>${amostra}</ul>`;
+                    const avisosHtml = (tipo === 'tarefa' && window.CONTEXTO_TAREFA?.avisos?.length)
+                        ? `<div style="color:#b45309;margin-top:6px;"><strong>Atenção:</strong> ${window.CONTEXTO_TAREFA.avisos.map(csvEscaparHtml).join(' ')}</div>`
+                        : '';
+                    preview.innerHTML = `<strong>Arquivo validado:</strong> ${csvEscaparHtml(arquivo.name)} · ${registros.length} registros.<br><span style="color:#64748b;">${destinoImportacao}</span><ul>${amostra}</ul>${avisosHtml}`;
                     preview.className = 'msg';
                     preview.style.display = 'block';
                     confirmar.disabled = false;
@@ -2609,7 +2669,7 @@
                         : tipo === 'robotica_mensal'
                             ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para ${MESES_ROBOTICA[periodoMensal.mes - 1]} de ${periodoMensal.ano}. Os demais meses foram preservados.`
                             : tipo === 'tarefa'
-                                ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para a ${window.CONTEXTO_TAREFA.semanaLabel} de ${window.CONTEXTO_TAREFA.ano}. As demais semanas foram preservadas.`
+                                ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para ${window.CONTEXTO_TAREFA.resumo}. As demais semanas foram preservadas.`
                                 : tipo === 'leia'
                                     ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para a semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}. As demais semanas foram preservadas.`
                                     : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
