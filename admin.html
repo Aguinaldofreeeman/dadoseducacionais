@@ -2256,7 +2256,7 @@
                     else throw new Error(`Linha ${i + 1}: valor PEI inválido ("${registro.pei}").`);
                 } else if (tipo === 'leia') {
                     // periodo ja definido acima; nada extra
-                } else {
+                } else if (tipo === 'apoio') {
                     registro.filtros = String(registro.filtros || '').trim() || null;
                 }
             } else {
