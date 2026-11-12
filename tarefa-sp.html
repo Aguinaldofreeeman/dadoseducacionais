@@ -4,23 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarefa SP — Dados Educacionais</title>
-    <meta name="description" content="Módulo Tarefa SP: tarefas e atividades da plataforma por escola e turma na Unidade Regional de Ensino de Marília.">
+    <meta name="description" content="Painel semanal do Tarefa SP: participação, tarefas concluídas, acertos e IQ por escola na Unidade Regional de Ensino de Marília.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
     <style>
         :root {
             --paper: #fbfcfa;
             --desk: #edf1ec;
+            --wash: #f4f7f2;
             --ink: #13222e;
             --graphite: #566872;
             --rule: #d8e1d9;
+            --rule-strong: #b9c6bc;
             --margin-rule: #e0b3ad;
-            --stamp: #9e2b24;
             --teal: #0e6f66;
+            --teal-soft: #dcebe7;
+            --amber: #b45309;
+            --brick: #9e2b24;
+            --slate: #4b6b7a;
+            --incomplete: #8a9a8f;
         }
 
         * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
 
         body {
             margin: 0;
@@ -33,7 +40,7 @@
         ::selection { background: rgba(14, 111, 102, .18); }
 
         .topbar {
-            max-width: 980px;
+            max-width: 1120px;
             margin: 0 auto;
             padding: 26px 22px 0;
             display: flex;
@@ -67,9 +74,9 @@
 
         .sheet {
             position: relative;
-            max-width: 980px;
+            max-width: 1120px;
             margin: 22px auto 56px;
-            padding: clamp(34px, 6vw, 64px) clamp(24px, 6vw, 72px) 40px clamp(46px, 9vw, 112px);
+            padding: clamp(34px, 5vw, 60px) clamp(24px, 5vw, 56px) 40px clamp(46px, 8vw, 96px);
             background: var(--paper);
             border: 1px solid var(--rule);
             box-shadow: 0 1px 2px rgba(19, 34, 46, .04), 0 30px 70px -30px rgba(19, 34, 46, .22);
@@ -79,7 +86,7 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            left: clamp(26px, 6vw, 72px);
+            left: clamp(26px, 5vw, 56px);
             width: 1px;
             background: var(--margin-rule);
             opacity: .75;
@@ -90,35 +97,36 @@
             text-wrap: balance;
         }
 
+        .masthead { position: relative; }
+
         h1 {
             margin: 0;
-            font-size: clamp(3.1rem, 9vw, 5.6rem);
+            font-size: clamp(2.9rem, 7vw, 4.6rem);
             font-weight: 700;
-            line-height: .92;
+            line-height: .94;
             letter-spacing: -.035em;
         }
 
         .lede {
-            max-width: 46ch;
-            margin: 22px 0 0;
-            font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+            max-width: 56ch;
+            margin: 20px 0 0;
+            font-size: clamp(1rem, 1.5vw, 1.15rem);
             line-height: 1.55;
             color: var(--graphite);
         }
 
         .stamp {
             position: absolute;
-            top: clamp(34px, 6vw, 64px);
-            right: clamp(24px, 6vw, 72px);
+            top: 4px;
+            right: 0;
             margin: 0;
-            padding: 12px 18px 10px;
-            border: 2px solid var(--stamp);
+            padding: 11px 17px 9px;
+            border: 2px solid var(--teal);
             border-radius: 3px;
-            color: var(--stamp);
+            color: var(--teal);
             text-align: center;
             text-transform: uppercase;
-            transform: rotate(-6deg);
-            opacity: .95;
+            transform: rotate(-5deg);
         }
 
         .stamp::after {
@@ -127,23 +135,91 @@
             inset: 3px;
             border: 1px solid currentColor;
             border-radius: 1px;
-            opacity: .45;
+            opacity: .4;
         }
 
         .stamp span {
             display: block;
-            font: 700 .74rem/1.25 "Figtree", system-ui, sans-serif;
-            letter-spacing: .2em;
+            font: 700 .72rem/1.25 "Figtree", system-ui, sans-serif;
+            letter-spacing: .18em;
         }
 
         .stamp small {
             display: block;
-            margin-top: 5px;
+            margin-top: 4px;
             font: 600 .62rem/1 "Figtree", system-ui, sans-serif;
-            letter-spacing: .12em;
-            opacity: .8;
+            letter-spacing: .1em;
+            opacity: .85;
         }
 
+        .loading {
+            margin: 34px 0 0;
+            color: var(--graphite);
+            font-size: .9rem;
+        }
+
+        .loading.error { color: var(--brick); }
+
+        /* Resumo */
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 1px;
+            margin: 40px 0 0;
+            padding: 0;
+            border: 1px solid var(--rule);
+            background: var(--rule);
+        }
+
+        .kpi {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding: 18px 17px 16px;
+            background: var(--wash);
+        }
+
+        .kpi dt {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--graphite);
+        }
+
+        .kpi dd {
+            margin: 6px 0 0;
+            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            font-size: clamp(1.75rem, 2.5vw, 2.3rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kpi .sub {
+            margin: 5px 0 0;
+            font-size: 11.5px;
+            line-height: 1.4;
+            color: var(--graphite);
+        }
+
+        .mini {
+            display: flex;
+            gap: 2px;
+            height: 4px;
+            margin-top: 8px;
+            background: var(--rule);
+            overflow: hidden;
+        }
+
+        .mini i { display: block; height: 100%; }
+
+        .c-ontime { background: var(--teal); }
+        .c-late { background: var(--amber); }
+        .c-incomplete { background: var(--incomplete); }
+        .c-notdone { background: var(--brick); }
+
+        /* Seções */
         .block {
             margin-top: 52px;
             padding-top: 28px;
@@ -151,67 +227,567 @@
         }
 
         h2 {
-            margin: 0 0 6px;
-            font-size: 1.1rem;
+            margin: 0;
+            font-size: 1.35rem;
             font-weight: 700;
+            letter-spacing: -.015em;
+        }
+
+        .hint {
+            margin: 6px 0 0;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: var(--graphite);
+        }
+
+        /* Leitura */
+        .insights {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 18px;
+            border-top: 1px solid var(--rule);
+        }
+
+        .insight {
+            padding: 18px 22px 2px 0;
+            border-right: 1px solid var(--rule);
+            margin-right: 22px;
+        }
+
+        .insight:last-child {
+            border-right: 0;
+            margin-right: 0;
+            padding-right: 0;
+        }
+
+        .insight strong {
+            display: block;
+            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .insight p {
+            margin: 7px 0 0;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: var(--graphite);
+        }
+
+        /* Análise */
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+            gap: 34px;
+            align-items: start;
+        }
+
+        .scatter {
+            position: relative;
+            margin-top: 14px;
+            background: #f7f9f4;
+            border: 1px solid var(--rule);
+        }
+
+        .scatter svg { display: block; width: 100%; height: auto; }
+
+        .scatter .gridline { stroke: #e2e9e0; stroke-width: 1; }
+        .scatter .axis { stroke: var(--rule-strong); stroke-width: 1; }
+        .scatter text {
+            fill: var(--graphite);
+            font-family: "Figtree", system-ui, sans-serif;
+            font-size: 10px;
+        }
+        .scatter .median {
+            stroke: #aebbb0;
+            stroke-width: 1;
+            stroke-dasharray: 3 4;
+        }
+        .scatter .axis-title { font-size: 11px; }
+        .scatter .dot {
+            cursor: pointer;
+            transition: opacity .15s ease, stroke-width .15s ease;
+        }
+        .scatter .dot:hover, .scatter .dot:focus-visible {
+            stroke: var(--ink);
+            stroke-width: 2;
+            outline: none;
+        }
+        .scatter .dot.dim { opacity: .13; pointer-events: none; }
+        .scatter .dot.sel { stroke: var(--ink); stroke-width: 2.5; }
+
+        .q-hh { fill: var(--teal); }
+        .q-hl { fill: var(--amber); }
+        .q-lh { fill: var(--slate); }
+        .q-ll { fill: var(--brick); }
+
+        .tooltip {
+            position: absolute;
+            z-index: 6;
+            max-width: 230px;
+            padding: 8px 10px;
+            background: var(--ink);
+            color: var(--paper);
+            font-size: 11.5px;
+            line-height: 1.45;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity .12s ease;
+        }
+
+        .tooltip.on { opacity: 1; }
+
+        .tooltip strong {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .tooltip span { display: block; opacity: .82; }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px 16px;
+            margin-top: 10px;
+            font-size: 11.5px;
+            color: var(--graphite);
+        }
+
+        .legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .legend i { width: 9px; height: 9px; border-radius: 50%; }
+
+        /* Detalhe */
+        .detail {
+            margin-top: 14px;
+            padding: 20px;
+            border: 1px solid var(--rule);
+            background: var(--wash);
+        }
+
+        .detail-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .detail-head h3 {
+            margin: 0;
+            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1.2;
             letter-spacing: -.01em;
         }
 
-        .pauta {
-            margin: 0;
+        .detail-head .code {
+            display: block;
+            margin-top: 3px;
+            font: 400 11px/1.2 "Figtree", system-ui, sans-serif;
+            color: var(--graphite);
         }
 
-        .pauta > div {
+        .link-btn {
+            appearance: none;
+            background: none;
+            border: 0;
+            padding: 2px 0;
+            color: var(--teal);
+            font: 600 11.5px/1.2 "Figtree", system-ui, sans-serif;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .detail-kpis {
             display: grid;
-            grid-template-columns: minmax(180px, .85fr) minmax(0, 1.5fr);
-            gap: 10px 32px;
-            padding: 18px 0;
-            border-bottom: 1px solid var(--rule);
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 18px;
         }
 
-        .pauta > div:last-child { border-bottom: 0; padding-bottom: 0; }
-
-        dt {
-            font-weight: 600;
-            font-size: .98rem;
+        .detail-kpis div {
+            padding-top: 8px;
+            border-top: 1px solid var(--rule);
         }
 
-        dd {
-            margin: 0;
-            color: var(--graphite);
-            font-size: .95rem;
-        }
-
-        .block > p {
-            max-width: 62ch;
-            margin: 14px 0 0;
+        .detail-kpis span {
+            display: block;
+            font-size: 11px;
             color: var(--graphite);
         }
 
-        .sheet-foot {
+        .detail-kpis strong {
+            display: block;
+            margin-top: 2px;
+            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .detail-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 18px;
+            margin: 18px 0 0;
+            padding: 0;
+        }
+
+        .detail-stats div {
             display: flex;
-            flex-wrap: wrap;
             align-items: baseline;
             justify-content: space-between;
-            gap: 10px 24px;
-            margin-top: 56px;
-            padding-top: 20px;
+            gap: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--rule);
+            font-size: 11.5px;
+        }
+
+        .detail-stats dt { color: var(--graphite); }
+        .detail-stats dd {
+            margin: 0;
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .detail-stats small {
+            font-weight: 400;
+            color: var(--graphite);
+        }
+
+        .stack {
+            display: flex;
+            gap: 2px;
+            height: 12px;
+            margin-top: 20px;
+            background: var(--rule);
+        }
+
+        .stack i { display: block; height: 100%; }
+
+        .stack-legend {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px 14px;
+            margin: 10px 0 0;
+            padding: 0;
+            font-size: 11px;
+            color: var(--graphite);
+        }
+
+        .stack-legend li {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .stack-legend .l { display: inline-flex; align-items: center; gap: 6px; }
+        .stack-legend i { width: 8px; height: 8px; flex: 0 0 auto; }
+        .stack-legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+        .detail-empty {
+            margin: 18px 0 0;
+            padding: 12px 14px;
+            border-left: 3px solid var(--brick);
+            background: #f7ecea;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--brick);
+        }
+
+        /* Ranking */
+        .section-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .select {
+            appearance: none;
+            height: 34px;
+            padding: 0 30px 0 10px;
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+            background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23566872' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+            color: var(--ink);
+            font: 600 12px/1 "Figtree", system-ui, sans-serif;
+            cursor: pointer;
+        }
+
+        .toggle {
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+            background: var(--paper);
+            color: var(--graphite);
+            font: 600 12px/1 "Figtree", system-ui, sans-serif;
+            cursor: pointer;
+        }
+
+        .toggle[aria-pressed="true"] {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--paper);
+        }
+
+        .ranking {
+            list-style: none;
+            margin: 14px 0 0;
+            padding: 0;
+        }
+
+        .rank {
+            display: grid;
+            grid-template-columns: 30px minmax(150px, .9fr) minmax(120px, 1.3fr) 62px;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            padding: 7px 8px;
+            border: 0;
+            border-bottom: 1px solid var(--rule);
+            background: none;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .rank:hover { background: var(--wash); }
+        .rank[aria-current="true"] { background: var(--teal-soft); }
+
+        .rank .n {
+            color: var(--graphite);
+            font-size: 11px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rank .nm {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rank .nm small {
+            display: block;
+            color: var(--graphite);
+            font-size: 10.5px;
+            font-weight: 400;
+        }
+
+        .track {
+            position: relative;
+            height: 9px;
+            background: #e6ece4;
+            border-radius: 5px;
+        }
+
+        .track > i {
+            display: block;
+            height: 100%;
+            background: var(--teal);
+            border-radius: 5px;
+            transition: width .3s ease;
+        }
+
+        .rank.attention .track > i { background: var(--brick); }
+
+        .track .med {
+            position: absolute;
+            top: -2px;
+            bottom: -2px;
+            width: 1px;
+            background: var(--ink);
+            opacity: .4;
+        }
+
+        .rank .v {
+            font-size: 12.5px;
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty {
+            margin: 18px 0 0;
+            padding: 24px 0;
+            color: var(--graphite);
+            font-size: 13px;
+        }
+
+        /* Tabela */
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .search {
+            flex: 1 1 260px;
+            max-width: 340px;
+            height: 34px;
+            padding: 0 11px;
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+            background: var(--paper);
+            color: var(--ink);
+            font: 400 13px/1 "Figtree", system-ui, sans-serif;
+        }
+
+        .search:focus { border-color: var(--teal); }
+
+        .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .chip {
+            height: 32px;
+            padding: 0 11px;
+            border: 1px solid var(--rule);
+            border-radius: 99px;
+            background: var(--paper);
+            color: var(--graphite);
+            font: 600 11.5px/1 "Figtree", system-ui, sans-serif;
+            cursor: pointer;
+        }
+
+        .chip:hover { border-color: var(--rule-strong); }
+        .chip[aria-pressed="true"] {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--paper);
+        }
+
+        .table-wrap {
+            margin-top: 14px;
+            max-height: 540px;
+            overflow: auto;
             border-top: 1px solid var(--rule);
-            font-size: .82rem;
+        }
+
+        .table-scroll-hint { display: none; }
+
+        table {
+            width: 100%;
+            min-width: 840px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12.5px;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding: 8px;
+            border-bottom: 1px solid var(--ink);
+            background: var(--paper);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        thead th:first-child { text-align: left; }
+
+        thead th button {
+            appearance: none;
+            border: 0;
+            background: none;
+            padding: 0;
+            color: var(--graphite);
+            font: 600 11px/1.3 "Figtree", system-ui, sans-serif;
+            text-align: right;
+            cursor: pointer;
+        }
+
+        thead th:first-child button { text-align: left; }
+        thead th[aria-sort] button { color: var(--ink); }
+
+        tbody td {
+            padding: 8px;
+            border-bottom: 1px solid var(--rule);
+            text-align: right;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        tbody td:first-child { text-align: left; }
+
+        tbody tr { cursor: pointer; }
+        tbody tr:hover td { background: var(--wash); }
+        tbody tr[aria-selected="true"] td { background: var(--teal-soft); }
+        tbody tr.inactive td { color: var(--graphite); }
+
+        .name-btn {
+            appearance: none;
+            border: 0;
+            background: none;
+            padding: 0;
+            color: inherit;
+            font: 600 12.5px/1.3 "Figtree", system-ui, sans-serif;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .name-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+        .code {
+            display: block;
+            margin-top: 1px;
+            font: 400 10.5px/1.2 "Figtree", system-ui, sans-serif;
+            color: var(--graphite);
+        }
+
+        .tag {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            border: 1px solid var(--rule);
+            border-radius: 99px;
+            font: 600 9.5px/1.4 "Figtree", system-ui, sans-serif;
+            color: var(--graphite);
+            background: var(--wash);
+            vertical-align: 1px;
+        }
+
+        /* Rodapé */
+        .sheet-foot {
+            margin-top: 52px;
+            padding-top: 18px;
+            border-top: 1px solid var(--rule);
+            display: grid;
+            gap: 6px;
+            font-size: 11.5px;
+            line-height: 1.55;
             color: var(--graphite);
         }
 
         .sheet-foot p { margin: 0; }
-
-        .back-inline {
-            color: var(--teal);
-            font-weight: 600;
-            text-decoration: underline;
-            text-decoration-thickness: 1px;
-            text-underline-offset: 3px;
-        }
-
-        .back-inline:hover { text-decoration-thickness: 2px; }
+        .sheet-foot a { color: var(--teal); font-weight: 600; }
 
         :focus-visible {
             outline: 3px solid rgba(14, 111, 102, .4);
@@ -223,35 +799,59 @@
             .stamp { animation: stamp-in .5s cubic-bezier(.2, .7, .2, 1) .15s both; }
 
             @keyframes stamp-in {
-                from { opacity: 0; transform: rotate(-10deg) scale(1.14); }
-                to { opacity: .95; transform: rotate(-6deg) scale(1); }
+                from { opacity: 0; transform: rotate(-9deg) scale(1.12); }
+                to { opacity: 1; transform: rotate(-5deg) scale(1); }
             }
         }
 
-        @media (max-width: 900px) {
-            .stamp {
-                position: static;
-                display: inline-block;
-                margin: 26px 0 0;
+        @media (max-width: 1000px) {
+            .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .split { grid-template-columns: 1fr; }
+            .stamp { position: static; display: inline-block; margin-top: 24px; }
+        }
+
+        @media (max-width: 760px) {
+            .insights { grid-template-columns: 1fr; }
+            .insight {
+                padding: 16px 0;
+                margin-right: 0;
+                border-right: 0;
+                border-bottom: 1px solid var(--rule);
             }
+            .insight:last-child { border-bottom: 0; }
         }
 
         @media (max-width: 720px) {
             .margin-rule { display: none; }
-
             .sheet { padding-left: clamp(24px, 6vw, 40px); }
-
-            .stamp { transform: rotate(-3deg); }
-
-            @keyframes stamp-in {
-                from { opacity: 0; transform: rotate(-7deg) scale(1.12); }
-                to { opacity: .95; transform: rotate(-3deg) scale(1); }
+            .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .kpi:last-child { grid-column: 1 / -1; }
+            .rank {
+                grid-template-columns: 26px minmax(0, 1fr) 58px;
+                row-gap: 4px;
             }
-
-            .pauta > div {
-                grid-template-columns: 1fr;
-                gap: 4px;
+            .rank .n { grid-column: 1; grid-row: 1; }
+            .rank .nm {
+                grid-column: 2;
+                grid-row: 1;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
             }
+            .rank .v { grid-column: 3; grid-row: 1; }
+            .rank .track { grid-column: 2 / -1; grid-row: 2; }
+            .search { max-width: none; }
+            .detail-stats { grid-template-columns: 1fr; }
+            .table-scroll-hint { display: block; margin-top: 10px; }
+        }
+
+        @media (max-width: 560px) {
+            .scatter text { font-size: 18px; }
+            .scatter .axis-title { font-size: 22px; }
+        }
+
+        @media (max-width: 420px) {
+            .kpis { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -264,60 +864,681 @@
     <main class="sheet">
         <div class="margin-rule" aria-hidden="true"></div>
 
-        <header>
+        <header class="masthead">
             <h1>Tarefa SP</h1>
-            <p class="lede">Tarefas e atividades da plataforma Tarefa SP nas escolas da Unidade Regional de Ensino de Marília.</p>
-            <div class="stamp">
-                <span>Em preparação</span>
-                <small>nov. 2026</small>
-            </div>
+            <p class="lede">Quem acessou, quem concluiu e onde a qualidade não acompanhou a participação na primeira semana de fevereiro.</p>
+            <p class="stamp">
+                <span>Semana 01</span>
+                <small>01.02 — 07.02</small>
+            </p>
         </header>
 
-        <section class="block" aria-labelledby="reunir">
-            <h2 id="reunir">O módulo vai reunir</h2>
-            <dl class="pauta">
-                <div>
-                    <dt>Tarefas por escola</dt>
-                    <dd>Tarefas publicadas, entregues e pendentes em cada unidade.</dd>
+        <p id="statusDados" class="loading" role="status">Carregando dados da semana…</p>
+
+        <div id="dashboard" hidden>
+            <dl class="kpis" aria-label="Resumo da semana">
+                <div class="kpi">
+                    <dt>Escolas com tarefas</dt>
+                    <dd id="kpiEscolas">—</dd>
+                    <p class="sub" id="kpiEscolasSub">—</p>
                 </div>
-                <div>
-                    <dt>Participação das turmas</dt>
-                    <dd>Acessos e entregas por turma, com as pendências em destaque.</dd>
+                <div class="kpi">
+                    <dt>Alunos com tarefas</dt>
+                    <dd id="kpiAlunos">—</dd>
+                    <p class="sub" id="kpiAlunosSub">—</p>
                 </div>
-                <div>
-                    <dt>Evolução no período</dt>
-                    <dd>Como o uso da plataforma se move ao longo das semanas.</dd>
+                <div class="kpi">
+                    <dt>Tarefas concluídas</dt>
+                    <dd id="kpiConcluidas">—</dd>
+                    <p class="sub" id="kpiConcluidasSub">—</p>
+                    <div class="mini" id="kpiMini" role="img" aria-label="Distribuição das tarefas"></div>
+                </div>
+                <div class="kpi">
+                    <dt>Acertos</dt>
+                    <dd id="kpiAcertos">—</dd>
+                    <p class="sub">Média ponderada pelas tarefas concluídas</p>
+                </div>
+                <div class="kpi">
+                    <dt>IQ da regional</dt>
+                    <dd id="kpiIq">—</dd>
+                    <p class="sub">Metade no prazo, metade acertos</p>
                 </div>
             </dl>
-        </section>
 
-        <section class="block" aria-labelledby="situacao">
-            <h2 id="situacao">Situação</h2>
-            <p>A página do módulo já está no painel. Os indicadores serão publicados aqui assim que a base de dados de Tarefa SP estiver conectada.</p>
-        </section>
+            <section class="block" aria-labelledby="leituraTitulo">
+                <h2 id="leituraTitulo">Leitura da semana</h2>
+                <div class="insights" id="insights"></div>
+            </section>
 
-        <footer class="sheet-foot">
-            <a class="back-inline" href="index.html">Voltar ao painel</a>
-            <p>Unidade Regional de Ensino de Marília. Atualizado em novembro de 2026.</p>
-        </footer>
+            <section class="block" aria-labelledby="quadroTitulo">
+                <div class="section-head">
+                    <div>
+                        <h2 id="quadroTitulo">Participação e qualidade</h2>
+                        <p class="hint">Cada ponto é uma escola. Clique para ver os detalhes. As linhas tracejadas marcam as medianas da regional.</p>
+                    </div>
+                </div>
+
+                <div class="split">
+                    <div>
+                        <div class="scatter" id="scatterWrap">
+                            <svg id="scatter" viewBox="0 0 760 420" role="img" aria-label="Dispersão entre alunos com tarefas e IQ por escola"></svg>
+                            <div class="tooltip" id="tooltip"></div>
+                        </div>
+                        <div class="legend">
+                            <span><i class="q-hh"></i> Alta participação, alto IQ</span>
+                            <span><i class="q-hl"></i> Alta participação, baixo IQ</span>
+                            <span><i class="q-lh"></i> Baixa participação, alto IQ</span>
+                            <span><i class="q-ll"></i> Baixa participação, baixo IQ</span>
+                        </div>
+                    </div>
+
+                    <aside class="detail" aria-labelledby="detalheTitulo">
+                        <div class="detail-head">
+                            <div>
+                                <h3 id="detalheTitulo">Regional</h3>
+                                <span class="code" id="detalheCodigo">40 escolas com tarefas</span>
+                            </div>
+                            <button class="link-btn" id="btnRegional" type="button" hidden>Ver regional</button>
+                        </div>
+                        <div id="detalheCorpo"></div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="block" aria-labelledby="rankingTitulo">
+                <div class="section-head">
+                    <div>
+                        <h2 id="rankingTitulo">Ranking da semana</h2>
+                        <p class="hint" id="rankingHint">10 escolas com os maiores valores.</p>
+                    </div>
+                    <div class="controls">
+                        <label for="metrica" class="hint" style="margin:0">Ordenar por</label>
+                        <select class="select" id="metrica">
+                            <option value="iq">IQ</option>
+                            <option value="part">Alunos com tarefas (%)</option>
+                            <option value="done">Tarefas concluídas (%)</option>
+                            <option value="correct">Acertos (%)</option>
+                        </select>
+                        <button class="toggle" id="btnAtencao" type="button" aria-pressed="false">Ver atenção</button>
+                    </div>
+                </div>
+                <ol class="ranking" id="ranking"></ol>
+                <p class="hint" id="rankingRodape">A linha vertical marca a mediana da regional.</p>
+            </section>
+
+            <section class="block" aria-labelledby="tabelaTitulo">
+                <div class="section-head">
+                    <div>
+                        <h2 id="tabelaTitulo">Todas as escolas</h2>
+                        <p class="hint" id="tabelaContagem">—</p>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <input class="search" id="busca" type="search" placeholder="Buscar escola ou código" aria-label="Buscar escola ou código">
+                    <div class="chips" id="chips" role="group" aria-label="Filtrar escolas">
+                        <button class="chip" type="button" data-filtro="all" aria-pressed="true">Todas</button>
+                        <button class="chip" type="button" data-filtro="lowiq" aria-pressed="false" title="IQ abaixo de 0,35">IQ baixo</button>
+                        <button class="chip" type="button" data-filtro="lowpart" aria-pressed="false" title="Menos de 10% dos alunos com tarefas">Baixa participação</button>
+                        <button class="chip" type="button" data-filtro="nodata" aria-pressed="false" title="Escolas sem tarefas registradas na semana">Sem registro</button>
+                    </div>
+                </div>
+
+                <p class="hint table-scroll-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
+
+                <div class="table-wrap">
+                    <table id="tabela">
+                        <thead>
+                            <tr>
+                                <th data-key="name" aria-sort="none"><button type="button">Escola</button></th>
+                                <th data-key="enroll" aria-sort="none"><button type="button">Matrículas</button></th>
+                                <th data-key="students" aria-sort="none"><button type="button">Alunos c/ tarefas</button></th>
+                                <th data-key="pctStudents" aria-sort="none"><button type="button">% alunos</button></th>
+                                <th data-key="proposed" aria-sort="none"><button type="button">Propostas</button></th>
+                                <th data-key="pctDone" aria-sort="none"><button type="button">Concluídas</button></th>
+                                <th data-key="pctOnTime" aria-sort="none"><button type="button">No prazo</button></th>
+                                <th data-key="pctCorrect" aria-sort="none"><button type="button">Acertos</button></th>
+                                <th data-key="iq" aria-sort="descending"><button type="button">IQ</button></th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabela"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="sheet-foot">
+                <p>Fonte: export Tarefa SP, semana 01 (01.02 a 07.02). 50 escolas e 19.670 matrículas na regional; 40 escolas registraram tarefas.</p>
+                <p>IQ = média entre o percentual de tarefas realizadas no prazo e o percentual de acertos. Tarefas entregues fora do prazo contam como concluídas, mas não entram no IQ. O IQ da regional é calculado sobre os totais da rede.</p>
+                <p>Dados agregados por escola, sem informação individual de estudante. <a href="index.html">Voltar ao painel</a>.</p>
+            </footer>
+        </div>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-    // Proteção de rota não autenticada
-    async function verificarSessao() {
+    const FONTE_DADOS = 'dados/tarefa-sp-semana-01.json';
+
+    const fmtInt = new Intl.NumberFormat('pt-BR');
+    const pct = (v) => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    const iqf = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const DADOS = { schools: [] };
+    const estado = {
+        filtro: 'all',
+        busca: '',
+        metrica: 'iq',
+        atencao: false,
+        ordenacao: 'iq',
+        direcao: 'desc',
+        selecionada: null
+    };
+
+    const METRICAS = {
+        iq: { valor: (s) => s.iq, formato: iqf, escala: 0.8 },
+        part: { valor: (s) => s.pctStudents, formato: pct, escala: 1 },
+        done: { valor: (s) => s.pctDone, formato: pct, escala: 1 },
+        correct: { valor: (s) => s.pctCorrect, formato: pct, escala: 1 }
+    };
+
+    const norm = (texto) => String(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const ativas = () => DADOS.schools.filter((s) => s.proposed > 0);
+    const porCodigo = (codigo) => DADOS.schools.find((s) => s.code === codigo) || null;
+
+    function mediana(valores) {
+        if (!valores.length) return 0;
+        const a = [...valores].sort((x, y) => x - y);
+        const meio = Math.floor(a.length / 2);
+        return a.length % 2 ? a[meio] : (a[meio - 1] + a[meio]) / 2;
+    }
+
+    function rede() {
+        const todas = DADOS.schools;
+        const comDados = ativas();
+        const soma = (lista, campo) => lista.reduce((total, s) => total + s[campo], 0);
+        const matriculas = soma(todas, 'enroll');
+        const alunos = soma(comDados, 'students');
+        const propostas = soma(comDados, 'proposed');
+        const noPrazo = soma(comDados, 'onTime');
+        const fora = soma(comDados, 'late');
+        const incompletas = soma(comDados, 'incomplete');
+        const naoRealizadas = soma(comDados, 'notDone');
+        const concluidas = noPrazo + fora;
+        const totalStatus = concluidas + incompletas + naoRealizadas;
+        const acertos = concluidas
+            ? comDados.reduce((total, s) => total + s.pctCorrect * (s.onTime + s.late), 0) / concluidas
+            : 0;
+        const pctNoPrazo = propostas ? noPrazo / propostas : 0;
+
+        return {
+            escolas: todas.length,
+            ativas: comDados.length,
+            matriculas,
+            alunos,
+            propostas,
+            noPrazo,
+            fora,
+            incompletas,
+            naoRealizadas,
+            concluidas,
+            totalStatus,
+            pctAlunos: matriculas ? alunos / matriculas : 0,
+            pctConcluidas: propostas ? concluidas / propostas : 0,
+            pctNoPrazo,
+            pctAcertos: acertos,
+            iq: 0.5 * pctNoPrazo + 0.5 * acertos
+        };
+    }
+
+    function combinaFiltro(s) {
+        if (estado.filtro === 'lowiq') return s.proposed > 0 && s.iq < 0.35;
+        if (estado.filtro === 'lowpart') return s.proposed > 0 && s.pctStudents < 0.10;
+        if (estado.filtro === 'nodata') return s.proposed === 0;
+        return true;
+    }
+
+    function combinaBusca(s) {
+        if (!estado.busca) return true;
+        const alvo = norm(estado.busca);
+        return norm(s.name).includes(alvo) || norm(s.code).includes(alvo);
+    }
+
+    const noCoorte = (s) => combinaFiltro(s) && combinaBusca(s);
+
+    function renderKpis() {
+        const n = rede();
+        document.getElementById('kpiEscolas').textContent = n.ativas;
+        document.getElementById('kpiEscolasSub').textContent = `de ${n.escolas} escolas da regional`;
+        document.getElementById('kpiAlunos').textContent = fmtInt.format(n.alunos);
+        document.getElementById('kpiAlunosSub').textContent = `${pct(n.pctAlunos)} das matrículas`;
+        document.getElementById('kpiConcluidas').textContent = pct(n.pctConcluidas);
+        document.getElementById('kpiConcluidasSub').textContent = `${fmtInt.format(n.concluidas)} de ${fmtInt.format(n.propostas)} tarefas`;
+        document.getElementById('kpiAcertos').textContent = pct(n.pctAcertos);
+        document.getElementById('kpiIq').textContent = iqf(n.iq);
+
+        const mini = document.getElementById('kpiMini');
+        mini.innerHTML = `
+            <i class="c-ontime" style="width:${(n.noPrazo / n.totalStatus) * 100}%"></i>
+            <i class="c-late" style="width:${(n.fora / n.totalStatus) * 100}%"></i>
+            <i class="c-incomplete" style="width:${(n.incompletas / n.totalStatus) * 100}%"></i>
+            <i class="c-notdone" style="width:${(n.naoRealizadas / n.totalStatus) * 100}%"></i>`;
+        mini.setAttribute('aria-label', `${pct(n.noPrazo / n.totalStatus)} no prazo, ${pct(n.fora / n.totalStatus)} fora do prazo, ${pct(n.incompletas / n.totalStatus)} incompletas e ${pct(n.naoRealizadas / n.totalStatus)} não realizadas`);
+    }
+
+    function renderInsights() {
+        const comDados = ativas();
+        const n = rede();
+        const baixaParticipacao = comDados.filter((s) => s.pctStudents < 0.10).length;
+        const semRegistro = DADOS.schools.length - comDados.length;
+        const maiorGap = [...comDados].sort((a, b) => b.enroll * (1 - b.pctStudents) - a.enroll * (1 - a.pctStudents))[0];
+        const maiorIq = [...comDados].sort((a, b) => b.iq - a.iq)[0];
+        const maiorParticipacao = [...comDados].sort((a, b) => b.pctStudents - a.pctStudents)[0];
+
+        document.getElementById('insights').innerHTML = `
+            <div class="insight">
+                <strong>${baixaParticipacao} de ${n.ativas}</strong>
+                <p>escolas têm menos de 10% dos alunos com tarefas. ${semRegistro} escolas não registraram nenhuma tarefa na semana.</p>
+            </div>
+            <div class="insight">
+                <strong>${fmtInt.format(maiorGap.enroll)} matrículas</strong>
+                <p>${esc(maiorGap.name)} concentra a maior oportunidade de alcance, com ${pct(maiorGap.pctStudents)} de participação.</p>
+            </div>
+            <div class="insight">
+                <strong>IQ ${iqf(maiorIq.iq)}</strong>
+                <p>${esc(maiorIq.name)} lidera o IQ, mas só ${pct(maiorIq.pctStudents)} dos alunos entraram. ${esc(maiorParticipacao.name)} tem a maior participação: ${pct(maiorParticipacao.pctStudents)}.</p>
+            </div>`;
+    }
+
+    function renderScatter() {
+        const svg = document.getElementById('scatter');
+        const comDados = ativas();
+        const compacto = window.matchMedia('(max-width: 560px)').matches;
+        const W = compacto ? 600 : 760;
+        const H = compacto ? 440 : 420;
+        const mL = 54, mR = 18, mT = 18, mB = compacto ? 62 : 46;
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const px = (v) => mL + v * (W - mL - mR);
+        const py = (v) => mT + (1 - (v - 0.2) / 0.6) * (H - mT - mB);
+        const medX = mediana(comDados.map((s) => s.pctStudents));
+        const medY = mediana(comDados.map((s) => s.iq));
+        const maxMatricula = Math.max(...comDados.map((s) => s.enroll));
+
+        let markup = '';
+        [0, 0.25, 0.5, 0.75, 1].forEach((t) => {
+            const x = px(t);
+            markup += `<line class="gridline" x1="${x}" y1="${mT}" x2="${x}" y2="${H - mB}"></line>`;
+            markup += `<text x="${x}" y="${H - mB + 17}" text-anchor="middle">${Math.round(t * 100)}%</text>`;
+        });
+
+        [0.2, 0.4, 0.6, 0.8].forEach((t) => {
+            const y = py(t);
+            markup += `<line class="gridline" x1="${mL}" y1="${y}" x2="${W - mR}" y2="${y}"></line>`;
+            markup += `<text x="${mL - 9}" y="${y + 3.5}" text-anchor="end">${String(t).replace('.', ',')}</text>`;
+        });
+
+        markup += `<line class="axis" x1="${mL}" y1="${H - mB}" x2="${W - mR}" y2="${H - mB}"></line>`;
+        markup += `<line class="axis" x1="${mL}" y1="${mT}" x2="${mL}" y2="${H - mB}"></line>`;
+        markup += `<line class="median" x1="${px(medX)}" y1="${mT}" x2="${px(medX)}" y2="${H - mB}"></line>`;
+        markup += `<line class="median" x1="${mL}" y1="${py(medY)}" x2="${W - mR}" y2="${py(medY)}"></line>`;
+        markup += `<text class="axis-title" x="${(mL + W - mR) / 2}" y="${H - 8}" text-anchor="middle">Alunos com tarefas</text>`;
+        markup += `<text class="axis-title" transform="translate(${compacto ? 22 : 14} ${H / 2}) rotate(-90)" text-anchor="middle">IQ</text>`;
+
+        const pontos = [...comDados].sort((a, b) => a.enroll - b.enroll);
+        pontos.forEach((s) => {
+            const altaParticipacao = s.pctStudents >= medX;
+            const altoIq = s.iq >= medY;
+            const classe = altoIq ? (altaParticipacao ? 'q-hh' : 'q-lh') : (altaParticipacao ? 'q-hl' : 'q-ll');
+            const r = 4 + 8 * Math.sqrt(s.enroll / maxMatricula);
+            const rotulo = `${s.name} (${s.code}): ${pct(s.pctStudents)} dos alunos com tarefas, IQ ${iqf(s.iq)}, ${fmtInt.format(s.enroll)} matrículas`;
+            markup += `<circle class="dot ${classe}" data-code="${esc(s.code)}" cx="${px(s.pctStudents)}" cy="${py(s.iq)}" r="${r}" tabindex="0" role="button" aria-label="${esc(rotulo)}"></circle>`;
+        });
+
+        svg.innerHTML = markup;
+
+        svg.querySelectorAll('.dot').forEach((ponto) => {
+            const escola = porCodigo(ponto.dataset.code);
+            ponto.addEventListener('pointerenter', (evento) => mostrarTooltip(evento, escola));
+            ponto.addEventListener('pointermove', (evento) => mostrarTooltip(evento, escola));
+            ponto.addEventListener('pointerleave', esconderTooltip);
+            ponto.addEventListener('click', () => selecionar(escola.code));
+            ponto.addEventListener('keydown', (evento) => {
+                if (evento.key === 'Enter' || evento.key === ' ') {
+                    evento.preventDefault();
+                    selecionar(escola.code);
+                }
+            });
+        });
+
+        atualizarScatter();
+    }
+
+    function mostrarTooltip(evento, escola) {
+        if (!escola) return;
+        const tip = document.getElementById('tooltip');
+        const caixa = document.getElementById('scatterWrap').getBoundingClientRect();
+        tip.innerHTML = `<strong>${esc(escola.name)}</strong><span>${pct(escola.pctStudents)} dos alunos com tarefas</span><span>IQ ${iqf(escola.iq)} · ${fmtInt.format(escola.enroll)} matrículas</span>`;
+        tip.classList.add('on');
+
+        let x = evento.clientX - caixa.left + 12;
+        let y = evento.clientY - caixa.top - 12;
+        if (x + tip.offsetWidth > caixa.width - 4) x = evento.clientX - caixa.left - tip.offsetWidth - 12;
+        if (y + tip.offsetHeight > caixa.height - 4) y = caixa.height - tip.offsetHeight - 4;
+        tip.style.left = `${Math.max(4, x)}px`;
+        tip.style.top = `${Math.max(4, y)}px`;
+    }
+
+    function esconderTooltip() {
+        document.getElementById('tooltip').classList.remove('on');
+    }
+
+    function atualizarScatter() {
+        document.querySelectorAll('#scatter .dot').forEach((ponto) => {
+            const escola = porCodigo(ponto.dataset.code);
+            ponto.classList.toggle('dim', !(escola && noCoorte(escola)));
+            ponto.classList.toggle('sel', Boolean(escola) && escola.code === estado.selecionada);
+        });
+    }
+
+    function renderDetalhe() {
+        const escola = estado.selecionada ? porCodigo(estado.selecionada) : null;
+        const n = rede();
+        const titulo = document.getElementById('detalheTitulo');
+        const codigo = document.getElementById('detalheCodigo');
+        const corpo = document.getElementById('detalheCorpo');
+        const btn = document.getElementById('btnRegional');
+
+        btn.hidden = !escola;
+
+        if (!escola) {
+            titulo.textContent = 'Regional';
+            codigo.textContent = `${n.ativas} escolas com tarefas · ${fmtInt.format(n.matriculas)} matrículas`;
+            corpo.innerHTML = `
+                <div class="detail-kpis">
+                    <div><span>IQ da regional</span><strong>${iqf(n.iq)}</strong></div>
+                    <div><span>Tarefas concluídas</span><strong>${pct(n.pctConcluidas)}</strong></div>
+                </div>
+                <dl class="detail-stats">
+                    <div><dt>Matrículas</dt><dd>${fmtInt.format(n.matriculas)}</dd></div>
+                    <div><dt>Alunos com tarefas</dt><dd>${fmtInt.format(n.alunos)} <small>${pct(n.pctAlunos)}</small></dd></div>
+                    <div><dt>Tarefas propostas</dt><dd>${fmtInt.format(n.propostas)}</dd></div>
+                    <div><dt>Acertos</dt><dd>${pct(n.pctAcertos)}</dd></div>
+                </dl>
+                ${barraStatus(n)}
+                <p class="hint" style="margin-top:12px">${fmtInt.format(n.concluidas)} tarefas concluídas: ${fmtInt.format(n.noPrazo)} no prazo e ${fmtInt.format(n.fora)} fora do prazo.</p>`;
+            return;
+        }
+
+        titulo.textContent = escola.name;
+        codigo.textContent = `Escola ${escola.code} · ${fmtInt.format(escola.enroll)} matrículas`;
+
+        if (!escola.proposed) {
+            corpo.innerHTML = `
+                <div class="detail-empty">Sem tarefas registradas nesta semana. A escola aparece no export apenas com o total de matrículas.</div>
+                <dl class="detail-stats" style="margin-top:18px">
+                    <div><dt>Matrículas</dt><dd>${fmtInt.format(escola.enroll)}</dd></div>
+                    <div><dt>Alunos com tarefas</dt><dd>0</dd></div>
+                    <div><dt>Tarefas propostas</dt><dd>0</dd></div>
+                    <div><dt>IQ</dt><dd>—</dd></div>
+                </dl>`;
+            return;
+        }
+
+        const dados = {
+            ...escola,
+            totalStatus: escola.onTime + escola.late + escola.incomplete + escola.notDone,
+            pctConcluidas: escola.pctDone
+        };
+
+        corpo.innerHTML = `
+            <div class="detail-kpis">
+                <div><span>IQ</span><strong>${iqf(escola.iq)}</strong></div>
+                <div><span>Tarefas concluídas</span><strong>${pct(escola.pctDone)}</strong></div>
+            </div>
+            <dl class="detail-stats">
+                <div><dt>Matrículas</dt><dd>${fmtInt.format(escola.enroll)}</dd></div>
+                <div><dt>Alunos com tarefas</dt><dd>${fmtInt.format(escola.students)} <small>${pct(escola.pctStudents)}</small></dd></div>
+                <div><dt>Tarefas propostas</dt><dd>${fmtInt.format(escola.proposed)}</dd></div>
+                <div><dt>Acertos</dt><dd>${pct(escola.pctCorrect)}</dd></div>
+            </dl>
+            ${barraStatus(dados)}`;
+    }
+
+    function barraStatus(d) {
+        const total = d.totalStatus || 1;
+        const partes = [
+            { classe: 'c-ontime', nome: 'No prazo', valor: d.noPrazo },
+            { classe: 'c-late', nome: 'Fora do prazo', valor: d.fora },
+            { classe: 'c-incomplete', nome: 'Incompletas', valor: d.incompletas },
+            { classe: 'c-notdone', nome: 'Não realizadas', valor: d.naoRealizadas }
+        ];
+        const barra = partes.map((p) => `<i class="${p.classe}" style="width:${(p.valor / total) * 100}%"></i>`).join('');
+        const legenda = partes.map((p) => `
+            <li><span class="l"><i class="${p.classe}"></i>${p.nome}</span><b>${fmtInt.format(p.valor)}</b></li>`).join('');
+        return `<div class="stack" role="img" aria-label="No prazo: ${d.noPrazo}; fora do prazo: ${d.fora}; incompletas: ${d.incompletas}; não realizadas: ${d.naoRealizadas}">${barra}</div><ul class="stack-legend">${legenda}</ul>`;
+    }
+
+    function renderRanking() {
+        const config = METRICAS[estado.metrica];
+        const base = ativas().filter(noCoorte);
+        const lista = [...base].sort((a, b) => estado.atencao ? config.valor(a) - config.valor(b) : config.valor(b) - config.valor(a)).slice(0, 10);
+        const medianaGeral = mediana(ativas().map(config.valor));
+        const listaEl = document.getElementById('ranking');
+        const hint = document.getElementById('rankingHint');
+        const rodape = document.getElementById('rankingRodape');
+
+        hint.textContent = estado.atencao
+            ? '10 escolas com os menores valores entre as que registraram tarefas.'
+            : '10 escolas com os maiores valores entre as que registraram tarefas.';
+        rodape.hidden = lista.length === 0;
+
+        if (!lista.length) {
+            listaEl.innerHTML = `<li class="empty">Nenhuma escola com tarefas neste filtro.</li>`;
+            return;
+        }
+
+        listaEl.innerHTML = lista.map((s, indice) => {
+            const valor = config.valor(s);
+            const largura = Math.max(1.5, Math.min(100, (valor / config.escala) * 100));
+            const posicaoMediana = Math.max(0, Math.min(100, (medianaGeral / config.escala) * 100));
+            return `
+                <li>
+                    <button class="rank${estado.atencao ? ' attention' : ''}" type="button" data-code="${esc(s.code)}" aria-current="${s.code === estado.selecionada}">
+                        <span class="n">${indice + 1}</span>
+                        <span class="nm">${esc(s.name)}<small>${esc(s.code)}</small></span>
+                        <span class="track"><i style="width:${largura}%"></i><span class="med" style="left:${posicaoMediana}%"></span></span>
+                        <span class="v">${config.formato(valor)}</span>
+                    </button>
+                </li>`;
+        }).join('');
+    }
+
+    function renderTabela() {
+        const linhas = DADOS.schools.filter(noCoorte);
+        const chave = estado.ordenacao;
+        const direcao = estado.direcao === 'asc' ? 1 : -1;
+
+        linhas.sort((a, b) => {
+            const aAtiva = a.proposed > 0;
+            const bAtiva = b.proposed > 0;
+            if (!aAtiva && bAtiva) return 1;
+            if (aAtiva && !bAtiva) return -1;
+            if (!aAtiva && !bAtiva) return a.name.localeCompare(b.name, 'pt-BR');
+
+            let va = a[chave];
+            let vb = b[chave];
+            if (chave === 'name' || chave === 'code') {
+                return String(va).localeCompare(String(vb), 'pt-BR') * direcao;
+            }
+            return (va - vb) * direcao;
+        });
+
+        document.getElementById('corpoTabela').innerHTML = linhas.map((s) => {
+            const ativa = s.proposed > 0;
+            return `
+                <tr data-code="${esc(s.code)}" aria-selected="${s.code === estado.selecionada}" class="${ativa ? '' : 'inactive'}">
+                    <td>
+                        <button class="name-btn" type="button" data-code="${esc(s.code)}">${esc(s.name)}${ativa ? '' : ' <span class="tag">sem registro</span>'}</button>
+                        <span class="code">${esc(s.code)}</span>
+                    </td>
+                    <td>${fmtInt.format(s.enroll)}</td>
+                    <td>${ativa ? fmtInt.format(s.students) : '—'}</td>
+                    <td>${ativa ? pct(s.pctStudents) : '0,0%'}</td>
+                    <td>${ativa ? fmtInt.format(s.proposed) : '—'}</td>
+                    <td>${ativa ? pct(s.pctDone) : '—'}</td>
+                    <td>${ativa ? pct(s.pctOnTime) : '—'}</td>
+                    <td>${ativa ? pct(s.pctCorrect) : '—'}</td>
+                    <td>${ativa ? iqf(s.iq) : '—'}</td>
+                </tr>`;
+        }).join('');
+
+        document.getElementById('tabelaContagem').textContent = `${linhas.length} ${linhas.length === 1 ? 'escola' : 'escolas'} no filtro atual.`;
+        document.querySelectorAll('#tabela thead th').forEach((th) => {
+            th.setAttribute('aria-sort', th.dataset.key === chave ? (estado.direcao === 'asc' ? 'ascending' : 'descending') : 'none');
+        });
+    }
+
+    function atualizarChips() {
+        const comDados = ativas();
+        const contagens = {
+            all: DADOS.schools.length,
+            lowiq: comDados.filter((s) => s.iq < 0.35).length,
+            lowpart: comDados.filter((s) => s.pctStudents < 0.10).length,
+            nodata: DADOS.schools.length - comDados.length
+        };
+        const nomes = {
+            all: 'Todas',
+            lowiq: 'IQ baixo',
+            lowpart: 'Baixa participação',
+            nodata: 'Sem registro'
+        };
+        document.querySelectorAll('#chips .chip').forEach((chip) => {
+            const chave = chip.dataset.filtro;
+            chip.textContent = `${nomes[chave]} (${contagens[chave]})`;
+            chip.setAttribute('aria-pressed', String(estado.filtro === chave));
+        });
+    }
+
+    function selecionar(codigo) {
+        estado.selecionada = estado.selecionada === codigo ? null : codigo;
+        renderDetalhe();
+        atualizarScatter();
+        renderRanking();
+        renderTabela();
+    }
+
+    function renderTudo() {
+        renderKpis();
+        renderInsights();
+        renderScatter();
+        renderDetalhe();
+        renderRanking();
+        renderTabela();
+    }
+
+    function ligarEventos() {
+        document.getElementById('btnRegional').addEventListener('click', () => {
+            estado.selecionada = null;
+            renderDetalhe();
+            atualizarScatter();
+            renderRanking();
+            renderTabela();
+        });
+
+        document.getElementById('metrica').addEventListener('change', (evento) => {
+            estado.metrica = evento.target.value;
+            renderRanking();
+        });
+
+        document.getElementById('btnAtencao').addEventListener('click', (evento) => {
+            estado.atencao = !estado.atencao;
+            evento.currentTarget.setAttribute('aria-pressed', String(estado.atencao));
+            evento.currentTarget.textContent = estado.atencao ? 'Ver melhores' : 'Ver atenção';
+            renderRanking();
+        });
+
+        document.getElementById('chips').addEventListener('click', (evento) => {
+            const chip = evento.target.closest('.chip');
+            if (!chip) return;
+            estado.filtro = chip.dataset.filtro;
+            atualizarChips();
+            atualizarScatter();
+            renderRanking();
+            renderTabela();
+        });
+
+        document.getElementById('busca').addEventListener('input', (evento) => {
+            estado.busca = evento.target.value;
+            atualizarScatter();
+            renderRanking();
+            renderTabela();
+        });
+
+        document.getElementById('ranking').addEventListener('click', (evento) => {
+            const botao = evento.target.closest('.rank');
+            if (botao) selecionar(botao.dataset.code);
+        });
+
+        document.getElementById('corpoTabela').addEventListener('click', (evento) => {
+            const linha = evento.target.closest('tr');
+            if (linha) selecionar(linha.dataset.code);
+        });
+
+        document.querySelectorAll('#tabela thead th').forEach((th) => {
+            th.querySelector('button').addEventListener('click', () => {
+                const chave = th.dataset.key;
+                if (estado.ordenacao === chave) {
+                    estado.direcao = estado.direcao === 'asc' ? 'desc' : 'asc';
+                } else {
+                    estado.ordenacao = chave;
+                    estado.direcao = chave === 'name' || chave === 'code' ? 'asc' : 'desc';
+                }
+                renderTabela();
+            });
+        });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(renderScatter, 150);
+        });
+
+        document.getElementById('btn-sair').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        });
+    }
+
+    async function carregarDados() {
+        const status = document.getElementById('statusDados');
+        try {
+            const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            const dados = await resposta.json();
+            if (!dados.schools || !dados.schools.length) throw new Error('Base vazia');
+
+            DADOS.schools = dados.schools;
+            document.getElementById('dashboard').hidden = false;
+            status.hidden = true;
+            atualizarChips();
+            renderTudo();
+            ligarEventos();
+        } catch (erro) {
+            status.textContent = 'Não foi possível carregar os dados da semana. Abra a página pelo endereço do site e recarregue.';
+            status.classList.add('error');
+        }
+    }
+
+    async function iniciar() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.href = 'index.html';
+            return;
         }
+        carregarDados();
     }
-    verificarSessao();
 
-    document.getElementById('btn-sair').addEventListener('click', async () => {
-        await supabaseClient.auth.signOut();
-        window.location.href = 'index.html';
-    });
+    iniciar();
 </script>
 </body>
 </html>
