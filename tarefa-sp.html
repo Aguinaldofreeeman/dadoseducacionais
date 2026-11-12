@@ -1,1018 +1,1613 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarefa SP — Dados Educacionais</title>
-    <meta name="description" content="Painel semanal do Tarefa SP: participação, tarefas concluídas, acertos e IQ por escola na Unidade Regional de Ensino de Marília.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
-    <style>
-        :root {
-            --paper: #fbfcfa;
-            --desk: #edf1ec;
-            --wash: #f4f7f2;
-            --ink: #13222e;
-            --graphite: #566872;
-            --rule: #d8e1d9;
-            --rule-strong: #b9c6bc;
-            --margin-rule: #e0b3ad;
-            --teal: #0e6f66;
-            --teal-soft: #dcebe7;
-            --amber: #b45309;
-            --brick: #9e2b24;
-            --slate: #4b6b7a;
-            --incomplete: #8a9a8f;
-        }
-
-        * { box-sizing: border-box; }
-        [hidden] { display: none !important; }
-
-        body {
-            margin: 0;
-            background: var(--desk);
-            color: var(--ink);
-            font: 400 1rem/1.6 "Figtree", "Segoe UI", system-ui, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        ::selection { background: rgba(14, 111, 102, .18); }
-
-        .topbar {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 26px 22px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            font-size: .875rem;
-        }
-
-        .back {
-            color: var(--ink);
-            font-weight: 600;
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            padding-bottom: 2px;
-        }
-
-        .back:hover { border-bottom-color: var(--ink); }
-
-        .quiet {
-            appearance: none;
-            background: none;
-            border: 0;
-            padding: 6px 2px;
-            color: var(--graphite);
-            font: 500 .875rem/1 "Figtree", system-ui, sans-serif;
-            cursor: pointer;
-        }
-
-        .quiet:hover { color: var(--ink); }
-
-        .sheet {
-            position: relative;
-            max-width: 1120px;
-            margin: 22px auto 56px;
-            padding: clamp(34px, 5vw, 60px) clamp(24px, 5vw, 56px) 40px clamp(46px, 8vw, 96px);
-            background: var(--paper);
-            border: 1px solid var(--rule);
-            box-shadow: 0 1px 2px rgba(19, 34, 46, .04), 0 30px 70px -30px rgba(19, 34, 46, .22);
-        }
-
-        .margin-rule {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: clamp(26px, 5vw, 56px);
-            width: 1px;
-            background: var(--margin-rule);
-            opacity: .75;
-        }
-
-        h1, h2 {
-            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-            text-wrap: balance;
-        }
-
-        .masthead { position: relative; }
-
-        h1 {
-            margin: 0;
-            font-size: clamp(2.9rem, 7vw, 4.6rem);
-            font-weight: 700;
-            line-height: .94;
-            letter-spacing: -.035em;
-        }
-
-        .lede {
-            max-width: 56ch;
-            margin: 20px 0 0;
-            font-size: clamp(1rem, 1.5vw, 1.15rem);
-            line-height: 1.55;
-            color: var(--graphite);
-        }
-
-        .stamp {
-            position: absolute;
-            top: 4px;
-            right: 0;
-            margin: 0;
-            padding: 11px 17px 9px;
-            border: 2px solid var(--teal);
-            border-radius: 3px;
-            color: var(--teal);
-            text-align: center;
-            text-transform: uppercase;
-            transform: rotate(-5deg);
-        }
-
-        .stamp::after {
-            content: "";
-            position: absolute;
-            inset: 3px;
-            border: 1px solid currentColor;
-            border-radius: 1px;
-            opacity: .4;
-        }
-
-        .stamp span {
-            display: block;
-            font: 700 .72rem/1.25 "Figtree", system-ui, sans-serif;
-            letter-spacing: .18em;
-        }
-
-        .stamp small {
-            display: block;
-            margin-top: 4px;
-            font: 600 .62rem/1 "Figtree", system-ui, sans-serif;
-            letter-spacing: .1em;
-            opacity: .85;
-        }
-
-        .loading {
-            margin: 34px 0 0;
-            color: var(--graphite);
-            font-size: .9rem;
-        }
-
-        .loading.error { color: var(--brick); }
-
-        /* Resumo */
-        .kpis {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 1px;
-            margin: 40px 0 0;
-            padding: 0;
-            border: 1px solid var(--rule);
-            background: var(--rule);
-        }
-
-        .kpi {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            padding: 18px 17px 16px;
-            background: var(--wash);
-        }
-
-        .kpi dt {
-            margin: 0;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--graphite);
-        }
-
-        .kpi dd {
-            margin: 6px 0 0;
-            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-            font-size: clamp(1.75rem, 2.5vw, 2.3rem);
-            font-weight: 700;
-            line-height: 1;
-            letter-spacing: -.02em;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .kpi .sub {
-            margin: 5px 0 0;
-            font-size: 11.5px;
-            line-height: 1.4;
-            color: var(--graphite);
-        }
-
-        .mini {
-            display: flex;
-            gap: 2px;
-            height: 4px;
-            margin-top: 8px;
-            background: var(--rule);
-            overflow: hidden;
-        }
-
-        .mini i { display: block; height: 100%; }
-
-        .c-ontime { background: var(--teal); }
-        .c-late { background: var(--amber); }
-        .c-incomplete { background: var(--incomplete); }
-        .c-notdone { background: var(--brick); }
-
-        /* Seções */
-        .block {
-            margin-top: 52px;
-            padding-top: 28px;
-            border-top: 1px solid var(--rule);
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: -.015em;
-        }
-
-        .hint {
-            margin: 6px 0 0;
-            font-size: 12.5px;
-            line-height: 1.5;
-            color: var(--graphite);
-        }
-
-        /* Leitura */
-        .insights {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-top: 18px;
-            border-top: 1px solid var(--rule);
-        }
-
-        .insight {
-            padding: 18px 22px 2px 0;
-            border-right: 1px solid var(--rule);
-            margin-right: 22px;
-        }
-
-        .insight:last-child {
-            border-right: 0;
-            margin-right: 0;
-            padding-right: 0;
-        }
-
-        .insight strong {
-            display: block;
-            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-            font-size: 1.65rem;
-            font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -.02em;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .insight p {
-            margin: 7px 0 0;
-            font-size: 12.5px;
-            line-height: 1.5;
-            color: var(--graphite);
-        }
-
-        /* Análise */
-        .split {
-            display: grid;
-            grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
-            gap: 34px;
-            align-items: start;
-        }
-
-        .scatter {
-            position: relative;
-            margin-top: 14px;
-            background: #f7f9f4;
-            border: 1px solid var(--rule);
-        }
-
-        .scatter svg { display: block; width: 100%; height: auto; }
-
-        .scatter .gridline { stroke: #e2e9e0; stroke-width: 1; }
-        .scatter .axis { stroke: var(--rule-strong); stroke-width: 1; }
-        .scatter text {
-            fill: var(--graphite);
-            font-family: "Figtree", system-ui, sans-serif;
-            font-size: 10px;
-        }
-        .scatter .median {
-            stroke: #aebbb0;
-            stroke-width: 1;
-            stroke-dasharray: 3 4;
-        }
-        .scatter .axis-title { font-size: 11px; }
-        .scatter .dot {
-            cursor: pointer;
-            transition: opacity .15s ease, stroke-width .15s ease;
-        }
-        .scatter .dot:hover, .scatter .dot:focus-visible {
-            stroke: var(--ink);
-            stroke-width: 2;
-            outline: none;
-        }
-        .scatter .dot.dim { opacity: .13; pointer-events: none; }
-        .scatter .dot.sel { stroke: var(--ink); stroke-width: 2.5; }
-
-        .q-hh { fill: var(--teal); }
-        .q-hl { fill: var(--amber); }
-        .q-lh { fill: var(--slate); }
-        .q-ll { fill: var(--brick); }
-
-        .tooltip {
-            position: absolute;
-            z-index: 6;
-            max-width: 230px;
-            padding: 8px 10px;
-            background: var(--ink);
-            color: var(--paper);
-            font-size: 11.5px;
-            line-height: 1.45;
-            border-radius: 3px;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-2px);
-            transition: opacity .12s ease;
-        }
-
-        .tooltip.on { opacity: 1; }
-
-        .tooltip strong {
-            display: block;
-            font-size: 12px;
-            margin-bottom: 2px;
-        }
-
-        .tooltip span { display: block; opacity: .82; }
-
-        .legend {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px 16px;
-            margin-top: 10px;
-            font-size: 11.5px;
-            color: var(--graphite);
-        }
-
-        .legend span { display: inline-flex; align-items: center; gap: 6px; }
-        .legend i { width: 9px; height: 9px; border-radius: 50%; }
-
-        /* Detalhe */
-        .detail {
-            margin-top: 14px;
-            padding: 20px;
-            border: 1px solid var(--rule);
-            background: var(--wash);
-        }
-
-        .detail-head {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .detail-head h3 {
-            margin: 0;
-            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-            font-size: 1.08rem;
-            font-weight: 700;
-            line-height: 1.2;
-            letter-spacing: -.01em;
-        }
-
-        .detail-head .code {
-            display: block;
-            margin-top: 3px;
-            font: 400 11px/1.2 "Figtree", system-ui, sans-serif;
-            color: var(--graphite);
-        }
-
-        .link-btn {
-            appearance: none;
-            background: none;
-            border: 0;
-            padding: 2px 0;
-            color: var(--teal);
-            font: 600 11.5px/1.2 "Figtree", system-ui, sans-serif;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .detail-kpis {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 18px;
-        }
-
-        .detail-kpis div {
-            padding-top: 8px;
-            border-top: 1px solid var(--rule);
-        }
-
-        .detail-kpis span {
-            display: block;
-            font-size: 11px;
-            color: var(--graphite);
-        }
-
-        .detail-kpis strong {
-            display: block;
-            margin-top: 2px;
-            font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .detail-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 18px;
-            margin: 18px 0 0;
-            padding: 0;
-        }
-
-        .detail-stats div {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--rule);
-            font-size: 11.5px;
-        }
-
-        .detail-stats dt { color: var(--graphite); }
-        .detail-stats dd {
-            margin: 0;
-            font-weight: 600;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .detail-stats small {
-            font-weight: 400;
-            color: var(--graphite);
-        }
-
-        .stack {
-            display: flex;
-            gap: 2px;
-            height: 12px;
-            margin-top: 20px;
-            background: var(--rule);
-        }
-
-        .stack i { display: block; height: 100%; }
-
-        .stack-legend {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px 14px;
-            margin: 10px 0 0;
-            padding: 0;
-            font-size: 11px;
-            color: var(--graphite);
-        }
-
-        .stack-legend li {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .stack-legend .l { display: inline-flex; align-items: center; gap: 6px; }
-        .stack-legend i { width: 8px; height: 8px; flex: 0 0 auto; }
-        .stack-legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
-
-        .detail-empty {
-            margin: 18px 0 0;
-            padding: 12px 14px;
-            border-left: 3px solid var(--brick);
-            background: #f7ecea;
-            font-size: 12px;
-            line-height: 1.5;
-            color: var(--brick);
-        }
-
-        /* Ranking */
-        .section-head {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .select {
-            appearance: none;
-            height: 34px;
-            padding: 0 30px 0 10px;
-            border: 1px solid var(--rule);
-            border-radius: 3px;
-            background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23566872' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
-            color: var(--ink);
-            font: 600 12px/1 "Figtree", system-ui, sans-serif;
-            cursor: pointer;
-        }
-
-        .toggle {
-            height: 34px;
-            padding: 0 12px;
-            border: 1px solid var(--rule);
-            border-radius: 3px;
-            background: var(--paper);
-            color: var(--graphite);
-            font: 600 12px/1 "Figtree", system-ui, sans-serif;
-            cursor: pointer;
-        }
-
-        .toggle[aria-pressed="true"] {
-            background: var(--ink);
-            border-color: var(--ink);
-            color: var(--paper);
-        }
-
-        .ranking {
-            list-style: none;
-            margin: 14px 0 0;
-            padding: 0;
-        }
-
-        .rank {
-            display: grid;
-            grid-template-columns: 30px minmax(150px, .9fr) minmax(120px, 1.3fr) 62px;
-            gap: 10px;
-            align-items: center;
-            width: 100%;
-            padding: 7px 8px;
-            border: 0;
-            border-bottom: 1px solid var(--rule);
-            background: none;
-            color: inherit;
-            font: inherit;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        .rank:hover { background: var(--wash); }
-        .rank[aria-current="true"] { background: var(--teal-soft); }
-
-        .rank .n {
-            color: var(--graphite);
-            font-size: 11px;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .rank .nm {
-            font-size: 13px;
-            font-weight: 600;
-            line-height: 1.25;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .rank .nm small {
-            display: block;
-            color: var(--graphite);
-            font-size: 10.5px;
-            font-weight: 400;
-        }
-
-        .track {
-            position: relative;
-            height: 9px;
-            background: #e6ece4;
-            border-radius: 5px;
-        }
-
-        .track > i {
-            display: block;
-            height: 100%;
-            background: var(--teal);
-            border-radius: 5px;
-            transition: width .3s ease;
-        }
-
-        .rank.attention .track > i { background: var(--brick); }
-
-        .track .med {
-            position: absolute;
-            top: -2px;
-            bottom: -2px;
-            width: 1px;
-            background: var(--ink);
-            opacity: .4;
-        }
-
-        .rank .v {
-            font-size: 12.5px;
-            font-weight: 600;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .empty {
-            margin: 18px 0 0;
-            padding: 24px 0;
-            color: var(--graphite);
-            font-size: 13px;
-        }
-
-        /* Tabela */
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-
-        .search {
-            flex: 1 1 260px;
-            max-width: 340px;
-            height: 34px;
-            padding: 0 11px;
-            border: 1px solid var(--rule);
-            border-radius: 3px;
-            background: var(--paper);
-            color: var(--ink);
-            font: 400 13px/1 "Figtree", system-ui, sans-serif;
-        }
-
-        .search:focus { border-color: var(--teal); }
-
-        .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-
-        .chip {
-            height: 32px;
-            padding: 0 11px;
-            border: 1px solid var(--rule);
-            border-radius: 99px;
-            background: var(--paper);
-            color: var(--graphite);
-            font: 600 11.5px/1 "Figtree", system-ui, sans-serif;
-            cursor: pointer;
-        }
-
-        .chip:hover { border-color: var(--rule-strong); }
-        .chip[aria-pressed="true"] {
-            background: var(--ink);
-            border-color: var(--ink);
-            color: var(--paper);
-        }
-
-        .table-wrap {
-            margin-top: 14px;
-            max-height: 540px;
-            overflow: auto;
-            border-top: 1px solid var(--rule);
-        }
-
-        .table-scroll-hint { display: none; }
-
-        table {
-            width: 100%;
-            min-width: 840px;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 12.5px;
-        }
-
-        thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            padding: 8px;
-            border-bottom: 1px solid var(--ink);
-            background: var(--paper);
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        thead th:first-child { text-align: left; }
-
-        thead th button {
-            appearance: none;
-            border: 0;
-            background: none;
-            padding: 0;
-            color: var(--graphite);
-            font: 600 11px/1.3 "Figtree", system-ui, sans-serif;
-            text-align: right;
-            cursor: pointer;
-        }
-
-        thead th:first-child button { text-align: left; }
-        thead th[aria-sort] button { color: var(--ink); }
-
-        tbody td {
-            padding: 8px;
-            border-bottom: 1px solid var(--rule);
-            text-align: right;
-            white-space: nowrap;
-            font-variant-numeric: tabular-nums;
-        }
-
-        tbody td:first-child { text-align: left; }
-
-        tbody tr { cursor: pointer; }
-        tbody tr:hover td { background: var(--wash); }
-        tbody tr[aria-selected="true"] td { background: var(--teal-soft); }
-        tbody tr.inactive td { color: var(--graphite); }
-
-        .name-btn {
-            appearance: none;
-            border: 0;
-            background: none;
-            padding: 0;
-            color: inherit;
-            font: 600 12.5px/1.3 "Figtree", system-ui, sans-serif;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        .name-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-
-        .code {
-            display: block;
-            margin-top: 1px;
-            font: 400 10.5px/1.2 "Figtree", system-ui, sans-serif;
-            color: var(--graphite);
-        }
-
-        .tag {
-            display: inline-block;
-            margin-left: 6px;
-            padding: 1px 6px;
-            border: 1px solid var(--rule);
-            border-radius: 99px;
-            font: 600 9.5px/1.4 "Figtree", system-ui, sans-serif;
-            color: var(--graphite);
-            background: var(--wash);
-            vertical-align: 1px;
-        }
-
-        /* Rodapé */
-        .sheet-foot {
-            margin-top: 52px;
-            padding-top: 18px;
-            border-top: 1px solid var(--rule);
-            display: grid;
-            gap: 6px;
-            font-size: 11.5px;
-            line-height: 1.55;
-            color: var(--graphite);
-        }
-
-        .sheet-foot p { margin: 0; }
-        .sheet-foot a { color: var(--teal); font-weight: 600; }
-
-        :focus-visible {
-            outline: 3px solid rgba(14, 111, 102, .4);
-            outline-offset: 3px;
-            border-radius: 2px;
-        }
-
-        @media (prefers-reduced-motion: no-preference) {
-            .stamp { animation: stamp-in .5s cubic-bezier(.2, .7, .2, 1) .15s both; }
-
-            @keyframes stamp-in {
-                from { opacity: 0; transform: rotate(-9deg) scale(1.12); }
-                to { opacity: 1; transform: rotate(-5deg) scale(1); }
-            }
-        }
-
-        @media (max-width: 1000px) {
-            .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .split { grid-template-columns: 1fr; }
-            .stamp { position: static; display: inline-block; margin-top: 24px; }
-        }
-
-        @media (max-width: 760px) {
-            .insights { grid-template-columns: 1fr; }
-            .insight {
-                padding: 16px 0;
-                margin-right: 0;
-                border-right: 0;
-                border-bottom: 1px solid var(--rule);
-            }
-            .insight:last-child { border-bottom: 0; }
-        }
-
-        @media (max-width: 720px) {
-            .margin-rule { display: none; }
-            .sheet { padding-left: clamp(24px, 6vw, 40px); }
-            .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .kpi:last-child { grid-column: 1 / -1; }
-            .rank {
-                grid-template-columns: 26px minmax(0, 1fr) 58px;
-                row-gap: 4px;
-            }
-            .rank .n { grid-column: 1; grid-row: 1; }
-            .rank .nm {
-                grid-column: 2;
-                grid-row: 1;
-                white-space: normal;
-                overflow: visible;
-                text-overflow: clip;
-            }
-            .rank .v { grid-column: 3; grid-row: 1; }
-            .rank .track { grid-column: 2 / -1; grid-row: 2; }
-            .search { max-width: none; }
-            .detail-stats { grid-template-columns: 1fr; }
-            .table-scroll-hint { display: block; margin-top: 10px; }
-        }
-
-        @media (max-width: 560px) {
-            .scatter text { font-size: 18px; }
-            .scatter .axis-title { font-size: 22px; }
-        }
-
-        @media (max-width: 420px) {
-            .kpis { grid-template-columns: 1fr; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>Tarefa SP — URE Marília</title>
+<meta name="description" content="Painel semanal do Tarefa SP na Unidade Regional de Ensino de Marília: participação, conclusão, acertos e IQ por escola.">
+<link rel="stylesheet" href="css/home-button.css">
+<style>
+:root {
+    color-scheme: light;
+    --bg: #eef3f7;
+    --surface: #ffffff;
+    --surface-2: #f7fafc;
+    --text: #0f172a;
+    --muted: #5b6b7f;
+    --border: #dbe4ee;
+    --border-strong: #c3d0de;
+    --heading: #17365d;
+    --teal: #0d9488;
+    --teal-ink: #0f766e;
+    --teal-soft: #ccfbf1;
+    --blue: #4f46e5;
+    --blue-ink: #4338ca;
+    --blue-soft: #e7e7fb;
+    --amber: #d97706;
+    --amber-ink: #b45309;
+    --amber-soft: #fef0d8;
+    --red: #dc2626;
+    --red-ink: #b91c1c;
+    --red-soft: #fde6e6;
+    --slate: #64748b;
+    --slate-soft: #e9eef5;
+    --green: #15803d;
+    --q-hh: #0d9488;
+    --q-hl: #d97706;
+    --q-lh: #4f46e5;
+    --q-ll: #dc2626;
+    --chart-bg: #f8fafc;
+    --median: #94a3b8;
+    --tooltip-bg: #0f172a;
+    --tooltip-text: #f8fafc;
+    --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 12px 30px -14px rgba(15, 23, 42, .22);
+    --shadow-lg: 0 18px 50px -20px rgba(15, 23, 42, .35);
+    --header-gradient: linear-gradient(120deg, #17365d, #0f4c75 58%, #0f766e);
+    --summary-gradient: linear-gradient(120deg, #17365d, #134e6f);
+    --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        --bg: #0b1220;
+        --surface: #131c2e;
+        --surface-2: #0f1929;
+        --text: #e2e8f0;
+        --muted: #9fb0c4;
+        --border: #26334d;
+        --border-strong: #354664;
+        --heading: #bfdbfe;
+        --teal: #2dd4bf;
+        --teal-ink: #5eead4;
+        --teal-soft: #0f3d3a;
+        --blue: #818cf8;
+        --blue-ink: #c7d2fe;
+        --blue-soft: #242456;
+        --amber: #fbbf24;
+        --amber-ink: #fde68a;
+        --amber-soft: #422c0b;
+        --red: #f87171;
+        --red-ink: #fecaca;
+        --red-soft: #451d1d;
+        --slate: #94a3b8;
+        --slate-soft: #243145;
+        --green: #4ade80;
+        --q-hh: #2dd4bf;
+        --q-hl: #fbbf24;
+        --q-lh: #818cf8;
+        --q-ll: #f87171;
+        --chart-bg: #0f1929;
+        --median: #64748b;
+        --tooltip-bg: #e2e8f0;
+        --tooltip-text: #0f172a;
+        --shadow: 0 1px 3px #0008, 0 12px 30px -14px #000a;
+        --shadow-lg: 0 18px 50px -20px #000c;
+        --summary-gradient: linear-gradient(120deg, #1e3a5f, #164e63);
+    }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 15px/1.55 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+button, input, select { font: inherit; }
+button { color: inherit; }
+a { color: var(--teal-ink); }
+
+::selection { background: color-mix(in srgb, var(--teal) 25%, transparent); }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--teal) 45%, transparent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Cabeçalho */
+.site-header {
+    background: var(--header-gradient);
+    color: #fff;
+    box-shadow: 0 10px 34px -18px rgba(15, 23, 42, .7);
+}
+
+.header-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 26px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    flex-wrap: wrap;
+}
+
+.eyebrow {
+    margin: 0 0 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: #c7ece8;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 3.1vw, 2.35rem);
+    line-height: 1.06;
+    letter-spacing: -.02em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.week-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, .26);
+    border-radius: 99px;
+    background: rgba(255, 255, 255, .13);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.header-sub {
+    margin: 9px 0 0;
+    max-width: 70ch;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .8);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-ghost {
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid rgba(255, 255, 255, .34);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, .12);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-ghost:hover { background: rgba(15, 23, 42, .24); }
+
+/* Conteúdo */
+main {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 22px 30px 46px;
+}
+
+/* Resumo */
+.summary {
+    position: relative;
+    overflow: hidden;
+    padding: 22px 24px 20px;
+    border-radius: 16px;
+    background: var(--summary-gradient);
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+}
+
+.summary::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    bottom: -110px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45, 212, 191, .2), transparent 66%);
+    pointer-events: none;
+}
+
+.summary > * { position: relative; z-index: 1; }
+
+.summary-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.summary-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+.summary-head p {
+    margin: 4px 0 0;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, .76);
+}
+
+.period-chip {
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 99px;
+    background: rgba(255, 255, 255, .1);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 17px 20px;
+    margin-top: 19px;
+}
+
+.summary-item .k {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .78);
+}
+
+.summary-item .v {
+    margin: 3px 0 6px;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-item .bar {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, .17);
+    overflow: hidden;
+}
+
+.summary-item .bar i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #5eead4;
+}
+
+.summary-item .d {
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, .68);
+}
+
+.status-strip {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, .15);
+}
+
+.status-bar {
+    display: flex;
+    gap: 2px;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, .14);
+    overflow: hidden;
+}
+
+.status-bar i { display: block; height: 100%; }
+
+.s-ontime { background: #2dd4bf; }
+.s-late { background: #fbbf24; }
+.s-incomplete { background: #94a3b8; }
+.s-missed { background: #f87171; }
+
+.status-legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 9px 0 0;
+    padding: 0;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, .78);
+}
+
+.status-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-legend i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.status-legend b {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Cartões de leitura */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+}
+
+.card {
+    padding: 15px 17px 14px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--teal);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.card.amber { border-left-color: var(--amber); }
+.card.red { border-left-color: var(--red); }
+.card.blue { border-left-color: var(--blue); }
+
+.card .k {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.card .v {
+    margin: 5px 0 4px;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    color: var(--heading);
+    font-variant-numeric: tabular-nums;
+}
+
+.card .d {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+/* Filtros */
+.filter-panel {
+    position: sticky;
+    top: 12px;
+    z-index: 30;
+    margin-bottom: 18px;
+    padding: 13px 15px 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.field > label,
+.field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.field input,
+.field select {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.field input::placeholder { color: var(--muted); opacity: .85; }
+.field input:focus, .field select:focus { border-color: var(--teal); outline: 2px solid color-mix(in srgb, var(--teal) 22%, transparent); outline-offset: 0; }
+
+.field.search { flex: 1 1 230px; }
+.field.search input { width: 100%; }
+.field.select-metrica { flex: 0 0 142px; }
+.field.select-visao { flex: 0 0 160px; }
+
+.chip-field { display: flex; flex-direction: column; gap: 4px; }
+
+.chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip[aria-pressed="true"] {
+    background: var(--heading);
+    border-color: var(--heading);
+    color: var(--surface);
+}
+
+.btn-clear {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-clear:hover:not(:disabled) { border-color: var(--red); color: var(--red-ink); }
+.btn-clear:disabled { opacity: .42; cursor: default; }
+
+.filter-status {
+    margin: 9px 1px 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+/* Grade principal */
+.dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, .88fr);
+    grid-template-areas:
+        "scatter detail"
+        "ranking bands";
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.panel {
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    min-width: 0;
+}
+
+.panel-scatter { grid-area: scatter; }
+.panel-detail { grid-area: detail; display: flex; flex-direction: column; }
+.panel-ranking { grid-area: ranking; }
+.panel-bands { grid-area: bands; display: flex; flex-direction: column; }
+.panel-nodata { margin-bottom: 18px; }
+.panel-table { margin-top: 0; }
+
+.panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 13px;
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    color: var(--heading);
+}
+
+.panel-head p {
+    margin: 4px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.panel-note {
+    flex: none;
+    padding: 4px 9px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.panel-foot {
+    margin: 12px 0 0;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.btn-link {
+    flex: none;
+    padding: 2px 0;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: var(--teal-ink);
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-link:hover { border-bottom-color: currentColor; }
+
+.btn-secondary {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-secondary:hover:not(:disabled) { border-color: var(--teal); color: var(--teal-ink); }
+.btn-secondary:disabled { opacity: .45; cursor: default; }
+
+/* Gráfico */
+.chart {
+    position: relative;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--chart-bg);
+    overflow: hidden;
+}
+
+.chart svg { display: block; width: 100%; height: auto; }
+
+.chart .gridline { stroke: var(--border); stroke-width: 1; }
+.chart .axis { stroke: var(--border-strong); stroke-width: 1; }
+.chart .median { stroke: var(--median); stroke-width: 1; stroke-dasharray: 3 4; }
+.chart text { fill: var(--muted); font-family: inherit; font-size: 10px; }
+.chart .axis-title { font-size: 11px; }
+
+.chart .dot { cursor: pointer; transition: opacity .15s ease, stroke-width .15s ease; }
+.chart .dot:hover, .chart .dot:focus-visible { stroke: var(--text); stroke-width: 2.5; outline: none; }
+.chart .dot.dim { opacity: .12; pointer-events: none; }
+.chart .dot.sel { stroke: var(--text); stroke-width: 3; }
+
+.q-hh { fill: var(--q-hh); }
+.q-hl { fill: var(--q-hl); }
+.q-lh { fill: var(--q-lh); }
+.q-ll { fill: var(--q-ll); }
+
+.quad-legend i.q-hh { background: var(--q-hh); }
+.quad-legend i.q-hl { background: var(--q-hl); }
+.quad-legend i.q-lh { background: var(--q-lh); }
+.quad-legend i.q-ll { background: var(--q-ll); }
+
+.chart-tip {
+    position: absolute;
+    z-index: 6;
+    max-width: 240px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    font-size: 11px;
+    line-height: 1.45;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity .12s ease;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
+}
+
+.chart-tip.on { opacity: 1; }
+.chart-tip strong { display: block; margin-bottom: 2px; font-size: 11.5px; }
+.chart-tip span { display: block; opacity: .82; }
+
+.quad-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    margin-top: 11px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.quad-legend span { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.quad-legend i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.quad-legend b { margin-left: auto; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* Detalhe */
+.detail-body { display: flex; flex-direction: column; flex: 1; }
+
+.detail-kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.detail-kpis > div {
+    padding-top: 9px;
+    border-top: 2px solid var(--border);
+}
+
+.detail-kpis span { display: block; font-size: 10.5px; font-weight: 600; color: var(--muted); }
+.detail-kpis strong {
+    display: block;
+    margin: 3px 0 2px;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.025em;
+    color: var(--heading);
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-aux { font-size: 10.5px; color: var(--muted); }
+
+.delta { font-size: 10.5px; font-weight: 700; }
+.delta.up { color: var(--green); }
+.delta.down { color: var(--red-ink); }
+
+.bd {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.bd.teal { background: var(--teal-soft); color: var(--teal-ink); }
+.bd.blue { background: var(--blue-soft); color: var(--blue-ink); }
+.bd.amber { background: var(--amber-soft); color: var(--amber-ink); }
+.bd.red { background: var(--red-soft); color: var(--red-ink); }
+.bd.neutral { background: var(--slate-soft); color: var(--slate); }
+
+.detail-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+.detail-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+    margin: 15px 0 0;
+    padding: 0;
+}
+
+.detail-stats div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11.5px;
+}
+
+.detail-stats dt { color: var(--muted); }
+.detail-stats dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-stats small { color: var(--muted); font-weight: 500; }
+
+.stack {
+    display: flex;
+    gap: 2px;
+    height: 10px;
+    margin-top: 16px;
+    border-radius: 99px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.stack i { display: block; height: 100%; }
+
+.c-ontime { background: var(--teal); }
+.c-late { background: var(--amber); }
+.c-incomplete { background: var(--slate); }
+.c-missed { background: var(--red); }
+
+.stack-legend {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 14px;
+    margin: 9px 0 0;
+    padding: 0;
+    font-size: 10.5px;
+    color: var(--muted);
+}
+
+.stack-legend li { display: flex; align-items: baseline; gap: 6px; }
+.stack-legend i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.stack-legend b { margin-left: auto; color: var(--text); font-variant-numeric: tabular-nums; }
+
+.detail-empty {
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    background: var(--red-soft);
+    color: var(--red-ink);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.detail-prompt {
+    margin-top: auto;
+    padding-top: 16px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.detail-guide {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.detail-guide h3 {
+    margin: 0 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.detail-guide ul {
+    list-style: none;
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+.detail-guide li {
+    position: relative;
+    padding-left: 13px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+.detail-guide li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--teal);
+}
+
+.detail-guide b { color: var(--text); font-weight: 700; }
+
+.detail-compare {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.cmp-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.cmp-head h3 {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.cmp-head span { font-size: 9px; color: var(--muted); white-space: nowrap; }
+
+.cmp-list {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+}
+
+.cmp-row {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 42px;
+    gap: 8px;
+    align-items: center;
+    font-size: 10.5px;
+}
+
+.cmp-label { color: var(--muted); }
+
+.cmp-track {
+    position: relative;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--border);
+}
+
+.cmp-track i {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+    border-radius: inherit;
+    background: var(--teal);
+}
+
+.cmp-track b {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--text);
+    opacity: .65;
+}
+
+.cmp-val {
+    color: var(--text);
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Ranking */
+.rank-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 460px;
+    overflow: auto;
+}
+
+.rank-row {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) 66px;
+    gap: 9px;
+    align-items: center;
+    width: 100%;
+    padding: 5px 6px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rank-row:hover { background: var(--surface-2); }
+.rank-row[aria-current="true"] { background: var(--teal-soft); }
+
+.rank-pos {
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.rank-main { min-width: 0; }
+
+.rank-name {
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.rank-name small {
+    display: block;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.rank-track {
+    position: relative;
+    display: block;
+    height: 6px;
+    margin-top: 3px;
+    border-radius: 99px;
+    background: var(--border);
+}
+
+.rank-track > i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--teal);
+    transition: width .25s ease;
+}
+
+.rank-row.attention .rank-track > i { background: var(--red); }
+
+.rank-track .med {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 1px;
+    background: var(--text);
+    opacity: .42;
+}
+
+.rank-val {
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+    color: var(--heading);
+    font-variant-numeric: tabular-nums;
+}
+
+.empty {
+    margin: 14px 0;
+    padding: 18px 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* Faixas de IQ */
+.bands { display: grid; gap: 7px; }
+
+.band-row {
+    display: block;
+    width: 100%;
+    padding: 8px 9px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.band-row:hover { background: var(--surface-2); }
+.band-row[aria-pressed="true"] {
+    border-color: var(--teal);
+    background: var(--teal-soft);
+}
+
+.band-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.band-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.band-label i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.band-label i.teal { background: var(--teal); }
+.band-label i.blue { background: var(--blue); }
+.band-label i.amber { background: var(--amber); }
+.band-label i.red { background: var(--red); }
+.band-label small { color: var(--muted); font-size: 10px; font-weight: 500; }
+.band-top b { font-size: 13px; color: var(--heading); font-variant-numeric: tabular-nums; }
+
+.band-track {
+    display: block;
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 99px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.band-track i { display: block; height: 100%; border-radius: inherit; }
+.band-track i.teal { background: var(--teal); }
+.band-track i.blue { background: var(--blue); }
+.band-track i.amber { background: var(--amber); }
+.band-track i.red { background: var(--red); }
+
+.band-sub {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.band-foot { margin-top: auto; padding-top: 12px; font-size: 11px; line-height: 1.5; color: var(--muted); }
+
+.band-formula {
+    margin: 13px 0 0;
+    padding-top: 11px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.band-formula b { color: var(--text); }
+
+.priority { margin-top: 14px; }
+
+.priority-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.priority-head h3 {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.priority-head span { font-size: 9.5px; color: var(--muted); white-space: nowrap; }
+
+.priority-list {
+    list-style: none;
+    display: grid;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+}
+
+.priority-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 7px;
+    align-items: center;
+    width: 100%;
+    padding: 5px 6px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.priority-row:hover { background: var(--surface-2); }
+.priority-row[aria-current="true"] { background: var(--teal-soft); }
+
+.priority-name {
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.priority-enroll {
+    color: var(--muted);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.priority-row .iq-badge { padding: 1px 6px; font-size: 9.5px; }
+
+/* Sem registro */
+.nodata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 7px;
+}
+
+.nodata-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    text-align: left;
+    cursor: pointer;
+}
+
+.nodata-item:hover { border-color: var(--teal); }
+.nodata-item[aria-current="true"] { border-color: var(--teal); background: var(--teal-soft); }
+
+.nodata-name {
+    min-width: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.nodata-name small { display: block; color: var(--muted); font-size: 9.5px; font-weight: 500; }
+
+.nodata-enroll {
+    flex: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.nodata-enroll b { color: var(--text); font-size: 12.5px; }
+
+/* Tabela */
+.table-wrap {
+    max-height: 560px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    min-width: 880px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 8px 9px;
+    border-bottom: 1px solid var(--border-strong);
+    background: var(--surface);
+    text-align: right;
+    white-space: nowrap;
+}
+
+thead th:first-child { text-align: left; }
+
+thead th button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    text-align: right;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+thead th:first-child button { text-align: left; }
+
+thead th[aria-sort="ascending"] button,
+thead th[aria-sort="descending"] button { color: var(--heading); }
+
+thead th[aria-sort="ascending"] button::after { content: "\2191"; margin-left: 3px; }
+thead th[aria-sort="descending"] button::after { content: "\2193"; margin-left: 3px; }
+
+thead th button:hover { color: var(--teal-ink); }
+
+tbody td {
+    padding: 8px 9px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+tbody td:first-child { text-align: left; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: var(--surface-2); }
+tbody tr[aria-selected="true"] td { background: var(--teal-soft); }
+tbody tr.inactive td { color: var(--muted); }
+
+.name-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+}
+
+.name-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+.code {
+    display: block;
+    margin-top: 1px;
+    color: var(--muted);
+    font-size: 9.5px;
+    font-weight: 500;
+}
+
+.tag {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 600;
+    vertical-align: 1px;
+}
+
+.iq-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+.iq-badge.teal { background: var(--teal-soft); color: var(--teal-ink); }
+.iq-badge.blue { background: var(--blue-soft); color: var(--blue-ink); }
+.iq-badge.amber { background: var(--amber-soft); color: var(--amber-ink); }
+.iq-badge.red { background: var(--red-soft); color: var(--red-ink); }
+
+.table-empty { padding: 26px 10px !important; text-align: center !important; color: var(--muted); }
+.table-hint { display: none; }
+
+/* Estados */
+.state {
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.state h2 { margin: 0 0 6px; font-size: 17px; color: var(--heading); }
+.state p { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.state .btn-secondary { margin-top: 14px; }
+.state.error { border-left: 4px solid var(--red); }
+
+/* Rodapé */
+.page-footer {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+.page-footer p { margin: 0; }
+.page-footer a { color: var(--teal-ink); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+}
+
+@media (max-width: 1100px) {
+    .dashboard { grid-template-columns: minmax(0, 1.45fr) minmax(300px, .9fr); }
+}
+
+@media (max-width: 960px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+        grid-template-areas: "scatter" "detail" "ranking" "bands";
+    }
+    .filter-panel { position: static; }
+    .rank-list { max-height: none; }
+}
+
+@media (max-width: 720px) {
+    .header-inner { padding: 20px 18px; }
+    main { padding: 16px 14px 36px; }
+    .summary { padding: 18px 17px 16px; }
+    .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+    .summary-item .v { font-size: 24px; }
+    .status-legend { gap: 5px 14px; }
+    .filters { gap: 9px; }
+    .field.search { flex: 1 1 100%; }
+    .chip-field { width: 100%; }
+    .field.select-metrica,
+    .field.select-visao { flex: 1 1 140px; }
+    .field.select-metrica select,
+    .field.select-visao select { width: 100%; }
+    .btn-clear { flex: 1 1 100%; }
+    .panel { padding: 16px; }
+    .panel-head { flex-wrap: wrap; }
+    .panel-head h2 { font-size: 16px; }
+    .quad-legend { grid-template-columns: 1fr; gap: 5px; }
+    .detail-kpis strong { font-size: 27px; }
+    .detail-stats { grid-template-columns: 1fr; }
+    .table-hint { display: block; margin: 9px 1px 0; }
+    .nodata-grid { grid-template-columns: 1fr; }
+    .rank-row { grid-template-columns: 22px minmax(0, 1fr) 58px; }
+    .rank-name { white-space: normal; }
+}
+
+@media (max-width: 560px) {
+    .status-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; }
+    .status-legend li { justify-content: flex-start; }
+    .status-legend b { margin-left: 3px; }
+}
+
+@media (max-width: 420px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .summary-item .v { font-size: 22px; }
+    .card .v { font-size: 23px; }
+    .header-actions { width: 100%; }
+    .header-actions .home-button { flex: 1; }
+    .header-actions .btn-ghost { flex: 0 0 auto; }
+}
+</style>
 </head>
 <body>
-    <nav class="topbar">
-        <a class="back" href="index.html">&larr; Painel</a>
-        <button id="btn-sair" class="quiet" type="button">Sair</button>
-    </nav>
+<header class="site-header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">Unidade Regional de Ensino de Marília</p>
+            <h1>Tarefa SP <span class="week-badge" id="semanaBadge">Semana 01</span></h1>
+            <p class="header-sub" id="headerSub">Participação, conclusão e qualidade das tarefas · 01.02 a 07.02 · 50 escolas</p>
+        </div>
+        <div class="header-actions">
+            <a class="home-button" href="index.html">Início</a>
+            <button class="btn-ghost" id="btn-sair" type="button">Sair</button>
+        </div>
+    </div>
+</header>
 
-    <main class="sheet">
-        <div class="margin-rule" aria-hidden="true"></div>
+<main>
+    <div id="estado" class="state" role="status" aria-live="polite">
+        <h2 id="estadoTitulo">Carregando a semana</h2>
+        <p id="estadoTexto">Buscando os dados do Tarefa SP…</p>
+        <button class="btn-secondary" id="btnTentar" type="button" hidden>Tentar novamente</button>
+    </div>
 
-        <header class="masthead">
-            <h1>Tarefa SP</h1>
-            <p class="lede">Quem acessou, quem concluiu e onde a qualidade não acompanhou a participação na primeira semana de fevereiro.</p>
-            <p class="stamp">
-                <span>Semana 01</span>
-                <small>01.02 — 07.02</small>
-            </p>
-        </header>
-
-        <p id="statusDados" class="loading" role="status">Carregando dados da semana…</p>
-
-        <div id="dashboard" hidden>
-            <dl class="kpis" aria-label="Resumo da semana">
-                <div class="kpi">
-                    <dt>Escolas com tarefas</dt>
-                    <dd id="kpiEscolas">—</dd>
-                    <p class="sub" id="kpiEscolasSub">—</p>
+    <div id="dashboard" hidden>
+        <section class="summary" aria-labelledby="resumoTitulo">
+            <div class="summary-head">
+                <div>
+                    <h2 id="resumoTitulo">Resumo da regional</h2>
+                    <p id="resumoSub">—</p>
                 </div>
-                <div class="kpi">
-                    <dt>Alunos com tarefas</dt>
-                    <dd id="kpiAlunos">—</dd>
-                    <p class="sub" id="kpiAlunosSub">—</p>
-                </div>
-                <div class="kpi">
-                    <dt>Tarefas concluídas</dt>
-                    <dd id="kpiConcluidas">—</dd>
-                    <p class="sub" id="kpiConcluidasSub">—</p>
-                    <div class="mini" id="kpiMini" role="img" aria-label="Distribuição das tarefas"></div>
-                </div>
-                <div class="kpi">
-                    <dt>Acertos</dt>
-                    <dd id="kpiAcertos">—</dd>
-                    <p class="sub">Média ponderada pelas tarefas concluídas</p>
-                </div>
-                <div class="kpi">
-                    <dt>IQ da regional</dt>
-                    <dd id="kpiIq">—</dd>
-                    <p class="sub">Metade no prazo, metade acertos</p>
-                </div>
-            </dl>
+                <span class="period-chip" id="periodoChip">Semana 01 · 01.02 — 07.02</span>
+            </div>
+            <div class="summary-grid" id="resumo"></div>
+            <div class="status-strip">
+                <div class="status-bar" id="resumoStack" role="img" aria-label="Distribuição das tarefas"></div>
+                <ul class="status-legend" id="resumoLegenda"></ul>
+            </div>
+        </section>
 
-            <section class="block" aria-labelledby="leituraTitulo">
-                <h2 id="leituraTitulo">Leitura da semana</h2>
-                <div class="insights" id="insights"></div>
-            </section>
+        <section class="cards" id="insights" aria-label="Leitura da semana"></section>
 
-            <section class="block" aria-labelledby="quadroTitulo">
-                <div class="section-head">
-                    <div>
-                        <h2 id="quadroTitulo">Participação e qualidade</h2>
-                        <p class="hint">Cada ponto é uma escola. Clique para ver os detalhes. As linhas tracejadas marcam as medianas da regional.</p>
+        <section class="filter-panel" aria-label="Filtros do painel">
+            <div class="filters">
+                <div class="field search">
+                    <label for="busca">Buscar escola</label>
+                    <input id="busca" type="search" placeholder="Nome ou código da escola" autocomplete="off">
+                </div>
+                <div class="chip-field">
+                    <span class="field-label" id="chipsLabel">Situação</span>
+                    <div class="chips" id="chips" role="group" aria-labelledby="chipsLabel">
+                        <button class="chip" type="button" data-situacao="all" aria-pressed="true">Todas</button>
+                        <button class="chip" type="button" data-situacao="lowiq" aria-pressed="false" title="Escolas com IQ abaixo de 0,35">IQ baixo</button>
+                        <button class="chip" type="button" data-situacao="lowpart" aria-pressed="false" title="Escolas com menos de 10% dos alunos com tarefas">Baixa participação</button>
+                        <button class="chip" type="button" data-situacao="nodata" aria-pressed="false" title="Escolas sem tarefas registradas na semana">Sem registro</button>
                     </div>
                 </div>
-
-                <div class="split">
-                    <div>
-                        <div class="scatter" id="scatterWrap">
-                            <svg id="scatter" viewBox="0 0 760 420" role="img" aria-label="Dispersão entre alunos com tarefas e IQ por escola"></svg>
-                            <div class="tooltip" id="tooltip"></div>
-                        </div>
-                        <div class="legend">
-                            <span><i class="q-hh"></i> Alta participação, alto IQ</span>
-                            <span><i class="q-hl"></i> Alta participação, baixo IQ</span>
-                            <span><i class="q-lh"></i> Baixa participação, alto IQ</span>
-                            <span><i class="q-ll"></i> Baixa participação, baixo IQ</span>
-                        </div>
-                    </div>
-
-                    <aside class="detail" aria-labelledby="detalheTitulo">
-                        <div class="detail-head">
-                            <div>
-                                <h3 id="detalheTitulo">Regional</h3>
-                                <span class="code" id="detalheCodigo">40 escolas com tarefas</span>
-                            </div>
-                            <button class="link-btn" id="btnRegional" type="button" hidden>Ver regional</button>
-                        </div>
-                        <div id="detalheCorpo"></div>
-                    </aside>
+                <div class="field select-metrica">
+                    <label for="metrica">Ranking por</label>
+                    <select id="metrica">
+                        <option value="iq">IQ</option>
+                        <option value="part">Participação</option>
+                        <option value="done">Conclusão</option>
+                        <option value="correct">Acertos</option>
+                    </select>
                 </div>
-            </section>
+                <div class="field select-visao">
+                    <label for="visao">Mostrar</label>
+                    <select id="visao">
+                        <option value="top">Top 10</option>
+                        <option value="atencao">10 em atenção</option>
+                        <option value="todas">Todas</option>
+                    </select>
+                </div>
+                <button class="btn-clear" id="btnLimpar" type="button" disabled>Limpar filtros</button>
+            </div>
+            <p class="filter-status" id="statusFiltro" aria-live="polite">—</p>
+        </section>
 
-            <section class="block" aria-labelledby="rankingTitulo">
-                <div class="section-head">
+        <div class="dashboard">
+            <article class="panel panel-scatter" aria-labelledby="scatterTitulo">
+                <div class="panel-head">
+                    <div>
+                        <h2 id="scatterTitulo">Participação e qualidade</h2>
+                        <p>Cada ponto é uma escola; o tamanho representa as matrículas. Clique para abrir o detalhe.</p>
+                    </div>
+                    <span class="panel-note" id="quadroNota">—</span>
+                </div>
+                <div class="chart" id="scatterWrap">
+                    <svg id="scatter" viewBox="0 0 760 420" role="group" aria-label="Dispersão entre participação dos alunos e IQ por escola"></svg>
+                    <div class="chart-tip" id="tooltip"></div>
+                </div>
+                <div class="quad-legend" id="quadLegend"></div>
+                <p class="panel-foot" id="quadMediana"></p>
+            </article>
+
+            <aside class="panel panel-detail" id="detalhePanel" aria-labelledby="detalheTitulo">
+                <div class="panel-head">
+                    <div>
+                        <h2 id="detalheTitulo">Visão da regional</h2>
+                        <p id="detalheSub">—</p>
+                    </div>
+                    <button class="btn-link" id="btnRegional" type="button" hidden>Ver regional</button>
+                </div>
+                <div class="detail-body" id="detalheCorpo"></div>
+            </aside>
+
+            <article class="panel panel-ranking" aria-labelledby="rankingTitulo">
+                <div class="panel-head">
                     <div>
                         <h2 id="rankingTitulo">Ranking da semana</h2>
-                        <p class="hint" id="rankingHint">10 escolas com os maiores valores.</p>
+                        <p id="rankingHint">—</p>
                     </div>
-                    <div class="controls">
-                        <label for="metrica" class="hint" style="margin:0">Ordenar por</label>
-                        <select class="select" id="metrica">
-                            <option value="iq">IQ</option>
-                            <option value="part">Alunos com tarefas (%)</option>
-                            <option value="done">Tarefas concluídas (%)</option>
-                            <option value="correct">Acertos (%)</option>
-                        </select>
-                        <button class="toggle" id="btnAtencao" type="button" aria-pressed="false">Ver atenção</button>
-                    </div>
+                    <span class="panel-note" id="rankingNota">IQ</span>
                 </div>
-                <ol class="ranking" id="ranking"></ol>
-                <p class="hint" id="rankingRodape">A linha vertical marca a mediana da regional.</p>
-            </section>
+                <ol class="rank-list" id="ranking"></ol>
+                <p class="panel-foot">A marca vertical indica a mediana da regional.</p>
+            </article>
 
-            <section class="block" aria-labelledby="tabelaTitulo">
-                <div class="section-head">
+            <article class="panel panel-bands" aria-labelledby="faixasTitulo">
+                <div class="panel-head">
                     <div>
-                        <h2 id="tabelaTitulo">Todas as escolas</h2>
-                        <p class="hint" id="tabelaContagem">—</p>
+                        <h2 id="faixasTitulo">Faixas de IQ</h2>
+                        <p>Distribuição das escolas com tarefas. Clique em uma faixa para filtrar o painel.</p>
                     </div>
                 </div>
-
-                <div class="filters">
-                    <input class="search" id="busca" type="search" placeholder="Buscar escola ou código" aria-label="Buscar escola ou código">
-                    <div class="chips" id="chips" role="group" aria-label="Filtrar escolas">
-                        <button class="chip" type="button" data-filtro="all" aria-pressed="true">Todas</button>
-                        <button class="chip" type="button" data-filtro="lowiq" aria-pressed="false" title="IQ abaixo de 0,35">IQ baixo</button>
-                        <button class="chip" type="button" data-filtro="lowpart" aria-pressed="false" title="Menos de 10% dos alunos com tarefas">Baixa participação</button>
-                        <button class="chip" type="button" data-filtro="nodata" aria-pressed="false" title="Escolas sem tarefas registradas na semana">Sem registro</button>
+                <div class="bands" id="faixas"></div>
+                <p class="band-formula"><b>Como calculamos:</b> IQ = 50% das tarefas no prazo + 50% de acertos. Entregas fora do prazo contam como concluídas, mas não elevam o IQ.</p>
+                <div class="priority">
+                    <div class="priority-head">
+                        <h3>Prioridade na faixa crítica</h3>
+                        <span>matrículas · IQ</span>
                     </div>
+                    <ul class="priority-list" id="prioridadeLista"></ul>
                 </div>
-
-                <p class="hint table-scroll-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
-
-                <div class="table-wrap">
-                    <table id="tabela">
-                        <thead>
-                            <tr>
-                                <th data-key="name" aria-sort="none"><button type="button">Escola</button></th>
-                                <th data-key="enroll" aria-sort="none"><button type="button">Matrículas</button></th>
-                                <th data-key="students" aria-sort="none"><button type="button">Alunos c/ tarefas</button></th>
-                                <th data-key="pctStudents" aria-sort="none"><button type="button">% alunos</button></th>
-                                <th data-key="proposed" aria-sort="none"><button type="button">Propostas</button></th>
-                                <th data-key="pctDone" aria-sort="none"><button type="button">Concluídas</button></th>
-                                <th data-key="pctOnTime" aria-sort="none"><button type="button">No prazo</button></th>
-                                <th data-key="pctCorrect" aria-sort="none"><button type="button">Acertos</button></th>
-                                <th data-key="iq" aria-sort="descending"><button type="button">IQ</button></th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpoTabela"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <footer class="sheet-foot">
-                <p>Fonte: export Tarefa SP, semana 01 (01.02 a 07.02). 50 escolas e 19.670 matrículas na regional; 40 escolas registraram tarefas.</p>
-                <p>IQ = média entre o percentual de tarefas realizadas no prazo e o percentual de acertos. Tarefas entregues fora do prazo contam como concluídas, mas não entram no IQ. O IQ da regional é calculado sobre os totais da rede.</p>
-                <p>Dados agregados por escola, sem informação individual de estudante. <a href="index.html">Voltar ao painel</a>.</p>
-            </footer>
+                <p class="band-foot" id="faixasFoot"></p>
+            </article>
         </div>
-    </main>
+
+        <section class="panel panel-nodata" aria-labelledby="nodataTitulo">
+            <div class="panel-head">
+                <div>
+                    <h2 id="nodataTitulo">Escolas sem registro</h2>
+                    <p id="semRegistroSub">—</p>
+                </div>
+                <button class="btn-secondary" id="btnSemRegistroTabela" type="button">Ver na tabela</button>
+            </div>
+            <div class="nodata-grid" id="semRegistroLista"></div>
+        </section>
+
+        <section class="panel panel-table" id="tabelaPanel" aria-labelledby="tabelaTitulo">
+            <div class="panel-head">
+                <div>
+                    <h2 id="tabelaTitulo">Resultados por escola</h2>
+                    <p id="tabelaContagem">—</p>
+                </div>
+                <button class="btn-secondary" id="btnCsv" type="button">Exportar CSV</button>
+            </div>
+            <p class="table-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
+            <div class="table-wrap">
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th data-key="name" aria-sort="none"><button type="button">Escola</button></th>
+                            <th data-key="enroll" aria-sort="none"><button type="button">Matrículas</button></th>
+                            <th data-key="students" aria-sort="none"><button type="button">Alunos c/ tarefas</button></th>
+                            <th data-key="pctStudents" aria-sort="none"><button type="button">% alunos</button></th>
+                            <th data-key="proposed" aria-sort="none"><button type="button">Propostas</button></th>
+                            <th data-key="pctDone" aria-sort="none"><button type="button">Concluídas</button></th>
+                            <th data-key="pctOnTime" aria-sort="none"><button type="button">No prazo</button></th>
+                            <th data-key="pctCorrect" aria-sort="none"><button type="button">Acertos</button></th>
+                            <th data-key="iq" aria-sort="descending"><button type="button">IQ</button></th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <p id="footerFonte">Fonte: export Tarefa SP, semana 01 (01.02 a 07.02). 50 escolas e 19.670 matrículas na regional; 40 escolas registraram tarefas.</p>
+            <p>IQ = média entre o percentual de tarefas realizadas no prazo e o percentual de acertos. Tarefas entregues fora do prazo contam como concluídas, mas não entram no IQ. O IQ da regional é calculado sobre os totais da rede.</p>
+            <p>Dados agregados por escola, sem informação individual de estudante. <a href="index.html">Voltar ao painel</a>.</p>
+        </footer>
+    </div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -1023,26 +1618,42 @@
     const pct = (v) => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
     const iqf = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-    const DADOS = { schools: [] };
+    const DADOS = { schools: [], source: '', week: '', period: '' };
+
     const estado = {
-        filtro: 'all',
         busca: '',
+        situacao: 'all',
+        faixa: null,
         metrica: 'iq',
-        atencao: false,
+        visao: 'top',
+        selecionada: null,
         ordenacao: 'iq',
-        direcao: 'desc',
-        selecionada: null
+        direcao: 'desc'
     };
+
+    const FAIXAS = [
+        { id: 'destaque', nome: 'Destaque', desc: 'IQ 0,60 ou mais', min: 0.60, max: Infinity, cor: 'teal' },
+        { id: 'evolucao', nome: 'Em evolução', desc: 'IQ 0,45 a 0,59', min: 0.45, max: 0.60, cor: 'blue' },
+        { id: 'atencao', nome: 'Atenção', desc: 'IQ 0,35 a 0,44', min: 0.35, max: 0.45, cor: 'amber' },
+        { id: 'critico', nome: 'Crítico', desc: 'IQ abaixo de 0,35', min: 0, max: 0.35, cor: 'red' }
+    ];
 
     const METRICAS = {
-        iq: { valor: (s) => s.iq, formato: iqf, escala: 0.8 },
-        part: { valor: (s) => s.pctStudents, formato: pct, escala: 1 },
-        done: { valor: (s) => s.pctDone, formato: pct, escala: 1 },
-        correct: { valor: (s) => s.pctCorrect, formato: pct, escala: 1 }
+        iq: { rotulo: 'IQ', valor: (s) => s.iq, formato: iqf, escala: 0.8 },
+        part: { rotulo: 'Participação', valor: (s) => s.pctStudents, formato: pct, escala: 1 },
+        done: { rotulo: 'Conclusão', valor: (s) => s.pctDone, formato: pct, escala: 1 },
+        correct: { rotulo: 'Acertos', valor: (s) => s.pctCorrect, formato: pct, escala: 1 }
     };
 
-    const norm = (texto) => String(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const QUADROS = {
+        hh: 'Alta participação · alto IQ',
+        hl: 'Alta participação · baixo IQ',
+        lh: 'Baixa participação · alto IQ',
+        ll: 'Baixa participação · baixo IQ'
+    };
+
     const ativas = () => DADOS.schools.filter((s) => s.proposed > 0);
     const porCodigo = (codigo) => DADOS.schools.find((s) => s.code === codigo) || null;
 
@@ -1051,6 +1662,14 @@
         const a = [...valores].sort((x, y) => x - y);
         const meio = Math.floor(a.length / 2);
         return a.length % 2 ? a[meio] : (a[meio - 1] + a[meio]) / 2;
+    }
+
+    function faixaDe(iq) {
+        return FAIXAS.find((f) => iq >= f.min && iq < f.max) || FAIXAS[FAIXAS.length - 1];
+    }
+
+    function nomesSituacao(chave) {
+        return { all: 'Todas', lowiq: 'IQ baixo', lowpart: 'Baixa participação', nodata: 'Sem registro' }[chave] || chave;
     }
 
     function rede() {
@@ -1091,11 +1710,21 @@
         };
     }
 
-    function combinaFiltro(s) {
-        if (estado.filtro === 'lowiq') return s.proposed > 0 && s.iq < 0.35;
-        if (estado.filtro === 'lowpart') return s.proposed > 0 && s.pctStudents < 0.10;
-        if (estado.filtro === 'nodata') return s.proposed === 0;
-        return true;
+    function medianasReferencia() {
+        const lista = ativas();
+        return {
+            part: mediana(lista.map((s) => s.pctStudents)),
+            iq: mediana(lista.map((s) => s.iq))
+        };
+    }
+
+    function quadrante(s, ref) {
+        const alta = s.pctStudents >= ref.part;
+        const alto = s.iq >= ref.iq;
+        if (alto && alta) return 'hh';
+        if (alto) return 'lh';
+        if (alta) return 'hl';
+        return 'll';
     }
 
     function combinaBusca(s) {
@@ -1104,64 +1733,120 @@
         return norm(s.name).includes(alvo) || norm(s.code).includes(alvo);
     }
 
-    const noCoorte = (s) => combinaFiltro(s) && combinaBusca(s);
+    function noCoorte(s) {
+        if (estado.situacao === 'lowiq' && !(s.proposed > 0 && s.iq < 0.35)) return false;
+        if (estado.situacao === 'lowpart' && !(s.proposed > 0 && s.pctStudents < 0.10)) return false;
+        if (estado.situacao === 'nodata' && s.proposed !== 0) return false;
+        if (estado.faixa && (s.proposed === 0 || faixaDe(s.iq).id !== estado.faixa)) return false;
+        return combinaBusca(s);
+    }
 
-    function renderKpis() {
+    function renderResumo() {
         const n = rede();
-        document.getElementById('kpiEscolas').textContent = n.ativas;
-        document.getElementById('kpiEscolasSub').textContent = `de ${n.escolas} escolas da regional`;
-        document.getElementById('kpiAlunos').textContent = fmtInt.format(n.alunos);
-        document.getElementById('kpiAlunosSub').textContent = `${pct(n.pctAlunos)} das matrículas`;
-        document.getElementById('kpiConcluidas').textContent = pct(n.pctConcluidas);
-        document.getElementById('kpiConcluidasSub').textContent = `${fmtInt.format(n.concluidas)} de ${fmtInt.format(n.propostas)} tarefas`;
-        document.getElementById('kpiAcertos').textContent = pct(n.pctAcertos);
-        document.getElementById('kpiIq').textContent = iqf(n.iq);
+        const periodo = DADOS.period || '01.02 a 07.02';
+        const semana = DADOS.week || 'Semana 01';
+        document.getElementById('semanaBadge').textContent = semana;
+        document.getElementById('periodoChip').textContent = `${semana} · ${periodo.replace(' a ', ' — ')}`;
+        document.getElementById('headerSub').textContent =
+            `Participação, conclusão e qualidade das tarefas · ${periodo} · ${n.escolas} escolas`;
+        document.getElementById('footerFonte').textContent =
+            `Fonte: ${DADOS.source || 'export Tarefa SP'}, ${semana.toLowerCase()} (${periodo}). ${n.escolas} escolas e ${fmtInt.format(n.matriculas)} matrículas na regional; ${n.ativas} escolas registraram tarefas.`;
+        document.title = `Tarefa SP — ${semana} — URE Marília`;
+        const itens = [
+            { k: 'IQ da regional', v: iqf(n.iq), p: n.iq * 100, d: 'Metade no prazo, metade acertos' },
+            { k: 'Tarefas concluídas', v: pct(n.pctConcluidas), p: n.pctConcluidas * 100, d: `${fmtInt.format(n.concluidas)} de ${fmtInt.format(n.propostas)} tarefas` },
+            { k: 'No prazo', v: pct(n.pctNoPrazo), p: n.pctNoPrazo * 100, d: `${fmtInt.format(n.noPrazo)} entregas dentro do prazo` },
+            { k: 'Acertos', v: pct(n.pctAcertos), p: n.pctAcertos * 100, d: 'Ponderado pelas tarefas concluídas' },
+            { k: 'Alunos com tarefas', v: fmtInt.format(n.alunos), p: n.pctAlunos * 100, d: `${pct(n.pctAlunos)} das matrículas` },
+            { k: 'Escolas com tarefas', v: n.ativas, p: (n.ativas / n.escolas) * 100, d: `de ${n.escolas} escolas da regional` }
+        ];
 
-        const mini = document.getElementById('kpiMini');
-        mini.innerHTML = `
-            <i class="c-ontime" style="width:${(n.noPrazo / n.totalStatus) * 100}%"></i>
-            <i class="c-late" style="width:${(n.fora / n.totalStatus) * 100}%"></i>
-            <i class="c-incomplete" style="width:${(n.incompletas / n.totalStatus) * 100}%"></i>
-            <i class="c-notdone" style="width:${(n.naoRealizadas / n.totalStatus) * 100}%"></i>`;
-        mini.setAttribute('aria-label', `${pct(n.noPrazo / n.totalStatus)} no prazo, ${pct(n.fora / n.totalStatus)} fora do prazo, ${pct(n.incompletas / n.totalStatus)} incompletas e ${pct(n.naoRealizadas / n.totalStatus)} não realizadas`);
+        document.getElementById('resumoSub').textContent =
+            `${n.ativas} escolas com tarefas · ${fmtInt.format(n.matriculas)} matrículas · ${fmtInt.format(n.alunos)} alunos com tarefas`;
+
+        document.getElementById('resumo').innerHTML = itens.map((item) => `
+            <div class="summary-item">
+                <div class="k">${item.k}</div>
+                <div class="v">${item.v}</div>
+                <div class="bar"><i style="width:${Math.max(0, Math.min(100, item.p))}%"></i></div>
+                <div class="d">${item.d}</div>
+            </div>`).join('');
+
+        const status = [
+            { classe: 's-ontime', nome: 'No prazo', valor: n.noPrazo },
+            { classe: 's-late', nome: 'Fora do prazo', valor: n.fora },
+            { classe: 's-incomplete', nome: 'Incompletas', valor: n.incompletas },
+            { classe: 's-missed', nome: 'Não realizadas', valor: n.naoRealizadas }
+        ];
+
+        const stack = document.getElementById('resumoStack');
+        stack.innerHTML = status.map((p) => `<i class="${p.classe}" style="width:${(p.valor / n.totalStatus) * 100}%"></i>`).join('');
+        stack.setAttribute('aria-label', status.map((p) => `${p.nome}: ${fmtInt.format(p.valor)}`).join('; '));
+
+        document.getElementById('resumoLegenda').innerHTML = status.map((p) => `
+            <li><i class="${p.classe}"></i>${p.nome} <b>${fmtInt.format(p.valor)}</b></li>`).join('');
     }
 
     function renderInsights() {
         const comDados = ativas();
         const n = rede();
-        const baixaParticipacao = comDados.filter((s) => s.pctStudents < 0.10).length;
+        const baixa = comDados.filter((s) => s.pctStudents < 0.10).length;
         const semRegistro = DADOS.schools.length - comDados.length;
         const maiorGap = [...comDados].sort((a, b) => b.enroll * (1 - b.pctStudents) - a.enroll * (1 - a.pctStudents))[0];
         const maiorIq = [...comDados].sort((a, b) => b.iq - a.iq)[0];
-        const maiorParticipacao = [...comDados].sort((a, b) => b.pctStudents - a.pctStudents)[0];
+        const maiorPart = [...comDados].sort((a, b) => b.pctStudents - a.pctStudents)[0];
 
-        document.getElementById('insights').innerHTML = `
-            <div class="insight">
-                <strong>${baixaParticipacao} de ${n.ativas}</strong>
-                <p>escolas têm menos de 10% dos alunos com tarefas. ${semRegistro} escolas não registraram nenhuma tarefa na semana.</p>
-            </div>
-            <div class="insight">
-                <strong>${fmtInt.format(maiorGap.enroll)} matrículas</strong>
-                <p>${esc(maiorGap.name)} concentra a maior oportunidade de alcance, com ${pct(maiorGap.pctStudents)} de participação.</p>
-            </div>
-            <div class="insight">
-                <strong>IQ ${iqf(maiorIq.iq)}</strong>
-                <p>${esc(maiorIq.name)} lidera o IQ, mas só ${pct(maiorIq.pctStudents)} dos alunos entraram. ${esc(maiorParticipacao.name)} tem a maior participação: ${pct(maiorParticipacao.pctStudents)}.</p>
-            </div>`;
+        const cards = [
+            {
+                cor: '',
+                k: 'Baixa participação',
+                v: `${baixa} de ${n.ativas}`,
+                d: `escolas têm menos de 10% dos alunos com tarefas. Outras ${semRegistro} não registraram nenhuma tarefa na semana.`
+            },
+            {
+                cor: 'red',
+                k: 'Maior lacuna',
+                v: pct(maiorGap.pctStudents),
+                d: `${fmtInt.format(maiorGap.enroll)} matrículas em ${esc(maiorGap.name)} — a maior lacuna absoluta da semana.`
+            },
+            {
+                cor: 'blue',
+                k: 'Destaque em IQ',
+                v: iqf(maiorIq.iq),
+                d: `${esc(maiorIq.name)} lidera o IQ, mas só ${pct(maiorIq.pctStudents)} dos alunos participaram.`
+            },
+            {
+                cor: 'amber',
+                k: 'Prazo x participação',
+                v: pct(maiorPart.pctStudents),
+                d: `${esc(maiorPart.name)} tem a maior participação; ${pct(maiorPart.pctOnTime)} das tarefas foram entregues no prazo.`
+            }
+        ];
+
+        document.getElementById('insights').innerHTML = cards.map((c) => `
+            <article class="card ${c.cor}">
+                <div class="k">${c.k}</div>
+                <div class="v">${c.v}</div>
+                <p class="d">${c.d}</p>
+            </article>`).join('');
     }
 
     function renderScatter() {
         const svg = document.getElementById('scatter');
+        const wrap = document.getElementById('scatterWrap');
         const comDados = ativas();
-        const compacto = window.matchMedia('(max-width: 560px)').matches;
-        const W = compacto ? 600 : 760;
-        const H = compacto ? 440 : 420;
-        const mL = 54, mR = 18, mT = 18, mB = compacto ? 62 : 46;
+        const W = Math.max(300, Math.floor(wrap.clientWidth) - 10);
+        const compacto = W < 660;
+        const H = compacto ? Math.min(440, Math.max(330, Math.round(W * 1.02))) : 420;
+        const mL = compacto ? 46 : 54;
+        const mR = 18;
+        const mT = 18;
+        const mB = compacto ? 58 : 46;
         svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
         const px = (v) => mL + v * (W - mL - mR);
         const py = (v) => mT + (1 - (v - 0.2) / 0.6) * (H - mT - mB);
-        const medX = mediana(comDados.map((s) => s.pctStudents));
-        const medY = mediana(comDados.map((s) => s.iq));
+        const ref = medianasReferencia();
         const maxMatricula = Math.max(...comDados.map((s) => s.enroll));
 
         let markup = '';
@@ -1179,22 +1864,27 @@
 
         markup += `<line class="axis" x1="${mL}" y1="${H - mB}" x2="${W - mR}" y2="${H - mB}"></line>`;
         markup += `<line class="axis" x1="${mL}" y1="${mT}" x2="${mL}" y2="${H - mB}"></line>`;
-        markup += `<line class="median" x1="${px(medX)}" y1="${mT}" x2="${px(medX)}" y2="${H - mB}"></line>`;
-        markup += `<line class="median" x1="${mL}" y1="${py(medY)}" x2="${W - mR}" y2="${py(medY)}"></line>`;
+        markup += `<line class="median" x1="${px(ref.part)}" y1="${mT}" x2="${px(ref.part)}" y2="${H - mB}"></line>`;
+        markup += `<line class="median" x1="${mL}" y1="${py(ref.iq)}" x2="${W - mR}" y2="${py(ref.iq)}"></line>`;
         markup += `<text class="axis-title" x="${(mL + W - mR) / 2}" y="${H - 8}" text-anchor="middle">Alunos com tarefas</text>`;
         markup += `<text class="axis-title" transform="translate(${compacto ? 22 : 14} ${H / 2}) rotate(-90)" text-anchor="middle">IQ</text>`;
 
-        const pontos = [...comDados].sort((a, b) => a.enroll - b.enroll);
-        pontos.forEach((s) => {
-            const altaParticipacao = s.pctStudents >= medX;
-            const altoIq = s.iq >= medY;
-            const classe = altoIq ? (altaParticipacao ? 'q-hh' : 'q-lh') : (altaParticipacao ? 'q-hl' : 'q-ll');
-            const r = 4 + 8 * Math.sqrt(s.enroll / maxMatricula);
-            const rotulo = `${s.name} (${s.code}): ${pct(s.pctStudents)} dos alunos com tarefas, IQ ${iqf(s.iq)}, ${fmtInt.format(s.enroll)} matrículas`;
-            markup += `<circle class="dot ${classe}" data-code="${esc(s.code)}" cx="${px(s.pctStudents)}" cy="${py(s.iq)}" r="${r}" tabindex="0" role="button" aria-label="${esc(rotulo)}"></circle>`;
+        [...comDados].sort((a, b) => a.enroll - b.enroll).forEach((s) => {
+            const q = quadrante(s, ref);
+            const r = 4 + 9 * Math.sqrt(s.enroll / maxMatricula);
+            const rotulo = `${s.name} (${s.code}): ${pct(s.pctStudents)} dos alunos com tarefas, IQ ${iqf(s.iq)}, ${fmtInt.format(s.enroll)} matrículas. ${QUADROS[q]}.`;
+            markup += `<circle class="dot q-${q}" data-code="${esc(s.code)}" cx="${px(s.pctStudents)}" cy="${py(s.iq)}" r="${r}" tabindex="0" role="button" aria-label="${esc(rotulo)}"></circle>`;
         });
 
         svg.innerHTML = markup;
+
+        const contagem = { hh: 0, hl: 0, lh: 0, ll: 0 };
+        comDados.forEach((s) => { contagem[quadrante(s, ref)] += 1; });
+        document.getElementById('quadroNota').textContent = `${comDados.length} escolas`;
+        document.getElementById('quadLegend').innerHTML = ['hh', 'hl', 'lh', 'll']
+            .map((q) => `<span><i class="q-${q}"></i>${QUADROS[q]} <b>${contagem[q]}</b></span>`).join('');
+        document.getElementById('quadMediana').textContent =
+            `Linhas tracejadas: medianas da regional (${pct(ref.part)} de participação e IQ ${iqf(ref.iq)}).`;
 
         svg.querySelectorAll('.dot').forEach((ponto) => {
             const escola = porCodigo(ponto.dataset.code);
@@ -1217,7 +1907,9 @@
         if (!escola) return;
         const tip = document.getElementById('tooltip');
         const caixa = document.getElementById('scatterWrap').getBoundingClientRect();
-        tip.innerHTML = `<strong>${esc(escola.name)}</strong><span>${pct(escola.pctStudents)} dos alunos com tarefas</span><span>IQ ${iqf(escola.iq)} · ${fmtInt.format(escola.enroll)} matrículas</span>`;
+        tip.innerHTML = `<strong>${esc(escola.name)}</strong>
+            <span>${pct(escola.pctStudents)} dos alunos com tarefas</span>
+            <span>IQ ${iqf(escola.iq)} · ${fmtInt.format(escola.enroll)} matrículas</span>`;
         tip.classList.add('on');
 
         let x = evento.clientX - caixa.left + 12;
@@ -1240,23 +1932,80 @@
         });
     }
 
+    function atualizarDestaques() {
+        document.querySelectorAll('#prioridadeLista .priority-row, #semRegistroLista .nodata-item').forEach((el) => {
+            el.setAttribute('aria-current', String(el.dataset.code === estado.selecionada));
+        });
+    }
+
+    function barraStatus(d) {
+        const total = d.onTime + d.late + d.incomplete + d.notDone || 1;
+        const partes = [
+            { classe: 'c-ontime', nome: 'No prazo', valor: d.onTime },
+            { classe: 'c-late', nome: 'Fora do prazo', valor: d.late },
+            { classe: 'c-incomplete', nome: 'Incompletas', valor: d.incomplete },
+            { classe: 'c-missed', nome: 'Não realizadas', valor: d.notDone }
+        ];
+        const barra = partes.map((p) => `<i class="${p.classe}" style="width:${(p.valor / total) * 100}%"></i>`).join('');
+        const legenda = partes.map((p) => `
+            <li><i class="${p.classe}"></i>${p.nome} <b>${fmtInt.format(p.valor)}</b></li>`).join('');
+        return `<div class="stack" role="img" aria-label="${partes.map((p) => `${p.nome}: ${p.valor}`).join('; ')}">${barra}</div>
+            <ul class="stack-legend">${legenda}</ul>`;
+    }
+
+    function comparacaoEscola(escola, n) {
+        const itens = [
+            { rotulo: 'Participação', escola: escola.pctStudents, regional: n.pctAlunos, formato: pct },
+            { rotulo: 'Conclusão', escola: escola.pctDone, regional: n.pctConcluidas, formato: pct },
+            { rotulo: 'No prazo', escola: escola.pctOnTime, regional: n.pctNoPrazo, formato: pct },
+            { rotulo: 'Acertos', escola: escola.pctCorrect, regional: n.pctAcertos, formato: pct },
+            { rotulo: 'IQ', escola: escola.iq, regional: n.iq, formato: iqf }
+        ];
+        return `
+            <div class="detail-compare">
+                <div class="cmp-head">
+                    <h3>Escola x regional</h3>
+                    <span>barra = escola · marca = regional</span>
+                </div>
+                <ul class="cmp-list">
+                    ${itens.map((item) => `
+                        <li class="cmp-row" aria-label="${item.rotulo}: escola ${item.formato(item.escola)}, regional ${item.formato(item.regional)}">
+                            <span class="cmp-label">${item.rotulo}</span>
+                            <span class="cmp-track">
+                                <i style="width:${Math.max(2, Math.min(100, item.escola * 100))}%"></i>
+                                <b style="left:${Math.max(0, Math.min(100, item.regional * 100))}%"></b>
+                            </span>
+                            <span class="cmp-val">${item.formato(item.escola)}</span>
+                        </li>`).join('')}
+                </ul>
+            </div>`;
+    }
+
     function renderDetalhe() {
-        const escola = estado.selecionada ? porCodigo(estado.selecionada) : null;
         const n = rede();
+        const escola = estado.selecionada ? porCodigo(estado.selecionada) : null;
         const titulo = document.getElementById('detalheTitulo');
-        const codigo = document.getElementById('detalheCodigo');
+        const sub = document.getElementById('detalheSub');
         const corpo = document.getElementById('detalheCorpo');
         const btn = document.getElementById('btnRegional');
 
         btn.hidden = !escola;
 
         if (!escola) {
-            titulo.textContent = 'Regional';
-            codigo.textContent = `${n.ativas} escolas com tarefas · ${fmtInt.format(n.matriculas)} matrículas`;
+            titulo.textContent = 'Visão da regional';
+            sub.textContent = `${n.ativas} escolas com tarefas · ${fmtInt.format(n.matriculas)} matrículas`;
             corpo.innerHTML = `
                 <div class="detail-kpis">
-                    <div><span>IQ da regional</span><strong>${iqf(n.iq)}</strong></div>
-                    <div><span>Tarefas concluídas</span><strong>${pct(n.pctConcluidas)}</strong></div>
+                    <div>
+                        <span>IQ da regional</span>
+                        <strong>${iqf(n.iq)}</strong>
+                        <span class="bd ${faixaDe(n.iq).cor}">${faixaDe(n.iq).nome}</span>
+                    </div>
+                    <div>
+                        <span>Tarefas concluídas</span>
+                        <strong>${pct(n.pctConcluidas)}</strong>
+                        <span class="detail-aux">${fmtInt.format(n.concluidas)} de ${fmtInt.format(n.propostas)}</span>
+                    </div>
                 </div>
                 <dl class="detail-stats">
                     <div><dt>Matrículas</dt><dd>${fmtInt.format(n.matriculas)}</dd></div>
@@ -1264,36 +2013,58 @@
                     <div><dt>Tarefas propostas</dt><dd>${fmtInt.format(n.propostas)}</dd></div>
                     <div><dt>Acertos</dt><dd>${pct(n.pctAcertos)}</dd></div>
                 </dl>
-                ${barraStatus(n)}
-                <p class="hint" style="margin-top:12px">${fmtInt.format(n.concluidas)} tarefas concluídas: ${fmtInt.format(n.noPrazo)} no prazo e ${fmtInt.format(n.fora)} fora do prazo.</p>`;
+                <div class="detail-guide">
+                    <h3>Como explorar</h3>
+                    <ul>
+                        <li><b>Gráfico:</b> participação dos alunos no eixo horizontal e IQ no vertical; clique em um ponto para abrir a escola.</li>
+                        <li><b>Ranking e faixas:</b> ordene por IQ, participação, conclusão ou acertos e filtre por faixa de IQ.</li>
+                        <li><b>Tabela:</b> clique nos títulos para ordenar, busque por nome ou código e exporte em CSV.</li>
+                        <li><b>Atenção:</b> IQ alto com participação baixa indica poucos alunos atendidos, não cobertura ampla.</li>
+                    </ul>
+                </div>
+                <p class="detail-prompt">Clique em uma escola no gráfico, no ranking ou na tabela para abrir o detalhe.</p>`;
             return;
         }
 
         titulo.textContent = escola.name;
-        codigo.textContent = `Escola ${escola.code} · ${fmtInt.format(escola.enroll)} matrículas`;
+        sub.textContent = `Escola ${escola.code} · ${fmtInt.format(escola.enroll)} matrículas`;
 
         if (!escola.proposed) {
             corpo.innerHTML = `
+                <div class="detail-badges"><span class="bd neutral">Sem registro</span></div>
                 <div class="detail-empty">Sem tarefas registradas nesta semana. A escola aparece no export apenas com o total de matrículas.</div>
-                <dl class="detail-stats" style="margin-top:18px">
+                <dl class="detail-stats">
                     <div><dt>Matrículas</dt><dd>${fmtInt.format(escola.enroll)}</dd></div>
                     <div><dt>Alunos com tarefas</dt><dd>0</dd></div>
                     <div><dt>Tarefas propostas</dt><dd>0</dd></div>
                     <div><dt>IQ</dt><dd>—</dd></div>
-                </dl>`;
+                </dl>
+                <p class="detail-prompt">Esta escola não entrou no cálculo da regional nesta semana.</p>`;
             return;
         }
 
-        const dados = {
-            ...escola,
-            totalStatus: escola.onTime + escola.late + escola.incomplete + escola.notDone,
-            pctConcluidas: escola.pctDone
-        };
+        const faixa = faixaDe(escola.iq);
+        const delta = escola.iq - n.iq;
+        const sinal = delta >= 0 ? '▲' : '▼';
+        const classeDelta = delta >= 0 ? 'up' : 'down';
+        const posicao = [...ativas()].sort((a, b) => b.iq - a.iq).findIndex((s) => s.code === escola.code) + 1;
 
         corpo.innerHTML = `
-            <div class="detail-kpis">
-                <div><span>IQ</span><strong>${iqf(escola.iq)}</strong></div>
-                <div><span>Tarefas concluídas</span><strong>${pct(escola.pctDone)}</strong></div>
+            <div class="detail-badges">
+                <span class="bd ${faixa.cor}">${faixa.nome}</span>
+                <span class="bd neutral">Escola ${esc(escola.code)}</span>
+            </div>
+            <div class="detail-kpis" style="margin-top:12px">
+                <div>
+                    <span>IQ</span>
+                    <strong>${iqf(escola.iq)}</strong>
+                    <span class="delta ${classeDelta}">${sinal} ${iqf(Math.abs(delta))} vs regional · ${posicao}º de ${n.ativas} no IQ</span>
+                </div>
+                <div>
+                    <span>Tarefas concluídas</span>
+                    <strong>${pct(escola.pctDone)}</strong>
+                    <span class="detail-aux">${fmtInt.format(escola.onTime + escola.late)} de ${fmtInt.format(escola.proposed)}</span>
+                </div>
             </div>
             <dl class="detail-stats">
                 <div><dt>Matrículas</dt><dd>${fmtInt.format(escola.enroll)}</dd></div>
@@ -1301,186 +2072,346 @@
                 <div><dt>Tarefas propostas</dt><dd>${fmtInt.format(escola.proposed)}</dd></div>
                 <div><dt>Acertos</dt><dd>${pct(escola.pctCorrect)}</dd></div>
             </dl>
-            ${barraStatus(dados)}`;
+            ${barraStatus(escola)}
+            ${comparacaoEscola(escola, n)}`;
     }
 
-    function barraStatus(d) {
-        const total = d.totalStatus || 1;
-        const partes = [
-            { classe: 'c-ontime', nome: 'No prazo', valor: d.noPrazo },
-            { classe: 'c-late', nome: 'Fora do prazo', valor: d.fora },
-            { classe: 'c-incomplete', nome: 'Incompletas', valor: d.incompletas },
-            { classe: 'c-notdone', nome: 'Não realizadas', valor: d.naoRealizadas }
-        ];
-        const barra = partes.map((p) => `<i class="${p.classe}" style="width:${(p.valor / total) * 100}%"></i>`).join('');
-        const legenda = partes.map((p) => `
-            <li><span class="l"><i class="${p.classe}"></i>${p.nome}</span><b>${fmtInt.format(p.valor)}</b></li>`).join('');
-        return `<div class="stack" role="img" aria-label="No prazo: ${d.noPrazo}; fora do prazo: ${d.fora}; incompletas: ${d.incompletas}; não realizadas: ${d.naoRealizadas}">${barra}</div><ul class="stack-legend">${legenda}</ul>`;
-    }
+    function selecionar(codigo, opcoes = {}) {
+        estado.selecionada = estado.selecionada === codigo ? null : codigo;
+        renderDetalhe();
+        atualizarScatter();
+        renderRanking();
+        renderTabela();
+        renderStatusFiltro();
+        atualizarDestaques();
 
+        if (estado.selecionada && opcoes.rolar !== false) {
+            const painel = document.getElementById('detalhePanel');
+            const caixa = painel.getBoundingClientRect();
+            if (caixa.top < 70 || caixa.bottom > window.innerHeight - 20) {
+                painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+</script>
+<script>
     function renderRanking() {
         const config = METRICAS[estado.metrica];
         const base = ativas().filter(noCoorte);
-        const lista = [...base].sort((a, b) => estado.atencao ? config.valor(a) - config.valor(b) : config.valor(b) - config.valor(a)).slice(0, 10);
-        const medianaGeral = mediana(ativas().map(config.valor));
-        const listaEl = document.getElementById('ranking');
-        const hint = document.getElementById('rankingHint');
-        const rodape = document.getElementById('rankingRodape');
+        const asc = estado.visao === 'atencao';
+        const ordenada = [...base].sort((a, b) => {
+            const diferenca = asc ? config.valor(a) - config.valor(b) : config.valor(b) - config.valor(a);
+            return diferenca || a.name.localeCompare(b.name, 'pt-BR');
+        });
+        const lista = estado.visao === 'todas' ? ordenada : ordenada.slice(0, 10);
 
-        hint.textContent = estado.atencao
-            ? '10 escolas com os menores valores entre as que registraram tarefas.'
-            : '10 escolas com os maiores valores entre as que registraram tarefas.';
-        rodape.hidden = lista.length === 0;
+        document.getElementById('rankingNota').textContent = config.rotulo;
+        document.getElementById('rankingHint').textContent = estado.visao === 'todas'
+            ? `${lista.length} escolas no recorte, ordenadas por ${config.rotulo.toLowerCase()}.`
+            : estado.visao === 'atencao'
+                ? `10 escolas com os menores valores de ${config.rotulo.toLowerCase()}.`
+                : `10 escolas com os maiores valores de ${config.rotulo.toLowerCase()}.`;
 
+        const el = document.getElementById('ranking');
         if (!lista.length) {
-            listaEl.innerHTML = `<li class="empty">Nenhuma escola com tarefas neste filtro.</li>`;
+            el.innerHTML = `<li class="empty">Nenhuma escola com tarefas neste recorte.</li>`;
             return;
         }
 
-        listaEl.innerHTML = lista.map((s, indice) => {
+        const referencia = mediana(ativas().map(config.valor));
+        const posReferencia = Math.max(0, Math.min(100, (referencia / config.escala) * 100));
+
+        el.innerHTML = lista.map((s, indice) => {
             const valor = config.valor(s);
             const largura = Math.max(1.5, Math.min(100, (valor / config.escala) * 100));
-            const posicaoMediana = Math.max(0, Math.min(100, (medianaGeral / config.escala) * 100));
-            return `
-                <li>
-                    <button class="rank${estado.atencao ? ' attention' : ''}" type="button" data-code="${esc(s.code)}" aria-current="${s.code === estado.selecionada}">
-                        <span class="n">${indice + 1}</span>
-                        <span class="nm">${esc(s.name)}<small>${esc(s.code)}</small></span>
-                        <span class="track"><i style="width:${largura}%"></i><span class="med" style="left:${posicaoMediana}%"></span></span>
-                        <span class="v">${config.formato(valor)}</span>
-                    </button>
-                </li>`;
+            return `<li>
+                <button class="rank-row${estado.visao === 'atencao' ? ' attention' : ''}" type="button" data-code="${esc(s.code)}" aria-current="${s.code === estado.selecionada}" title="${esc(s.name)}">
+                    <span class="rank-pos">${indice + 1}</span>
+                    <span class="rank-main">
+                        <span class="rank-name">${esc(s.name)}<small>${esc(s.code)}</small></span>
+                        <span class="rank-track"><i style="width:${largura}%"></i><span class="med" style="left:${posReferencia}%"></span></span>
+                    </span>
+                    <span class="rank-val">${config.formato(valor)}</span>
+                </button>
+            </li>`;
         }).join('');
     }
 
-    function renderTabela() {
-        const linhas = DADOS.schools.filter(noCoorte);
+    function renderFaixas() {
+        const base = ativas();
+        const total = base.length || 1;
+        const grupos = FAIXAS.map((f) => {
+            const lista = base.filter((s) => faixaDe(s.iq).id === f.id);
+            return {
+                ...f,
+                escolas: lista.length,
+                matriculas: lista.reduce((soma, s) => soma + s.enroll, 0)
+            };
+        });
+
+        document.getElementById('faixas').innerHTML = grupos.map((g) => `
+            <button class="band-row" type="button" data-faixa="${g.id}" aria-pressed="${estado.faixa === g.id}">
+                <span class="band-top">
+                    <span class="band-label"><i class="${g.cor}"></i>${g.nome} <small>${g.desc}</small></span>
+                    <b>${g.escolas}</b>
+                </span>
+                <span class="band-track"><i class="${g.cor}" style="width:${(g.escolas / total) * 100}%"></i></span>
+                <span class="band-sub">${fmtInt.format(g.matriculas)} matrículas · ${pct(g.escolas / total)} das escolas</span>
+            </button>`).join('');
+
+        const critico = grupos.find((g) => g.id === 'critico');
+        document.getElementById('faixasFoot').textContent = critico.escolas
+            ? `${critico.escolas} escolas com IQ abaixo de 0,35 somam ${fmtInt.format(critico.matriculas)} matrículas.`
+            : 'Nenhuma escola na faixa crítica.';
+
+        const prioridades = base.filter((s) => s.iq < 0.35).sort((a, b) => b.enroll - a.enroll).slice(0, 4);
+        document.getElementById('prioridadeLista').innerHTML = prioridades.length
+            ? prioridades.map((s) => `
+                <li>
+                    <button class="priority-row" type="button" data-code="${esc(s.code)}" title="${esc(s.name)}">
+                        <span class="priority-name">${esc(s.name)}</span>
+                        <span class="priority-enroll">${fmtInt.format(s.enroll)}</span>
+                        <span class="iq-badge ${faixaDe(s.iq).cor}">${iqf(s.iq)}</span>
+                    </button>
+                </li>`).join('')
+            : '<li class="empty">Nenhuma escola na faixa crítica.</li>';
+    }
+
+    function atualizarFaixas() {
+        document.querySelectorAll('.band-row').forEach((botao) => {
+            botao.setAttribute('aria-pressed', String(botao.dataset.faixa === estado.faixa));
+        });
+    }
+
+    function renderSemRegistro() {
+        const sem = DADOS.schools.filter((s) => s.proposed === 0).sort((a, b) => b.enroll - a.enroll);
+        const matriculas = sem.reduce((soma, s) => soma + s.enroll, 0);
+        document.getElementById('semRegistroSub').textContent =
+            `${sem.length} escolas e ${fmtInt.format(matriculas)} matrículas sem tarefas na semana. Clique para abrir o detalhe.`;
+
+        document.getElementById('semRegistroLista').innerHTML = sem.map((s) => `
+            <button class="nodata-item" type="button" data-code="${esc(s.code)}">
+                <span class="nodata-name">${esc(s.name)}<small>${esc(s.code)}</small></span>
+                <span class="nodata-enroll"><b>${fmtInt.format(s.enroll)}</b> matrículas</span>
+            </button>`).join('');
+    }
+
+    let linhasExport = [];
+
+    function linhasTabela() {
         const chave = estado.ordenacao;
         const direcao = estado.direcao === 'asc' ? 1 : -1;
-
-        linhas.sort((a, b) => {
+        return DADOS.schools.filter(noCoorte).sort((a, b) => {
             const aAtiva = a.proposed > 0;
             const bAtiva = b.proposed > 0;
             if (!aAtiva && bAtiva) return 1;
             if (aAtiva && !bAtiva) return -1;
             if (!aAtiva && !bAtiva) return a.name.localeCompare(b.name, 'pt-BR');
-
-            let va = a[chave];
-            let vb = b[chave];
-            if (chave === 'name' || chave === 'code') {
-                return String(va).localeCompare(String(vb), 'pt-BR') * direcao;
-            }
-            return (va - vb) * direcao;
+            if (chave === 'name') return a.name.localeCompare(b.name, 'pt-BR') * direcao;
+            return (a[chave] - b[chave]) * direcao;
         });
+    }
 
-        document.getElementById('corpoTabela').innerHTML = linhas.map((s) => {
-            const ativa = s.proposed > 0;
-            return `
-                <tr data-code="${esc(s.code)}" aria-selected="${s.code === estado.selecionada}" class="${ativa ? '' : 'inactive'}">
+    function renderTabela() {
+        linhasExport = linhasTabela();
+        const corpo = document.getElementById('corpoTabela');
+
+        if (!linhasExport.length) {
+            corpo.innerHTML = `<tr><td class="table-empty" colspan="9">Nenhuma escola encontrada para os filtros atuais.</td></tr>`;
+        } else {
+            corpo.innerHTML = linhasExport.map((s) => {
+                const ativa = s.proposed > 0;
+                const faixa = ativa ? faixaDe(s.iq) : null;
+                return `<tr data-code="${esc(s.code)}" aria-selected="${s.code === estado.selecionada}" class="${ativa ? '' : 'inactive'}">
                     <td>
                         <button class="name-btn" type="button" data-code="${esc(s.code)}">${esc(s.name)}${ativa ? '' : ' <span class="tag">sem registro</span>'}</button>
                         <span class="code">${esc(s.code)}</span>
                     </td>
                     <td>${fmtInt.format(s.enroll)}</td>
                     <td>${ativa ? fmtInt.format(s.students) : '—'}</td>
-                    <td>${ativa ? pct(s.pctStudents) : '0,0%'}</td>
+                    <td>${ativa ? pct(s.pctStudents) : '—'}</td>
                     <td>${ativa ? fmtInt.format(s.proposed) : '—'}</td>
                     <td>${ativa ? pct(s.pctDone) : '—'}</td>
                     <td>${ativa ? pct(s.pctOnTime) : '—'}</td>
                     <td>${ativa ? pct(s.pctCorrect) : '—'}</td>
-                    <td>${ativa ? iqf(s.iq) : '—'}</td>
+                    <td>${ativa ? `<span class="iq-badge ${faixa.cor}">${iqf(s.iq)}</span>` : '—'}</td>
                 </tr>`;
-        }).join('');
+            }).join('');
+        }
 
-        document.getElementById('tabelaContagem').textContent = `${linhas.length} ${linhas.length === 1 ? 'escola' : 'escolas'} no filtro atual.`;
+        document.getElementById('tabelaContagem').textContent =
+            `${linhasExport.length} ${linhasExport.length === 1 ? 'escola' : 'escolas'} · clique em uma linha para abrir o detalhe`;
+        document.getElementById('btnCsv').disabled = !linhasExport.length;
+
         document.querySelectorAll('#tabela thead th').forEach((th) => {
-            th.setAttribute('aria-sort', th.dataset.key === chave ? (estado.direcao === 'asc' ? 'ascending' : 'descending') : 'none');
+            th.setAttribute('aria-sort', th.dataset.key === estado.ordenacao
+                ? (estado.direcao === 'asc' ? 'ascending' : 'descending')
+                : 'none');
         });
     }
 
     function atualizarChips() {
-        const comDados = ativas();
+        const base = ativas();
         const contagens = {
             all: DADOS.schools.length,
-            lowiq: comDados.filter((s) => s.iq < 0.35).length,
-            lowpart: comDados.filter((s) => s.pctStudents < 0.10).length,
-            nodata: DADOS.schools.length - comDados.length
-        };
-        const nomes = {
-            all: 'Todas',
-            lowiq: 'IQ baixo',
-            lowpart: 'Baixa participação',
-            nodata: 'Sem registro'
+            lowiq: base.filter((s) => s.iq < 0.35).length,
+            lowpart: base.filter((s) => s.pctStudents < 0.10).length,
+            nodata: DADOS.schools.length - base.length
         };
         document.querySelectorAll('#chips .chip').forEach((chip) => {
-            const chave = chip.dataset.filtro;
-            chip.textContent = `${nomes[chave]} (${contagens[chave]})`;
-            chip.setAttribute('aria-pressed', String(estado.filtro === chave));
+            const chave = chip.dataset.situacao;
+            chip.textContent = `${nomesSituacao(chave)} (${contagens[chave]})`;
+            chip.setAttribute('aria-pressed', String(estado.situacao === chave));
         });
     }
 
-    function selecionar(codigo) {
-        estado.selecionada = estado.selecionada === codigo ? null : codigo;
-        renderDetalhe();
+    function renderStatusFiltro() {
+        const n = rede();
+        const ativasFiltradas = ativas().filter(noCoorte).length;
+        const tabelaFiltrada = DADOS.schools.filter(noCoorte).length;
+        let texto = `${ativasFiltradas} de ${n.ativas} escolas com tarefas no recorte`;
+        if (tabelaFiltrada !== ativasFiltradas) texto += ` · ${tabelaFiltrada} escolas na tabela`;
+
+        const marcas = [];
+        if (estado.situacao !== 'all') marcas.push(nomesSituacao(estado.situacao));
+        if (estado.faixa) marcas.push(`faixa ${FAIXAS.find((f) => f.id === estado.faixa).nome}`);
+        if (estado.busca) marcas.push(`busca "${estado.busca}"`);
+        if (marcas.length) texto += ` · ${marcas.join(' · ')}`;
+
+        document.getElementById('statusFiltro').textContent = `${texto}.`;
+        document.getElementById('btnLimpar').disabled = !(
+            estado.busca || estado.situacao !== 'all' || estado.faixa || estado.selecionada ||
+            estado.metrica !== 'iq' || estado.visao !== 'top'
+        );
+    }
+
+    function ajustarSelecao() {
+        if (!estado.selecionada) return;
+        const escola = porCodigo(estado.selecionada);
+        if (!escola || !noCoorte(escola)) estado.selecionada = null;
+    }
+
+    function atualizarFiltros() {
+        ajustarSelecao();
+        atualizarChips();
+        atualizarFaixas();
         atualizarScatter();
         renderRanking();
         renderTabela();
+        renderDetalhe();
+        renderStatusFiltro();
+        atualizarDestaques();
     }
 
     function renderTudo() {
-        renderKpis();
+        renderResumo();
         renderInsights();
         renderScatter();
         renderDetalhe();
         renderRanking();
+        renderFaixas();
+        renderSemRegistro();
         renderTabela();
+        atualizarChips();
+        renderStatusFiltro();
+    }
+
+    function resetarFiltros() {
+        estado.busca = '';
+        estado.situacao = 'all';
+        estado.faixa = null;
+        estado.metrica = 'iq';
+        estado.visao = 'top';
+        estado.selecionada = null;
+        estado.ordenacao = 'iq';
+        estado.direcao = 'desc';
+        document.getElementById('busca').value = '';
+        document.getElementById('metrica').value = 'iq';
+        document.getElementById('visao').value = 'top';
+        atualizarFiltros();
+    }
+
+    function exportarCsv() {
+        if (!linhasExport.length) return;
+        const cabecalho = ['Escola', 'Código', 'Matrículas', 'Alunos com tarefas', '% alunos', 'Tarefas propostas', 'No prazo', 'Fora do prazo', 'Incompletas', 'Não realizadas', 'Concluídas (%)', 'No prazo (%)', 'Acertos (%)', 'IQ'];
+        const linhas = linhasExport.map((s) => {
+            const ativa = s.proposed > 0;
+            return [
+                s.name,
+                s.code,
+                s.enroll,
+                s.students,
+                ativa ? pct(s.pctStudents) : '',
+                s.proposed,
+                s.onTime,
+                s.late,
+                s.incomplete,
+                s.notDone,
+                ativa ? pct(s.pctDone) : '',
+                ativa ? pct(s.pctOnTime) : '',
+                ativa ? pct(s.pctCorrect) : '',
+                ativa ? iqf(s.iq) : ''
+            ];
+        });
+        const texto = [cabecalho, ...linhas]
+            .map((linha) => linha.map((valor) => `"${String(valor).replace(/"/g, '""')}"`).join(';'))
+            .join('\r\n');
+        const blob = new Blob(['\ufeff' + texto], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'tarefa-sp-semana-01.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
     }
 
     function ligarEventos() {
+        document.getElementById('busca').addEventListener('input', (evento) => {
+            estado.busca = evento.target.value;
+            atualizarFiltros();
+        });
+
+        document.getElementById('chips').addEventListener('click', (evento) => {
+            const chip = evento.target.closest('.chip');
+            if (!chip) return;
+            estado.situacao = chip.dataset.situacao;
+            estado.faixa = null;
+            atualizarFiltros();
+        });
+
+        document.getElementById('metrica').addEventListener('change', (evento) => {
+            estado.metrica = evento.target.value;
+            renderRanking();
+            renderStatusFiltro();
+        });
+
+        document.getElementById('visao').addEventListener('change', (evento) => {
+            estado.visao = evento.target.value;
+            renderRanking();
+            renderStatusFiltro();
+        });
+
+        document.getElementById('btnLimpar').addEventListener('click', resetarFiltros);
+
         document.getElementById('btnRegional').addEventListener('click', () => {
             estado.selecionada = null;
             renderDetalhe();
             atualizarScatter();
             renderRanking();
             renderTabela();
-        });
-
-        document.getElementById('metrica').addEventListener('change', (evento) => {
-            estado.metrica = evento.target.value;
-            renderRanking();
-        });
-
-        document.getElementById('btnAtencao').addEventListener('click', (evento) => {
-            estado.atencao = !estado.atencao;
-            evento.currentTarget.setAttribute('aria-pressed', String(estado.atencao));
-            evento.currentTarget.textContent = estado.atencao ? 'Ver melhores' : 'Ver atenção';
-            renderRanking();
-        });
-
-        document.getElementById('chips').addEventListener('click', (evento) => {
-            const chip = evento.target.closest('.chip');
-            if (!chip) return;
-            estado.filtro = chip.dataset.filtro;
-            atualizarChips();
-            atualizarScatter();
-            renderRanking();
-            renderTabela();
-        });
-
-        document.getElementById('busca').addEventListener('input', (evento) => {
-            estado.busca = evento.target.value;
-            atualizarScatter();
-            renderRanking();
-            renderTabela();
+            renderStatusFiltro();
+            atualizarDestaques();
         });
 
         document.getElementById('ranking').addEventListener('click', (evento) => {
-            const botao = evento.target.closest('.rank');
-            if (botao) selecionar(botao.dataset.code);
+            const linha = evento.target.closest('.rank-row');
+            if (linha) selecionar(linha.dataset.code);
         });
 
         document.getElementById('corpoTabela').addEventListener('click', (evento) => {
-            const linha = evento.target.closest('tr');
+            const linha = evento.target.closest('tr[data-code]');
             if (linha) selecionar(linha.dataset.code);
         });
 
@@ -1491,26 +2422,80 @@
                     estado.direcao = estado.direcao === 'asc' ? 'desc' : 'asc';
                 } else {
                     estado.ordenacao = chave;
-                    estado.direcao = chave === 'name' || chave === 'code' ? 'asc' : 'desc';
+                    estado.direcao = chave === 'name' ? 'asc' : 'desc';
                 }
                 renderTabela();
             });
         });
 
+        document.getElementById('faixas').addEventListener('click', (evento) => {
+            const faixa = evento.target.closest('.band-row');
+            if (!faixa) return;
+            estado.faixa = estado.faixa === faixa.dataset.faixa ? null : faixa.dataset.faixa;
+            estado.situacao = 'all';
+            atualizarFiltros();
+        });
+
+        document.getElementById('prioridadeLista').addEventListener('click', (evento) => {
+            const item = evento.target.closest('.priority-row');
+            if (item) selecionar(item.dataset.code);
+        });
+
+        document.getElementById('btnSemRegistroTabela').addEventListener('click', () => {
+            estado.situacao = 'nodata';
+            estado.faixa = null;
+            estado.busca = '';
+            estado.selecionada = null;
+            document.getElementById('busca').value = '';
+            atualizarFiltros();
+            document.getElementById('tabelaPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        document.getElementById('semRegistroLista').addEventListener('click', (evento) => {
+            const item = evento.target.closest('.nodata-item');
+            if (item) selecionar(item.dataset.code);
+        });
+
+        document.getElementById('btnCsv').addEventListener('click', exportarCsv);
+
+        document.getElementById('btn-sair').addEventListener('click', async () => {
+            try {
+                await supabaseClient.auth.signOut();
+            } catch (erro) {
+                console.error(erro);
+            } finally {
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('btnTentar').addEventListener('click', carregarDados);
+
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(renderScatter, 150);
-        });
-
-        document.getElementById('btn-sair').addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
+            resizeTimer = setTimeout(renderScatter, 160);
         });
     }
 
+    function mostrarErro(titulo, texto, permitirTentar = true) {
+        const estadoEl = document.getElementById('estado');
+        estadoEl.hidden = false;
+        estadoEl.classList.add('error');
+        document.getElementById('estadoTitulo').textContent = titulo;
+        document.getElementById('estadoTexto').textContent = texto;
+        document.getElementById('btnTentar').hidden = !permitirTentar;
+        document.getElementById('dashboard').hidden = true;
+    }
+
     async function carregarDados() {
-        const status = document.getElementById('statusDados');
+        const estadoEl = document.getElementById('estado');
+        estadoEl.hidden = false;
+        estadoEl.classList.remove('error');
+        document.getElementById('estadoTitulo').textContent = 'Carregando a semana';
+        document.getElementById('estadoTexto').textContent = 'Buscando os dados do Tarefa SP…';
+        document.getElementById('btnTentar').hidden = true;
+        document.getElementById('dashboard').hidden = true;
+
         try {
             const resposta = await fetch(FONTE_DADOS, { cache: 'no-store' });
             if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
@@ -1518,23 +2503,34 @@
             if (!dados.schools || !dados.schools.length) throw new Error('Base vazia');
 
             DADOS.schools = dados.schools;
+            DADOS.source = dados.source || 'Export Tarefa SP';
+            DADOS.week = dados.week || 'Semana 01';
+            DADOS.period = dados.period || '01.02 a 07.02';
             document.getElementById('dashboard').hidden = false;
-            status.hidden = true;
-            atualizarChips();
+            estadoEl.hidden = true;
             renderTudo();
-            ligarEventos();
         } catch (erro) {
-            status.textContent = 'Não foi possível carregar os dados da semana. Abra a página pelo endereço do site e recarregue.';
-            status.classList.add('error');
+            console.error(erro);
+            mostrarErro(
+                'Não foi possível carregar os dados',
+                'Verifique a conexão e tente novamente. Os dados da semana ficam em dados/tarefa-sp-semana-01.json.'
+            );
         }
     }
 
     async function iniciar() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-            window.location.href = 'index.html';
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+        } catch (erro) {
+            console.error(erro);
+            mostrarErro('Sessão indisponível', 'Entre novamente pelo painel para acessar os dados.', false);
             return;
         }
+        ligarEventos();
         carregarDados();
     }
 
