@@ -476,7 +476,7 @@ const{data,error}=await SB.from('resultados_khan').select('*').eq('ano',anos[0].
 if(error||!data||!data.length)throw new Error('consulta falhou');
 DB=aPartirDeBanco(data);fonte='supabase';
 
-$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_matific_mensal) Â· ano '+DB.ano+' Â· importada via admin.html.';
+$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) Â· ano '+DB.ano+' Â· importada via admin.html.';
 cur=avail().at(-1);cmp=null;fillSchoolSelect();render();if(!silent)toast('Dados carregados do Supabase.');
 }catch(err){fonte='local';
 $('#fonte').textContent='Fonte: Escola Total. Atualizada em 13/11/26';
@@ -491,4 +491,5 @@ if(has(m))cur=m;if(has(c)&&c!==cur)cmp=c;fillSchoolSelect();render();carregarSup
 </script>
 </body>
 </html>
+
 
