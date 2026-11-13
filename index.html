@@ -359,15 +359,30 @@
         function animarContagem(alvo) {
             const duracao = 1200;
             const inicio = performance.now();
+            let finalizado = false;
+
+            // Garante o valor final mesmo se a animação for pausada (aba em segundo plano)
+            const finalizar = () => {
+                if (finalizado) return;
+                finalizado = true;
+                valueEl.textContent = formatar(alvo);
+            };
+            const timer = setTimeout(finalizar, duracao + 200);
 
             function passo(agora) {
                 const progresso = Math.min((agora - inicio) / duracao, 1);
                 const suavizado = 1 - Math.pow(1 - progresso, 3);
                 valueEl.textContent = formatar(Math.round(alvo * suavizado));
-                if (progresso < 1) requestAnimationFrame(passo);
+                if (progresso < 1) {
+                    requestAnimationFrame(passo);
+                } else {
+                    clearTimeout(timer);
+                    finalizar();
+                }
             }
 
             requestAnimationFrame(passo);
+            if (document.visibilityState === 'hidden') finalizar();
         }
 
         async function obterContador() {
