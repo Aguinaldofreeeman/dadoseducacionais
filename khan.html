@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matific Â· Painel Mensal â€” URE MarÃ­lia</title>
+<title>Khan Academy - painel mensal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -165,7 +165,7 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
 <body>
 <div class="math" id="math"></div>
 <nav>
-  <a class="brand" href="index.html"><div class="mark">âˆ‘</div><div><b>Matific Â· Painel Mensal</b><span>URE MarÃ­lia Â· Anos Finais</span></div></a>
+  <a class="brand" href="index.html"><div class="mark">âˆ‘</div><div><b>Khan Academy - painel mensal</b><span>URE Marília</span></div></a>
   <div class="nav-act">
     <button class="ibtn" id="btnRefresh" title="Recarregar do Supabase"><i class="fas fa-rotate"></i></button>
     <button class="ibtn" id="btnTheme" title="Tema"><i class="fas fa-sun"></i></button>
@@ -276,7 +276,7 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
   </article>
 
   <footer>
-    <span id="fonte"><i class="fas fa-database"></i>Fonte: planilha mensal Matific (fev/2026) Â· Diretoria MarÃ­lia.</span>
+    <span id="fonte">Fonte: Escola Total. Atualizada em 13/11/26</span>
     <span><i class="fas fa-shield-halved"></i>Dados agregados por escola Â· sem dados pessoais de alunos (LGPD).</span>
   </footer>
 </main>
@@ -475,11 +475,11 @@ if(e1||!anos||!anos.length)throw new Error('sem dados');
 const{data,error}=await SB.from('resultados_khan').select('*').eq('ano',anos[0].ano).range(0,4999);
 if(error||!data||!data.length)throw new Error('consulta falhou');
 DB=aPartirDeBanco(data);fonte='supabase';
-$('#srcBadge').className='badge live';$('#srcTxt').textContent='Supabase';
+
 $('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_matific_mensal) Â· ano '+DB.ano+' Â· importada via admin.html.';
 cur=avail().at(-1);cmp=null;fillSchoolSelect();render();if(!silent)toast('Dados carregados do Supabase.');
-}catch(err){fonte='local';$('#srcBadge').className='badge local';$('#srcTxt').textContent='Local';
-$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: planilha mensal Matific (fev/2026) Â· Diretoria MarÃ­lia. Conecte o Supabase para dados ao vivo.';
+}catch(err){fonte='local';
+$('#fonte').textContent='Fonte: Escola Total. Atualizada em 13/11/26';
 if(!silent)toast('Sem dados no Supabase â€” usando semente local de fev/2026.','warn');}
 finally{btn.classList.remove('spin')}}
 $('#btnRefresh').onclick=()=>carregarSupabase(false);
@@ -491,3 +491,4 @@ if(has(m))cur=m;if(has(c)&&c!==cur)cmp=c;fillSchoolSelect();render();carregarSup
 </script>
 </body>
 </html>
+
