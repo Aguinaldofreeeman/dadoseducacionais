@@ -38,12 +38,90 @@
         .btn-module { display: inline-block; text-align: center; background-color: #0284c7; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
         .btn-module:hover { background-color: #0369a1; }
         .badge-disabled { display: inline-block; text-align: center; background-color: #94a3b8; color: white; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+
+        /* Contador de Visitas */
+        .visit-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.22);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 16px rgba(2,6,23,0.18);
+            color: #e6fffb;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .visit-counter:hover { transform: translateY(-1px); background: rgba(255,255,255,0.16); }
+        .visit-counter::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.28) 50%, transparent 80%);
+            transform: translateX(-120%);
+            animation: visit-shimmer 4.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .visit-counter-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 0 rgba(52,211,153,0.65);
+            animation: visit-pulse 2.2s ease-out infinite;
+            flex: 0 0 auto;
+        }
+        .visit-counter svg { width: 15px; height: 15px; opacity: 0.9; flex: 0 0 auto; }
+        .visit-counter-label { opacity: 0.85; font-weight: 500; }
+        .visit-counter-value {
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg,#a7f3d0,#7dd3fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            min-width: 1ch;
+        }
+        .visit-counter.is-loading .visit-counter-value { opacity: 0.55; }
+        @keyframes visit-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
+            70% { box-shadow: 0 0 0 7px rgba(52,211,153,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        }
+        @keyframes visit-shimmer {
+            0%, 55% { transform: translateX(-120%); }
+            85%, 100% { transform: translateX(120%); }
+        }
+        @media (max-width: 640px) {
+            header { flex-wrap: wrap; gap: 10px; }
+            .visit-counter-label { display: none; }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Plataforma de Dados Educacionais</h1>
         <div class="header-actions">
+            <!-- Contador de Visitas -->
+            <div class="visit-counter is-loading" id="visit-counter" title="Visitas à plataforma" aria-label="Contador de visitas">
+                <span class="visit-counter-dot" aria-hidden="true"></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span class="visit-counter-label">Visitas</span>
+                <span class="visit-counter-value" id="visit-counter-value" aria-live="polite">&mdash;</span>
+            </div>
             <!-- Botão da Área Administrativa (Exibido apenas para ADM) -->
             <a id="btn-area-admin" href="admin.html" class="btn-admin-nav">Área Administrativa</a>
             <button id="btn-sair" class="btn-logout" style="display: none;">Sair</button>
@@ -265,6 +343,67 @@
         await supabaseClient.auth.signOut();
         verificarSessao();
     });
+
+    // Contador de Visitas
+    (function initVisitCounter() {
+        const pill = document.getElementById('visit-counter');
+        const valueEl = document.getElementById('visit-counter-value');
+        if (!pill || !valueEl) return;
+
+        const NAMESPACE = 'aguinaldofreeeman';
+        const COUNTER_KEY = 'dadoseducacionais-index';
+        const BASE_URL = 'https://abacus.jasoncameron.dev';
+
+        const formatar = (valor) => new Intl.NumberFormat('pt-BR').format(valor);
+
+        function animarContagem(alvo) {
+            const duracao = 1200;
+            const inicio = performance.now();
+
+            function passo(agora) {
+                const progresso = Math.min((agora - inicio) / duracao, 1);
+                const suavizado = 1 - Math.pow(1 - progresso, 3);
+                valueEl.textContent = formatar(Math.round(alvo * suavizado));
+                if (progresso < 1) requestAnimationFrame(passo);
+            }
+
+            requestAnimationFrame(passo);
+        }
+
+        async function obterContador() {
+            let jaContou = false;
+            try { jaContou = sessionStorage.getItem('visita-contada') === '1'; } catch (e) {}
+
+            const acao = jaContou ? 'get' : 'hit';
+            const resposta = await fetch(`${BASE_URL}/${acao}/${NAMESPACE}/${COUNTER_KEY}`, { cache: 'no-store' });
+            if (!resposta.ok) throw new Error('Contador indisponível');
+
+            const dados = await resposta.json();
+            if (!jaContou) {
+                try { sessionStorage.setItem('visita-contada', '1'); } catch (e) {}
+            }
+            if (typeof dados.value !== 'number') throw new Error('Resposta inválida');
+            return dados.value;
+        }
+
+        obterContador()
+            .then((total) => {
+                pill.title = `${formatar(total)} visitas à plataforma`;
+                animarContagem(total);
+            })
+            .catch(() => {
+                // Fallback local caso a API de contagem esteja indisponível
+                let total = 0;
+                try {
+                    total = Number(localStorage.getItem('visitas-index-local') || 0) + 1;
+                    localStorage.setItem('visitas-index-local', String(total));
+                } catch (e) {}
+                pill.title = 'Contador de visitas (modo local)';
+                if (total > 0) animarContagem(total);
+                else valueEl.textContent = '\u2014';
+            })
+            .finally(() => pill.classList.remove('is-loading'));
+    })();
 
     // Abrir o módulo em nova guia ao clicar em qualquer parte do card
     document.querySelectorAll('.module-card').forEach((card) => {
