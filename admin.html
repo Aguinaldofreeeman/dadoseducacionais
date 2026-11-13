@@ -431,6 +431,48 @@
                 <button type="button" id="tarefa-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
             </div>
         </div>
+        <!-- Card de Importação de Dados - Khan Academy -->
+        <div class="card">
+            <div class="modal-header">
+                <h3>Importar Planilha Mensal - Khan Academy</h3>
+            </div>
+            <div class="form-group">
+                <label for="khan-ano">Ano Letivo Referente à Planilha</label>
+                <select id="khan-ano">
+                    <option value="">Selecione o ano...</option>
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="khan-mes">Mês de Referência</label>
+                <select id="khan-mes">
+                    <option value="">Selecione o mês...</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+                <span class="help-text">Cada planilha corresponde a um mês. Reimportar o mesmo mês substitui os resultados anteriores daquele mês. Colunas esperadas: Escola (NOME - CÓDIGO), Matrículas Ativas, Alunos Ativos, Alunos com Atividades no Período, (%) Alunos Ativos no Período, Tempo Total de Uso em Minutos, Tempo Total de Uso em Min por Aluno, Quantidade de Atividades Realizadas, Quantidade de Atividades Acertadas, (%) Habilidades com Progresso e Índice de Atividades Realizadas por Aluno.</span>
+            </div>
+            <div class="form-group">
+                <label for="khan-file">Planilha Mensal da Khan Academy (.xlsx)</label>
+                <input type="file" id="khan-file" accept=".xlsx,.xls">
+            </div>
+            <div id="khan-preview" class="msg" style="display: none; background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;"></div>
+            <div class="actions">
+                <button type="button" id="khan-ler" class="btn-cancel">1. Ler e Pré-visualizar</button>
+                <button type="button" id="khan-confirmar" class="btn-save" disabled>2. Confirmar Importação</button>
+            </div>
+        </div>
         <div class="card">
             <div class="modal-header">
                 <h3>Importar CSV - Robótica</h3>
@@ -3295,6 +3337,137 @@
             confirmar.disabled = false;
         } finally {
             confirmar.textContent = '2. Confirmar Importação';
+        }
+    });
+
+    // Importador mensal da Khan Academy
+    const khanNormalizar = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    const khanNumero = (valor, tipo) => {
+        if (valor === null || valor === undefined || valor === '') return null;
+        if (typeof valor === 'number') return Number.isFinite(valor) ? (tipo === 'int' ? Math.round(valor) : valor) : null;
+        let txt = String(valor).trim().replace(/%/g, '').replace(/\s/g, '');
+        txt = txt.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+        const n = parseFloat(txt);
+        if (!Number.isFinite(n)) return null;
+        if (tipo === 'int') return Math.round(n);
+        if (tipo === 'pct') return String(valor).includes('%') || n > 1.5 ? n / 100 : n;
+        return n;
+    };
+    let dadosKhanPendentes = [];
+    let contextoKhan = null;
+    const invalidarKhan = () => {
+        dadosKhanPendentes = []; contextoKhan = null;
+        const c = document.getElementById('khan-confirmar'); const p = document.getElementById('khan-preview');
+        if (c) c.disabled = true; if (p) p.style.display = 'none';
+    };
+    ['khan-ano','khan-mes','khan-file'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', invalidarKhan); });
+
+    document.getElementById('khan-ler').addEventListener('click', () => {
+        const ano = parseInt(document.getElementById('khan-ano').value);
+        const mes = parseInt(document.getElementById('khan-mes').value);
+        const file = document.getElementById('khan-file').files[0];
+        const preview = document.getElementById('khan-preview');
+        const confirmar = document.getElementById('khan-confirmar');
+        preview.style.display = 'none'; confirmar.disabled = true; dadosKhanPendentes = []; contextoKhan = null;
+        if (!ano) return alert('Selecione o ano referente a planilha mensal da Khan Academy.');
+        if (!mes) return alert('Selecione o mes referente a planilha mensal da Khan Academy.');
+        if (!file) return alert('Selecione a planilha mensal da Khan Academy (.xlsx).');
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const aba = wb.SheetNames[0];
+                const linhas = XLSX.utils.sheet_to_json(wb.Sheets[aba], { defval: null, raw: true });
+                if (!linhas.length) throw new Error('A planilha esta vazia.');
+                const apelidos = {
+                    escola: 'escola',
+                    matriculas_ativas: 'matriculas_ativas',
+                    alunos_ativos: 'alunos_ativos',
+                    alunos_com_atividades_no_periodo: 'alunos_com_atividades',
+                    percentual_alunos_ativos_no_periodo: 'percentual_alunos_ativos',
+                    alunos_ativos_no_periodo: 'percentual_alunos_ativos',
+                    tempo_total_de_uso_em_minutos: 'tempo_total_minutos',
+                    tempo_total_de_uso_em_min_por_aluno: 'tempo_por_aluno_minutos',
+                    quantidade_de_atividades_realizadas: 'atividades_realizadas',
+                    quantidade_de_atividades_acertadas: 'atividades_acertadas',
+                    habilidades_com_progresso: 'habilidades_com_progresso',
+                    indice_de_atividades_realizadas_por_aluno: 'indice_atividades_por_aluno'
+                };
+                const tipos = {
+                    escola: 'texto', matriculas_ativas: 'int', alunos_ativos: 'int', alunos_com_atividades: 'int',
+                    percentual_alunos_ativos: 'pct', tempo_total_minutos: 'num', tempo_por_aluno_minutos: 'num',
+                    atividades_realizadas: 'int', atividades_acertadas: 'int', habilidades_com_progresso: 'pct', indice_atividades_por_aluno: 'num'
+                };
+                const cabecalhos = Object.keys(linhas[0]);
+                const mapeamento = {};
+                cabecalhos.forEach(cab => {
+                    const n = khanNormalizar(cab);
+                    const chave = apelidos[n] || n;
+                    if (tipos[chave]) mapeamento[cab] = chave;
+                });
+                if (!Object.values(mapeamento).includes('escola')) throw new Error('Nao foi possivel identificar a coluna "Escola" na planilha.');
+                dadosKhanPendentes = linhas.map(linha => {
+                    const item = { ano, mes };
+                    Object.entries(mapeamento).forEach(([cab, campo]) => {
+                        const v = linha[cab];
+                        item[campo] = tipos[campo] === 'texto' ? String(v == null ? '' : v).trim() : khanNumero(v, tipos[campo]);
+                    });
+                    return item;
+                }).filter(x => x.escola && !/^total\b/i.test(x.escola) && !/^filtros aplicados/i.test(x.escola));
+                if (!dadosKhanPendentes.length) throw new Error('Nenhuma escola valida foi encontrada na planilha.');
+                const faltandoEscolaCodigo = [];
+                dadosKhanPendentes.forEach(item => {
+                    let nome = String(item.escola || '').trim();
+                    let codigo = '';
+                    const m = nome.match(/^(.*?)\s*-\s*(\d+)$/);
+                    if (m) { nome = m[1].trim(); codigo = m[2]; }
+                    if (!codigo) {
+                        const achado = typeof buscarCodigoEscola === 'function' ? buscarCodigoEscola(nome) : null;
+                        if (achado) codigo = achado;
+                    }
+                    item.escola = nome;
+                    item.codigo_escola = codigo;
+                    item.fonte_arquivo = file.name;
+                    if (!item.codigo_escola) faltandoEscolaCodigo.push(nome);
+                });
+                if (faltandoEscolaCodigo.length) throw new Error('Nao foi possivel identificar o codigo das escolas: ' + faltandoEscolaCodigo.slice(0,5).join(', ') + '. Use o formato "NOME - CODIGO" na coluna Escola.');
+                const nomes = dadosKhanPendentes.map(x => x.codigo_escola);
+                const duplicadas = [...new Set(nomes.filter((n,i)=>nomes.indexOf(n)!==i))];
+                if (duplicadas.length) throw new Error('Escolas duplicadas na planilha: ' + duplicadas.join(', ') + '.');
+                const mesNome = document.getElementById('khan-mes').selectedOptions[0].textContent;
+                contextoKhan = { ano, mes, mesNome };
+                preview.innerHTML = `<strong>Sucesso:</strong> ${dadosKhanPendentes.length} escolas encontradas na aba "${aba}" para ${mesNome}/${ano}. Ao confirmar, os dados anteriores desse mes serao substituidos.`;
+                preview.className = 'msg'; preview.style.display = 'block'; confirmar.disabled = false;
+            } catch (err) {
+                console.error('Erro na leitura Khan mensal:', err);
+                preview.innerHTML = `<span style="color:red;">Erro ao ler o arquivo: ${err.message}</span>`;
+                preview.className = 'msg error'; preview.style.display = 'block';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('khan-confirmar').addEventListener('click', async () => {
+        const preview = document.getElementById('khan-preview');
+        const confirmar = document.getElementById('khan-confirmar');
+        if (!dadosKhanPendentes.length || !contextoKhan) return;
+        const { ano, mes, mesNome } = contextoKhan;
+        confirmar.disabled = true; confirmar.textContent = 'Importando...';
+        try {
+            const { error: erroDelete } = await supabaseClient.from('resultados_khan').delete().eq('ano', ano).eq('mes', mes);
+            if (erroDelete) throw new Error(`Nao foi possivel substituir os dados anteriores do mes: ${erroDelete.message}`);
+            const { error } = await supabaseClient.from('resultados_khan').insert(dadosKhanPendentes);
+            if (error) throw error;
+            preview.innerHTML = `<span style="color:green;"><strong>Importacao realizada com sucesso!</strong> ${dadosKhanPendentes.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_khan.</span>`;
+            preview.className = 'msg success';
+            document.getElementById('khan-file').value = '';
+            dadosKhanPendentes = []; contextoKhan = null;
+        } catch (err) {
+            console.error('Erro na importacao Khan mensal:', err);
+            preview.innerHTML = `<span style="color:red;">Erro ao gravar no banco: ${err.message}. Verifique se a tabela resultados_khan foi criada (supabase-resultados-khan.sql).</span>`;
+            preview.className = 'msg error'; confirmar.disabled = false;
+        } finally {
+            confirmar.textContent = '2. Confirmar Importacao';
         }
     });
 

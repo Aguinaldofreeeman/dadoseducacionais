@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khan Academy - URE Marilia</title>
+<meta name="description" content="Painel mensal da Khan Academy na Unidade Regional de Ensino de Marilia: uso, atividades, acertos e progresso por escola.">
+<link rel="stylesheet" href="css/home-button.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Public+Sans:wght@400..700&display=swap');
+:root{color-scheme:light;--bg:#f2f6f6;--surface:#ffffff;--surface-2:#f6f9f9;--text:#10262b;--muted:#5b7277;--border:#d2e0e2;--border-strong:#b5c7ca;--heading:#10262b;--teal:#0d5c68;--teal-ink:#0a4a54;--teal-soft:#dceef0;--amber:#c98f2a;--amber-ink:#8a5d13;--amber-soft:#f8eed6;--red:#b85046;--green:#2f8f63;--marker:#dfa03c;--marker-soft:rgba(223,160,60,.38);--on-accent:#fff;--shadow:0 1px 2px rgba(16,38,43,.04),0 18px 40px -24px rgba(16,38,43,.20);--radius:12px;--display:"Fraunces","Georgia",serif;--body:"Public Sans","Segoe UI",system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#091316;--surface:#101d21;--surface-2:#16272c;--text:#e7eff0;--muted:#98aeb3;--border:#243a40;--border-strong:#3a565d;--heading:#e7eff0;--teal:#5cc0cb;--teal-ink:#7fd4dd;--teal-soft:#12333a;--amber:#e5b95f;--amber-ink:#f0cb85;--amber-soft:#3a2f16;--red:#ec7f77;--green:#55c68a;--marker:#efb45f;--marker-soft:rgba(239,180,95,.32);--on-accent:#062a2f;--shadow:0 1px 3px #0008,0 18px 40px -24px #000c}}
+*{box-sizing:border-box}html,body{margin:0}body{font:400 14.5px/1.55 var(--body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+a{color:var(--teal-ink)}button,input,select{font:inherit}::selection{background:var(--marker-soft)}
+.skip{position:absolute;left:12px;top:-60px;background:var(--teal);color:var(--on-accent);padding:8px 12px;border-radius:8px;z-index:10}.skip:focus{top:12px}
+.site-header{background:var(--bg);border-bottom:1px solid var(--border)}
+.header-inner{max-width:1320px;margin:0 auto;padding:30px 30px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.eyebrow{margin:0 0 8px;font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--teal-ink)}
+h1{margin:0;font-family:var(--display);font-size:clamp(2rem,3.6vw,2.8rem);font-weight:600;line-height:1.06;letter-spacing:-.02em;color:var(--heading)}
+.title-mark{padding:0 .04em;background-image:linear-gradient(var(--marker-soft),var(--marker-soft));background-repeat:no-repeat;background-size:100% .3em;background-position:0 90%}
+.header-sub{margin:9px 0 0;max-width:70ch;font-size:13.5px;color:var(--muted)}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.site-header .home-button{background:var(--teal);color:var(--on-accent);font-weight:600;border-radius:8px}
+.site-header .home-button:hover,.site-header .home-button:focus-visible{background:var(--teal-ink);color:var(--on-accent)}
+.btn-ghost{min-height:40px;padding:9px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal-ink)}
+main{max-width:1320px;margin:0 auto;padding:22px 30px 40px}
+.state{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);color:var(--muted)}
+.state.error{border-color:color-mix(in srgb,var(--red) 35%,var(--border));color:var(--text)}
+.filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11.5px;font-weight:600;color:var(--muted)}
+.field select,.field input{min-height:40px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--text)}
+.field select:focus,.field input:focus{border-color:var(--teal);outline:2px solid color-mix(in srgb,var(--teal) 22%,transparent)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.card{padding:15px 17px 14px;border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:10px;background:var(--surface)}
+.card .k{font-size:11.5px;font-weight:600;color:var(--muted)}
+.card .v{margin:5px 0 4px;font-family:var(--display);font-size:27px;font-weight:600;line-height:1.05;letter-spacing:-.015em;color:var(--heading);font-variant-numeric:tabular-nums}
+.card .d{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
+.panel{border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.panel-head h2{margin:0;font-family:var(--display);font-size:20px;font-weight:600;color:var(--heading)}
+.panel-head p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+th{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--surface-2);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1}
+th:first-child{background:var(--surface-2);z-index:2}
+tbody tr:hover td{background:color-mix(in srgb,var(--teal-soft) 35%,transparent)}
+tbody tr:hover td:first-child{background:color-mix(in srgb,var(--teal-soft) 45%,var(--surface))}
+.bad{color:var(--red);font-weight:600}.good{color:var(--green);font-weight:600}
+.mono{font-size:12px;color:var(--muted)}
+.foot{margin-top:16px;font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.header-inner{padding:22px 18px 18px}main{padding:16px 18px 28px}.cards,.filters{grid-template-columns:1fr}table{min-width:860px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Ir para o conteudo</a>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <p class="eyebrow">Unidade Regional de Ensino de Marilia</p>
+      <h1><span class="title-mark">Khan Academy</span></h1>
+      <p class="header-sub" id="subtitulo">Uso, atividades e progresso por escola no periodo selecionado.</p>
+    </div>
+    <div class="header-actions">
+      <a class="home-button" href="index.html">Inicio</a>
+      <button class="btn-ghost" id="btn-sair" type="button">Sair</button>
+    </div>
+  </div>
+</header>
+<main id="conteudo">
+  <div id="estado" class="state">Carregando dados da Khan Academy...</div>
+  <div id="painel" class="hidden">
+    <section class="filters" aria-label="Filtros">
+      <div class="field"><label for="fAno">Ano</label><select id="fAno"></select></div>
+      <div class="field"><label for="fMes">Mes</label><select id="fMes"></select></div>
+      <div class="field"><label for="fBusca">Buscar escola</label><input id="fBusca" type="search" placeholder="Nome ou codigo"></div>
+      <div class="field"><label for="fOrdem">Ordenar por</label>
+        <select id="fOrdem">
+          <option value="indice_desc">Indice de atividades por aluno</option>
+          <option value="ativos_desc">% alunos ativos</option>
+          <option value="habilidades_desc">Habilidades com progresso</option>
+          <option value="realizadas_desc">Atividades realizadas</option>
+          <option value="nome_asc">Nome da escola</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="cards" aria-label="Resumo">
+      <article class="card"><div class="k">Escolas com dados</div><div class="v" id="kEscolas">-</div><p class="d" id="kEscolasD">no periodo</p></article>
+      <article class="card"><div class="k">Alunos ativos no periodo</div><div class="v" id="kAtivos">-</div><p class="d" id="kAtivosD">de matrículas ativas</p></article>
+      <article class="card"><div class="k">Atividades realizadas</div><div class="v" id="kRealizadas">-</div><p class="d" id="kAcertosD">acertadas</p></article>
+      <article class="card"><div class="k">Indice medio por aluno</div><div class="v" id="kIndice">-</div><p class="d">atividades realizadas por aluno</p></article>
+    </section>
+
+    <section class="panel" aria-label="Tabela por escola">
+      <div class="panel-head">
+        <div><h2>Escolas</h2><p id="tInfo">-</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Escola</th><th>Matriculas</th><th>Alunos ativos</th><th>% ativos</th><th>Tempo total (min)</th><th>Tempo/aluno (min)</th><th>Ativ. realizadas</th><th>Ativ. acertadas</th><th>Habilidades c/ progresso</th><th>Indice por aluno</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+    <p class="foot" id="rodape"></p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const TABELA = 'resultados_khan';
+const MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const fmtInt = new Intl.NumberFormat('pt-BR');
+const fmt1 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmt2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const pct = v => v==null||isNaN(v)?'-':fmt1.format(Number(v)*100)+'%';
+const num = v => v==null||isNaN(v)?0:Number(v);
+
+const FALLBACK = {
+  meses: [{ano:2026,mes:2}],
+  rows: [
+    {ano:2026,mes:2,codigo_escola:'33443',escola:'NORMA MONICO TRUZZI PROFA',matriculas_ativas:49,alunos_ativos:49,alunos_com_atividades:33,percentual_alunos_ativos:0.673469387755102,tempo_total_minutos:2723,tempo_por_aluno_minutos:82.51515151515152,atividades_realizadas:722,atividades_acertadas:521,habilidades_com_progresso:0.721606648199446,indice_atividades_por_aluno:3.683673469387755,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33777',escola:'NEUZA MARIA MARANA FEIJAO PROFA',matriculas_ativas:70,alunos_ativos:70,alunos_com_atividades:45,percentual_alunos_ativos:0.6428571428571429,tempo_total_minutos:5492,tempo_por_aluno_minutos:122.04444444444445,atividades_realizadas:769,atividades_acertadas:600,habilidades_com_progresso:0.7802340702210663,indice_atividades_por_aluno:2.7464285714285714,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33637',escola:'RUTH MAMEDE DE GODOY PROFA',matriculas_ativas:47,alunos_ativos:47,alunos_com_atividades:23,percentual_alunos_ativos:0.48936170212765956,tempo_total_minutos:600,tempo_por_aluno_minutos:26.08695652173913,atividades_realizadas:421,atividades_acertadas:390,habilidades_com_progresso:0.9263657957244655,indice_atividades_por_aluno:2.2393617021276597,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33558',escola:'DIRCE BELLUZZO DE CAMPOS PROFA',matriculas_ativas:110,alunos_ativos:109,alunos_com_atividades:63,percentual_alunos_ativos:0.5727272727272728,tempo_total_minutos:3356,tempo_por_aluno_minutos:53.26984126984127,atividades_realizadas:723,atividades_acertadas:435,habilidades_com_progresso:0.6016597510373444,indice_atividades_por_aluno:1.643181818181818,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33790',escola:'VITU GIORGI DONA',matriculas_ativas:64,alunos_ativos:64,alunos_com_atividades:23,percentual_alunos_ativos:0.359375,tempo_total_minutos:1828,tempo_por_aluno_minutos:79.47826086956522,atividades_realizadas:284,atividades_acertadas:174,habilidades_com_progresso:0.6126760563380281,indice_atividades_por_aluno:1.109375,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33650',escola:'JOSE AMBROSIO DOS SANTOS',matriculas_ativas:66,alunos_ativos:66,alunos_com_atividades:16,percentual_alunos_ativos:0.24242424242424243,tempo_total_minutos:511,tempo_por_aluno_minutos:31.9375,atividades_realizadas:288,atividades_acertadas:224,habilidades_com_progresso:0.7777777777777778,indice_atividades_por_aluno:1.0909090909090908,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'47843',escola:'SYLVIA RIBEIRO DE CARVALHO PROFA',matriculas_ativas:80,alunos_ativos:80,alunos_com_atividades:42,percentual_alunos_ativos:0.525,tempo_total_minutos:899,tempo_por_aluno_minutos:21.404761904761905,atividades_realizadas:342,atividades_acertadas:246,habilidades_com_progresso:0.7192982456140351,indice_atividades_por_aluno:1.06875,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33424',escola:'NELY CARBONIERI DE ANDRADE PROFA',matriculas_ativas:69,alunos_ativos:69,alunos_com_atividades:23,percentual_alunos_ativos:0.3333333333333333,tempo_total_minutos:606,tempo_por_aluno_minutos:26.347826086956523,atividades_realizadas:202,atividades_acertadas:161,habilidades_com_progresso:0.7970297029702971,indice_atividades_por_aluno:0.7318840579710145,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'923000',escola:'EDSON VIANEI ALVES PROF',matriculas_ativas:65,alunos_ativos:65,alunos_com_atividades:8,percentual_alunos_ativos:0.12307692307692308,tempo_total_minutos:304,tempo_por_aluno_minutos:38,atividades_realizadas:178,atividades_acertadas:171,habilidades_com_progresso:0.9606741573033708,indice_atividades_por_aluno:0.6846153846153846,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33522',escola:'EDUARDO DE SOUZA PORTO CEL',matriculas_ativas:83,alunos_ativos:83,alunos_com_atividades:48,percentual_alunos_ativos:0.5783132530120482,tempo_total_minutos:890,tempo_por_aluno_minutos:18.541666666666668,atividades_realizadas:211,atividades_acertadas:177,habilidades_com_progresso:0.8388625592417062,indice_atividades_por_aluno:0.6355421686746988,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33510',escola:'RAFAEL PAES DE BARROS DOUTOR',matriculas_ativas:75,alunos_ativos:74,alunos_com_atividades:14,percentual_alunos_ativos:0.18666666666666668,tempo_total_minutos:835,tempo_por_aluno_minutos:59.642857142857146,atividades_realizadas:180,atividades_acertadas:107,habilidades_com_progresso:0.5944444444444444,indice_atividades_por_aluno:0.6,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'474629',escola:'JARDIM ALCIR RAINERI',matriculas_ativas:229,alunos_ativos:228,alunos_com_atividades:78,percentual_alunos_ativos:0.3406113537117904,tempo_total_minutos:2013,tempo_por_aluno_minutos:25.807692307692307,atividades_realizadas:500,atividades_acertadas:283,habilidades_com_progresso:0.566,indice_atividades_por_aluno:0.5458515283842795,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'43254',escola:'JOSE ALFREDO DE ALMEIDA',matriculas_ativas:142,alunos_ativos:140,alunos_com_atividades:40,percentual_alunos_ativos:0.28169014084507044,tempo_total_minutos:2150,tempo_por_aluno_minutos:53.75,atividades_realizadas:301,atividades_acertadas:117,habilidades_com_progresso:0.38870431893687707,indice_atividades_por_aluno:0.5299295774647887,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33376',escola:'JOSE BONIFACIO DO COUTO',matriculas_ativas:55,alunos_ativos:55,alunos_com_atividades:7,percentual_alunos_ativos:0.12727272727272726,tempo_total_minutos:443,tempo_por_aluno_minutos:63.285714285714285,atividades_realizadas:106,atividades_acertadas:75,habilidades_com_progresso:0.7075471698113207,indice_atividades_por_aluno:0.4818181818181818,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33753',escola:'BICUDO MONSENHOR',matriculas_ativas:95,alunos_ativos:95,alunos_com_atividades:19,percentual_alunos_ativos:0.2,tempo_total_minutos:632,tempo_por_aluno_minutos:33.26315789473684,atividades_realizadas:141,atividades_acertadas:124,habilidades_com_progresso:0.8794326241134752,indice_atividades_por_aluno:0.37105263157894736,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'44568',escola:'SEBASTIAO MONACO VEREADOR',matriculas_ativas:423,alunos_ativos:421,alunos_com_atividades:64,percentual_alunos_ativos:0.15130023640661938,tempo_total_minutos:2032,tempo_por_aluno_minutos:31.75,atividades_realizadas:583,atividades_acertadas:449,habilidades_com_progresso:0.7701543739279588,indice_atividades_por_aluno:0.34456264775413714,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33492',escola:'HILMAR MACHADO DE OLIVEIRA',matriculas_ativas:114,alunos_ativos:112,alunos_com_atividades:30,percentual_alunos_ativos:0.2631578947368421,tempo_total_minutos:1127,tempo_por_aluno_minutos:37.56666666666667,atividades_realizadas:152,atividades_acertadas:88,habilidades_com_progresso:0.5789473684210527,indice_atividades_por_aluno:0.3333333333333333,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33455',escola:'IZIDORO DAUN',matriculas_ativas:73,alunos_ativos:73,alunos_com_atividades:5,percentual_alunos_ativos:0.0684931506849315,tempo_total_minutos:170,tempo_por_aluno_minutos:34,atividades_realizadas:78,atividades_acertadas:48,habilidades_com_progresso:0.6153846153846154,indice_atividades_por_aluno:0.2671232876712329,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33625',escola:'CULTURA E LIBERDADE',matriculas_ativas:348,alunos_ativos:348,alunos_com_atividades:21,percentual_alunos_ativos:0.0603448275862069,tempo_total_minutos:973,tempo_por_aluno_minutos:46.333333333333336,atividades_realizadas:278,atividades_acertadas:197,habilidades_com_progresso:0.7086330935251799,indice_atividades_por_aluno:0.1997126436781609,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33728',escola:'AMILCARE MATTEI PROF',matriculas_ativas:198,alunos_ativos:191,alunos_com_atividades:35,percentual_alunos_ativos:0.17676767676767677,tempo_total_minutos:889,tempo_por_aluno_minutos:25.4,atividades_realizadas:140,atividades_acertadas:59,habilidades_com_progresso:0.42142857142857143,indice_atividades_por_aluno:0.17676767676767677,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33856',escola:'BALTAZAR DE GODOY MOREIRA PROF',matriculas_ativas:359,alunos_ativos:359,alunos_com_atividades:10,percentual_alunos_ativos:0.027855153203342618,tempo_total_minutos:452,tempo_por_aluno_minutos:45.2,atividades_realizadas:234,atividades_acertadas:170,habilidades_com_progresso:0.7264957264957265,indice_atividades_por_aluno:0.16295264623955433,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33406',escola:'ALCYR DA ROSA LIMA PROF',matriculas_ativas:195,alunos_ativos:194,alunos_com_atividades:23,percentual_alunos_ativos:0.11794871794871795,tempo_total_minutos:538,tempo_por_aluno_minutos:23.391304347826086,atividades_realizadas:127,atividades_acertadas:73,habilidades_com_progresso:0.5748031496062992,indice_atividades_por_aluno:0.16282051282051282,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33561',escola:'ANTONIO DE BAPTISTA PROF',matriculas_ativas:152,alunos_ativos:151,alunos_com_atividades:24,percentual_alunos_ativos:0.15789473684210525,tempo_total_minutos:1207,tempo_por_aluno_minutos:50.291666666666664,atividades_realizadas:86,atividades_acertadas:63,habilidades_com_progresso:0.7325581395348837,indice_atividades_por_aluno:0.14144736842105263,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'43242',escola:'ANTONIO REGINATO PROF',matriculas_ativas:441,alunos_ativos:441,alunos_com_atividades:37,percentual_alunos_ativos:0.08390022675736962,tempo_total_minutos:1304,tempo_por_aluno_minutos:35.24324324324324,atividades_realizadas:218,atividades_acertadas:151,habilidades_com_progresso:0.6926605504587156,indice_atividades_por_aluno:0.1235827664399093,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'47703',escola:'MAURICIO MILANI',matriculas_ativas:102,alunos_ativos:101,alunos_com_atividades:18,percentual_alunos_ativos:0.17647058823529413,tempo_total_minutos:569,tempo_por_aluno_minutos:31.61111111111111,atividades_realizadas:46,atividades_acertadas:26,habilidades_com_progresso:0.5652173913043478,indice_atividades_por_aluno:0.11274509803921569,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33534',escola:'GRACIEMA BAGANHA RIBEIRO',matriculas_ativas:83,alunos_ativos:83,alunos_com_atividades:2,percentual_alunos_ativos:0.024096385542168676,tempo_total_minutos:12,tempo_por_aluno_minutos:6,atividades_realizadas:37,atividades_acertadas:37,habilidades_com_progresso:1,indice_atividades_por_aluno:0.11144578313253012,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'26414',escola:'JOSE CARLOS MONTEIRO',matriculas_ativas:77,alunos_ativos:77,alunos_com_atividades:2,percentual_alunos_ativos:0.025974025974025976,tempo_total_minutos:82,tempo_por_aluno_minutos:41,atividades_realizadas:19,atividades_acertadas:5,habilidades_com_progresso:0.2631578947368421,indice_atividades_por_aluno:0.06168831168831169,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'47855',escola:'MARIA CECILIA FERRAZ DE FREITAS PROFA',matriculas_ativas:225,alunos_ativos:225,alunos_com_atividades:7,percentual_alunos_ativos:0.03111111111111111,tempo_total_minutos:202,tempo_por_aluno_minutos:28.857142857142858,atividades_realizadas:46,atividades_acertadas:22,habilidades_com_progresso:0.4782608695652174,indice_atividades_por_aluno:0.051111111111111114,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33388',escola:'LYDIA YVONE GOMES MARQUES PROFA',matriculas_ativas:70,alunos_ativos:70,alunos_com_atividades:1,percentual_alunos_ativos:0.014285714285714285,tempo_total_minutos:35,tempo_por_aluno_minutos:35,atividades_realizadas:9,atividades_acertadas:4,habilidades_com_progresso:0.4444444444444444,indice_atividades_por_aluno:0.03214285714285714,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'903693',escola:'BENITO MARTINELLI PROF',matriculas_ativas:172,alunos_ativos:172,alunos_com_atividades:4,percentual_alunos_ativos:0.023255813953488372,tempo_total_minutos:78,tempo_por_aluno_minutos:19.5,atividades_realizadas:20,atividades_acertadas:17,habilidades_com_progresso:0.85,indice_atividades_por_aluno:0.029069767441860465,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33819',escola:'MARIA IZABEL SAMPAIO VIDAL',matriculas_ativas:272,alunos_ativos:270,alunos_com_atividades:2,percentual_alunos_ativos:0.007352941176470588,tempo_total_minutos:99,tempo_por_aluno_minutos:49.5,atividades_realizadas:29,atividades_acertadas:16,habilidades_com_progresso:0.5517241379310345,indice_atividades_por_aluno:0.02665441176470588,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'43655',escola:'ORACINA CORREA DE MORAES RODINE PROFA',matriculas_ativas:123,alunos_ativos:122,alunos_com_atividades:1,percentual_alunos_ativos:0.008130081300813009,tempo_total_minutos:20,tempo_por_aluno_minutos:20,atividades_realizadas:13,atividades_acertadas:13,habilidades_com_progresso:1,indice_atividades_por_aluno:0.026422764227642278,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33698',escola:'NELSON CABRINI PROF',matriculas_ativas:81,alunos_ativos:79,alunos_com_atividades:2,percentual_alunos_ativos:0.024691358024691357,tempo_total_minutos:15,tempo_por_aluno_minutos:7.5,atividades_realizadas:8,atividades_acertadas:5,habilidades_com_progresso:0.625,indice_atividades_por_aluno:0.024691358024691357,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33832',escola:'ANTONIO AUGUSTO NETTO',matriculas_ativas:435,alunos_ativos:430,alunos_com_atividades:5,percentual_alunos_ativos:0.011494252873563218,tempo_total_minutos:110,tempo_por_aluno_minutos:22,atividades_realizadas:27,atividades_acertadas:14,habilidades_com_progresso:0.5185185185185185,indice_atividades_por_aluno:0.015517241379310345,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'907662',escola:'REIKO UEMURA TSUNOKAWA PROFA',matriculas_ativas:157,alunos_ativos:157,alunos_com_atividades:1,percentual_alunos_ativos:0.006369426751592357,tempo_total_minutos:37,tempo_por_aluno_minutos:37,atividades_realizadas:9,atividades_acertadas:7,habilidades_com_progresso:0.7777777777777778,indice_atividades_por_aluno:0.014331210191082803,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'914198',escola:'AMELIA LOPES ANDERS PROFA',matriculas_ativas:289,alunos_ativos:287,alunos_com_atividades:2,percentual_alunos_ativos:0.006920415224913495,tempo_total_minutos:146,tempo_por_aluno_minutos:73,atividades_realizadas:12,atividades_acertadas:2,habilidades_com_progresso:0.16666666666666666,indice_atividades_por_aluno:0.010380622837370242,fonte_arquivo:'fevereiro.xlsx'},
+    {ano:2026,mes:2,codigo_escola:'33479',escola:'ERMELINDA CLARICE SANCHES PROFA',matriculas_ativas:148,alunos_ativos:148,alunos_com_atividades:1,percentual_alunos_ativos:0.006756756756756757,tempo_total_minutos:10,tempo_por_aluno_minutos:10,atividades_realizadas:4,atividades_acertadas:4,habilidades_com_progresso:1,indice_atividades_por_aluno:0.006756756756756757,fonte_arquivo:'fevereiro.xlsx'}
+  ]
+};
+
+let MESES_DISP = [];
+let CACHE = new Map();
+const state = { ano:null, mes:null, busca:'', ordem:'indice_desc' };
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function carregarMeses(){
+  try{
+    if(typeof supabaseClient==='undefined') throw new Error('no client');
+    const {data,error} = await supabaseClient.from(TABELA).select('ano,mes').order('ano',{ascending:false}).order('mes',{ascending:false});
+    if(error) throw error;
+    const seen = new Set();
+    const meses = [];
+    (data||[]).forEach(r=>{const k=`${r.ano}-${r.mes}`; if(!seen.has(k)){seen.add(k); meses.push({ano:r.ano,mes:r.mes});}});
+    if(meses.length) return meses;
+  }catch(e){console.warn('Khan: usando fallback de meses',e);}
+  return FALLBACK.meses.slice();
+}
+
+async function carregarDados(ano,mes){
+  const key=`${ano}-${mes}`;
+  if(CACHE.has(key)) return CACHE.get(key);
+  try{
+    if(typeof supabaseClient==='undefined') throw new Error('no client');
+    const {data,error} = await supabaseClient.from(TABELA).select('*').eq('ano',ano).eq('mes',mes).order('indice_atividades_por_aluno',{ascending:false});
+    if(error) throw error;
+    if(data && data.length){ CACHE.set(key,data); return data; }
+  }catch(e){console.warn('Khan: usando fallback de dados',e);}
+  const fb = FALLBACK.rows.filter(r=>r.ano==ano && r.mes==mes);
+  CACHE.set(key,fb);
+  return fb;
+}
+
+function preencherFiltros(){
+  const anos = [...new Set(MESES_DISP.map(m=>m.ano))].sort((a,b)=>b-a);
+  const fAno=document.getElementById('fAno');
+  fAno.innerHTML = anos.map(a=>`<option value="${a}">${a}</option>`).join('');
+  state.ano = anos[0] || 2026;
+  fAno.value = String(state.ano);
+  atualizarMeses();
+}
+
+function atualizarMeses(){
+  const fMes=document.getElementById('fMes');
+  const meses = MESES_DISP.filter(m=>m.ano==state.ano).sort((a,b)=>b.mes-a.mes);
+  fMes.innerHTML = meses.map(m=>`<option value="${m.mes}">${MESES[m.mes-1]||m.mes}</option>`).join('');
+  state.mes = meses[0]?.mes || 2;
+  fMes.value = String(state.mes);
+}
+
+function ordenar(lista){
+  const o = state.ordem;
+  const arr = lista.slice();
+  const by = (k,dir=-1)=>(a,b)=>(num(a[k])-num(b[k]))*dir || String(a.escola).localeCompare(String(b.escola),'pt-BR');
+  if(o==='indice_desc') arr.sort(by('indice_atividades_por_aluno'));
+  else if(o==='ativos_desc') arr.sort(by('percentual_alunos_ativos'));
+  else if(o==='habilidades_desc') arr.sort(by('habilidades_com_progresso'));
+  else if(o==='realizadas_desc') arr.sort(by('atividades_realizadas'));
+  else arr.sort((a,b)=>String(a.escola).localeCompare(String(b.escola),'pt-BR'));
+  return arr;
+}
+
+function render(rows){
+  const q = norm(state.busca);
+  const filtrados = rows.filter(r=>!q || norm(r.escola).includes(q) || String(r.codigo_escola||'').includes(q));
+  const lista = ordenar(filtrados);
+  const totalMat = rows.reduce((s,r)=>s+num(r.matriculas_ativas),0);
+  const totalAt = rows.reduce((s,r)=>s+num(r.alunos_com_atividades),0);
+  const totalReal = rows.reduce((s,r)=>s+num(r.atividades_realizadas),0);
+  const totalAc = rows.reduce((s,r)=>s+num(r.atividades_acertadas),0);
+  const medIndice = rows.length ? rows.reduce((s,r)=>s+num(r.indice_atividades_por_aluno),0)/rows.length : 0;
+  document.getElementById('kEscolas').textContent = fmtInt.format(rows.length);
+  document.getElementById('kEscolasD').textContent = `${fmtInt.format(lista.length)} exibidas`;
+  document.getElementById('kAtivos').textContent = fmtInt.format(totalAt);
+  document.getElementById('kAtivosD').textContent = totalMat ? `${pct(totalAt/totalMat)} das ${fmtInt.format(totalMat)} matriculas` : '-';
+  document.getElementById('kRealizadas').textContent = fmtInt.format(totalReal);
+  document.getElementById('kAcertosD').textContent = `${fmtInt.format(totalAc)} acertadas (${totalReal?fmt1.format(totalAc/totalReal*100):'0'}%)`;
+  document.getElementById('kIndice').textContent = fmt2.format(medIndice);
+  const mesNome = MESES[(state.mes||1)-1] || state.mes;
+  document.getElementById('subtitulo').textContent = `Uso, atividades e progresso por escola em ${mesNome} de ${state.ano}.`;
+  document.getElementById('tInfo').textContent = `${lista.length} escolas no recorte de ${mesNome} de ${state.ano}.`;
+  const tbody = document.getElementById('tbody');
+  if(!lista.length){ tbody.innerHTML = '<tr><td colspan="10" style="text-align:left;color:var(--muted);padding:18px">Nenhuma escola encontrada para os filtros.</td></tr>'; }
+  else {
+    tbody.innerHTML = lista.map(r=>`<tr>
+      <td><strong>${esc(r.escola)}</strong><div class="mono">${esc(r.codigo_escola||'')}</div></td>
+      <td>${fmtInt.format(num(r.matriculas_ativas))}</td>
+      <td>${fmtInt.format(num(r.alunos_com_atividades))}</td>
+      <td>${pct(r.percentual_alunos_ativos)}</td>
+      <td>${fmtInt.format(Math.round(num(r.tempo_total_minutos)))}</td>
+      <td>${fmt1.format(num(r.tempo_por_aluno_minutos))}</td>
+      <td>${fmtInt.format(num(r.atividades_realizadas))}</td>
+      <td>${fmtInt.format(num(r.atividades_acertadas))}</td>
+      <td>${pct(r.habilidades_com_progresso)}</td>
+      <td><strong>${fmt2.format(num(r.indice_atividades_por_aluno))}</strong></td>
+    </tr>`).join('');
+  }
+  const fonte = rows[0]?.fonte_arquivo ? ` Fonte: ${rows[0].fonte_arquivo}.` : '';
+  document.getElementById('rodape').textContent = `Dados agregados por escola.${fonte} Periodo: ${mesNome}/${state.ano}.`;
+}
+
+async function atualizar(){
+  const rows = await carregarDados(state.ano,state.mes);
+  render(rows);
+}
+
+function mostrarErro(msg){
+  const el=document.getElementById('estado');
+  el.className='state error';
+  el.textContent=msg;
+}
+
+async function iniciar(){
+  try{
+    if(typeof supabaseClient!=='undefined'){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href='index.html'; return; }
+    }
+  }catch(e){ /* permite fallback local se supabase indisponivel */ }
+  try{
+    MESES_DISP = await carregarMeses();
+    if(!MESES_DISP.length) throw new Error('Sem dados disponiveis.');
+    preencherFiltros();
+    document.getElementById('estado').classList.add('hidden');
+    document.getElementById('painel').classList.remove('hidden');
+    await atualizar();
+  }catch(e){
+    console.error(e);
+    mostrarErro('Nao foi possivel carregar os dados da Khan Academy. Verifique a conexao e tente novamente.');
+  }
+}
+
+document.getElementById('fAno').addEventListener('change', async e=>{ state.ano=Number(e.target.value); atualizarMeses(); await atualizar(); });
+document.getElementById('fMes').addEventListener('change', async e=>{ state.mes=Number(e.target.value); await atualizar(); });
+document.getElementById('fBusca').addEventListener('input', async e=>{ state.busca=e.target.value||''; await atualizar(); });
+document.getElementById('fOrdem').addEventListener('change', async e=>{ state.ordem=e.target.value; await atualizar(); });
+document.getElementById('btn-sair').addEventListener('click', async ()=>{ try{ await supabaseClient.auth.signOut(); }catch(_){} window.location.href='index.html'; });
+
+iniciar();
+</script>
+</body>
+</html>
