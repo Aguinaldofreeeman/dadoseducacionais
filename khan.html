@@ -165,12 +165,12 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
 <body>
 <div class="math" id="math"></div>
 <nav>
-  <a class="brand" href="index.html"><div class="mark">âˆ‘</div><div><b>Khan Academy - painel mensal</b><span>URE Marília</span></div></a>
+  <a class="brand" href="index.html"><div class="mark">∑</div><div><b>Khan Academy - painel mensal</b><span>URE Marília</span></div></a>
   <div class="nav-act">
     <button class="ibtn" id="btnRefresh" title="Recarregar do Supabase"><i class="fas fa-rotate"></i></button>
     <button class="ibtn" id="btnTheme" title="Tema"><i class="fas fa-sun"></i></button>
     <button class="tbtn solid" id="btnCsv"><i class="fas fa-download"></i><span>CSV</span></button>
-    <a class="tbtn" href="index.html"><i class="fas fa-house"></i><span>InÃ­cio</span></a>
+    <a class="tbtn" href="index.html"><i class="fas fa-house"></i><span>Início</span></a>
   </div>
 </nav>
 <main>
@@ -182,13 +182,13 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
   </div>
 
   <section class="panel period reveal">
-    <div class="ph"><i class="fas fa-calendar-days"></i><h2>PerÃ­odo letivo <span id="anoT">2026</span></h2><span class="hint">meses sem dados ficam desativados</span></div>
-    <p class="psub">Clique num mÃªs para visualizÃ¡-lo. Use o seletor ao lado para comparar com outro mÃªs importado.</p>
+    <div class="ph"><i class="fas fa-calendar-days"></i><h2>Período letivo <span id="anoT">2026</span></h2><span class="hint">meses sem dados ficam desativados</span></div>
+    <p class="psub">Clique num mês para visualizá-lo. Use o seletor ao lado para comparar com outro mês importado.</p>
     <div class="chips" id="mb"></div>
     <div class="mrow">
       <div class="info" id="mi"></div>
-      <select id="cmpSel" title="MÃªs de comparaÃ§Ã£o"></select>
-      <button class="tbtn" id="blast"><i class="fas fa-forward"></i> Ãšltimo mÃªs</button>
+      <select id="cmpSel" title="Mês de comparação"></select>
+      <button class="tbtn" id="blast"><i class="fas fa-forward"></i> Último mês</button>
     </div>
   </section>
 
@@ -197,57 +197,57 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
   <section class="g2">
     <article class="panel reveal">
       <div class="ph"><i class="fas fa-filter"></i><h2>Funil de engajamento</h2></div>
-      <p class="psub">Pessoas (matrÃ­culas â†’ ativos â†’ com atividade) e atividades (realizadas â†’ acertadas).</p>
+      <p class="psub">Pessoas (matrículas â†’ ativos â†’ com atividade) e atividades (realizadas â†’ acertadas).</p>
       <div id="fn"></div>
       <div class="meta-box">
-        <label>Meta de alunos ativos no perÃ­odo <b id="metaVal">25%</b></label>
+        <label>Meta de alunos ativos no período <b id="metaVal">25%</b></label>
         <input type="range" id="metaRange" min="5" max="60" step="1" value="25">
         <div class="meta-info" id="metaInfo"></div>
       </div>
     </article>
     <article class="panel reveal">
       <div class="ph"><i class="fas fa-satellite-dish"></i><h2>Radar da rede</h2><span class="hint">clique para agir</span></div>
-      <p class="psub">Leituras automÃ¡ticas dos dados do mÃªs selecionado.</p>
+      <p class="psub">Leituras automáticas dos dados do mês selecionado.</p>
       <div class="radar" id="radar"></div>
     </article>
   </section>
 
   <section class="g2 wide">
     <article class="panel reveal">
-      <div class="ph"><i class="fas fa-ranking-star"></i><h2 id="rankTitle">Ranking</h2><span class="hint">marca = mÃ©dia regional</span></div>
+      <div class="ph"><i class="fas fa-ranking-star"></i><h2 id="rankTitle">Ranking</h2><span class="hint">marca = média regional</span></div>
       <div class="rank-ctl">
         <select id="metric">
-          <option value="idx">Ãndice semanal (atividades/aluno)</option>
+          <option value="idx">Índice semanal (atividades/aluno)</option>
           <option value="pct">% de alunos ativos</option>
           <option value="acc">Taxa de acerto</option>
           <option value="tpa">Tempo por aluno ativo (min)</option>
           <option value="real">Atividades realizadas</option>
-          <option value="per">Alunos ativos no perÃ­odo</option>
+          <option value="per">Alunos ativos no período</option>
         </select>
         <select id="vis"><option value="top">Top 10</option><option value="bot">Bottom 10</option><option value="all">Todas</option></select>
       </div>
       <div class="rank" id="rank"></div>
     </article>
     <article class="panel reveal">
-      <div class="ph"><i class="fas fa-braille"></i><h2>Quadrantes Â· engajamento Ã— acerto</h2></div>
-      <p class="psub">Bolhas = escolas (tamanho = matrÃ­culas). Linhas = mÃ©dias regionais. Clique numa bolha.</p>
+      <div class="ph"><i class="fas fa-braille"></i><h2>Quadrantes · engajamento × acerto</h2></div>
+      <p class="psub">Bolhas = escolas (tamanho = matrículas). Linhas = médias regionais. Clique numa bolha.</p>
       <div class="chart-wrap"><canvas id="scChart"></canvas></div>
-      <div class="fallback" id="scFb" hidden>Chart.js indisponÃ­vel.</div>
+      <div class="fallback" id="scFb" hidden>Chart.js indisponível.</div>
       <div class="leg">
-        <span><span class="sw" style="background:#2dd4bf"></span>ReferÃªncia</span>
-        <span><span class="sw" style="background:#60a5fa"></span>PrecisÃ£o sem alcance</span>
+        <span><span class="sw" style="background:#2dd4bf"></span>Referência</span>
+        <span><span class="sw" style="background:#60a5fa"></span>Precisão sem alcance</span>
         <span><span class="sw" style="background:#fbbf24"></span>Alcance com apoio</span>
-        <span><span class="sw" style="background:#fb7185"></span>AtenÃ§Ã£o</span>
+        <span><span class="sw" style="background:#fb7185"></span>Atenção</span>
       </div>
     </article>
   </section>
 
   <section class="g2 wide">
     <article class="panel reveal">
-      <div class="ph"><i class="fas fa-chart-line"></i><h2>EvoluÃ§Ã£o mensal</h2><span class="hint" id="evoHint"></span></div>
-      <p class="psub">% de alunos ativos e Ã­ndice semanal ao longo dos meses importados. Clique num ponto para abrir o mÃªs.</p>
+      <div class="ph"><i class="fas fa-chart-line"></i><h2>Evolução mensal</h2><span class="hint" id="evoHint"></span></div>
+      <p class="psub">% de alunos ativos e ííndice semanal ao longo dos meses importados. Clique num ponto para abrir o mês.</p>
       <div class="chart-wrap sm"><canvas id="evoChart"></canvas></div>
-      <div class="fallback" id="evoFb" hidden>Chart.js indisponÃ­vel.</div>
+      <div class="fallback" id="evoFb" hidden>Chart.js indisponível.</div>
     </article>
     <article class="panel reveal">
       <div class="ph"><i class="fas fa-chart-column"></i><h2>Faixas de engajamento</h2></div>
@@ -258,17 +258,17 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
   </section>
 
   <article class="panel reveal" id="hmPanel" hidden style="margin-bottom:18px">
-    <div class="ph"><i class="fas fa-table-cells"></i><h2>Mapa de calor Â· escola Ã— mÃªs</h2><span class="hint" id="hmHint"></span></div>
-    <p class="psub">Quanto mais forte a cor, maior o valor da mÃ©trica do ranking. Clique no mÃªs ou na escola.</p>
+    <div class="ph"><i class="fas fa-table-cells"></i><h2>Mapa de calor · escola × mês</h2><span class="hint" id="hmHint"></span></div>
+    <p class="psub">Quanto mais forte a cor, maior o valor da métrica do ranking. Clique no mês ou na escola.</p>
     <div class="tw"><table class="hm" id="hm"></table></div>
   </article>
 
   <article class="panel reveal">
     <div class="ph"><i class="fas fa-table-list"></i><h2>Todas as escolas</h2><span class="hint" id="tbCount"></span></div>
     <div class="tools">
-      <div class="search"><i class="fas fa-magnifying-glass"></i><input type="search" id="q" placeholder="Buscar escola ou cÃ³digoâ€¦"></div>
+      <div class="search"><i class="fas fa-magnifying-glass"></i><input type="search" id="q" placeholder="Buscar escola ou código⬦"></div>
       <select id="selE"><option value="">Todas as escolas</option></select>
-      <select id="tier"><option value="">Todas as faixas</option><option value="up">Ãndice â‰¥ mÃ©dia regional</option><option value="dn">Ãndice &lt; mÃ©dia regional</option></select>
+      <select id="tier"><option value="">Todas as faixas</option><option value="up">Índice ≥ média regional</option><option value="dn">Índice &lt; média regional</option></select>
       <span class="bandchip" id="bandChip" hidden><i class="fas fa-filter"></i><span id="bandChipTxt"></span><button id="bandClear"><i class="fas fa-xmark"></i></button></span>
       <button class="tbtn" id="reset"><i class="fas fa-eraser"></i> Limpar</button>
     </div>
@@ -277,7 +277,7 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
 
   <footer>
     <span id="fonte">Fonte: Escola Total. Atualizada em 13/11/26</span>
-    <span><i class="fas fa-shield-halved"></i>Dados agregados por escola Â· sem dados pessoais de alunos (LGPD).</span>
+    <span><i class="fas fa-shield-halved"></i>Dados agregados por escola · sem dados pessoais de alunos (LGPD).</span>
   </footer>
 </main>
 
@@ -300,7 +300,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const sn=s=>String(s).replace(/\s*-\s*\d+$/,'');
 const codOf=s=>{const m=String(s).match(/(\d+)\s*$/);return m?m[1]:''};
 const gv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const MN=['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MS=MN.map(m=>m.slice(0,3));
 const SEMDEF={1:3,2:4,3:5,4:4,5:5,6:4,7:4,8:5,9:4,10:5,11:4,12:2};
 
@@ -327,7 +327,7 @@ let cur=2,cmp=null,meta=25,metric='idx',vis='top',q='',selE='',tier='',band=null
 let ES=[],R=null,PV=new Map(),RC=null;
 const charts={sc:null,evo:null};
 const has=m=>!!DB.meses[m],L=m=>DB.meses[m].escolas,avail=()=>Object.keys(DB.meses).map(Number).sort((a,b)=>a-b);
-const MET={idx:{lb:'Ãndice semanal',fmt:dec,ref:()=>R.idx},pct:{lb:'% de alunos ativos',fmt:pct,ref:()=>R.pct},acc:{lb:'Taxa de acerto',fmt:pct,ref:()=>R.acc},tpa:{lb:'Tempo por aluno ativo',fmt:v=>F(v,1)+' min',ref:()=>R.tpa},real:{lb:'Atividades realizadas',fmt:nf,ref:()=>R.real/R.n},per:{lb:'Alunos ativos no perÃ­odo',fmt:nf,ref:()=>R.per/R.n}};
+const MET={idx:{lb:'Índice semanal',fmt:dec,ref:()=>R.idx},pct:{lb:'% de alunos ativos',fmt:pct,ref:()=>R.pct},acc:{lb:'Taxa de acerto',fmt:pct,ref:()=>R.acc},tpa:{lb:'Tempo por aluno ativo',fmt:v=>F(v,1)+' min',ref:()=>R.tpa},real:{lb:'Atividades realizadas',fmt:nf,ref:()=>R.real/R.n},per:{lb:'Alunos ativos no período',fmt:nf,ref:()=>R.per/R.n}};
 function agg(l,sem){const s=k=>l.reduce((a,x)=>a+(x[k]||0),0);const mat=s('mat'),per=s('per'),real=s('real'),acer=s('acer'),tmin=s('tmin');
 return{n:l.length,mat,alu:s('alu'),per,real,acer,tmin,ini:s('ini'),pct:mat?per/mat:0,acc:real?acer/real:0,idx:mat?real/(mat*sem):0,tpa:per?tmin/per:0}}
 function prep(){ES=L(cur);const sem=DB.meses[cur].semanas;R=agg(ES,sem);PV=new Map();RC=null;
@@ -339,48 +339,48 @@ function dm(v,p,t){if(cmp==null||p==null)return'';const d=v-p;if(Math.abs(d)<1e-
 function theme(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('theme',t)}catch(e){}$('#btnTheme').innerHTML=t==='dark'?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';themeCharts()}
 $('#btnTheme').onclick=()=>theme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
 theme(localStorage.getItem('theme')||'dark');
-(function(){const sy=['Ï€','âˆ‘','âˆš','Ã·','Ã—','%','âˆž','Î”','Î¸','+','=','Â½'];let h='';for(let i=0;i<16;i++){const s=sy[i%sy.length];h+='<span style="left:'+(Math.random()*96)+'%;top:'+(Math.random()*96)+'%;font-size:'+(22+Math.random()*46)+'px;animation-duration:'+(14+Math.random()*18)+'s;animation-delay:-'+(Math.random()*20)+'s">'+s+'</span>'}$('#math').innerHTML=h})();
+(function(){const sy=['π','∑','√','÷','×','%','∞','Δ','θ','+','=','½'];let h='';for(let i=0;i<16;i++){const s=sy[i%sy.length];h+='<span style="left:'+(Math.random()*96)+'%;top:'+(Math.random()*96)+'%;font-size:'+(22+Math.random()*46)+'px;animation-duration:'+(14+Math.random()*18)+'s;animation-delay:-'+(Math.random()*20)+'s">'+s+'</span>'}$('#math').innerHTML=h})();
 function toast(m,t){const e=document.createElement('div');e.className='toast'+(t==='warn'?' warn':'');e.innerHTML='<i class="fas '+(t==='warn'?'fa-triangle-exclamation':'fa-circle-check')+'"></i><span>'+esc(m)+'</span>';$('#toasts').appendChild(e);requestAnimationFrame(()=>e.classList.add('show'));setTimeout(()=>{e.classList.remove('show');setTimeout(()=>e.remove(),450)},3800)}
 
 /* ===== RENDER ===== */
 function renderHero(){$('#heroTitle').innerHTML=MN[cur-1]+' <em>'+DB.ano+'</em>';$('#anoT').textContent=DB.ano;
-const sem=DB.meses[cur].semanas;$('#heroMeta').innerHTML='<span class="mchip"><i class="fas fa-school"></i>'+R.n+' escolas</span><span class="mchip"><i class="fas fa-calendar-week"></i>'+sem+' semanas</span><span class="mchip"><i class="fas fa-users"></i>'+nf(R.mat)+' matrÃ­culas</span><span class="mchip"><i class="fas fa-location-dot"></i>Diretoria MarÃ­lia</span>'}
+const sem=DB.meses[cur].semanas;$('#heroMeta').innerHTML='<span class="mchip"><i class="fas fa-school"></i>'+R.n+' escolas</span><span class="mchip"><i class="fas fa-calendar-week"></i>'+sem+' semanas</span><span class="mchip"><i class="fas fa-users"></i>'+nf(R.mat)+' matrículas</span><span class="mchip"><i class="fas fa-location-dot"></i>Diretoria Marília</span>'}
 function renderMonths(){const ms=avail();$('#mb').innerHTML=MN.map((n,i)=>{const m=i+1,h=has(m);const cl=m===cur?' cur':m===cmp?' cmp':'';const tag=m===cur?'<i>atual</i>':m===cmp?'<i>base</i>':'';return'<button class="mchipbtn'+cl+'" data-m="'+m+'" '+(h?'':'disabled')+'>'+tag+n+'<small>'+(h?(DB.meses[m].semanas+' sem.'):'sem dados')+'</small></button>'}).join('');
-$('#mi').innerHTML=cmp!=null?'Comparando <b>'+MN[cmp-1]+'</b> â†’ <b>'+MN[cur-1]+'</b> de '+DB.ano+'.':'Mostrando <b>'+MN[cur-1]+' de '+DB.ano+'</b> Â· '+DB.meses[cur].semanas+' semanas.';
-const opts=['<option value="">Sem comparaÃ§Ã£o</option>'].concat(ms.filter(m=>m!==cur).map(m=>'<option value="'+m+'"'+(m===cmp?' selected':'')+'>Comparar com '+MN[m-1]+'</option>'));$('#cmpSel').innerHTML=opts.join('');$('#cmpSel').disabled=ms.length<2}
+$('#mi').innerHTML=cmp!=null?'Comparando <b>'+MN[cmp-1]+'</b> â†’ <b>'+MN[cur-1]+'</b> de '+DB.ano+'.':'Mostrando <b>'+MN[cur-1]+' de '+DB.ano+'</b> · '+DB.meses[cur].semanas+' semanas.';
+const opts=['<option value="">Sem comparação</option>'].concat(ms.filter(m=>m!==cur).map(m=>'<option value="'+m+'"'+(m===cmp?' selected':'')+'>Comparar com '+MN[m-1]+'</option>'));$('#cmpSel').innerHTML=opts.join('');$('#cmpSel').disabled=ms.length<2}
 function renderKPIs(){const c=RC;const cards=[
-{ic:'fa-users',kc:'var(--blue)',lb:'MatrÃ­culas',vl:nf(R.mat),sb:'alunos matriculados',dl:dm(R.mat,c&&c.mat,'rel')},
-{ic:'fa-user-check',kc:'var(--brand2)',lb:'Ativos no perÃ­odo',vl:nf(R.per),sb:pct(R.pct)+' das matrÃ­culas',dl:dm(R.pct,c&&c.pct,'pp')},
-{ic:'fa-list-check',kc:'var(--violet)',lb:'Realizadas',vl:nf(R.real),sb:F(R.real/R.mat,2)+' por matrÃ­cula',dl:dm(R.real,c&&c.real,'rel')},
+{ic:'fa-users',kc:'var(--blue)',lb:'Matrículas',vl:nf(R.mat),sb:'alunos matriculados',dl:dm(R.mat,c&&c.mat,'rel')},
+{ic:'fa-user-check',kc:'var(--brand2)',lb:'Ativos no período',vl:nf(R.per),sb:pct(R.pct)+' das matrículas',dl:dm(R.pct,c&&c.pct,'pp')},
+{ic:'fa-list-check',kc:'var(--violet)',lb:'Realizadas',vl:nf(R.real),sb:F(R.real/R.mat,2)+' por matrícula',dl:dm(R.real,c&&c.real,'rel')},
 {ic:'fa-bullseye',kc:'var(--ok)',lb:'Taxa de acerto',vl:pct(R.acc),sb:nf(R.acer)+' acertadas',dl:dm(R.acc,c&&c.acc,'pp')},
 {ic:'fa-clock',kc:'var(--amber)',lb:'Tempo de uso',vl:F(R.tmin/60,0)+' h',sb:F(R.tpa,1)+' min/aluno ativo',dl:dm(R.tmin,c&&c.tmin,'rel')},
-{ic:'fa-gauge-high',kc:'var(--rose)',lb:'Ãndice semanal',vl:dec(R.idx),sb:'atividades/aluno/semana',dl:dm(R.idx,c&&c.idx,'idx')}];
+{ic:'fa-gauge-high',kc:'var(--rose)',lb:'Índice semanal',vl:dec(R.idx),sb:'atividades/aluno/semana',dl:dm(R.idx,c&&c.idx,'idx')}];
 $('#kpis').innerHTML=cards.map((k,i)=>'<article class="panel kpi reveal" style="--kc:'+k.kc+';animation-delay:'+(i*.04)+'s"><div class="top"><div class="ic"><i class="fas '+k.ic+'"></i></div><span class="lb">'+k.lb+'</span></div><div class="vl num">'+k.vl+'</div><div class="sb">'+k.sb+'</div>'+k.dl+'</article>').join('')}
 function renderFunnel(){const bar=(w,c,mk)=>'<div class="bar big"><i style="width:'+Math.min(100,w*100)+'%;background:'+c+'"></i>'+(mk!=null?'<u class="'+(mk.cls||'')+'" style="left:'+Math.min(100,mk.v*100)+'%"></u>':'')+'</div>';
-let h='<div class="fn-step"><b>MatrÃ­culas</b>'+bar(1,'linear-gradient(90deg,var(--brand),var(--brand2))')+'<strong>'+nf(R.mat)+'<small>100%</small></strong></div>';
+let h='<div class="fn-step"><b>Matrículas</b>'+bar(1,'linear-gradient(90deg,var(--brand),var(--brand2))')+'<strong>'+nf(R.mat)+'<small>100%</small></strong></div>';
 h+='<div class="fn-step"><b>Alunos ativos</b>'+bar(R.alu/R.mat,'linear-gradient(90deg,var(--brand),var(--brand2))')+'<strong>'+nf(R.alu)+'<small>'+pct(R.alu/R.mat)+'</small></strong></div>';
 h+='<div class="fn-step"><b>Com atividade</b>'+bar(R.pct,'linear-gradient(90deg,var(--brand2),var(--ok))',{v:meta/100,cls:'meta'})+'<strong>'+nf(R.per)+'<small>'+pct(R.pct)+'</small></strong></div>';
 h+='<div class="fn-step" style="margin-top:16px"><b>Realizadas</b>'+bar(1,'linear-gradient(90deg,var(--violet),var(--blue))')+'<strong>'+nf(R.real)+'<small>100%</small></strong></div>';
 h+='<div class="fn-step"><b>Acertadas</b>'+bar(R.acc,'linear-gradient(90deg,var(--violet),var(--blue))')+'<strong>'+nf(R.acer)+'<small>'+pct(R.acc)+'</small></strong></div>';
-h+='<p class="fn-note">Cada matrÃ­cula realizou '+F(R.real/R.mat,2)+' atividades; cada aluno ativo realizou '+F(R.real/R.per,1)+' e acertou '+F(R.acc*100,1)+'%. A marca amarela Ã© a meta de ativos; a vermelha, a mÃ©dia regional.</p>';
+h+='<p class="fn-note">Cada matrícula realizou '+F(R.real/R.mat,2)+' atividades; cada aluno ativo realizou '+F(R.real/R.per,1)+' e acertou '+F(R.acc*100,1)+'%. A marca amarela é a meta de ativos; a vermelha, a média regional.</p>';
 $('#fn').innerHTML=h;requestAnimationFrame(()=>requestAnimationFrame(()=>$('#fn').querySelectorAll('.bar i').forEach(b=>b.style.width=b.style.width)));
-const hit=ES.filter(x=>x.pct*100>=meta);$('#metaVal').textContent=meta+'%';$('#metaInfo').innerHTML='<b>'+hit.length+' de '+R.n+'</b> escolas atingem a meta Â· '+nf(hit.reduce((a,x)=>a+x.mat,0))+' matrÃ­culas ('+pct(hit.reduce((a,x)=>a+x.mat,0)/R.mat)+').' }
+const hit=ES.filter(x=>x.pct*100>=meta);$('#metaVal').textContent=meta+'%';$('#metaInfo').innerHTML='<b>'+hit.length+' de '+R.n+'</b> escolas atingem a meta · '+nf(hit.reduce((a,x)=>a+x.mat,0))+' matrículas ('+pct(hit.reduce((a,x)=>a+x.mat,0)/R.mat)+').' }
 function renderRadar(){const low=ES.filter(x=>x.pct<0.05);const lowMat=low.reduce((a,x)=>a+x.mat,0);
 const big=[...ES].sort((a,b)=>b.mat-a.mat).slice(0,3);const bigMat=big.reduce((a,x)=>a+x.mat,0);const bigPer=big.reduce((a,x)=>a+x.per,0);
 const topIdx=[...ES].sort((a,b)=>b.idx-a.idx)[0];const topAcc=[...ES].filter(x=>x.real>=100).sort((a,b)=>b.acc-a.acc)[0];const topTpa=[...ES].sort((a,b)=>b.tpa-a.tpa)[0];
 const hit=ES.filter(x=>x.pct*100>=meta).length;
 const ins=[
-{ic:'fa-triangle-exclamation',c:'var(--rose)',t:low.length+' escolas abaixo de 5% de ativos',p:nf(lowMat)+' matrÃ­culas ('+pct(lowMat/R.mat)+' da rede) com engajamento crÃ­tico. Clique para filtrar.',act:()=>{band=[0,5];renderTable(base());toast('Filtro: faixa 0â€“5% aplicada.')}},
-{ic:'fa-building',c:'var(--amber)',t:'Maiores escolas, menor alcance',p:big.map(x=>sn(x.escola)).join(', ')+' concentram '+pct(bigMat/R.mat)+' das matrÃ­culas, mas sÃ³ '+pct(bigPer/R.per)+' dos ativos.',act:()=>openDrawer(big[0].escola)},
-{ic:'fa-crown',c:'var(--brand2)',t:'Destaque do mÃªs: '+sn(topIdx.escola),p:'Ãndice '+dec(topIdx.idx)+' ('+F(topIdx.idx/R.idx,1)+'Ã— a mÃ©dia) e '+pct(topIdx.pct)+' de ativos.',act:()=>openDrawer(topIdx.escola)},
-{ic:'fa-bullseye',c:'var(--ok)',t:'PrecisÃ£o: '+sn(topAcc.escola),p:pct(topAcc.acc)+' de acerto em '+nf(topAcc.real)+' atividades realizadas.',act:()=>openDrawer(topAcc.escola)},
-{ic:'fa-hourglass-half',c:'var(--blue)',t:'Mais tempo de uso: '+sn(topTpa.escola),p:F(topTpa.tpa,1)+' min por aluno ativo ('+F(topTpa.tpa/R.tpa,1)+'Ã— a mÃ©dia regional).',act:()=>openDrawer(topTpa.escola)},
+{ic:'fa-triangle-exclamation',c:'var(--rose)',t:low.length+' escolas abaixo de 5% de ativos',p:nf(lowMat)+' matrículas ('+pct(lowMat/R.mat)+' da rede) com engajamento crítico. Clique para filtrar.',act:()=>{band=[0,5];renderTable(base());toast('Filtro: faixa 0�5% aplicada.')}},
+{ic:'fa-building',c:'var(--amber)',t:'Maiores escolas, menor alcance',p:big.map(x=>sn(x.escola)).join(', ')+' concentram '+pct(bigMat/R.mat)+' das matrículas, mas só '+pct(bigPer/R.per)+' dos ativos.',act:()=>openDrawer(big[0].escola)},
+{ic:'fa-crown',c:'var(--brand2)',t:'Destaque do mês: '+sn(topIdx.escola),p:'Índice '+dec(topIdx.idx)+' ('+F(topIdx.idx/R.idx,1)+'× a média) e '+pct(topIdx.pct)+' de ativos.',act:()=>openDrawer(topIdx.escola)},
+{ic:'fa-bullseye',c:'var(--ok)',t:'Precisão: '+sn(topAcc.escola),p:pct(topAcc.acc)+' de acerto em '+nf(topAcc.real)+' atividades realizadas.',act:()=>openDrawer(topAcc.escola)},
+{ic:'fa-hourglass-half',c:'var(--blue)',t:'Mais tempo de uso: '+sn(topTpa.escola),p:F(topTpa.tpa,1)+' min por aluno ativo ('+F(topTpa.tpa/R.tpa,1)+'× a média regional).',act:()=>openDrawer(topTpa.escola)},
 {ic:'fa-flag-checkered',c:'var(--violet)',t:'Meta de '+meta+'% de ativos',p:hit+' de '+R.n+' escolas atingem a meta definida. Ajuste o controle no funil.',act:()=>{$('#metaRange').focus()}}];
 $('#radar').innerHTML=ins.map((x,i)=>'<button class="ins" data-i="'+i+'" style="--ic:'+x.c+'"><div class="ii"><i class="fas '+x.ic+'"></i></div><div><b>'+esc(x.t)+'</b><p>'+esc(x.p)+'</p></div></button>').join('');
 $('#radar').querySelectorAll('.ins').forEach(b=>b.onclick=()=>ins[+b.dataset.i].act())}
 function renderRank(){const k=metric,M=MET[k],l=base();const mx=Math.max(...ES.map(x=>x[k]||0))||1;const ref=M.ref();
 const arr=[...l].sort((a,b)=>vis==='bot'?(a[k]||0)-(b[k]||0):(b[k]||0)-(a[k]||0)).slice(0,vis==='all'?l.length:10);
-$('#rankTitle').textContent='Ranking Â· '+M.lb;
+$('#rankTitle').textContent='Ranking · '+M.lb;
 $('#rank').innerHTML=arr.length?arr.map((x,i)=>{const medal=vis!=='bot'&&i<3?['ðŸ¥‡','ðŸ¥ˆ','ðŸ¥‰'][i]:null;const o=PV.get(x.escola);const d=o?(x[k]||0)-(o[k]||0):null;
 const dt=d==null?'':'<small class="'+(d>0?'up':d<0?'dn':'')+'">'+(d>0?'â–² ':d<0?'â–¼ ':'')+M.fmt(Math.abs(d))+'</small>';
 const mk=k==='pct'?'<u class="meta" style="left:'+Math.min(100,meta/mx*100)+'%"></u>':'';
@@ -392,37 +392,37 @@ const QC=['#2dd4bf','#60a5fa','#fbbf24','#fb7185'];
 function renderScatter(){if(!window.Chart){$('#scChart').hidden=true;$('#scFb').hidden=false;return}
 const data=ES.map(x=>({x:x.pct*100,y:(x.acc||0)*100,r:5+Math.sqrt(x.mat)/2.3,school:x.escola,q:quad(x)}));
 if(!charts.sc){charts.sc=new Chart($('#scChart'),{type:'bubble',data:{datasets:[{data,backgroundColor:data.map(d=>QC[d.q]+'cc'),borderColor:data.map(d=>QC[d.q]),borderWidth:1.5,hoverBorderWidth:3}]},
-options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{padding:11,cornerRadius:10,callbacks:{label:c=>{const x=ES.find(e=>e.escola===c.raw.school);return[sn(x.escola),'Ativos: '+pct(x.pct)+' Â· Acerto: '+pct(x.acc),'Ãndice '+dec(x.idx)+' Â· '+nf(x.mat)+' matrÃ­culas']}}}},
+options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{padding:11,cornerRadius:10,callbacks:{label:c=>{const x=ES.find(e=>e.escola===c.raw.school);return[sn(x.escola),'Ativos: '+pct(x.pct)+' · Acerto: '+pct(x.acc),'Índice '+dec(x.idx)+' · '+nf(x.mat)+' matrículas']}}}},
 scales:{x:{title:{display:true,text:'% de alunos ativos',color:gv('--muted')},min:0,max:100,ticks:{callback:v=>v+'%',color:gv('--muted')},grid:{color:'rgba(148,190,233,.1)'}},y:{title:{display:true,text:'Taxa de acerto',color:gv('--muted')},min:0,max:100,ticks:{callback:v=>v+'%',color:gv('--muted')},grid:{color:'rgba(148,190,233,.1)'}}},
 onClick:(e,el)=>{if(el.length)openDrawer(charts.sc.data.datasets[0].data[el[0].index].school)}},
-plugins:[{id:'quad',afterDraw(c){const{ctx,chartArea:a,scales}=c;if(!a)return;const px=scales.x.getPixelForValue(R.pct*100),py=scales.y.getPixelForValue(R.acc*100);ctx.save();ctx.strokeStyle=gv('--rose');ctx.setLineDash([5,5]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.moveTo(a.left,py);ctx.lineTo(a.right,py);ctx.stroke();ctx.setLineDash([]);ctx.font='600 10px Inter';ctx.fillStyle=gv('--muted');ctx.globalAlpha=.7;ctx.fillText('ReferÃªncia',a.right-72,a.top+14);ctx.fillText('PrecisÃ£o s/ alcance',a.left+6,a.top+14);ctx.fillText('Alcance c/ apoio',a.right-92,a.bottom-8);ctx.fillText('AtenÃ§Ã£o',a.left+6,a.bottom-8);ctx.restore()}}]});
+plugins:[{id:'quad',afterDraw(c){const{ctx,chartArea:a,scales}=c;if(!a)return;const px=scales.x.getPixelForValue(R.pct*100),py=scales.y.getPixelForValue(R.acc*100);ctx.save();ctx.strokeStyle=gv('--rose');ctx.setLineDash([5,5]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.moveTo(a.left,py);ctx.lineTo(a.right,py);ctx.stroke();ctx.setLineDash([]);ctx.font='600 10px Inter';ctx.fillStyle=gv('--muted');ctx.globalAlpha=.7;ctx.fillText('Referência',a.right-72,a.top+14);ctx.fillText('Precisão s/ alcance',a.left+6,a.top+14);ctx.fillText('Alcance c/ apoio',a.right-92,a.bottom-8);ctx.fillText('Atenção',a.left+6,a.bottom-8);ctx.restore()}}]});
 themeCharts()}else{charts.sc.data.datasets[0].data=data;charts.sc.data.datasets[0].backgroundColor=data.map(d=>QC[d.q]+'cc');charts.sc.data.datasets[0].borderColor=data.map(d=>QC[d.q]);charts.sc.update()}}
 function renderEvo(){const ms=avail();$('#evoHint').textContent=ms.length<2?'importe mais meses para ver a curva':ms.length+' meses';
 if(!window.Chart){$('#evoChart').hidden=true;$('#evoFb').hidden=false;return}
 const labels=ms.map(m=>MS[m-1]);const pcts=ms.map(m=>{const a=agg(L(m),DB.meses[m].semanas);return+(a.pct*100).toFixed(2)});const idxs=ms.map(m=>+agg(L(m),DB.meses[m].semanas).idx.toFixed(3));
 if(!charts.evo){charts.evo=new Chart($('#evoChart'),{type:'line',data:{labels,datasets:[
 {label:'% ativos',data:pcts,borderColor:'#2dd4bf',backgroundColor:'rgba(45,212,191,.15)',fill:true,tension:.3,yAxisID:'y',pointRadius:5,pointHoverRadius:8,pointBackgroundColor:ms.map(m=>m===cur?'#2dd4bf':'#0e2138')},
-{label:'Ãndice',data:idxs,borderColor:'#fbbf24',backgroundColor:'transparent',tension:.3,yAxisID:'y1',pointRadius:5,pointHoverRadius:8,borderDash:[5,4]}]},
+{label:'Índice',data:idxs,borderColor:'#fbbf24',backgroundColor:'transparent',tension:.3,yAxisID:'y1',pointRadius:5,pointHoverRadius:8,borderDash:[5,4]}]},
 options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:gv('--muted'),usePointStyle:true,font:{family:'Inter',size:11}}},tooltip:{padding:10,cornerRadius:10}},
 scales:{x:{ticks:{color:gv('--muted')},grid:{display:false}},y:{position:'left',beginAtZero:true,ticks:{callback:v=>v+'%',color:gv('--muted')},grid:{color:'rgba(148,190,233,.1)'}},y1:{position:'right',beginAtZero:true,ticks:{color:gv('--muted')},grid:{display:false}}},
 onClick:(e,el)=>{if(el.length)setMonth(ms[el[0].index])}}});themeCharts()}
 else{charts.evo.data.labels=labels;charts.evo.data.datasets[0].data=pcts;charts.evo.data.datasets[1].data=idxs;charts.evo.data.datasets[0].pointBackgroundColor=ms.map(m=>m===cur?'#2dd4bf':'#0e2138');charts.evo.update()}}
-const BANDS=[[0,5,'0â€“5%'],[5,15,'5â€“15%'],[15,30,'15â€“30%'],[30,50,'30â€“50%'],[50,101,'50%+']];
+const BANDS=[[0,5,'0�5%'],[5,15,'5�15%'],[15,30,'15�30%'],[30,50,'30�50%'],[50,101,'50%+']];
 function renderBands(){const cnt=BANDS.map(b=>ES.filter(x=>x.pct*100>=b[0]&&x.pct*100<b[1]));const mx=Math.max(...cnt.map(c=>c.length),1);const ri=BANDS.findIndex(b=>R.pct*100>=b[0]&&R.pct*100<b[1]);
 $('#bands').innerHTML=BANDS.map((b,i)=>{const n=cnt[i].length,m=cnt[i].reduce((a,x)=>a+x.mat,0);const on=band&&band[0]===b[0];return'<div class="bcol'+(i===ri?' me':'')+(on?' on':'')+'" data-b="'+i+'"><b>'+n+'</b><div class="bbar" style="height:'+Math.max(3,n/mx*140)+'px"></div><span>'+b[2]+'</span><small>'+nf(m)+' mat.</small></div>'}).join('');
-$('#bandLeg').innerHTML='Faixa destacada contÃ©m a mÃ©dia regional ('+pct(R.pct)+').';
+$('#bandLeg').innerHTML='Faixa destacada contém a média regional ('+pct(R.pct)+').';
 $('#bands').querySelectorAll('.bcol').forEach(c=>c.onclick=()=>{const b=BANDS[+c.dataset.b];band=(band&&band[0]===b[0])?null:[b[0],b[1]];renderBands();renderTable(base());updateBandChip()})}
 function updateBandChip(){$('#bandChip').hidden=band==null;if(band)$('#bandChipTxt').textContent='Faixa '+BANDS.find(b=>b[0]===band[0])[2]}
 function renderHeat(){const ms=avail();if(ms.length<2){$('#hmPanel').hidden=true;return}$('#hmPanel').hidden=false;const k=metric,M=MET[k];$('#hmHint').textContent=M.lb;
 const mx=Math.max(...ms.flatMap(m=>L(m).map(x=>x[k]||0)))||1;const ix=new Map(ms.map(m=>[m,new Map(L(m).map(x=>[x.escola,x]))]));
-$('#hm').innerHTML='<thead><tr><th>Escola</th>'+ms.map(m=>'<th data-m="'+m+'"'+(m===cur?' style="color:var(--brand)"':'')+'>'+MS[m-1]+'</th>').join('')+'</tr></thead><tbody>'+[...ES].sort((a,b)=>(b[k]||0)-(a[k]||0)).map(x=>'<tr><td class="n" data-e="'+esc(x.escola)+'">'+esc(x.nome)+'</td>'+ms.map(m=>{const v=ix.get(m).get(x.escola);if(!v)return'<td class="c">â€“</td>';const a=Math.round((v[k]||0)/mx*82)+6;return'<td class="c" data-m="'+m+'" style="background:color-mix(in srgb,var(--brand) '+a+'%,var(--solid));'+(a>55?'color:#04211d':'')+'" title="'+esc(x.nome)+' Â· '+MN[m-1]+': '+M.fmt(v[k]||0)+'">'+M.fmt(v[k]||0)+'</td>'}).join('')+'</tr>').join('')+'</tbody>'}
-const COLS=[['nome','Escola'],['mat','Matr.'],['per','Ativos'],['pct','% ativos'],['real','Realiz.'],['acer','Acert.'],['acc','Acerto'],['tmin','Tempo(h)'],['tpa','Min/aluno'],['idx','Ãndice']];
+$('#hm').innerHTML='<thead><tr><th>Escola</th>'+ms.map(m=>'<th data-m="'+m+'"'+(m===cur?' style="color:var(--brand)"':'')+'>'+MS[m-1]+'</th>').join('')+'</tr></thead><tbody>'+[...ES].sort((a,b)=>(b[k]||0)-(a[k]||0)).map(x=>'<tr><td class="n" data-e="'+esc(x.escola)+'">'+esc(x.nome)+'</td>'+ms.map(m=>{const v=ix.get(m).get(x.escola);if(!v)return'<td class="c">�</td>';const a=Math.round((v[k]||0)/mx*82)+6;return'<td class="c" data-m="'+m+'" style="background:color-mix(in srgb,var(--brand) '+a+'%,var(--solid));'+(a>55?'color:#04211d':'')+'" title="'+esc(x.nome)+' · '+MN[m-1]+': '+M.fmt(v[k]||0)+'">'+M.fmt(v[k]||0)+'</td>'}).join('')+'</tr>').join('')+'</tbody>'}
+const COLS=[['nome','Escola'],['mat','Matr.'],['per','Ativos'],['pct','% ativos'],['real','Realiz.'],['acer','Acert.'],['acc','Acerto'],['tmin','Tempo(h)'],['tpa','Min/aluno'],['idx','Índice']];
 function renderTable(l){if(!COLS.some(c=>c[0]===ts.k))ts={k:'idx',d:-1};
 $('#tb thead').innerHTML='<tr>'+COLS.map(c=>'<th data-k="'+c[0]+'">'+c[1]+(ts.k===c[0]?(ts.d>0?' â–²':' â–¼'):'')+'</th>').join('')+'</tr>';
 const rows=[...l].sort((a,b)=>ts.k==='nome'?ts.d*a.nome.localeCompare(b.nome,'pt-BR'):ts.d*((a[ts.k]??-1e9)-(b[ts.k]??-1e9)));
 const heat=(v,mx)=>'background:color-mix(in srgb,var(--brand) '+Math.round(v/mx*60)+'%,transparent)';
 const mxP=Math.max(...ES.map(x=>x.pct))||1,mxA=Math.max(...ES.map(x=>x.acc||0))||1;
-$('#tb tbody').innerHTML=rows.length?rows.map(x=>'<tr data-e="'+esc(x.escola)+'"><td><span class="sn">'+esc(x.nome)+'</span><span class="cd">'+esc(x.cod)+'</span></td><td>'+nf(x.mat)+'</td><td>'+nf(x.per)+'</td><td style="'+heat(x.pct,mxP)+'">'+pct(x.pct)+'</td><td>'+nf(x.real)+'</td><td>'+(x.acer!=null?nf(x.acer):'â€“')+'</td><td style="'+heat(x.acc||0,mxA)+'">'+(x.acc!=null?pct(x.acc):'â€“')+'</td><td>'+(x.tmin!=null?F(x.tmin/60,1):'â€“')+'</td><td>'+(x.tpa!=null?F(x.tpa,1):'â€“')+'</td><td><b>'+dec(x.idx)+'</b></td></tr>').join(''):'<tr><td colspan="10" class="empty">Nenhuma escola no filtro.</td></tr>';
+$('#tb tbody').innerHTML=rows.length?rows.map(x=>'<tr data-e="'+esc(x.escola)+'"><td><span class="sn">'+esc(x.nome)+'</span><span class="cd">'+esc(x.cod)+'</span></td><td>'+nf(x.mat)+'</td><td>'+nf(x.per)+'</td><td style="'+heat(x.pct,mxP)+'">'+pct(x.pct)+'</td><td>'+nf(x.real)+'</td><td>'+(x.acer!=null?nf(x.acer):'�')+'</td><td style="'+heat(x.acc||0,mxA)+'">'+(x.acc!=null?pct(x.acc):'�')+'</td><td>'+(x.tmin!=null?F(x.tmin/60,1):'�')+'</td><td>'+(x.tpa!=null?F(x.tpa,1):'�')+'</td><td><b>'+dec(x.idx)+'</b></td></tr>').join(''):'<tr><td colspan="10" class="empty">Nenhuma escola no filtro.</td></tr>';
 $('#tbCount').textContent=rows.length+' de '+R.n+' escolas';
 $('#tb tbody').querySelectorAll('tr[data-e]').forEach(r=>r.onclick=()=>openDrawer(r.dataset.e))}
 function themeCharts(){if(!window.Chart)return;const m=gv('--muted'),g='rgba(148,190,233,.1)';
@@ -431,17 +431,17 @@ if(charts.evo){const o=charts.evo.options;o.plugins.legend.labels.color=m;o.scal
 function render(){prep();renderHero();renderMonths();renderKPIs();renderFunnel();renderRadar();renderRank();renderScatter();renderEvo();renderBands();updateBandChip();renderHeat();renderTable(base())}
 
 /* ===== DRAWER ===== */
-function openDrawer(escola){const x=ES.find(e=>e.escola===escola);if(!x)return;const qn=['ReferÃªncia','PrecisÃ£o sem alcance','Alcance com apoio','AtenÃ§Ã£o'][quad(x)];
+function openDrawer(escola){const x=ES.find(e=>e.escola===escola);if(!x)return;const qn=['Referência','Precisão sem alcance','Alcance com apoio','Atenção'][quad(x)];
 const pos=k=>[...ES].sort((a,b)=>(b[k]||0)-(a[k]||0)).findIndex(e=>e.escola===escola)+1;
-const cmpBar=(lb,v,ref,fmt)=>{const mx=Math.max(v,ref)||1;return'<div class="cmp-row"><div class="cl"><span>'+lb+'</span><b>'+fmt(v)+'</b></div><div class="cmp-bar"><i style="width:'+(v/mx*100)+'%;background:linear-gradient(90deg,var(--brand),var(--brand2))"></i></div><div class="cmp-bar reg"><i style="width:'+(ref/mx*100)+'%"></i></div><div class="cl" style="margin:0"><span style="color:var(--muted);font-size:11px">regiÃ£o: '+fmt(ref)+'</span></div></div>'};
-const o=PV.get(escola);const dHtml=o?'<div class="dw-sec">VariaÃ§Ã£o vs '+MN[cmp-1]+'</div><div class="dw-tags"><span class="tag">'+dm(x.pct,o.pct,'pp')+'</span><span class="tag">'+dm(x.idx,o.idx,'idx')+'</span><span class="tag">'+dm(x.acc,o.acc,'pp')+'</span></div>':'';
+const cmpBar=(lb,v,ref,fmt)=>{const mx=Math.max(v,ref)||1;return'<div class="cmp-row"><div class="cl"><span>'+lb+'</span><b>'+fmt(v)+'</b></div><div class="cmp-bar"><i style="width:'+(v/mx*100)+'%;background:linear-gradient(90deg,var(--brand),var(--brand2))"></i></div><div class="cmp-bar reg"><i style="width:'+(ref/mx*100)+'%"></i></div><div class="cl" style="margin:0"><span style="color:var(--muted);font-size:11px">região: '+fmt(ref)+'</span></div></div>'};
+const o=PV.get(escola);const dHtml=o?'<div class="dw-sec">Variação vs '+MN[cmp-1]+'</div><div class="dw-tags"><span class="tag">'+dm(x.pct,o.pct,'pp')+'</span><span class="tag">'+dm(x.idx,o.idx,'idx')+'</span><span class="tag">'+dm(x.acc,o.acc,'pp')+'</span></div>':'';
 const p=Math.min(1,x.pct);
-$('#drawer').innerHTML='<div class="dw-head"><div style="flex:1"><h3>'+esc(x.nome)+'</h3><div class="cd">CÃ³digo '+esc(x.cod)+' Â· '+MN[cur-1]+'/'+DB.ano+'</div></div><button class="ibtn dw-close" id="dwClose"><i class="fas fa-xmark"></i></button></div>'+
-'<div class="dw-tags"><span class="tag" style="border-color:'+QC[quad(x)]+';color:'+QC[quad(x)]+'">'+qn+'</span><span class="tag">'+nf(x.mat)+' matrÃ­culas</span><span class="tag">'+DB.meses[cur].semanas+' semanas</span></div>'+
-'<div class="gauge"><svg viewBox="0 0 200 120"><path d="M20,105 A80,80 0 0 1 180,105" fill="none" stroke="var(--chip)" stroke-width="16" stroke-linecap="round"/><path d="M20,105 A80,80 0 0 1 180,105" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" pathLength="100" stroke-dasharray="'+(p*100)+' 100"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--brand)"/><stop offset="1" stop-color="var(--brand2)"/></linearGradient></defs><text x="100" y="92" text-anchor="middle" font-family="Space Grotesk" font-size="30" font-weight="700" fill="var(--text)">'+pct(x.pct)+'</text><text x="100" y="112" text-anchor="middle" font-size="11" fill="var(--muted)">alunos ativos no perÃ­odo</text></svg></div>'+
-'<div class="dw-grid"><div class="dw-cell"><small>Ativos</small><b>'+nf(x.per)+'</b></div><div class="dw-cell"><small>Realizadas</small><b>'+nf(x.real)+'</b></div><div class="dw-cell"><small>Acertadas</small><b>'+(x.acer!=null?nf(x.acer):'â€“')+'</b></div><div class="dw-cell"><small>Acerto</small><b>'+(x.acc!=null?pct(x.acc):'â€“')+'</b></div><div class="dw-cell"><small>Tempo</small><b>'+(x.tmin!=null?F(x.tmin/60,1)+'h':'â€“')+'</b></div><div class="dw-cell"><small>Min/aluno</small><b>'+(x.tpa!=null?F(x.tpa,1):'â€“')+'</b></div></div>'+
-'<div class="dw-sec">Escola vs mÃ©dia regional</div>'+cmpBar('% ativos',x.pct,R.pct,pct)+cmpBar('Acerto',x.acc||0,R.acc,pct)+cmpBar('Ãndice',x.idx,R.idx,dec)+cmpBar('Min/aluno',x.tpa||0,R.tpa,v=>F(v,1))+
-'<div class="dw-sec">PosiÃ§Ã£o no ranking</div><div class="pos-row"><span class="pos-pill">Ãndice <b>#'+pos('idx')+'</b></span><span class="pos-pill">% ativos <b>#'+pos('pct')+'</b></span><span class="pos-pill">Acerto <b>#'+pos('acc')+'</b></span><span class="pos-pill">Tempo <b>#'+pos('tpa')+'</b></span></div>'+dHtml;
+$('#drawer').innerHTML='<div class="dw-head"><div style="flex:1"><h3>'+esc(x.nome)+'</h3><div class="cd">Código '+esc(x.cod)+' · '+MN[cur-1]+'/'+DB.ano+'</div></div><button class="ibtn dw-close" id="dwClose"><i class="fas fa-xmark"></i></button></div>'+
+'<div class="dw-tags"><span class="tag" style="border-color:'+QC[quad(x)]+';color:'+QC[quad(x)]+'">'+qn+'</span><span class="tag">'+nf(x.mat)+' matrículas</span><span class="tag">'+DB.meses[cur].semanas+' semanas</span></div>'+
+'<div class="gauge"><svg viewBox="0 0 200 120"><path d="M20,105 A80,80 0 0 1 180,105" fill="none" stroke="var(--chip)" stroke-width="16" stroke-linecap="round"/><path d="M20,105 A80,80 0 0 1 180,105" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" pathLength="100" stroke-dasharray="'+(p*100)+' 100"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--brand)"/><stop offset="1" stop-color="var(--brand2)"/></linearGradient></defs><text x="100" y="92" text-anchor="middle" font-family="Space Grotesk" font-size="30" font-weight="700" fill="var(--text)">'+pct(x.pct)+'</text><text x="100" y="112" text-anchor="middle" font-size="11" fill="var(--muted)">alunos ativos no período</text></svg></div>'+
+'<div class="dw-grid"><div class="dw-cell"><small>Ativos</small><b>'+nf(x.per)+'</b></div><div class="dw-cell"><small>Realizadas</small><b>'+nf(x.real)+'</b></div><div class="dw-cell"><small>Acertadas</small><b>'+(x.acer!=null?nf(x.acer):'�')+'</b></div><div class="dw-cell"><small>Acerto</small><b>'+(x.acc!=null?pct(x.acc):'�')+'</b></div><div class="dw-cell"><small>Tempo</small><b>'+(x.tmin!=null?F(x.tmin/60,1)+'h':'�')+'</b></div><div class="dw-cell"><small>Min/aluno</small><b>'+(x.tpa!=null?F(x.tpa,1):'�')+'</b></div></div>'+
+'<div class="dw-sec">Escola vs média regional</div>'+cmpBar('% ativos',x.pct,R.pct,pct)+cmpBar('Acerto',x.acc||0,R.acc,pct)+cmpBar('Índice',x.idx,R.idx,dec)+cmpBar('Min/aluno',x.tpa||0,R.tpa,v=>F(v,1))+
+'<div class="dw-sec">Posição no ranking</div><div class="pos-row"><span class="pos-pill">Índice <b>#'+pos('idx')+'</b></span><span class="pos-pill">% ativos <b>#'+pos('pct')+'</b></span><span class="pos-pill">Acerto <b>#'+pos('acc')+'</b></span><span class="pos-pill">Tempo <b>#'+pos('tpa')+'</b></span></div>'+dHtml;
 $('#ovl').classList.add('show');$('#drawer').classList.add('show');$('#dwClose').onclick=closeDrawer}
 function closeDrawer(){$('#ovl').classList.remove('show');$('#drawer').classList.remove('show')}
 $('#ovl').onclick=closeDrawer;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
@@ -462,7 +462,7 @@ $('#reset').onclick=()=>{q='';selE='';tier='';band=null;$('#q').value='';$('#sel
 $('#tb').addEventListener('click',e=>{const h=e.target.closest('th[data-k]');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:k==='nome'?1:-1};renderTable(base())}});
 $('#hm').addEventListener('click',e=>{const m=e.target.closest('[data-m]');if(m){setMonth(+m.dataset.m);return}const n=e.target.closest('[data-e]');if(n)openDrawer(n.dataset.e)});
 $('#btnCsv').onclick=()=>{const rows=[...base()].sort((a,b)=>ts.k==='nome'?ts.d*a.nome.localeCompare(b.nome,'pt-BR'):ts.d*((a[ts.k]??-1e9)-(b[ts.k]??-1e9)));
-const head='Mes;Escola;Codigo;Matriculas;Alunos ativos;Ativos periodo;% ativos;Realizadas;Acertadas;% acerto;Tempo min;Min por aluno;Indice semanal';
+const head='Mes;Escola;Codigo;Matriculas;Alunos ativos;Ativos periodo;% ativos;Realizadas;Acertadas;% acerto;Tempo min;Min por aluno;Iíndice semanal';
 const body=rows.map(x=>[MN[cur-1],x.nome,x.cod,x.mat,x.alu,x.per,F(x.pct*100,2),x.real,x.acer??'',x.acc!=null?F(x.acc*100,2):'',x.tmin??'',x.tpa!=null?F(x.tpa,2):'',F(x.idx,3)].join(';')).join('\n');
 const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+head+'\n'+body],{type:'text/csv'}));a.download='khan-academy-'+MS[cur-1].toLowerCase()+'-'+DB.ano+'.csv';a.click();toast(rows.length+' escolas exportadas.')};
 function fillSchoolSelect(){$('#selE').innerHTML='<option value="">Todas as escolas</option>'+[...ES].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(x=>'<option value="'+esc(x.escola)+'">'+esc(x.escola)+'</option>').join('')}
@@ -476,11 +476,11 @@ const{data,error}=await SB.from('resultados_khan').select('*').eq('ano',anos[0].
 if(error||!data||!data.length)throw new Error('consulta falhou');
 DB=aPartirDeBanco(data);fonte='supabase';
 
-$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) Â· ano '+DB.ano+' Â· importada via admin.html.';
+$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) · ano '+DB.ano+' · importada via admin.html.';
 cur=avail().at(-1);cmp=null;fillSchoolSelect();render();if(!silent)toast('Dados carregados do Supabase.');
 }catch(err){fonte='local';
 $('#fonte').textContent='Fonte: Escola Total. Atualizada em 13/11/26';
-if(!silent)toast('Sem dados no Supabase â€” usando semente local de fev/2026.','warn');}
+if(!silent)toast('Sem dados no Supabase � usando semente local de fev/2026.','warn');}
 finally{btn.classList.remove('spin')}}
 $('#btnRefresh').onclick=()=>carregarSupabase(false);
 
