@@ -33,7 +33,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 
 | Arquivo | Acesso | Função |
 |---|---|---|
-| `index.html` | público | Login e painel de módulos |
+| `index.html` | público | Login e painel de módulos + **card de Analytics de uso** (visível apenas para ADM ativo) + contador de visitas |
 | `dashboard.html` | autenticado | **Dashboard da Prova Paulista**: KPIs, ranking, dispersão participação × desempenho, perfil de competências e evolução por edição |
 | `dashboard-alura.html` | autenticado | **Dashboard da Plataforma Alura**: indicador principal de cada ano, engajamento por escola e evolução do uso da plataforma |
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
@@ -44,7 +44,8 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 | `leia-sp.html` | público | **Leitura em Marília**: páginas, livros e tempo de leitura por escola, evolução semanal e mapa de calor, com seleção de uma ou mais semanas (clique = uma semana, `Ctrl` + clique = somar) |
 | `resultados-presenca.html` | autenticado | **Aluno Presente**: presença, aulas e evolução por escola e período |
 | `Robotica_Marilia.html` | autenticado | **Robótica**: indicadores de atividades, acertos e notas por escola |
-| `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente, Leia SP, Tarefa SP e Robótica) |
+| `khan.html` | autenticado | **Khan Academy**: uso, atividades, acertos e progresso por escola e período |
+| `admin.html` | ADM | Usuários + **importadores** de planilha/CSV (Alura, Prova Paulista, Matific, SARESP, Redação Paulista, Aluno Presente, Leia SP, Tarefa SP, Robótica e Khan Academy) |
 
 Todas as páginas (exceto `index.html`) exigem sessão ativa e redirecionam para o login caso contrário.
 
@@ -167,6 +168,34 @@ A leitura é permitida a usuários autenticados e a gravação/exclusão somente
 `id` (uuid) · `nome` · `email` · `perfil` · `funcao` · `escopo` (text, `ADM`/`USER`) ·
 `ativo` (boolean) · `criado_em` · `atualizado_em` · `created_at` (timestamptz)
 
+### `analytics_eventos` — uso da plataforma (criada por `supabase-analytics.sql`)
+
+Uma linha por evento de navegação. Alimenta o card **Analytics da Plataforma** da `index.html`,
+que só aparece para **ADM ativo** (`escopo` `ADM`/`ADMIN` e `ativo = true`).
+
+| Coluna | Uso |
+|---|---|
+| `id` (uuid) · `criado_em` (timestamptz) | identificação e ordenação |
+| `dia` (date) | dia no fuso `America/Sao_Paulo` (índice) |
+| `evento` (text) | `page_view` · `module_click` · `login` · `logout` |
+| `pagina` (text) | página do evento (`index.html`) |
+| `modulo` (text) | módulo clicado (`leia-sp`, `tarefa-sp`, …) |
+| `sessao_id` · `visitante_id` (text) | sessão do navegador e visitante (localStorage) |
+| `user_id` (uuid) · `escopo` (text) | **carimbados no servidor** a partir de `perfis_usuarios` |
+| `referrer` · `user_agent` (text) | contexto do acesso |
+| `metadata` (jsonb) | dados extras do evento |
+
+Regras de segurança:
+- a gravação passa pela RPC **`analytics_registrar`** (`SECURITY DEFINER`): o `escopo` e o
+  `user_id` são lidos do perfil real no banco, então o cliente **não consegue forjar ADM**;
+- `anon` **não tem** nenhum privilégio de tabela — só executa a RPC de gravação;
+- leitura e exclusão são liberadas apenas para ADM ativo (RLS);
+- a RPC **`analytics_resumo(dias)`** devolve o agregado (totais, série diária, ranking de
+  módulos e eventos recentes) e a RPC **`analytics_purgar(dias)`** remove eventos antigos.
+
+Eventos registrados: `page_view` (1× por sessão), `module_click` (ao abrir um módulo),
+`login` e `logout`.
+
 ## 4. Indicador principal por ano (Plataforma Alura)
 
 Cada ano tem **um** indicador de avaliação — os demais nem existem na planilha oficial:
@@ -210,6 +239,7 @@ Políticas ativas:
 | `resultados_presenca` | autenticados | **ADM ativo** | **ADM ativo** |
 | `resultados_robotica` | autenticados | **ADM ativo** | **ADM ativo** |
 | `resultados_tarefa_sp` | público | **ADM ativo** | **ADM ativo** |
+| `analytics_eventos` | **ADM ativo** | **ADM ativo** (via RPC `analytics_registrar`) | **ADM ativo** |
 | `perfis_usuarios` | autenticados | autenticados | autenticados |
 
 > A exclusão é liberada só para ADM porque o importador precisa limpar o ano antes de gravar.

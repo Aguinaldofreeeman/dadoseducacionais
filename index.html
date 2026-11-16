@@ -106,6 +106,81 @@
             header { flex-wrap: wrap; gap: 10px; }
             .visit-counter-label { display: none; }
         }
+        /* ===== Card de Analytics (exclusivo ADM) ===== */
+        .analytics-card { margin-top: 24px; display: none; border-top: 4px solid #0d9488; }
+        .an-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+        .an-head h2 { border: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 10px; }
+        .an-head h2 svg { width: 22px; height: 22px; color: #0d9488; }
+        .an-source { font-size: 11px; font-weight: bold; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid; }
+        .an-source.real { color: #0f766e; border-color: #99f6e4; background: #f0fdfa; }
+        .an-source.demo { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+        .an-controls { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .an-select { padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fff; color: #243247; cursor: pointer; }
+        .an-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 13px; font-weight: bold; cursor: pointer; transition: .15s; }
+        .an-btn:hover { border-color: #0d9488; color: #0f766e; }
+        .an-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .an-btn.danger { color: #b91c1c; border-color: #fecaca; }
+        .an-btn.danger:hover { background: #fef2f2; border-color: #f87171; color: #b91c1c; }
+        .an-btn svg { width: 14px; height: 14px; }
+        .an-seg { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; }
+        .an-seg button { border: none; background: #fff; color: #64748b; padding: 7px 12px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .an-seg button.active { background: #17365d; color: #fff; }
+        .an-seg button:disabled { opacity: .45; cursor: not-allowed; }
+        .an-sub { font-size: 13px; color: #64748b; margin: 0 0 18px; }
+
+        .an-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px; }
+        .an-kpi { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; position: relative; overflow: hidden; }
+        .an-kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--kpi-c, #0d9488); }
+        .an-kpi-top { display: flex; align-items: center; gap: 8px; color: #64748b; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; }
+        .an-kpi-top svg { width: 16px; height: 16px; color: var(--kpi-c, #0d9488); }
+        .an-kpi-value { font-size: 30px; font-weight: 800; color: #17365d; margin: 8px 0 2px; font-variant-numeric: tabular-nums; }
+        .an-kpi-foot { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+        .an-trend { font-weight: bold; display: inline-flex; align-items: center; gap: 3px; }
+        .an-trend.up { color: #16a34a; } .an-trend.down { color: #dc2626; } .an-trend.flat { color: #94a3b8; }
+
+        .an-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .an-panel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+        .an-panel h3 { margin: 0 0 12px; font-size: 15px; color: #17365d; display: flex; align-items: center; gap: 8px; }
+        .an-panel h3 svg { width: 16px; height: 16px; color: #0d9488; }
+        .an-legend { display: flex; gap: 14px; font-size: 12px; color: #64748b; margin-bottom: 8px; }
+        .an-legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .an-legend i { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+        .an-chart-wrap { position: relative; }
+        .an-chart { width: 100%; height: auto; display: block; }
+        .an-tooltip { position: absolute; pointer-events: none; background: #17365d; color: #fff; font-size: 12px; padding: 8px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.2); opacity: 0; transition: opacity .12s; white-space: nowrap; z-index: 5; }
+        .an-tooltip strong { display: block; margin-bottom: 3px; color: #a7f3d0; }
+
+        .an-rank { display: flex; flex-direction: column; gap: 9px; max-height: 320px; overflow-y: auto; }
+        .an-rank-row { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 10px; font-size: 13px; }
+        .an-rank-pos { font-weight: 800; color: #94a3b8; font-size: 12px; text-align: center; }
+        .an-rank-row.top .an-rank-pos { color: #0d9488; }
+        .an-rank-name { color: #334155; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .an-rank-bar { grid-column: 2 / 4; height: 7px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: -4px; }
+        .an-rank-fill { height: 100%; background: linear-gradient(90deg,#0d9488,#0284c7); border-radius: 4px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+        .an-rank-val { font-variant-numeric: tabular-nums; font-weight: 700; color: #17365d; }
+        .an-rank-share { color: #94a3b8; font-size: 11px; margin-left: 6px; }
+
+        .an-recent { margin-top: 20px; }
+        .an-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .an-table th { text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+        .an-table td { padding: 8px 10px; border-bottom: 1px solid #eef2f7; color: #334155; }
+        .an-ev { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 999px; }
+        .an-ev.page_view { background: #e0f2fe; color: #0369a1; }
+        .an-ev.module_click { background: #ccfbf1; color: #0f766e; }
+        .an-ev.login { background: #dcfce7; color: #166534; }
+        .an-ev.logout { background: #fee2e2; color: #991b1b; }
+        .an-escopo { font-size: 11px; color: #94a3b8; }
+
+        .an-status { margin-top: 16px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .an-status .dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; }
+        .an-loading { position: relative; }
+        .an-loading .an-kpi-value, .an-loading .an-rank, .an-loading .an-chart-wrap { opacity: .4; }
+        .an-empty { text-align: center; color: #94a3b8; padding: 30px 10px; font-size: 14px; }
+        .an-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+        @media (max-width: 820px) { .an-grid { grid-template-columns: 1fr; } .an-controls { margin-left: 0; width: 100%; } }
+        @media (max-width: 640px) { .an-kpi-value { font-size: 24px; } }
+        @media (prefers-reduced-motion: reduce) { .an-rank-fill { transition: none; } }
     </style>
 </head>
 <body>
@@ -154,7 +229,7 @@
 
 
                 <!-- Módulo 1: Aluno Presente -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="aluno-presente">
                     <div>
                         <h3>Aluno Presente</h3>
                         <p>Acompanhamento dos indicadores de presença dos estudantes.</p>
@@ -163,7 +238,7 @@
                 </div>
 
  <!-- Módulo 2: Apoio Presencial -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="apoio-presencial">
                     <div>
                         <h3>Apoio Presencial</h3>
                         <p>Registro e acompanhamento do apoio presencial às escolas da unidade regional.</p>
@@ -176,7 +251,7 @@
 
                 
                 <!-- Módulo 3: Prova Paulista -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="prova-paulista">
                     <div>
                         <h3>Prova Paulista</h3>
                         <p>Acompanhamento de desempenho, proficiências e participação por unidade escolar e turma.</p>
@@ -187,7 +262,7 @@
 
                 
                 <!-- Módulo 4: SARESP -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="saresp">
                     <div>
                         <h3>SARESP</h3>
                         <p>Resultados históricos e consolidados do Sistema de Avaliação do Rendimento Escolar.</p>
@@ -198,7 +273,7 @@
 
                 
                 <!-- Módulo 5: Alura -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="alura">
                     <div>
                         <h3>Alura</h3>
                         <p>Indicadores de engajamento, matrículas ativas, acessos, avaliações e cursos concluídos.</p>
@@ -208,7 +283,7 @@
 
 
                 <!-- Módulo 6: Matific -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="matific">
                     <div>
                         <h3>Matific</h3>
                         <p>Acompanhamento de participação, atividades e desempenho dos estudantes na plataforma Matific.</p>
@@ -217,7 +292,7 @@
                 </div>
 
                 <!-- Módulo 7: Redação Paulista -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="redacao-paulista">
                     <div>
                         <h3>Redação Paulista</h3>
                         <p>Índice semanal e nota das produções textuais em todas as quinzenas, com painel regional, painel individual por escola, busca e ordenação por coluna.</p>
@@ -227,7 +302,7 @@
 
 
                 <!-- Módulo 8: Robótica -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="robotica">
                     <div>
                         <h3>Robótica</h3>
                         <p>Acompanhamento das atividades e projetos de robótica educacional.</p>
@@ -236,7 +311,7 @@
                 </div>
 
                 <!-- Módulo 9: Leia SP -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="leia-sp">
                     <div>
                         <h3>Leia SP</h3>
                         <p>Indicadores de leitura por escola: alunos ativos, acerto, páginas lidas, livros concluídos e tempo de leitura.</p>
@@ -245,7 +320,7 @@
                 </div>
 
                 <!-- Módulo 10: Tarefa SP -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="tarefa-sp">
                     <div>
                         <h3>Tarefa SP</h3>
                         <p>Acompanhamento das tarefas e atividades da plataforma Tarefa SP por escola e turma.</p>
@@ -254,7 +329,7 @@
                 </div>
 
                 <!-- Módulo 11: Khan Academy -->
-                <div class="module-card">
+                <div class="module-card" data-modulo="khan-academy">
                     <div>
                         <h3>Khan Academy</h3>
                         <p>Uso, atividades realizadas, acertos e progresso na Khan Academy por escola e período.</p>
@@ -265,6 +340,71 @@
                
             </div>
         </div>
+        <!-- ===== Card de Analytics (somente ADM) ===== -->
+        <div id="card-analytics" class="card analytics-card" aria-label="Analytics de uso da plataforma">
+            <div class="an-head">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+                    Analytics da Plataforma
+                </h2>
+                <span id="an-source" class="an-source demo">Demonstração</span>
+                <div class="an-controls">
+                    <div class="an-seg" role="group" aria-label="Fonte dos dados">
+                        <button type="button" id="an-fonte-real" title="Dados reais do Supabase">Reais</button>
+                        <button type="button" id="an-fonte-demo" class="active" title="Dados de demonstração">Demonstração</button>
+                    </div>
+                    <label class="an-sr" for="an-periodo">Período</label>
+                    <select id="an-periodo" class="an-select" aria-label="Período">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="90">Últimos 90 dias</option>
+                    </select>
+                    <button type="button" id="an-refresh" class="an-btn" title="Atualizar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>Atualizar
+                    </button>
+                    <button type="button" id="an-export" class="an-btn" title="Exportar CSV">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M6 10l6 6 6-6M4 20h16"/></svg>CSV
+                    </button>
+                    <button type="button" id="an-purgar" class="an-btn danger" title="Apagar eventos com mais de 90 dias (ADM)" style="display:none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Purgar
+                    </button>
+                </div>
+            </div>
+            <p class="an-sub" id="an-sub">Uso da plataforma: visitas, acessos por módulo e evolução diária.</p>
+
+            <div class="an-kpis" id="an-kpis"></div>
+
+            <div class="an-grid">
+                <div class="an-panel">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Evolução diária</h3>
+                    <div class="an-legend">
+                        <span><i style="background:#0d9488"></i>Visitas</span>
+                        <span><i style="background:#0284c7"></i>Cliques em módulos</span>
+                    </div>
+                    <div class="an-chart-wrap" id="an-chart-wrap">
+                        <div id="an-chart"></div>
+                        <div class="an-tooltip" id="an-tooltip"></div>
+                    </div>
+                </div>
+                <div class="an-panel">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Módulos mais acessados</h3>
+                    <div class="an-rank" id="an-rank"></div>
+                </div>
+            </div>
+
+            <div class="an-panel an-recent">
+                <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Eventos recentes</h3>
+                <div style="overflow-x:auto">
+                    <table class="an-table">
+                        <thead><tr><th>Quando</th><th>Evento</th><th>Módulo</th><th>Perfil</th></tr></thead>
+                        <tbody id="an-recent"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="an-msg" class="msg"></div>
+            <div class="an-status" id="an-status"><span class="dot"></span><span>Carregando…</span></div>
+        </div>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -273,43 +413,76 @@
 
     const cardLogin = document.getElementById('card-login');
     const cardPainel = document.getElementById('card-painel');
+    const cardAnalytics = document.getElementById('card-analytics');
     const btnAreaAdmin = document.getElementById('btn-area-admin');
     const btnSair = document.getElementById('btn-sair');
     const boasVindasEl = document.getElementById('boas-vindas');
 
+    let sessaoAtual = null;   // sessão do Supabase
+    let perfilAtual = null;   // linha correspondente em perfis_usuarios
+    let isAdmin = false;       // ADM ativo (escopo ADM/ADMIN)
+    let uiFonte = 'auto';      // auto | real | demo
+    let resumoAtual = null;    // dados renderizados no card
+    let fonteAtual = 'demo';   // real | demo
+
+    const MODULE_NAMES = {
+        'aluno-presente': 'Aluno Presente',
+        'apoio-presencial': 'Apoio Presencial',
+        'prova-paulista': 'Prova Paulista',
+        'saresp': 'SARESP',
+        'alura': 'Alura',
+        'matific': 'Matific',
+        'redacao-paulista': 'Redação Paulista',
+        'robotica': 'Robótica',
+        'leia-sp': 'Leia SP',
+        'tarefa-sp': 'Tarefa SP',
+        'khan-academy': 'Khan Academy'
+    };
+
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    const fmtNum = n => new Intl.NumberFormat('pt-BR').format(Math.round(n || 0));
+    const isoDate = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     // Verifica a sessão atual e carrega o perfil do usuário
     async function verificarSessao() {
         const { data: { session } } = await supabaseClient.auth.getSession();
+        sessaoAtual = session || null;
+        perfilAtual = null;
+        isAdmin = false;
 
         if (session) {
             const { data: perfil } = await supabaseClient
                 .from('perfis_usuarios')
                 .select('nome, funcao, escopo, ativo')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
+
+            perfilAtual = perfil || null;
+            isAdmin = !!(perfil && perfil.ativo && (perfil.escopo === 'ADM' || perfil.escopo === 'ADMIN'));
 
             cardLogin.style.display = 'none';
             cardPainel.style.display = 'block';
             btnSair.style.display = 'inline-block';
+            btnAreaAdmin.style.display = isAdmin ? 'inline-block' : 'none';
 
             const nomeUsuario = (perfil && perfil.nome) ? perfil.nome : session.user.email;
             const funcaoUsuario = (perfil && perfil.funcao) ? ` (${perfil.funcao})` : '';
             boasVindasEl.textContent = `Olá, ${nomeUsuario}${funcaoUsuario}! Selecione um dos módulos abaixo para visualizar os relatórios:`;
-
-            if (perfil && perfil.ativo && (perfil.escopo === 'ADM' || perfil.escopo === 'ADMIN')) {
-                btnAreaAdmin.style.display = 'inline-block';
-            } else {
-                btnAreaAdmin.style.display = 'none';
-            }
         } else {
             cardLogin.style.display = 'block';
             cardPainel.style.display = 'none';
             btnSair.style.display = 'none';
             btnAreaAdmin.style.display = 'none';
         }
-    }
 
-    verificarSessao();
+        // Card de Analytics: EXCLUSIVO para ADM ativo.
+        cardAnalytics.style.display = isAdmin ? 'block' : 'none';
+        if (isAdmin) {
+            sincronizarFonte();
+            loadAnalytics();
+        }
+    }
 
     // Login
     document.getElementById('form-login').addEventListener('submit', async (e) => {
@@ -327,7 +500,8 @@
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
 
-            verificarSessao();
+            await verificarSessao();
+            logEvent('login');
         } catch (err) {
             msgEl.style.display = 'block';
             msgEl.textContent = 'Erro ao realizar login: ' + (err.message || 'Credenciais inválidas.');
@@ -340,8 +514,9 @@
 
     // Logout
     btnSair.addEventListener('click', async () => {
+        await logEvent('logout');
         await supabaseClient.auth.signOut();
-        verificarSessao();
+        await verificarSessao();
     });
 
     // Contador de Visitas
@@ -425,10 +600,378 @@
         const link = card.querySelector('.btn-module');
         if (!link) return;
         card.addEventListener('click', (e) => {
+            logEvent('module_click', { modulo: card.dataset.modulo || null });
             if (e.target.closest('a')) return;
             window.open(link.getAttribute('href'), '_blank', 'noopener');
         });
     });
+
+    /* ============================================================
+       REGISTRO DE EVENTOS
+       A gravação usa a RPC analytics_registrar (security definer):
+       o escopo e o user_id são carimbados no servidor a partir do
+       perfil real, então o cliente não consegue forjar ADM.
+       ============================================================ */
+    function rid() {
+        return (crypto.randomUUID ? crypto.randomUUID()
+            : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
+    }
+    function getVisitanteId() {
+        try {
+            let v = localStorage.getItem('analytics-vid');
+            if (!v) { v = rid(); localStorage.setItem('analytics-vid', v); }
+            return v;
+        } catch (e) { return rid(); }
+    }
+    function getSessaoId() {
+        try {
+            let v = sessionStorage.getItem('analytics-sid');
+            if (!v) { v = rid(); sessionStorage.setItem('analytics-sid', v); }
+            return v;
+        } catch (e) { return rid(); }
+    }
+
+    // espelho local (resiliência: se a gravação remota falhar, o dado fica aqui)
+    function pushLocal(row) {
+        try {
+            const buf = JSON.parse(localStorage.getItem('analytics-local') || '[]');
+            buf.push(Object.assign({ criado_em: new Date().toISOString() }, row));
+            while (buf.length > 200) buf.shift();
+            localStorage.setItem('analytics-local', JSON.stringify(buf));
+        } catch (e) { /* silencioso */ }
+    }
+
+    async function logEvent(evento, extra) {
+        extra = extra || {};
+        const row = {
+            evento: evento,
+            pagina: 'index.html',
+            modulo: extra.modulo || null,
+            sessao_id: getSessaoId(),
+            visitante_id: getVisitanteId(),
+            referrer: document.referrer || null,
+            user_agent: navigator.userAgent,
+            metadata: extra.metadata || {}
+        };
+        pushLocal(row);
+        try {
+            const { error } = await supabaseClient.rpc('analytics_registrar', row);
+            if (error) { /* silencioso: nunca bloqueia a navegação */ }
+        } catch (e) { /* silencioso */ }
+    }
+
+    function logPageViewOnce() {
+        try {
+            if (sessionStorage.getItem('analytics-pv') === '1') return;
+            sessionStorage.setItem('analytics-pv', '1');
+        } catch (e) { /* ignora */ }
+        logEvent('page_view');
+    }
+
+    /* ============================================================
+       ANALYTICS — card exclusivo ADM
+       ============================================================ */
+    const anKpis = document.getElementById('an-kpis');
+    const anChart = document.getElementById('an-chart');
+    const anRank = document.getElementById('an-rank');
+    const anRecent = document.getElementById('an-recent');
+    const anSource = document.getElementById('an-source');
+    const anStatus = document.getElementById('an-status');
+    const anMsg = document.getElementById('an-msg');
+    const anTooltip = document.getElementById('an-tooltip');
+    const anPeriodo = document.getElementById('an-periodo');
+    const btnReal = document.getElementById('an-fonte-real');
+    const btnDemo = document.getElementById('an-fonte-demo');
+    const btnPurgar = document.getElementById('an-purgar');
+
+    function setMsg(text, kind) {
+        anMsg.textContent = text || '';
+        anMsg.className = 'msg' + (text ? ' ' + kind : '');
+        anMsg.style.display = text ? 'block' : 'none';
+    }
+    function setSource(fonte) {
+        fonteAtual = fonte;
+        anSource.className = 'an-source ' + fonte;
+        anSource.textContent = fonte === 'real' ? 'Supabase · real' : 'Demonstração';
+        btnPurgar.style.display = (isAdmin && fonte === 'real') ? 'inline-flex' : 'none';
+    }
+    function setLoading(on) {
+        cardAnalytics.classList.toggle('an-loading', on);
+    }
+
+    function sincronizarFonte() {
+        btnReal.disabled = !isAdmin;
+        btnReal.title = isAdmin ? 'Dados reais do Supabase' : 'Somente ADM';
+        if (uiFonte === 'auto') uiFonte = isAdmin ? 'real' : 'demo';
+        if (uiFonte === 'real' && !isAdmin) uiFonte = 'demo';
+        btnReal.classList.toggle('active', uiFonte === 'real');
+        btnDemo.classList.toggle('active', uiFonte !== 'real');
+    }
+    btnReal.addEventListener('click', () => { if (!isAdmin) return; uiFonte = 'real'; sincronizarFonte(); loadAnalytics(); });
+    btnDemo.addEventListener('click', () => { uiFonte = 'demo'; sincronizarFonte(); loadAnalytics(); });
+    anPeriodo.addEventListener('change', loadAnalytics);
+    document.getElementById('an-refresh').addEventListener('click', loadAnalytics);
+    document.getElementById('an-export').addEventListener('click', exportCSV);
+    btnPurgar.addEventListener('click', purgar);
+
+    async function fetchReal(dias) {
+        const { data, error } = await supabaseClient.rpc('analytics_resumo', { dias: dias });
+        if (error) throw error;
+        if (!data || data.autorizado === false) throw new Error('nao_autorizado');
+        return data;
+    }
+
+    async function loadAnalytics() {
+        if (!isAdmin) return;
+        setLoading(true);
+        setMsg('');
+        const dias = parseInt(anPeriodo.value, 10) || 30;
+        let resumo = null;
+        let fonte = 'demo';
+
+        if (uiFonte === 'real') {
+            try {
+                resumo = await fetchReal(dias);
+                fonte = 'real';
+            } catch (err) {
+                resumo = demoResumo(dias);
+                fonte = 'demo';
+                uiFonte = 'demo';
+                sincronizarFonte();
+                setMsg('Não foi possível ler os dados reais (' + ((err && err.message) ? err.message : err) + '). Exibindo demonstração.', 'error');
+            }
+        } else {
+            resumo = demoResumo(dias);
+            fonte = 'demo';
+        }
+
+        resumoAtual = resumo;
+        setSource(fonte);
+        renderResumo(resumo);
+
+        const vazio = !resumo || !resumo.totais || (resumo.totais.visitas === 0 && resumo.totais.cliques === 0);
+        if (fonte === 'real' && vazio) {
+            setMsg('Ainda não há eventos reais no período. Navegue pelos módulos para gerar dados — ou clique em “Demonstração” para ver o layout.', 'ok');
+        }
+
+        const quando = (resumo && resumo.gerado_em) ? new Date(resumo.gerado_em).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+        anStatus.innerHTML = '<span class="dot"></span><span>' + (fonte === 'real' ? 'Dados reais do Supabase' : 'Dados de demonstração') + ' · atualizado em ' + esc(quando) + ' · período de ' + dias + ' dias</span>';
+        setLoading(false);
+    }
+
+    /* ---------- demonstração determinística ---------- */
+    function mulberry32(a) {
+        return function () {
+            a |= 0; a = a + 0x6D2B79F5 | 0;
+            let t = Math.imul(a ^ a >>> 15, 1 | a);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+    function demoResumo(dias) {
+        const rnd = mulberry32(20261113 + dias);
+        const hoje = new Date();
+        const serie = [];
+        for (let i = dias - 1; i >= 0; i--) {
+            const d = new Date(hoje); d.setDate(hoje.getDate() - i);
+            const dow = d.getDay();
+            const base = (dow === 0 || dow === 6) ? 42 : 118;
+            const visitas = Math.round(base * (0.7 + rnd() * 0.6));
+            const cliques = Math.round(visitas * (1.4 + rnd() * 0.9));
+            const visitantes = Math.round(visitas * (0.55 + rnd() * 0.2));
+            serie.push({ dia: isoDate(d), visitas: visitas, cliques: cliques, visitantes: visitantes });
+        }
+        const pesos = {
+            'prova-paulista': 1.0, 'alura': .86, 'tarefa-sp': .8, 'leia-sp': .72, 'matific': .66,
+            'redacao-paulista': .6, 'aluno-presente': .55, 'saresp': .46, 'apoio-presencial': .4,
+            'robotica': .34, 'khan-academy': .55
+        };
+        const somaPesos = Object.values(pesos).reduce((a, b) => a + b, 0);
+        const totalCliques = serie.reduce((a, s) => a + s.cliques, 0);
+        const modulos = Object.entries(pesos)
+            .map(([m, w]) => ({ modulo: m, cliques: Math.round(totalCliques * w / somaPesos * (0.8 + rnd() * 0.4)) }))
+            .sort((a, b) => b.cliques - a.cliques);
+        const totVisitas = serie.reduce((a, s) => a + s.visitas, 0);
+        const totVisitantes = Math.round(totVisitas * 0.6);
+        const recentes = [];
+        const evs = ['module_click', 'module_click', 'page_view', 'module_click', 'login', 'module_click', 'page_view', 'logout'];
+        const mods = Object.keys(pesos);
+        for (let i = 0; i < 10; i++) {
+            const t = new Date(Date.now() - i * 7 * 60000 - Math.floor(rnd() * 3) * 60000);
+            const ev = evs[i % evs.length];
+            recentes.push({
+                criado_em: t.toISOString(),
+                evento: ev,
+                modulo: ev === 'module_click' ? mods[Math.floor(rnd() * mods.length)] : null,
+                escopo: rnd() > 0.6 ? 'ADM' : (rnd() > 0.3 ? 'USER' : null)
+            });
+        }
+        return {
+            autorizado: true, dias: dias, gerado_em: new Date().toISOString(),
+            totais: { visitas: totVisitas, cliques: totalCliques, visitantes: totVisitantes, modulos_ativos: mods.length },
+            serie: serie, modulos: modulos, recentes: recentes
+        };
+    }
+
+    /* ---------- renderização ---------- */
+    function trend(serie, key) {
+        if (!serie || serie.length < 4) return null;
+        const half = Math.floor(serie.length / 2);
+        const a = serie.slice(0, half).reduce((s, x) => s + (x[key] || 0), 0);
+        const b = serie.slice(half).reduce((s, x) => s + (x[key] || 0), 0);
+        if (a === 0) return b > 0 ? 100 : 0;
+        return Math.round((b - a) / a * 100);
+    }
+    function trendHTML(p) {
+        if (p == null) return '<span class="an-trend flat">—</span>';
+        const cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat';
+        const arrow = p > 0 ? '▲' : p < 0 ? '▼' : '■';
+        return '<span class="an-trend ' + cls + '">' + arrow + ' ' + Math.abs(p) + '%</span>';
+    }
+    function animarValor(el, alvo) {
+        if (reduceMotion) { el.textContent = fmtNum(alvo); return; }
+        const dur = 900, ini = performance.now();
+        function passo(t) {
+            const p = Math.min((t - ini) / dur, 1);
+            const s = 1 - Math.pow(1 - p, 3);
+            el.textContent = fmtNum(alvo * s);
+            if (p < 1) requestAnimationFrame(passo);
+        }
+        requestAnimationFrame(passo);
+    }
+    function renderResumo(r) {
+        const t = r.totais || {};
+        const kpis = [
+            { label: 'Visitas', val: t.visitas || 0, c: '#0d9488', key: 'visitas', icon: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>' },
+            { label: 'Cliques em módulos', val: t.cliques || 0, c: '#0284c7', key: 'cliques', icon: '<path d="M9 9l5 12 1.8-5.2L21 14Z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6M6 12l-1.9 2"/>' },
+            { label: 'Visitantes únicos', val: t.visitantes || 0, c: '#7c3aed', key: 'visitantes', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+            { label: 'Módulos ativos', val: t.modulos_ativos || 0, c: '#f59e0b', key: null, icon: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>' }
+        ];
+        anKpis.innerHTML = kpis.map((k, i) =>
+            '<div class="an-kpi" style="--kpi-c:' + k.c + '"><div class="an-kpi-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + k.icon + '</svg>' + esc(k.label) + '</div><div class="an-kpi-value" id="an-kpi-' + i + '">0</div><div class="an-kpi-foot">' + (k.key ? trendHTML(trend(r.serie, k.key)) + '<span>tendência no período</span>' : '<span>com acesso no período</span>') + '</div></div>'
+        ).join('');
+        kpis.forEach((k, i) => animarValor(document.getElementById('an-kpi-' + i), k.val));
+        renderChart(r.serie || []);
+        renderRank(r.modulos || [], t.cliques || 0);
+        renderRecent(r.recentes || []);
+    }
+
+    function renderChart(serie) {
+        if (!serie.length) { anChart.innerHTML = '<div class="an-empty">Sem dados no período.</div>'; return; }
+        const W = 720, H = 240, padL = 44, padR = 14, padT = 14, padB = 30;
+        const iw = W - padL - padR, ih = H - padT - padB;
+        const maxV = Math.max(1, ...serie.map(s => Math.max(s.visitas || 0, s.cliques || 0)));
+        const n = serie.length;
+        const x = i => padL + (n === 1 ? iw / 2 : i * iw / (n - 1));
+        const y = v => padT + ih - (v / maxV) * ih;
+        function path(key) { return serie.map((s, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(s[key] || 0).toFixed(1)).join(' '); }
+        function area(key) { return path(key) + ' L' + x(n - 1).toFixed(1) + ' ' + (padT + ih) + ' L' + x(0).toFixed(1) + ' ' + (padT + ih) + ' Z'; }
+        let grid = '', ylabels = '';
+        for (let g = 0; g <= 4; g++) {
+            const vy = padT + ih - g * ih / 4;
+            const val = Math.round(maxV * g / 4);
+            grid += '<line x1="' + padL + '" y1="' + vy + '" x2="' + (W - padR) + '" y2="' + vy + '" stroke="#e2e8f0" stroke-width="1"/>';
+            ylabels += '<text x="' + (padL - 8) + '" y="' + (vy + 4) + '" text-anchor="end" font-size="10" fill="#94a3b8">' + fmtNum(val) + '</text>';
+        }
+        let xlabels = '';
+        const step = Math.max(1, Math.ceil(n / 6));
+        for (let i = 0; i < n; i += step) {
+            const d = serie[i].dia.slice(5).split('-');
+            xlabels += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10" fill="#94a3b8">' + d[2] + '/' + d[1] + '</text>';
+        }
+        let hover = '';
+        for (let i = 0; i < n; i++) {
+            const bw = iw / Math.max(1, n - 1);
+            hover += '<rect class="an-hover" data-i="' + i + '" x="' + (x(i) - bw / 2) + '" y="' + padT + '" width="' + bw + '" height="' + ih + '" fill="transparent"/>';
+        }
+        anChart.innerHTML =
+            '<svg class="an-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolução diária de visitas e cliques">' +
+            '<defs><linearGradient id="gVis" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d9488" stop-opacity="0.28"/><stop offset="1" stop-color="#0d9488" stop-opacity="0.02"/></linearGradient>' +
+            '<linearGradient id="gCli" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0284c7" stop-opacity="0.2"/><stop offset="1" stop-color="#0284c7" stop-opacity="0.02"/></linearGradient></defs>' +
+            grid + ylabels + xlabels +
+            '<path d="' + area('cliques') + '" fill="url(#gCli)"/>' +
+            '<path d="' + area('visitas') + '" fill="url(#gVis)"/>' +
+            '<path d="' + path('cliques') + '" fill="none" stroke="#0284c7" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+            '<path d="' + path('visitas') + '" fill="none" stroke="#0d9488" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>' +
+            hover + '</svg>';
+        const wrap = document.getElementById('an-chart-wrap');
+        const svg = anChart.querySelector('svg');
+        svg.querySelectorAll('.an-hover').forEach(rect => {
+            rect.addEventListener('mousemove', ev => {
+                const i = +rect.dataset.i;
+                const s = serie[i];
+                const r = wrap.getBoundingClientRect();
+                anTooltip.innerHTML = '<strong>' + esc(s.dia.split('-').reverse().join('/')) + '</strong>Visitas: ' + fmtNum(s.visitas) + '<br>Cliques: ' + fmtNum(s.cliques) + '<br>Únicos: ' + fmtNum(s.visitantes);
+                anTooltip.style.opacity = '1';
+                let tx = ev.clientX - r.left + 14, ty = ev.clientY - r.top - 10;
+                if (tx + 150 > r.width) tx = ev.clientX - r.left - 160;
+                anTooltip.style.left = tx + 'px';
+                anTooltip.style.top = ty + 'px';
+            });
+            rect.addEventListener('mouseleave', () => { anTooltip.style.opacity = '0'; });
+        });
+    }
+
+    function renderRank(modulos, total) {
+        if (!modulos.length) { anRank.innerHTML = '<div class="an-empty">Nenhum acesso registrado.</div>'; return; }
+        const max = Math.max(1, ...modulos.map(m => m.cliques));
+        anRank.innerHTML = modulos.map((m, i) => {
+            const nome = MODULE_NAMES[m.modulo] || m.modulo;
+            const share = total ? Math.round(m.cliques / total * 100) : 0;
+            return '<div class="an-rank-row' + (i < 3 ? ' top' : '') + '"><span class="an-rank-pos">' + (i + 1) + 'º</span><span class="an-rank-name" title="' + esc(nome) + '">' + esc(nome) + '</span><span class="an-rank-val">' + fmtNum(m.cliques) + '<span class="an-rank-share">' + share + '%</span></span><span class="an-rank-bar"><span class="an-rank-fill" style="width:' + Math.round(m.cliques / max * 100) + '%"></span></span></div>';
+        }).join('');
+    }
+
+    function renderRecent(recentes) {
+        if (!recentes.length) {
+            anRecent.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:16px">Sem eventos recentes.</td></tr>';
+            return;
+        }
+        const nomes = { page_view: 'Visita', module_click: 'Clique', login: 'Login', logout: 'Logout' };
+        anRecent.innerHTML = recentes.map(r => {
+            const quando = new Date(r.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const mod = r.modulo ? (MODULE_NAMES[r.modulo] || r.modulo) : '—';
+            return '<tr><td>' + esc(quando) + '</td><td><span class="an-ev ' + esc(r.evento) + '">' + esc(nomes[r.evento] || r.evento) + '</span></td><td>' + esc(mod) + '</td><td><span class="an-escopo">' + esc(r.escopo || 'anônimo') + '</span></td></tr>';
+        }).join('');
+    }
+
+    /* ---------- exportar CSV ---------- */
+    function exportCSV() {
+        if (!resumoAtual) return;
+        const lines = ['tipo;dia;visitas;cliques;visitantes'];
+        (resumoAtual.serie || []).forEach(s => lines.push('serie;' + s.dia + ';' + s.visitas + ';' + s.cliques + ';' + s.visitantes));
+        lines.push('');
+        lines.push('tipo;modulo;cliques');
+        (resumoAtual.modulos || []).forEach(m => lines.push('modulo;' + (MODULE_NAMES[m.modulo] || m.modulo) + ';' + m.cliques));
+        const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'analytics-plataforma-' + isoDate(new Date()) + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+        setMsg('CSV exportado.', 'ok');
+        setTimeout(() => setMsg(''), 3000);
+    }
+
+    /* ---------- purgar (ADM) ---------- */
+    async function purgar() {
+        if (!isAdmin || fonteAtual !== 'real') return;
+        if (!confirm('Apagar eventos com mais de 90 dias? Esta ação não pode ser desfeita.')) return;
+        try {
+            const { data, error } = await supabaseClient.rpc('analytics_purgar', { dias: 90 });
+            if (error) throw error;
+            setMsg('Purga concluída: ' + fmtNum(data) + ' eventos removidos.', 'ok');
+            loadAnalytics();
+        } catch (err) {
+            setMsg('Falha ao purgar: ' + ((err && err.message) ? err.message : err), 'error');
+        }
+    }
+
+    /* ---------- init ---------- */
+    (async function init() {
+        await verificarSessao();
+        logPageViewOnce();
+    })();
 </script>
 </body>
 </html>
