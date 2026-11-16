@@ -33,7 +33,7 @@ Supabase (projeto: hygvdaixsqogcmcolnyx)
 
 | Arquivo | Acesso | Função |
 |---|---|---|
-| `index.html` | público | Login e painel de módulos + **card de Analytics de uso** (visível apenas para ADM ativo) + contador de visitas |
+| `index.html` | público | Login e painel de módulos + contador de visitas (Abacus) |
 | `dashboard.html` | autenticado | **Dashboard da Prova Paulista**: KPIs, ranking, dispersão participação × desempenho, perfil de competências e evolução por edição |
 | `dashboard-alura.html` | autenticado | **Dashboard da Plataforma Alura**: indicador principal de cada ano, engajamento por escola e evolução do uso da plataforma |
 | `alura.html` | autenticado | Módulo Alura: tabela por escola/ano com filtro de ano letivo |
@@ -286,3 +286,23 @@ Deploy manual (quando o auto-deploy não desirable):
 ```bash
 npx vercel --prod --yes
 ```
+
+## 10. Analytics de Uso (exclusivo ADM)
+
+O card de Analytics deixou a `index.html` e agora vive na **`admin.html`**, na aba **"Analytics"** (e na sub-aba **"Usuários Detalhado"**), acessível apenas a ADM ativo.
+
+### O que é rastreado
+Cada página autenticada registra automaticamente (via `config.js`, sem editar página por página):
+- `page_view` — 1 vez por sessão em cada página visitada
+- `module_click` — ao abrir um módulo do painel inicial
+- `heartbeat` — a cada 5 minutos enquanto a aba está visível (base para o tempo de uso)
+- `login` / `logout` — autenticação
+
+### O que o ADM vê
+- **Visão geral**: KPIs (visitas, cliques em módulos, visitantes únicos, páginas acessadas), gráfico de evolução diária (visitas × cliques), ranking de módulos e de páginas, eventos recentes.
+- **Usuários Detalhado**: tabela com **nome, e-mail, função, escopo, status, visitas, cliques, páginas acessadas, tempo de uso estimado, 1º e último acesso** — com busca, ordenação e exportação CSV (PII, somente ADM).
+
+### Banco
+Tabela `analytics_eventos` + RPCs (`analytics_registrar`, `analytics_resumo`, `analytics_usuarios`, `analytics_purgar`) criadas por **`supabase-analytics.sql`**. A gravação usa `SECURITY DEFINER`: o `escopo` e o `user_id` são carimbados no servidor a partir de `perfis_usuarios`, então o cliente não consegue forjar ADM. `anon` não tem privilégio de tabela — apenas executa a RPC de gravação.
+
+O script é idempotente: execute uma vez no Supabase Dashboard > SQL Editor.
