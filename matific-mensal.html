@@ -68,7 +68,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <article class="panel" id="cpP" style="margin-bottom:18px;display:none"><h2>Comparação dos meses selecionados</h2><p id="cpd"></p><div class="tw" style="max-height:none"><table id="cpR"></table></div><div class="tw" style="max-height:480px;margin-top:16px"><table id="cpE"></table></div></article>
 <article class="panel" style="margin-bottom:18px"><h2>Mapa de calor: escola × mês</h2><p id="hmp"></p><div class="tw" style="max-height:560px"><table class="hm" id="hm"></table></div></article>
 <article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv" style="background:var(--p)">Exportar CSV</button></p></article>
-<p class="foot" id="fonte">Fonte: planilhas mensais do Matific (fev–out/2026). Filtros da exportação: Diretoria Marília, Ensino Fundamental Anos Finais.</p>
+<p class="foot" id="fonte">Atualizado em 17/11/2026. Fonte: Escola Total.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script>
 /* Dados de reserva: planilhas mensais. ESC = escolas; BM[mês] = {s: semanas, r: [[matrículas, ativos, iniciadas, concluídas, índice semanal]...]} */
@@ -191,10 +191,10 @@ async function carregarSupabase(){
     if(banco.ano===DB.ano){
       /* Mescla: meses presentes no banco tem prioridade; meses ainda nao importados caem no backup embutido da pagina (evita "perder" meses anteriores ao importar um novo mes). */
       DB={ano:banco.ano,meses:Object.assign({},DB.meses,banco.meses)};
-      fonte.textContent='Fonte: Supabase (resultados_matific_mensal) + backup embutido dos meses ainda nao importados, ano letivo '+DB.ano+'.';
+      fonte.textContent='Atualizado em 17/11/2026. Fonte: Escola Total.';
     }else{
       DB=banco;
-      fonte.textContent='Fonte: Supabase (resultados_matific_mensal), ano letivo '+DB.ano+', importada via admin.html.';
+      fonte.textContent='Atualizado em 17/11/2026. Fonte: Escola Total.';
     }
     sel=[];init();
   }catch(err){console.warn('Falha ao buscar resultados_matific_mensal:',err.message);}
