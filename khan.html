@@ -277,8 +277,6 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
 
   <footer>
     <span id="fonte" data-atualizacao="khan">Fonte: Escola Total.</span>
-    <span id="fonteDetalhe"></span>
-    <span><i class="fas fa-shield-halved"></i>Dados agregados por escola · sem dados pessoais de alunos (LGPD).</span>
   </footer>
 </main>
 
@@ -477,11 +475,8 @@ if(e1||!anos||!anos.length)throw new Error('sem dados');
 const{data,error}=await SB.from('resultados_khan').select('*').eq('ano',anos[0].ano).range(0,4999);
 if(error||!data||!data.length)throw new Error('consulta falhou');
 DB=aPartirDeBanco(data);fonte='supabase';
-
-$('#fonteDetalhe').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) · ano '+DB.ano+' · importada via admin.html.';
 cur=avail().at(-1);cmp=null;fillSchoolSelect();render();if(!silent)toast('Dados carregados do Supabase.');
 }catch(err){fonte='local';
-$('#fonteDetalhe').textContent='Sem dados no Supabase: exibindo a semente local de fev/2026.';
 if(!silent)toast('Sem dados no Supabase � usando semente local de fev/2026.','warn');}
 finally{btn.classList.remove('spin')}}
 $('#btnRefresh').onclick=()=>carregarSupabase(false);
