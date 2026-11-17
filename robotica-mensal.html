@@ -1448,6 +1448,17 @@ tfoot td.l{background:var(--surface2)}
     }
   }
 
+  function linhaDoBackup(mes, r) {
+    return {
+      mes: mes,
+      codigo_escola: r.codigo,
+      escola: r.escola,
+      semanas: (BASE.semanas || {})[String(mes)],
+      mat: r.mat, pub: r.pub, rasc: r.rasc, corr: r.corr, dev: r.dev,
+      conc: r.conc, acerto: r.acerto, indice: r.indice, nota: r.nota
+    };
+  }
+
   async function carregarDoSupabase() {
     var status = $("#data-status");
     if (typeof supabaseClient === "undefined") return false;
@@ -1456,8 +1467,23 @@ tfoot td.l{background:var(--surface2)}
         .select("*").eq("ano", ANO).order("mes", { ascending: true }).range(0, 4999);
       if (resp.error) throw resp.error;
       if (!resp.data || !resp.data.length) throw new Error("sem dados");
-      montarDoSupabase(resp.data);
-      status.textContent = "Dados de " + ANO + " carregados do Supabase (" + HAVE.length + " meses).";
+      /* Mescla: meses presentes no banco tem prioridade; meses ainda nao
+         importados vem do backup embutido. Evita "perder" os meses anteriores
+         quando um novo mes e importado pelo admin. */
+      var mesesBanco = {};
+      resp.data.forEach(function (r) {
+        var mes = Number(r.mes);
+        if (mes >= 1 && mes <= 12) mesesBanco[mes] = true;
+      });
+      var linhas = [];
+      Object.keys(BASE.meses).forEach(function (m) {
+        if (!mesesBanco[Number(m)]) {
+          (BASE.meses[m] || []).forEach(function (r) { linhas.push(linhaDoBackup(Number(m), r)); });
+        }
+      });
+      resp.data.forEach(function (r) { linhas.push(r); });
+      montarDoSupabase(linhas);
+      status.textContent = "Dados de " + ANO + " carregados (" + HAVE.length + " meses; Supabase + backup embutido).";
       status.hidden = false;
       return true;
     } catch (e) {
