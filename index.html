@@ -375,9 +375,7 @@
         const valueEl = document.getElementById('visit-counter-value');
         if (!pill || !valueEl) return;
 
-        const NAMESPACE = 'aguinaldofreeeman';
-        const COUNTER_KEY = 'dadoseducacionais-index';
-        const BASE_URL = 'https://abacus.jasoncameron.dev';
+        const CHAVE_CONTADOR = 'index';
         const CACHE_KEY = 'visitas-index-cache'; // último total oficial conhecido
         const MAX_KEY = 'visitas-index-max';     // maior total já visto (piso anti-regressão)
 
@@ -426,25 +424,29 @@
             } catch (e) {}
         }
 
+        const comLimite = (promessa, ms) => {
+            let cancelar;
+            const tempo = new Promise((_, falhar) => { cancelar = setTimeout(() => falhar(new Error('Tempo esgotado')), ms); });
+            return Promise.race([promessa, tempo]).finally(() => clearTimeout(cancelar));
+        };
+
         async function obterContador() {
             let jaContou = false;
             try { jaContou = sessionStorage.getItem('visita-contada') === '1'; } catch (e) {}
 
-            const acao = jaContou ? 'get' : 'hit';
-            const controle = new AbortController();
-            const limite = setTimeout(() => controle.abort(), 6000); // nao trava o pill esperando a API
-            try {
-                const resposta = await fetch(`${BASE_URL}/${acao}/${NAMESPACE}/${COUNTER_KEY}`, { cache: 'no-store', signal: controle.signal });
-                if (!resposta.ok) throw new Error('Contador indisponível');
-                const dados = await resposta.json();
-                if (typeof dados.value !== 'number') throw new Error('Resposta inválida');
-                if (!jaContou) {
-                    try { sessionStorage.setItem('visita-contada', '1'); } catch (e) {}
-                }
-                return dados.value;
-            } finally {
-                clearTimeout(limite);
+            // Contagem no Supabase: a RPC incrementa (1x por sessão do navegador) e devolve o total
+            const chamada = jaContou
+                ? supabaseClient.rpc('contador_visitas_obter', { p_chave: CHAVE_CONTADOR })
+                : supabaseClient.rpc('contador_visitas_registrar', { p_chave: CHAVE_CONTADOR });
+
+            const { data, error } = await comLimite(chamada, 6000); // nao trava o pill esperando a rede
+            if (error) throw new Error(error.message || 'Contador indisponível');
+            const total = Number(data); // bigint chega como texto no JSON
+            if (!Number.isFinite(total) || total <= 0) throw new Error('Resposta inválida');
+            if (!jaContou) {
+                try { sessionStorage.setItem('visita-contada', '1'); } catch (e) {}
             }
+            return total;
         }
 
         // 1) Exibe imediatamente o último total conhecido, sem esperar a rede
