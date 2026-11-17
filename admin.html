@@ -1296,6 +1296,7 @@
             if (error) throw error;
 
             previewEl.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosPlanilhaProcessados.length} registros foram gravados na tabela resultados_alura.${aviso}</span>`;
+            await registrarAtualizacao('alura', String(anoImportacao), dadosPlanilhaProcessados.length);
             document.getElementById('import-file').value = '';
             dadosPlanilhaProcessados = [];
         } catch (err) {
@@ -1379,6 +1380,7 @@
             const { error } = await supabaseClient.from('resultados_matific').insert(dadosMatificProcessados);
             if (error) throw error;
             preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosMatificProcessados.length} registros foram gravados na tabela resultados_matific.</span>`;
+            await registrarAtualizacao('matific', String(ano), dadosMatificProcessados.length);
             document.getElementById('matific-file').value = ''; dadosMatificProcessados = [];
         } catch (err) {
             console.error('Erro na importação Matific:', err);
@@ -1486,6 +1488,7 @@
             const { error } = await supabaseClient.from('resultados_matific_mensal').insert(dadosMatificMensalProcessados);
             if (error) throw error;
             preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosMatificMensalProcessados.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_matific_mensal.</span>`;
+            await registrarAtualizacao('matific-mensal', `${mesNome}/${ano}`, dadosMatificMensalProcessados.length);
             document.getElementById('matific-mensal-file').value = ''; dadosMatificMensalProcessados = []; contextoMatificMensal = null;
         } catch (err) {
             console.error('Erro na importação Matific mensal:', err);
@@ -1583,6 +1586,7 @@
             const { error } = await supabaseClient.from('resultados_saresp').insert(dadosSarespProcessados);
             if (error) throw error;
             preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosSarespProcessados.length} registros foram gravados na tabela resultados_saresp.</span>`;
+            await registrarAtualizacao('saresp', String(ano), dadosSarespProcessados.length);
             document.getElementById('saresp-file').value = ''; dadosSarespProcessados = []; regionalSaresp = null;
         } catch (err) {
             console.error('Erro na importação SARESP:', err);
@@ -1817,6 +1821,7 @@
 
             preview.innerHTML = '<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ' + todos.length +
                 ' registros gravados na tabela resultados_redacao (' + dadosRedacao.escolas + ' escolas + regional, ano ' + ano + ', quinzena ' + quinzena + ').</span>';
+            await registrarAtualizacao('redacao', `ano ${ano} · quinzena ${quinzena}`, todos.length);
             document.getElementById('redacao-file').value = '';
             dadosRedacao = null;
         } catch (err) {
@@ -2181,6 +2186,7 @@
             }
 
             previewEl.innerHTML = `<span style="color:green;"><strong>Importação concluída!</strong> ${ppRegistros.length} registros gravados em "${ppEdicao}" (${ppAno}).${aviso}</span>`;
+            await registrarAtualizacao('prova-paulista', `${ppEdicao} (${ppAno})`, ppRegistros.length);
             document.getElementById('pp-file').value = '';
             ppRegistros = [];
             btnConfirmar.textContent = '2. Confirmar Importação';
@@ -2934,6 +2940,15 @@
                                     ? `Importação concluída: ${registros.length} registros gravados em ${config.tabela} para a semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}. As demais semanas foram preservadas.`
                                     : `Importação concluída: ${registros.length} registros gravados em ${config.tabela}.`;
                 preview.className = 'msg success';
+                await registrarAtualizacao(
+                    MODULOS_ATUALIZACAO[tipo] || tipo,
+                    tipo === 'tarefa' ? (window.CONTEXTO_TAREFA && window.CONTEXTO_TAREFA.resumo)
+                        : tipo === 'leia' ? `Semana ${window.CONTEXTO_LEIA.semana} de ${window.CONTEXTO_LEIA.ano}`
+                            : tipo === 'apoio' ? `Ano ${anoApoio}`
+                                : tipo === 'robotica_mensal' ? `${MESES_ROBOTICA[periodoMensal.mes - 1]}/${periodoMensal.ano}`
+                                    : null,
+                    registros.length
+                );
                 input.value = '';
                 csvDadosPendentes[tipo] = null;
             } catch (erro) {
@@ -3335,6 +3350,7 @@
                 consRegistros.length + ' registro(s) gravados em dados_educacionais (' + consEdicoes.join(', ') + ')' +
                 (totalAvals ? ' e ' + totalAvals + ' registro(s) em avaliacoes_alura (ano ' + consAno + ').' : '.') +
                 avisos.map(a => ' <span style="color:#b45309;">Atenção: ' + consEscapar(a) + '</span>').join('') + '</span>';
+            await registrarAtualizacao('prova-paulista', consEdicoes.join(', ') + ' · ' + consAno, consRegistros.length);
             document.getElementById('cons-file').value = '';
             consRegistros = [];
             consAvaliacoes = [];
@@ -3547,6 +3563,7 @@
             if (error) throw error;
 
             preview.innerHTML = `<span style="color:green;"><strong>Importação realizada com sucesso!</strong> ${dadosAluraMensalProcessados.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_alura_mensal.</span>`;
+            await registrarAtualizacao('alura-mensal', `${mesNome}/${ano}`, dadosAluraMensalProcessados.length);
             document.getElementById('alura-mensal-file').value = '';
             dadosAluraMensalProcessados = []; contextoAluraMensal = null;
         } catch (err) {
@@ -3678,6 +3695,7 @@
             if (error) throw error;
             preview.innerHTML = `<span style="color:green;"><strong>Importacao realizada com sucesso!</strong> ${dadosKhanPendentes.length} registros de ${mesNome}/${ano} foram gravados na tabela resultados_khan.</span>`;
             preview.className = 'msg success';
+            await registrarAtualizacao('khan', `${mesNome}/${ano}`, dadosKhanPendentes.length);
             document.getElementById('khan-file').value = '';
             dadosKhanPendentes = []; contextoKhan = null;
         } catch (err) {
@@ -3688,6 +3706,36 @@
             confirmar.textContent = '2. Confirmar Importacao';
         }
     });
+
+    // =========================================================================
+    // Data e hora da última importação
+    // Grava em atualizacoes_dados (RPC) e alimenta o rodapé dos painéis:
+    // "Fonte: Escola Total. Atualizado em dd/mm/aaaa hh:mm."
+    // Nunca interrompe a importação: qualquer falha só gera aviso no console.
+    // =========================================================================
+    const MODULOS_ATUALIZACAO = {
+        presenca: 'presenca',
+        leia: 'leia',
+        tarefa: 'tarefa',
+        robotica: 'robotica',
+        robotica_mensal: 'robotica-mensal',
+        apoio: 'apoio'
+    };
+
+    async function registrarAtualizacao(modulo, periodo, registros, detalhe) {
+        if (!modulo) return;
+        try {
+            const { error } = await supabaseClient.rpc('registrar_atualizacao', {
+                p_modulo: modulo,
+                p_periodo: periodo || null,
+                p_registros: Number.isFinite(registros) ? registros : null,
+                p_detalhe: detalhe || {}
+            });
+            if (error) console.warn(`Data de atualização não registrada (${modulo}):`, error.message);
+        } catch (erro) {
+            console.warn(`Data de atualização não registrada (${modulo}):`, erro);
+        }
+    }
 
     configurarImportadorCsv('presenca');
     configurarImportadorCsv('apoio');

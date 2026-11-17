@@ -276,7 +276,8 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
   </article>
 
   <footer>
-    <span id="fonte">Fonte: Escola Total. Atualizada em 13/11/26</span>
+    <span id="fonte" data-atualizacao="khan">Fonte: Escola Total.</span>
+    <span id="fonteDetalhe"></span>
     <span><i class="fas fa-shield-halved"></i>Dados agregados por escola · sem dados pessoais de alunos (LGPD).</span>
   </footer>
 </main>
@@ -288,6 +289,7 @@ transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);ove
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="js/atualizacao.js" defer></script>
 <script>
 (function(){
 'use strict';
@@ -476,10 +478,10 @@ const{data,error}=await SB.from('resultados_khan').select('*').eq('ano',anos[0].
 if(error||!data||!data.length)throw new Error('consulta falhou');
 DB=aPartirDeBanco(data);fonte='supabase';
 
-$('#fonte').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) · ano '+DB.ano+' · importada via admin.html.';
+$('#fonteDetalhe').innerHTML='<i class="fas fa-database"></i>Fonte: Supabase (resultados_khan) · ano '+DB.ano+' · importada via admin.html.';
 cur=avail().at(-1);cmp=null;fillSchoolSelect();render();if(!silent)toast('Dados carregados do Supabase.');
 }catch(err){fonte='local';
-$('#fonte').textContent='Fonte: Escola Total. Atualizada em 13/11/26';
+$('#fonteDetalhe').textContent='Sem dados no Supabase: exibindo a semente local de fev/2026.';
 if(!silent)toast('Sem dados no Supabase � usando semente local de fev/2026.','warn');}
 finally{btn.classList.remove('spin')}}
 $('#btnRefresh').onclick=()=>carregarSupabase(false);
