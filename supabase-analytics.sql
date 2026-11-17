@@ -288,7 +288,9 @@ begin
   ) u
   right join public.perfis_usuarios p on p.id = u.user_id;
 
-  return resumo;
+  -- Retorna envelope {autorizado, usuarios} para casar com o contrato
+  -- esperado pelo cliente (admin.html), que lê data.usuarios.
+  return jsonb_build_object('autorizado', true, 'usuarios', resumo);
 end;
 $$;
 revoke all on function public.analytics_usuarios(integer) from public;

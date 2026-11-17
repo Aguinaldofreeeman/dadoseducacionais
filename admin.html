@@ -4400,7 +4400,7 @@
             const { data, error } = await supabaseClient.rpc('analytics_usuarios', { dias: dias });
             if (error) throw error;
             if (!data || data.autorizado === false) throw new Error('nao_autorizado');
-            usuariosDetalhado = (data && data.usuarios) || [];
+            usuariosDetalhado = Array.isArray(data) ? data : ((data && data.usuarios) || []);
             aplicarFiltroUsuario();
         } catch (err) {
             setMsgUsuario('Não foi possível carregar os dados de usuários (' + ((err && err.message) ? err.message : err) + ').', 'error');
