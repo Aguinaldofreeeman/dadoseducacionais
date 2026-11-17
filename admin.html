@@ -4451,7 +4451,7 @@
             const ativoTxt = u.ativo ? 'Ativo' : 'Inativo';
             const escopoCls = (u.escopo === 'ADM' || u.escopo === 'ADMIN') ? 'badge-admin' : 'badge-user';
             const ultimo = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
-            return '<tr>' +
+            return '<tr data-uid="' + esc(u.id || '') + '">' +
                 '<td><strong>' + esc(u.nome || '-') + '</strong></td>' +
                 '<td>' + esc(u.email || '-') + '</td>' +
                 '<td><span class="badge ' + escopoCls + '">' + esc(u.escopo || 'USER') + '</span></td>' +
@@ -4484,26 +4484,27 @@
         setTimeout(() => setMsgUsuario(''), 3000);
     }
 
-    // Exibe detalhe de eventos recentes de um usuário (clique na linha)
+    // Exibe eventos recentes do usuário específico (clique na linha)
     anUsuarioCorpo.addEventListener('click', async (e) => {
         const tr = e.target.closest('tr');
         if (!tr || anUsuarioDetalhe.innerHTML) return;
+        const uid = tr.getAttribute('data-uid');
         const nome = tr.cells[0].textContent.trim();
         const email = tr.cells[1].textContent.trim();
         anUsuarioDetalhe.innerHTML = '<h4 style="margin:0 0 8px">Eventos recentes — ' + esc(nome) + ' (' + esc(email) + ')</h4><div style="overflow-x:auto"><table class="an-table"><thead><tr><th>Quando</th><th>Evento</th><th>Página</th><th>Módulo</th></tr></thead><tbody id="an-detalhe-corpo"><tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:12px">Carregando…</td></tr></tbody></table></div><button type="button" onclick="fecharDetalheUsuario()" style="margin-top:10px;padding:8px 14px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer">Fechar</button>';
         const corpo = document.getElementById('an-detalhe-corpo');
         try {
-            // buscar eventos recentes deste usuário (filtrando pelo email não é direto; usa user_id — vamos trazer todos e filtrar no front por aproximação)
-            const { data, error } = await supabaseClient.rpc('analytics_resumo', { dias: 30 });
+            const dias = parseInt(anUsuarioPeriodo.value, 10) || 30;
+            const { data, error } = await supabaseClient.rpc('analytics_eventos_usuario', { p_user_id: uid, p_dias: dias });
             if (error) throw error;
-            const recentes = (data && data.recentes) || [];
-            // Sem user_id nos recentes, mostramos os gerais (melhor que nada)
+            if (!data || data.autorizado === false) throw new Error('nao_autorizado');
+            const recentes = (data && data.eventos) || [];
             corpo.innerHTML = recentes.map(r => {
-                const quando = new Date(r.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const quando = r.criado_em ? new Date(r.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
                 const pagina = r.pagina ? r.pagina.replace('.html', '') : '—';
                 const mod = r.modulo ? (nomesMod[r.modulo] || r.modulo) : '—';
                 return '<tr><td>' + esc(quando) + '</td><td><span class="an-ev ' + esc(r.evento) + '">' + esc(nomesEv[r.evento] || r.evento) + '</span></td><td>' + esc(pagina) + '</td><td>' + esc(mod) + '</td></tr>';
-            }).join('') || '<tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:12px">Sem eventos.</td></tr>';
+            }).join('') || '<tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:12px">Sem eventos no período.</td></tr>';
         } catch (err) {
             corpo.innerHTML = '<tr><td colspan="4" style="color:red;text-align:center;padding:12px">Erro ao carregar eventos.</td></tr>';
         }

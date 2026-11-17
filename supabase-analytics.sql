@@ -296,6 +296,44 @@ $$;
 revoke all on function public.analytics_usuarios(integer) from public;
 grant execute on function public.analytics_usuarios(integer) to anon, authenticated;
 
+-- 7b) RPC: eventos recentes de um usuario especifico ----------
+create or replace function public.analytics_eventos_usuario(
+  p_user_id uuid,
+  p_dias integer default 30
+)
+returns jsonb
+language plpgsql volatile security definer set search_path = public
+as $$
+declare
+  inicio date;
+  hoje date := (now() at time zone 'America/Sao_Paulo')::date;
+  resumo jsonb;
+begin
+  if not public.is_adm() then
+    return jsonb_build_object('autorizado', false);
+  end if;
+  p_dias := greatest(1, least(coalesce(p_dias, 30), 365));
+  inicio := hoje - (p_dias - 1);
+  if p_user_id is null then
+    return jsonb_build_object('autorizado', true, 'eventos', '[]'::jsonb);
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'criado_em', e.criado_em,
+    'evento', e.evento,
+    'modulo', e.modulo,
+    'escopo', e.escopo,
+    'pagina', e.pagina
+  ) order by e.criado_em desc), '[]'::jsonb)
+  into resumo
+  from public.analytics_eventos e
+  where e.user_id = p_user_id
+    and e.dia >= inicio;
+  return jsonb_build_object('autorizado', true, 'eventos', resumo);
+end;
+$$;
+revoke all on function public.analytics_eventos_usuario(uuid, integer) from public;
+grant execute on function public.analytics_eventos_usuario(uuid, integer) to anon, authenticated;
+
 -- 8) RPC: purgar eventos antigos (manutenção ADM) ------------
 create or replace function public.analytics_purgar(dias integer default 90)
 returns integer
