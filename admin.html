@@ -748,9 +748,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nome</th>
+                        <th id="th-nome-usuario" style="cursor:pointer" onclick="ordenarUsuariosCadastrados('nome')" title="Ordenar por nome">Nome ▲▼</th>
                         <th>E-mail</th>
-                        <th>Função</th>
+                        <th id="th-funcao-usuario" style="cursor:pointer" onclick="ordenarUsuariosCadastrados('funcao')" title="Ordenar por função">Função ▲▼</th>
                         <th>Escopo</th>
                         <th>Status</th>
                         <th>Ações</th>
@@ -942,6 +942,8 @@
 <script>
 
     let usuariosLocais = [];
+    let ordemUsuariosCadastrados = null;
+    let direcaoUsuariosCadastrados = 'asc';
 
     window.ESCOLAS_CODIGO = {};
     window.CONTEXTO_LEIA = null;
@@ -1005,32 +1007,66 @@
             if (error) throw error;
 
             usuariosLocais = data || [];
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">Nenhum usuário cadastrado.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = data.map(usr => `
-                <tr>
-                    <td><strong>${usr.nome || '-'}</strong></td>
-                    <td>${usr.email || '-'}</td>
-                    <td>${usr.funcao || 'Sem função'}</td>
-                    <td><span class="badge ${usr.escopo === 'ADM' || usr.escopo === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${usr.escopo || 'USER'}</span></td>
-                    <td><span class="badge ${usr.ativo ? 'badge-ativo' : 'badge-inativo'}">${usr.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                    <td>
-                        <button class="btn-action btn-edit" onclick="abrirModalEditar('${usr.id}')">Editar</button>
-                        <button class="btn-action" onclick="alternarStatus('${usr.id}', ${usr.ativo})">
-                            ${usr.ativo ? 'Desativar' : 'Ativar'}
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            aplicarOrdenacaoUsuariosCadastrados();
+            renderizarListaUsuarios();
         } catch (err) {
             console.error('Erro ao carregar usuários:', err);
             tbody.innerHTML = `<tr><td colspan="6" style="color:red;">Erro ao carregar lista: ${err.message}</td></tr>`;
         }
     }
+
+    // Renderiza a lista já ordenada de "Usuários Cadastrados".
+    function renderizarListaUsuarios() {
+        const tbody = document.getElementById('lista-usuarios');
+        if (!usuariosLocais.length) {
+            tbody.innerHTML = '<tr><td colspan="6">Nenhum usuário cadastrado.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = usuariosLocais.map(usr => `
+            <tr>
+                <td><strong>${usr.nome || '-'}</strong></td>
+                <td>${usr.email || '-'}</td>
+                <td>${usr.funcao || 'Sem função'}</td>
+                <td><span class="badge ${usr.escopo === 'ADM' || usr.escopo === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${usr.escopo || 'USER'}</span></td>
+                <td><span class="badge ${usr.ativo ? 'badge-ativo' : 'badge-inativo'}">${usr.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                <td>
+                    <button class="btn-action btn-edit" onclick="abrirModalEditar('${usr.id}')">Editar</button>
+                    <button class="btn-action" onclick="alternarStatus('${usr.id}', ${usr.ativo})">
+                        ${usr.ativo ? 'Desativar' : 'Ativar'}
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Aplica a ordenação atual (se houver) sobre usuariosLocais.
+    function aplicarOrdenacaoUsuariosCadastrados() {
+        if (!ordemUsuariosCadastrados) return;
+        const campo = ordemUsuariosCadastrados;
+        const fator = direcaoUsuariosCadastrados === 'asc' ? 1 : -1;
+        usuariosLocais = usuariosLocais.slice().sort((a, b) => {
+            const va = String(a[campo] == null ? '' : a[campo]).toLowerCase();
+            const vb = String(b[campo] == null ? '' : b[campo]).toLowerCase();
+            return va.localeCompare(vb, 'pt-BR') * fator;
+        });
+    }
+
+    // Ordena "Usuários Cadastrados" por nome ou função (clique alterna asc/desc).
+    window.ordenarUsuariosCadastrados = function(campo) {
+        if (ordemUsuariosCadastrados === campo) {
+            direcaoUsuariosCadastrados = direcaoUsuariosCadastrados === 'asc' ? 'desc' : 'asc';
+        } else {
+            ordemUsuariosCadastrados = campo;
+            direcaoUsuariosCadastrados = 'asc';
+        }
+        aplicarOrdenacaoUsuariosCadastrados();
+        const simbolo = direcaoUsuariosCadastrados === 'asc' ? '▲' : '▼';
+        const thNome = document.getElementById('th-nome-usuario');
+        const thFuncao = document.getElementById('th-funcao-usuario');
+        if (thNome) thNome.textContent = 'Nome ' + (ordemUsuariosCadastrados === 'nome' ? simbolo : '▲▼');
+        if (thFuncao) thFuncao.textContent = 'Função ' + (ordemUsuariosCadastrados === 'funcao' ? simbolo : '▲▼');
+        renderizarListaUsuarios();
+    };
 
     // Modal de Edição
     window.abrirModalEditar = function(id) {
