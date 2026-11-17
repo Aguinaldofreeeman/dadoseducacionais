@@ -161,9 +161,62 @@
         <!-- Barra de abas -->
         <div class="adm-tabs">
             <button type="button" id="tab-btn-importadores" class="active" onclick="abrirTab(event, 'importadores')">Importadores</button>
+            <button type="button" id="tab-btn-atualizacoes" onclick="abrirTab(event, 'atualizacoes')">Atualizações</button>
             <button type="button" id="tab-btn-usuarios" onclick="abrirTab(event, 'usuarios')">Usuários</button>
             <button type="button" id="tab-btn-analytics" onclick="abrirTab(event, 'analytics')">Analytics</button>
             <button type="button" id="tab-btn-analytics-usuarios" onclick="abrirTab(event, 'analytics-usuarios')">Usuários Detalhado</button>
+        </div>
+
+        <!-- ABA: Atualizações -->
+        <div id="tab-atualizacoes" class="adm-tab-panel">
+            <div class="card">
+                <h3>Data e hora da última importação de cada módulo</h3>
+                <p class="help-text">Essas datas alimentam o rodapé "Atualizado em ..." de todos os painéis. São gravadas automaticamente quando uma planilha é importada. Use o botão "Salvar" para corrigir manualmente (ex.: importação feita fora do admin).</p>
+                <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="btn-cancel" id="atualizacoes-recarregar">Recarregar</button>
+                    <button type="button" class="btn-save" id="atualizacoes-novo">+ Adicionar módulo</button>
+                </div>
+                <div id="atualizacoes-preview" class="preview" style="display:block;"></div>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Módulo</th>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Página</th>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Data e hora</th>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Período</th>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Registros</th>
+                            <th style="text-align:left;padding:6px;border-bottom:1px solid #e2e8f0;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="atualizacoes-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Formulário de adição/edição (oculto por padrão) -->
+            <div class="card" id="atualizacoes-form" style="display:none;">
+                <h3 id="atualizacoes-form-titulo">Adicionar módulo</h3>
+                <div class="form-row">
+                    <label>Módulo (chave)</label>
+                    <input type="text" id="atualizacao-modulo" placeholder="ex.: tarefa, saresp, khan">
+                </div>
+                <div class="form-row">
+                    <label>Data e hora</label>
+                    <input type="datetime-local" id="atualizacao-data">
+                </div>
+                <div class="form-row">
+                    <label>Período (opcional)</label>
+                    <input type="text" id="atualizacao-periodo" placeholder="ex.: Semana 41, 2026-11">
+                </div>
+                <div class="form-row">
+                    <label>Registros (opcional)</label>
+                    <input type="number" id="atualizacao-registros" min="0">
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button type="button" class="btn-save" id="atualizacao-salvar">Salvar</button>
+                    <button type="button" class="btn-cancel" id="atualizacao-cancelar">Cancelar</button>
+                </div>
+                <div id="atualizacao-msg" class="preview" style="display:none;margin-top:8px;"></div>
+            </div>
         </div>
 
         <!-- ABA: Importadores -->
@@ -3722,14 +3775,15 @@
         apoio: 'apoio'
     };
 
-    async function registrarAtualizacao(modulo, periodo, registros, detalhe) {
+    async function registrarAtualizacao(modulo, periodo, registros, detalhe, data) {
         if (!modulo) return;
         try {
             const { error } = await supabaseClient.rpc('registrar_atualizacao', {
                 p_modulo: modulo,
                 p_periodo: periodo || null,
                 p_registros: Number.isFinite(registros) ? registros : null,
-                p_detalhe: detalhe || {}
+                p_detalhe: detalhe || {},
+                p_data: data || null
             });
             if (error) console.warn(`Data de atualização não registrada (${modulo}):`, error.message);
         } catch (erro) {
@@ -3762,8 +3816,187 @@
             loadAnalytics();
         } else if (nomeTab === 'analytics-usuarios') {
             loadUsuariosDetalhado();
+        } else if (nomeTab === 'atualizacoes') {
+            carregarAtualizacoes();
         }
     }
+
+    /* ============================================================
+       ATUALIZAÇÕES — data e hora da última importação por módulo
+       ============================================================ */
+    const PAGINAS_MODULO = {
+        'tarefa': 'tarefa-sp.html',
+        'saresp': 'saresp.html / dashboard-saresp.html',
+        'redacao': 'redacao.html',
+        'leia': 'leia-sp.html',
+        'presenca': 'resultados-presenca.html',
+        'apoio': 'apoio-presencial.html',
+        'alura': 'alura.html / dashboard-alura.html',
+        'alura-mensal': 'visualizacao-mensal-alura.html',
+        'matific': 'matific.html',
+        'matific-mensal': 'matific-mensal.html',
+        'khan': 'khan.html',
+        'robotica': 'Robotica_Marilia.html',
+        'robotica-mensal': 'robotica-mensal.html',
+        'prova-paulista': 'dashboard.html / resultados_prova_paulista.html'
+    };
+
+    function formatarDataHora(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '—';
+        var dois = function (n) { return String(n).padStart(2, '0'); };
+        return dois(d.getDate()) + '/' + dois(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' +
+            dois(d.getHours()) + ':' + dois(d.getMinutes());
+    }
+
+    function paraInputLocal(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        // datetime-local usa hora local do navegador (Brasil).
+        var dois = function (n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + '-' + dois(d.getMonth() + 1) + '-' + dois(d.getDate()) + 'T' +
+            dois(d.getHours()) + ':' + dois(d.getMinutes());
+    }
+
+    async function carregarAtualizacoes() {
+        const tbody = document.getElementById('atualizacoes-tbody');
+        const preview = document.getElementById('atualizacoes-preview');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="padding:8px;color:#64748b;">Carregando…</td></tr>';
+        try {
+            const { data, error } = await supabaseClient
+                .from('atualizacoes_dados')
+                .select('modulo, atualizado_em, atualizado_por, periodo, registros')
+                .order('atualizado_em', { ascending: false });
+            if (error) throw error;
+            if (!data || !data.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:8px;color:#64748b;">Nenhum módulo registrado ainda. Os módulos aparecem aqui automaticamente após a primeira importação. Use "+ Adicionar módulo" para criar um manualmente.</td></tr>';
+                if (preview) { preview.style.display = 'block'; preview.className = 'preview'; preview.textContent = 'Tabela vazia.'; }
+                return;
+            }
+            // Resolve autores em uma única consulta.
+            const ids = [...new Set(data.map(r => r.atualizado_por).filter(Boolean))];
+            var autores = {};
+            if (ids.length) {
+                const { data: perfis } = await supabaseClient
+                    .from('perfis_usuarios')
+                    .select('id, nome, email')
+                    .in('id', ids);
+                (perfis || []).forEach(p => { autores[p.id] = p.nome || p.email || p.id; });
+            }
+            tbody.innerHTML = data.map(r => `
+                <tr data-modulo="${r.modulo}">
+                    <td style="padding:6px;font-weight:600;">${r.modulo}</td>
+                    <td style="padding:6px;color:#64748b;">${PAGINAS_MODULO[r.modulo] || '—'}</td>
+                    <td style="padding:6px;">
+                        <input type="datetime-local" class="atualizacao-data" value="${paraInputLocal(r.atualizado_em)}" style="font-size:12px;">
+                    </td>
+                    <td style="padding:6px;">
+                        <input type="text" class="atualizacao-periodo" value="${r.periodo || ''}" placeholder="período" style="font-size:12px;width:120px;">
+                    </td>
+                    <td style="padding:6px;">
+                        <input type="number" class="atualizacao-registros" value="${r.registros == null ? '' : r.registros}" min="0" style="font-size:12px;width:80px;">
+                    </td>
+                    <td style="padding:6px;">
+                        <button type="button" class="btn-save atualizacao-salvar-linha" style="padding:4px 8px;font-size:12px;">Salvar</button>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${autores[r.atualizado_por] || '—'}</div>
+                    </td>
+                </tr>
+            `).join('');
+
+            tbody.querySelectorAll('.atualizacao-salvar-linha').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const tr = btn.closest('tr');
+                    const modulo = tr.getAttribute('data-modulo');
+                    const dataLocal = tr.querySelector('.atualizacao-data').value;
+                    const periodo = tr.querySelector('.atualizacao-periodo').value.trim() || null;
+                    const regRaw = tr.querySelector('.atualizacao-registros').value;
+                    const registros = regRaw === '' ? null : Number(regRaw);
+                    // Converte datetime-local (hora local BR) para ISO com offset.
+                    let iso = null;
+                    if (dataLocal) {
+                        // new Date('YYYY-MM-DDTHH:mm') é interpretado como hora local.
+                        var d = new Date(dataLocal);
+                        if (!isNaN(d.getTime())) iso = d.toISOString();
+                    }
+                    btn.disabled = true; btn.textContent = 'Salvando…';
+                    try {
+                        const { error } = await supabaseClient.rpc('registrar_atualizacao', {
+                            p_modulo: modulo,
+                            p_periodo: periodo,
+                            p_registros: Number.isFinite(registros) ? registros : null,
+                            p_detalhe: {},
+                            p_data: iso
+                        });
+                        if (error) throw error;
+                        btn.textContent = 'Salvo ✓';
+                        setTimeout(() => { btn.textContent = 'Salvar'; btn.disabled = false; }, 1500);
+                    } catch (err) {
+                        console.error('Erro ao salvar atualização:', err);
+                        alert('Erro ao salvar: ' + (err.message || err));
+                        btn.textContent = 'Salvar'; btn.disabled = false;
+                    }
+                });
+            });
+        } catch (err) {
+            console.error('Erro ao carregar atualizações:', err);
+            tbody.innerHTML = '<tr><td colspan="6" style="padding:8px;color:#dc2626;">Erro: ' + (err.message || err) + '. Verifique se a tabela atualizacoes_dados foi criada (supabase-atualizacoes.sql).</td></tr>';
+        }
+    }
+
+    // Formulário de adição
+    (function () {
+        const btnNovo = document.getElementById('atualizacoes-novo');
+        const btnRecarregar = document.getElementById('atualizacoes-recarregar');
+        const form = document.getElementById('atualizacoes-form');
+        const btnSalvar = document.getElementById('atualizacao-salvar');
+        const btnCancelar = document.getElementById('atualizacao-cancelar');
+        const msg = document.getElementById('atualizacao-msg');
+        if (!btnNovo || !form) return;
+
+        btnNovo.addEventListener('click', () => {
+            form.style.display = 'block';
+            document.getElementById('atualizacao-modulo').value = '';
+            document.getElementById('atualizacao-data').value = paraInputLocal(new Date().toISOString());
+            document.getElementById('atualizacao-periodo').value = '';
+            document.getElementById('atualizacao-registros').value = '';
+            if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+        });
+        btnCancelar.addEventListener('click', () => { form.style.display = 'none'; });
+        if (btnRecarregar) btnRecarregar.addEventListener('click', carregarAtualizacoes);
+
+        btnSalvar.addEventListener('click', async () => {
+            const modulo = document.getElementById('atualizacao-modulo').value.trim();
+            const dataLocal = document.getElementById('atualizacao-data').value;
+            const periodo = document.getElementById('atualizacao-periodo').value.trim() || null;
+            const regRaw = document.getElementById('atualizacao-registros').value;
+            const registros = regRaw === '' ? null : Number(regRaw);
+            if (!modulo) { alert('Informe o módulo.'); return; }
+            let iso = null;
+            if (dataLocal) { var d = new Date(dataLocal); if (!isNaN(d.getTime())) iso = d.toISOString(); }
+            btnSalvar.disabled = true; btnSalvar.textContent = 'Salvando…';
+            try {
+                const { error } = await supabaseClient.rpc('registrar_atualizacao', {
+                    p_modulo: modulo,
+                    p_periodo: periodo,
+                    p_registros: Number.isFinite(registros) ? registros : null,
+                    p_detalhe: {},
+                    p_data: iso
+                });
+                if (error) throw error;
+                if (msg) { msg.style.display = 'block'; msg.className = 'preview'; msg.textContent = 'Salvo com sucesso.'; }
+                form.style.display = 'none';
+                carregarAtualizacoes();
+            } catch (err) {
+                console.error('Erro ao salvar atualização:', err);
+                if (msg) { msg.style.display = 'block'; msg.className = 'preview'; msg.textContent = 'Erro: ' + (err.message || err); }
+            } finally {
+                btnSalvar.disabled = false; btnSalvar.textContent = 'Salvar';
+            }
+        });
+    })();
 
     /* ============================================================
        ANALYTICS — visão geral (aba Analytics)

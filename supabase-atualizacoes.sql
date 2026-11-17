@@ -58,11 +58,15 @@ revoke insert, delete on public.atualizacoes_dados from anon, authenticated;
 -- SECURITY DEFINER: a data e o autor são carimbados no servidor,
 -- então o navegador não consegue forjar "atualizado em".
 -- ------------------------------------------------------------
+-- Atualiza a RPC se a versão anterior (sem p_data) existir.
+drop function if exists public.registrar_atualizacao(text, text, integer, jsonb);
+
 create or replace function public.registrar_atualizacao(
   p_modulo text,
   p_periodo text default null,
   p_registros integer default null,
-  p_detalhe jsonb default '{}'::jsonb
+  p_detalhe jsonb default '{}'::jsonb,
+  p_data timestamptz default null
 ) returns public.atualizacoes_dados
 language plpgsql
 security definer
@@ -87,13 +91,15 @@ begin
   insert into public.atualizacoes_dados as a
     (modulo, atualizado_em, atualizado_por, periodo, registros, detalhe)
   values (
-    btrim(p_modulo), now(), auth.uid(),
+    btrim(p_modulo),
+    coalesce(p_data, now()),
+    auth.uid(),
     nullif(btrim(coalesce(p_periodo, '')), ''),
     p_registros,
     coalesce(p_detalhe, '{}'::jsonb)
   )
   on conflict (modulo) do update
-    set atualizado_em  = now(),
+    set atualizado_em  = coalesce(p_data, now()),
         atualizado_por = auth.uid(),
         periodo        = coalesce(excluded.periodo, a.periodo),
         registros      = excluded.registros,
@@ -104,8 +110,8 @@ begin
 end;
 $$;
 
-revoke execute on function public.registrar_atualizacao(text, text, integer, jsonb) from anon;
-grant execute on function public.registrar_atualizacao(text, text, integer, jsonb) to authenticated;
+revoke execute on function public.registrar_atualizacao(text, text, integer, jsonb, timestamptz) from anon;
+grant execute on function public.registrar_atualizacao(text, text, integer, jsonb, timestamptz) to authenticated;
 
 notify pgrst, 'reload schema';
 
