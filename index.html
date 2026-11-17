@@ -378,10 +378,13 @@
         const NAMESPACE = 'aguinaldofreeeman';
         const COUNTER_KEY = 'dadoseducacionais-index';
         const BASE_URL = 'https://abacus.jasoncameron.dev';
+        const CACHE_KEY = 'visitas-index-cache'; // último total oficial conhecido
+        const MAX_KEY = 'visitas-index-max';     // maior total já visto (piso anti-regressão)
 
         const formatar = (valor) => new Intl.NumberFormat('pt-BR').format(valor);
 
-        function animarContagem(alvo) {
+        function animarContagem(alvo, de) {
+            de = de || 0;
             const duracao = 1200;
             const inicio = performance.now();
             let finalizado = false;
@@ -397,7 +400,7 @@
             function passo(agora) {
                 const progresso = Math.min((agora - inicio) / duracao, 1);
                 const suavizado = 1 - Math.pow(1 - progresso, 3);
-                valueEl.textContent = formatar(Math.round(alvo * suavizado));
+                valueEl.textContent = formatar(Math.round(de + (alvo - de) * suavizado));
                 if (progresso < 1) {
                     requestAnimationFrame(passo);
                 } else {
@@ -410,39 +413,68 @@
             if (document.visibilityState === 'hidden') finalizar();
         }
 
+        function lerLocal(chave) {
+            try {
+                const v = Number(localStorage.getItem(chave) || 0);
+                return Number.isFinite(v) && v > 0 ? v : 0;
+            } catch (e) { return 0; }
+        }
+        function guardarCache(valor) {
+            try {
+                localStorage.setItem(CACHE_KEY, String(valor));
+                if (valor > lerLocal(MAX_KEY)) localStorage.setItem(MAX_KEY, String(valor));
+            } catch (e) {}
+        }
+
         async function obterContador() {
             let jaContou = false;
             try { jaContou = sessionStorage.getItem('visita-contada') === '1'; } catch (e) {}
 
             const acao = jaContou ? 'get' : 'hit';
-            const resposta = await fetch(`${BASE_URL}/${acao}/${NAMESPACE}/${COUNTER_KEY}`, { cache: 'no-store' });
-            if (!resposta.ok) throw new Error('Contador indisponível');
-
-            const dados = await resposta.json();
-            if (!jaContou) {
-                try { sessionStorage.setItem('visita-contada', '1'); } catch (e) {}
+            const controle = new AbortController();
+            const limite = setTimeout(() => controle.abort(), 6000); // nao trava o pill esperando a API
+            try {
+                const resposta = await fetch(`${BASE_URL}/${acao}/${NAMESPACE}/${COUNTER_KEY}`, { cache: 'no-store', signal: controle.signal });
+                if (!resposta.ok) throw new Error('Contador indisponível');
+                const dados = await resposta.json();
+                if (typeof dados.value !== 'number') throw new Error('Resposta inválida');
+                if (!jaContou) {
+                    try { sessionStorage.setItem('visita-contada', '1'); } catch (e) {}
+                }
+                return dados.value;
+            } finally {
+                clearTimeout(limite);
             }
-            if (typeof dados.value !== 'number') throw new Error('Resposta inválida');
-            return dados.value;
         }
 
+        // 1) Exibe imediatamente o último total conhecido, sem esperar a rede
+        const emCache = lerLocal(CACHE_KEY);
+        if (emCache > 0) {
+            pill.title = `${formatar(emCache)} visitas à plataforma`;
+            animarContagem(emCache);
+            pill.classList.remove('is-loading');
+        }
+
+        // 2) Atualiza em segundo plano com o valor oficial do contador
         obterContador()
             .then((total) => {
-                pill.title = `${formatar(total)} visitas à plataforma`;
-                animarContagem(total);
+                const exibir = Math.max(total, lerLocal(MAX_KEY)); // nunca regride para um valor menor
+                guardarCache(exibir);
+                pill.title = `${formatar(exibir)} visitas à plataforma`;
+                if (exibir !== emCache) animarContagem(exibir, emCache);
+                else valueEl.textContent = formatar(exibir);
             })
             .catch(() => {
-                // Fallback local caso a API de contagem esteja indisponível
-                let total = 0;
-                try {
-                    total = Number(localStorage.getItem('visitas-index-local') || 0) + 1;
-                    localStorage.setItem('visitas-index-local', String(total));
-                } catch (e) {}
-                pill.title = 'Contador de visitas (modo local)';
-                if (total > 0) animarContagem(total);
-                else valueEl.textContent = '\u2014';
+                // API indisponível: mantém o melhor valor conhecido em vez de zerar
+                const total = Math.max(lerLocal(CACHE_KEY), lerLocal(MAX_KEY));
+                if (total > 0) {
+                    pill.title = `${formatar(total)} visitas à plataforma`;
+                    animarContagem(total, emCache);
+                } else {
+                    valueEl.textContent = '\u2014';
+                }
             })
-            .finally(() => pill.classList.remove('is-loading'));
+            .finally(() => { if (emCache <= 0) pill.classList.remove('is-loading'); });
     })();
 
     // Abrir o módulo em nova guia ao clicar em qualquer parte do card
