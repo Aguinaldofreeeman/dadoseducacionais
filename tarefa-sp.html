@@ -1697,7 +1697,7 @@ tbody tr.inactive td { color: var(--muted); }
         </section>
 
         <footer class="page-footer">
-            <p id="footerFonte">Fonte: export Tarefa SP, semana 01 (01.02 a 07.02). 50 escolas e 19.670 matrículas na regional; 40 escolas registraram tarefas.</p>
+            <p id="footerFonte">Atualizado em 17/11/2026. Fonte: Escola Total.</p>
             <p>IQ = média entre o percentual de tarefas realizadas no prazo e o percentual de acertos. Tarefas entregues fora do prazo contam como concluídas, mas não entram no IQ. O IQ da regional é calculado sobre os totais da rede.</p>
             <p>Dados agregados por escola, sem informação individual de estudante. <a href="index.html">Voltar ao painel</a>.</p>
         </footer>
@@ -1978,8 +1978,7 @@ tbody tr.inactive td { color: var(--muted); }
         document.getElementById('periodoChip').textContent = `${semana} · ${periodo.replace(' a ', ' — ')}`;
         document.getElementById('headerSub').textContent =
             `Participação, conclusão e qualidade das tarefas · ${periodo} · ${n.escolas} escolas`;
-        document.getElementById('footerFonte').textContent =
-            `Fonte: ${DADOS.source || 'export Tarefa SP'}, ${semana.toLowerCase()} (${periodo}). ${n.escolas} escolas e ${fmtInt.format(n.matriculas)} matrículas na regional; ${n.ativas} escolas registraram tarefas.`;
+        document.getElementById('footerFonte').textContent = 'Atualizado em 17/11/2026. Fonte: Escola Total.';
         document.title = `Tarefa SP — ${semana} — URE Marília`;
         const itens = [
             { k: 'IQ da regional', v: iqf(n.iq), p: n.iq * 100, d: 'Metade no prazo, metade acertos' },
