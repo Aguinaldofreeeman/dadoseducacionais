@@ -17,7 +17,11 @@ insert into public.atualizacoes_dados (modulo, atualizado_em, periodo, registros
   ('prova-paulista',   '2026-11-11 12:00:00-03', '2026',       null),
   ('leia',             '2026-11-11 12:00:00-03', 'Semana 1',   null),
   ('robotica',         '2026-11-11 12:00:00-03', '2026',       null),
-  ('khan',             '2026-11-13 12:00:00-03', '2026-11',    null)
+  ('khan',             '2026-11-13 12:00:00-03', '2026-11',    null),
+  ('matific',          '2026-11-11 12:00:00-03', '2026',       null),
+  ('redacao',          '2026-11-11 12:00:00-03', '2026',       null),
+  ('apoio',            '2026-11-11 12:00:00-03', '2026',       null),
+  ('robotica-mensal',  '2026-11-11 12:00:00-03', '2026-11',    null)
 on conflict (modulo) do nothing;
 
 -- Confirmação
