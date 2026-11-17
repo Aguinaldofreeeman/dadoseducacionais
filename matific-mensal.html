@@ -187,8 +187,15 @@ async function carregarSupabase(){
     if(erroAno||!anos||!anos.length)return;
     const {data,error}=await supabaseClient.from('resultados_matific_mensal').select('*').eq('ano',anos[0].ano).range(0,4999);
     if(error||!data||data.length<10)return;
-    DB=aPartirDeBanco(data);
-    fonte.textContent='Fonte: Supabase (resultados_matific_mensal), ano letivo '+DB.ano+', importada via admin.html.';
+    const banco=aPartirDeBanco(data);
+    if(banco.ano===DB.ano){
+      /* Mescla: meses presentes no banco tem prioridade; meses ainda nao importados caem no backup embutido da pagina (evita "perder" meses anteriores ao importar um novo mes). */
+      DB={ano:banco.ano,meses:Object.assign({},DB.meses,banco.meses)};
+      fonte.textContent='Fonte: Supabase (resultados_matific_mensal) + backup embutido dos meses ainda nao importados, ano letivo '+DB.ano+'.';
+    }else{
+      DB=banco;
+      fonte.textContent='Fonte: Supabase (resultados_matific_mensal), ano letivo '+DB.ano+', importada via admin.html.';
+    }
     sel=[];init();
   }catch(err){console.warn('Falha ao buscar resultados_matific_mensal:',err.message);}
 }
