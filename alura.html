@@ -5,54 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados Gerais da Alura </title>
     <link rel="stylesheet" href="css/home-button.css">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
-        header { background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
-        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .btn-nav:hover { background-color: #0f766e; }
-        .home-button { min-height: 0; }
-        main { padding: 30px; max-width: 1100px; margin: 0 auto; }
-        
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
 
-        /* Grid de Resumo de Indicadores */
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 25px; }
-        .metric-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; }
-        .metric-card h4 { margin: 0 0 8px 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
-        .metric-card .value { font-size: 24px; font-weight: bold; color: #17365d; }
-
-        /* Filtros */
-        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
-        .filter-group label { font-size: 13px; font-weight: bold; color: #475569; }
-        .filter-group input, .filter-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
-
-        /* Tabela de Resultados */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: bold; white-space: normal; max-width: 150px; vertical-align: middle; cursor: pointer; user-select: none; }
-        th:hover { background-color: #e2e8f0; }
-        th .sort-arrow { font-size: 10px; margin-left: 4px; color: #64748b; }
-        tr:hover { background-color: #f8fafc; }
-        .text-right { text-align: right; }
-        .badge-pct { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; background-color: #d1fae5; color: #065f46; }
-    </style>
+    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/alura.css">
 </head>
 <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <header>
         <h1>Prova Paulista — Indicadores Alura</h1>
         <div class="header-actions">
-            <a href="painel-prova-alura.html" class="btn-nav" style="background-color:#6d28d9;">Prova Paulista e Avaliação Alura</a>
-            <a href="dashboard-alura.html" class="btn-nav" style="background-color:#0284c7;">Dashboard Alura</a>
+            <a href="painel-prova-alura.html" class="btn-nav s-alura-1">Prova Paulista e Avaliação Alura</a>
+            <a href="dashboard-alura.html" class="btn-nav s-alura-2">Dashboard Alura</a>
             <a href="index.html" class="home-button">Início</a>
             <button id="btn-sair" class="btn-logout">Sair</button>
         </div>
     </header>
-    <main>
+    <main id="conteudo" tabindex="-1">
         <!-- Resumo Geral -->
         <div class="metrics-grid">
             <div class="metric-card">
@@ -79,17 +48,17 @@
 
         <!-- Card da Tabela de Resultados -->
         <div class="card">
-            <h2 style="display: flex; justify-content: space-between; align-items: center;">Resultados Gerais por Unidade Escolar
-                <span class="btn-nav" style="background-color: #6d28d9; cursor: pointer;" onclick="abrirVisualizacaoMensal()">Visualização Mensal da Alura</span>
+            <h2 class="s-alura-3">Resultados Gerais por Unidade Escolar
+                <span class="btn-nav s-alura-4" onclick="abrirVisualizacaoMensal()">Visualização Mensal da Alura</span>
             </h2>
-            <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0; line-height: 1.5;">
+            <p class="s-alura-5">
                 Colunas por ano letivo: 2026 tem <strong>acessos, exercícios, tentativas, avaliações mensais</strong>
                 (média, não-zeradores e realização) e <strong>questões discursivas</strong>; 2025 tem
                 <strong>projetos enviados, unidades, exercícios e acertos até 2ª tentativa</strong>; 2024 tem
                 <strong>índice de projetos enviados</strong>. Ao filtrar um ano, as <strong>colunas sem dados
                 ficam ocultas automaticamente</strong>; sem filtro de ano, todas as colunas voltam a aparecer.
             </p>
-            
+
             <div class="filters">
                 <div class="filter-group">
                     <label for="filtro-ano">Ano Letivo</label>
@@ -114,7 +83,7 @@
                 </table>
             </div>
         </div>
-        <p style="font-size:12px;color:#64748b;margin-top:18px;" data-atualizacao="alura">Fonte: Escola Total.</p>
+        <p class="s-alura-6" data-atualizacao="alura">Fonte: Escola Total.</p>
     </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -1,43 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Matific</title>
-<style>
-:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--w:#f59e0b;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
-*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
-header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}.nav{display:flex;gap:8px;flex-wrap:wrap}
-.btn{padding:9px 14px;border-radius:8px;color:#fff;text-decoration:none;font:14px inherit;background:#ffffff26;border:0;cursor:pointer}.btn:hover{background:#ffffff40}
-main{max-width:1320px;margin:auto;padding:22px 30px 40px}
-.avg{background:linear-gradient(120deg,#17365d,#134e6f);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:18px;box-shadow:var(--sh)}
-.avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
-.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 7px}
-.avg .bar{background:#ffffff30}.avg .bar i{background:#5eead4}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
-.card,.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh)}.card{padding:16px 18px;border-left:4px solid var(--a)}
-.card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}
-.dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#0d948826;color:#0d9488}.dl.dn{background:#f59e0b26;color:#d97706}
-.fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:180px}.filters .btn{background:var(--p);color:#fff}
-#sub{font-size:12px;color:var(--m);margin:8px 2px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
-.panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
-.rank{display:grid;gap:4px;align-content:start;max-height:460px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 66px;gap:10px;align-items:center;font-size:13px;cursor:pointer;padding:4px;border-radius:8px}.row:hover{background:var(--bg)}
-.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
-.bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}
-.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}.warn .bar i{background:var(--w)}
-.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.fn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}.fn-col h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.fn-note{font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.5}@media(max-width:620px){.fn-grid{grid-template-columns:1fr}}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
-.hist{display:flex;gap:10px;align-items:flex-end;height:150px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;color:var(--m)}
-.col i{width:100%;background:var(--a);border-radius:6px 6px 0 0;min-height:2px;opacity:.55}.col.me i{opacity:1;background:var(--p)}.col b{color:var(--t)}
-svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .g{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle{cursor:pointer}
-.tw{overflow:auto;max-height:440px}table{width:100%;border-collapse:collapse;font-size:13px}
-th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:var(--bg)}
-.empty,.foot{font-size:12px;color:var(--m)}.foot{margin-top:18px}.leg{font-size:12px;color:var(--m);margin-top:10px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.f{grid-template-columns:120px 1fr 76px}.fp{position:static}}
-@media(max-width:550px){header{padding:16px}main{padding:14px}.f{grid-template-columns:1fr}.filters select,.filters input{min-width:100%}}
-</style><link rel="stylesheet" href="css/home-button.css"></head><body>
+<link rel="stylesheet" href="css/home-button.css">    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/matific.css">
+</head><body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 <header><div><h1>Dashboard — Matific</h1><p>Unidade Regional de Ensino de Marília<, Ensino Fundamental Anos Finais</p></div><div class="nav"><a href="index.html" class="home-button">Início</a><a href="matific-mensal.html" class="btn">Matific Mensal</a></div></header>
-<main>
+<main id="conteudo" tabindex="-1">
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub">Referência para comparar cada escola e cada filtro.</p><div class="items" id="avg"></div></section>
 <section class="cards" id="cards"></section>
 <section class="panel fp"><div class="filters"><select id="selectEscola"><option value="">Todas as escolas</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="tier"><option value="">Todas as faixas</option><option value="up">Índice acima da média regional</option><option value="dn">Índice abaixo da média regional</option></select><select id="metric"><option value="indice">Ranking por índice concluídas/aluno</option><option value="percAtivos">Ranking por % de alunos ativos</option><option value="concluidas">Ranking por atividades concluídas</option><option value="iniciadas">Ranking por atividades iniciadas</option></select><select id="vis"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select><button class="btn" id="reset">Limpar</button></div><div id="sub"></div></section>
@@ -47,7 +16,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <article class="panel"><h2>Distribuição do índice</h2><p>Quantas escolas há em cada faixa de atividades concluídas por aluno.</p><div id="hs" class="hist"></div><div class="leg" id="hl"></div></article>
 <article class="panel"><h2>Funil de engajamento</h2><p>Dois funis independentes: pessoas (matrículas → ativos) e atividades (iniciadas → concluídas), comparados à média regional.</p><div id="fn"></div></article>
 </section>
-<article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv" style="background:var(--p)">Exportar CSV</button></p></article>
+<article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p class="s-matific-1"><button class="btn s-matific-2" id="csv">Exportar CSV</button></p></article>
 <p class="foot" id="fonte" data-atualizacao="matific">Fonte: Escola Total.</p>
 <p class="foot" id="fonteDetalhe">Fonte: MATIFIC.xlsx. Filtros da exportação: Diretoria Marília, Ensino Fundamental Anos Finais.</p>
 </main>

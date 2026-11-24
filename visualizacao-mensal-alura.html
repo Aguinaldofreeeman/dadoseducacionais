@@ -1,75 +1,14 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Resultados Mensais Alura</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
-<style>
-/* Layout: faixa verde institucional no topo, seletor de meses fixo, resumo, evolução anual, tabela por escola */
-:root{
-  --bg:#f3f6f3; --surface:#ffffff; --ink:#122117; --ink2:#4a5a4f; --muted:#7d8b81; --line:#dbe3dc;
-  --head:#072e0f; --headink:#eaf5ec; --accent:#0d9488; --accent-soft:#d6f0ec; --b:#c2410c; --b-soft:#fbe3d6;
-  --font:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0c1510; --surface:#131f17; --ink:#e6f0e8; --ink2:#a9b8ad; --muted:#74857a; --line:#25352a;
-  --head:#04170a; --headink:#eaf5ec; --accent:#2dd4bf; --accent-soft:#0f3a35; --b:#fb923c; --b-soft:#43240f; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0c1510; --surface:#131f17; --ink:#e6f0e8; --ink2:#a9b8ad; --muted:#74857a; --line:#25352a;
-  --head:#04170a; --headink:#eaf5ec; --accent:#2dd4bf; --accent-soft:#0f3a35; --b:#fb923c; --b-soft:#43240f; color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45}
-.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:var(--headink)}
-header .wrap{padding-block:20px;display:flex;gap:12px 24px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
-h1{font-size:1.35rem;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
-header p{margin:0;font-size:.85rem;opacity:.8}
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488)}
-.bar .wrap{padding-block:12px;display:grid;gap:10px}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;min-width:64px}
-.chip{font:inherit;font-size:.88rem;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:34px}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#04170a}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#04170a}}
-.chip:disabled{opacity:.4;cursor:not-allowed;border-style:dashed}
-.chip:focus-visible,select:focus-visible,input:focus-visible,.pt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-select,input[type=search]{font:inherit;font-size:.9rem;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-height:34px;min-width:0;max-width:100%}
-.link{background:none;border:0;color:var(--ink2);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer;padding:6px}
-main{padding-block:20px 48px;display:grid;gap:20px}
-h2{font-size:1rem;margin:0 0 2px;font-weight:650}
-.sub{margin:0;color:var(--ink2);font-size:.85rem}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
-.kpi .n{font-size:.78rem;color:var(--ink2);font-weight:550}
-.kpi .v{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px}
-.kpi .m{font-size:.8rem;color:var(--ink2);font-variant-numeric:tabular-nums;margin-top:4px;min-height:1.2em}
-.kpi .mm{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.up{color:#0f766e}.dn{color:#b42318}
-:root[data-theme="dark"] .up{color:#5eead4}:root[data-theme="dark"] .dn{color:#fca5a5}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .up{color:#5eead4}:root:not([data-theme="light"]) .dn{color:#fca5a5}}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
-.chart{width:100%;height:auto;display:block;margin-top:8px}
-.chart text{fill:var(--ink2);font-family:var(--font);font-size:11px}
-.readout{min-height:1.4em;font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:6px}
-.pt{cursor:pointer}
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 12px}
-.tools .grow{flex:1 1 200px}
-.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
-table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.9rem}
-th,td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child,td:first-child{text-align:left;white-space:normal;min-width:220px;position:sticky;left:0;background:var(--surface)}
-th{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);font-weight:600;background:var(--surface)}
-tbody tr:last-child td{border-bottom:0}
-tr.tot td{font-weight:700;background:var(--accent-soft)}
-tr.tot td:first-child{background:var(--accent-soft)}
-.d{font-size:.82rem}
-.empty{padding:24px;text-align:center;color:var(--ink2)}
-.note{font-size:.8rem;color:var(--muted)}
-@media (max-width:560px){.lab{min-width:100%}}
-@media (prefers-reduced-motion:no-preference){.chip{transition:background .12s,border-color .12s}}
-</style>
+
 <link rel="stylesheet" href="css/home-button.css">
-<header><div class="wrap"><div><h1>Painel Alura <span id="anoTitulo">2026</span> · Prova Paulista</h1><p>URE Marília· <span id="escolasInfo">50</span> escolas · visão regular</p></div><a href="index.html" class="home-button">Início</a></div></header>
+    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/visualizacao-mensal-alura.css">
+</head><body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a><header><div class="wrap"><div><h1>Painel Alura <span id="anoTitulo">2026</span> · Prova Paulista</h1><p>URE Marília· <span id="escolasInfo">50</span> escolas · visão regular</p></div><a href="index.html" class="home-button">Início</a></div></header>
 
 <div class="bar"><div class="wrap">
   <div class="row"><span class="lab">Meses</span><div class="row" id="months" role="group" aria-label="Meses de 2026"></div>
@@ -77,17 +16,17 @@ tr.tot td:first-child{background:var(--accent-soft)}
   <div class="row"><span class="lab">Indicador</span><select id="metric" aria-label="Indicador"></select></div>
 </div></div>
 
-<main class="wrap">
-  <section aria-labelledby="hk"><h2 id="hk">Rede no período escolhido</h2><p class="sub" id="ksub"></p><div class="kpis" id="kpis" style="margin-top:10px"></div></section>
+<main class="wrap" id="conteudo" tabindex="-1">
+  <section aria-labelledby="hk"><h2 id="hk">Rede no período escolhido</h2><p class="sub" id="ksub"></p><div class="kpis s-visualizacao-mensal-alura-1" id="kpis"></div></section>
   <section class="card" aria-labelledby="hc"><h2 id="hc">Evolução em <span id="anoEvolucao">2026</span></h2><p class="sub" id="csub"></p>
     <svg class="chart" id="chart" viewBox="0 0 760 230" role="img" aria-label="Evolução mensal do indicador"></svg>
     <div class="readout" id="readout" aria-live="polite"></div></section>
-  <section class="card" id="escolaSec" aria-labelledby="esk" hidden><h2 id="esk">Escola selecionada · <span id="escolaNome"></span></h2><p class="sub" id="eskSub"></p><div class="kpis" id="eskKpis" style="margin-top:10px"></div></section>
+  <section class="card" id="escolaSec" aria-labelledby="esk" hidden><h2 id="esk">Escola selecionada · <span id="escolaNome"></span></h2><p class="sub" id="eskSub"></p><div class="kpis s-visualizacao-mensal-alura-2" id="eskKpis"></div></section>
   <section aria-labelledby="ht"><h2 id="ht">Escola por escola</h2><p class="sub" id="tsub"></p>
-    <div class="tools"><label class="row" style="gap:6px"><span class="sub">Escola</span><select id="school" aria-label="Selecionar escola"></select></label><label class="row" style="gap:6px"><span class="sub">Ordenar</span><select id="sort"></select></label></div>
+    <div class="tools"><label class="row s-visualizacao-mensal-alura-3"><span class="sub">Escola</span><select id="school" aria-label="Selecionar escola"></select></label><label class="row s-visualizacao-mensal-alura-4"><span class="sub">Ordenar</span><select id="sort"></select></label></div>
     <div class="tablewrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-    <p class="note" style="margin-top:8px">Escolas sem dado no mês aparecem com “–”. Médias da rede ponderam pelas matrículas no índice de acessos; nos demais índices é a média simples das escolas.</p></section>
-<p style="font-size:12px;color:#64748b;margin-top:18px;" data-atualizacao="alura-mensal">Fonte: Escola Total.</p>
+    <p class="note s-visualizacao-mensal-alura-5">Escolas sem dado no mês aparecem com “–”. Médias da rede ponderam pelas matrículas no índice de acessos; nos demais índices é a média simples das escolas.</p></section>
+<p class="s-visualizacao-mensal-alura-6" data-atualizacao="alura-mensal">Fonte: Escola Total.</p>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="js/atualizacao.js" defer></script><script>
@@ -225,13 +164,13 @@ function renderChart(){
   const vals=chosenSchool==null?redeVals:have.map(n=>schoolVal(chosenSchool,metric,n));const mx=niceMax(Math.max(...vals.filter(v=>v!=null)),metric);
   const x=k=>L+(W-L-R)*(k/11),y=v=>T+(H-T-B)*(1-v/mx);
   let s='';
-  for(let t=0;t<=4;t++){const v=mx*t/4,yy=y(v);s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${yy+4}" text-anchor="end">${metric.f==='pct'?Math.round(v*100)+'%':F[metric.f==='int'?'int':metric.f].format(v)}</text>`}
+  for(let t=0;t<=4;t++){const v=mx*t/4,yy=y(v);s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--p-line)" stroke-width="1"/><text x="${L-8}" y="${yy+4}" text-anchor="end">${metric.f==='pct'?Math.round(v*100)+'%':F[metric.f==='int'?'int':metric.f].format(v)}</text>`}
   MS.forEach((m,k)=>{const ok=have.includes(k+1);s+=`<text x="${x(k)}" y="${H-8}" text-anchor="middle" style="${ok?'':'opacity:.45'}">${m}</text>`});
-  if(chosenSchool!=null){const dpts=have.map((n,j)=>[x(n-1),y(redeVals[j]),n,redeVals[j]]).filter(p=>p[3]!=null);if(dpts.length)s+=`<path d="${dpts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`}
+  if(chosenSchool!=null){const dpts=have.map((n,j)=>[x(n-1),y(redeVals[j]),n,redeVals[j]]).filter(p=>p[3]!=null);if(dpts.length)s+=`<path d="${dpts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--p-muted)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`}
   const pts=have.map((n,j)=>[x(n-1),y(vals[j]),n,vals[j]]).filter(p=>p[3]!=null);
-  s+=`<path d="${pts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+  s+=`<path d="${pts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="var(--p-accent)" stroke-width="2" stroke-linejoin="round"/>`;
   pts.forEach(p=>{const on=sel.includes(p[2]);
-    s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${on?6:4.5}" fill="${on?'var(--accent)':'var(--surface)'}" stroke="${on?'var(--surface)':'var(--accent)'}" stroke-width="2"/>`;
+    s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${on?6:4.5}" fill="${on?'var(--p-accent)':'var(--p-surface)'}" stroke="${on?'var(--p-surface)':'var(--p-accent)'}" stroke-width="2"/>`;
     s+=`<circle class="pt" data-m="${p[2]}" cx="${p[0]}" cy="${p[1]}" r="16" fill="transparent" tabindex="0" role="button" aria-label="${MN[p[2]-1]}: ${fmt(metric,valOf(p[2]))}. ${on?'Remover da seleção':'Adicionar à seleção'}"/>`});
   $('chart').innerHTML=s;
   $('csub').textContent=(chosenSchool==null?'Rede · ':(SCHOOLS[chosenSchool]+' · '))+metric.n+'. Pontos preenchidos são os meses escolhidos; clique em um ponto para incluir ou tirar o mês.'+(chosenSchool==null?'':' Linha tracejada: rede.');

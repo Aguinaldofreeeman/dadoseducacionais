@@ -5,97 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Alura - Plataforma de Dados Educacionais</title>
     <link rel="stylesheet" href="css/home-button.css">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
-        header { background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        header h1 { margin: 0; font-size: 21px; }
-        header p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.85; }
-        .header-actions { display: flex; gap: 8px; align-items: center; }
-        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .btn-nav:hover { background-color: #0f766e; }
-        .btn-nav.azul { background-color: #0284c7; }
-        .btn-nav.azul:hover { background-color: #0369a1; }
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
 
-        main { padding: 24px; max-width: 1400px; margin: 0 auto; box-sizing: border-box; }
-
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .card h2 { margin-top: 0; color: #17365d; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .card h3 { margin-top: 0; color: #17365d; font-size: 16px; }
-
-        .secao-titulo { display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; }
-        .secao-titulo .barra { width: 6px; height: 34px; border-radius: 3px; background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); }
-        .secao-titulo.alura .barra { background: #0284c7; }
-        .secao-titulo h2 { margin: 0; font-size: 20px; color: #17365d; }
-        .secao-titulo p { margin: 2px 0 0 0; font-size: 13px; color: #64748b; }
-
-        .fonte-tag { display: inline-block; font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 10px; background: #e2e8f0; color: #475569; margin-left: 8px; vertical-align: middle; }
-        .fonte-tag.alura { background: #dbeafe; color: #1e40af; }
-
-        .filters { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
-        .filter-group label { font-size: 13px; font-weight: bold; color: #475569; }
-        .filter-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff; }
-        .filter-group .help { font-size: 12px; color: #64748b; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 20px; }
-        .kpi { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #17365d; border-radius: 8px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .kpi.teal { border-left-color: #0d9488; }
-        .kpi.blue { border-left-color: #0284c7; }
-        .kpi.amber { border-left-color: #d97706; }
-        .kpi.rose { border-left-color: #e11d48; }
-        .kpi h4 { margin: 0 0 6px 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
-        .kpi .valor { font-size: 24px; font-weight: bold; color: #17365d; line-height: 1.1; }
-        .kpi .detalhe { font-size: 12px; color: #64748b; margin-top: 5px; }
-
-        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 20px; }
-        .chart-box { position: relative; height: 330px; }
-        .chart-box.alto { height: 380px; }
-
-        /* Destaque do indicador principal (Alura) */
-        .destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .destaque-item { background: linear-gradient(135deg, #17365d 0%, #1d4e89 100%); color: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 14px rgba(23,54,93,0.22); }
-        .destaque-item.alura { background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%); box-shadow: 0 4px 14px rgba(2,132,199,0.22); }
-        .destaque-ano { display: inline-block; background: rgba(255,255,255,0.18); border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
-        .destaque-titulo { font-size: 13px; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.9; margin-bottom: 6px; }
-        .destaque-valor { font-size: 34px; font-weight: bold; line-height: 1.1; margin-bottom: 10px; }
-        .destaque-detalhe { font-size: 12.5px; opacity: 0.92; line-height: 1.5; }
-        .destaque-detalhe strong { font-weight: bold; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #f8fafc; color: #475569; font-weight: bold; position: sticky; top: 0; }
-        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-        tr:hover td { background-color: #f8fafc; }
-        .pos { display: inline-block; min-width: 26px; text-align: center; background: #e2e8f0; border-radius: 4px; padding: 2px 6px; font-weight: bold; color: #475569; }
-        .pos.top { background: #d1fae5; color: #065f46; }
-        .pos.bottom { background: #fee2e2; color: #991b1b; }
-        .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-        .tag.verde { background: #d1fae5; color: #065f46; }
-        .tag.ambar { background: #fef3c7; color: #92400e; }
-        .tag.vermelho { background: #fee2e2; color: #991b1b; }
-        .tag.cinza { background: #f1f5f9; color: #475569; }
-        .table-wrap { max-height: 460px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px; }
-
-        .analises { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-        .analise { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; }
-        .analise .num { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: #fff; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; margin-bottom: 8px; }
-        .analise h4 { margin: 0 0 8px 0; color: #17365d; font-size: 15px; }
-        .analise p { margin: 0 0 8px 0; font-size: 13px; color: #475569; line-height: 1.5; }
-        .analise .dica { font-size: 12px; color: #0d9488; font-weight: bold; }
-
-        details.dicionario summary { cursor: pointer; font-weight: bold; color: #17365d; }
-        .dic-tabela { margin-top: 12px; font-size: 13px; }
-        .dic-tabela code { background: #f1f5f9; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
-        .tipo { color: #0d9488; font-weight: bold; }
-
-        .msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; }
-        .msg.error { background-color: #fee2e2; color: #991b1b; display: block; border: 1px solid #fca5a5; }
-
-        .rodape { text-align: center; color: #94a3b8; font-size: 12px; padding: 10px 0 30px; }
-    </style>
+    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/dashboard-alura.css">
 </head>
 <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <header>
         <div>
             <h1>Dashboard Alura</h1>
@@ -107,7 +23,7 @@
             <button id="btn-sair" class="btn-logout">Sair</button>
         </div>
     </header>
-    <main>
+    <main id="conteudo" tabindex="-1">
         <!-- ================= PLATAFORMA ALURA ================= -->
         <div class="secao-titulo alura">
             <span class="barra"></span>
@@ -126,7 +42,7 @@
                 </div>
                 <div class="filter-group">
                     <label for="filtro-busca-alura">Buscar escola</label>
-                    <input type="text" id="filtro-busca-alura" placeholder="Digite o nome da escola..." style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <input class="s-dashboard-alura-1" type="text" id="filtro-busca-alura" placeholder="Digite o nome da escola...">
                 </div>
                 <div class="filter-group">
                     <label for="filtro-escola-alura">Selecionar escola</label>
@@ -173,7 +89,7 @@
             </div>
         </div>
 
-   
+
 
         <p class="rodape" data-atualizacao="alura">Fonte: Escola Total.</p>
     </main>
@@ -300,7 +216,6 @@
 
         montarFiltrosAlura();
         aplicarFiltrosAlura();
-        montarDicionario();
     }
 
     function criarGrafico(id, config) {

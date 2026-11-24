@@ -2,52 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Apoios Realizados</title>
-<style>
-:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
-*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
-header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}
-.btn{padding:9px 14px;border-radius:8px;color:#fff;text-decoration:none;font:14px inherit;background:var(--p);border:0;cursor:pointer}header .btn{background:#ffffff26}header .btn:hover{background:#ffffff40}
-main{max-width:1320px;margin:auto;padding:22px 30px 40px}
-.g{background:#16803c;color:#fff}.y{background:#facc15;color:#422006}.r{background:#dc2626;color:#fff}
-.sq{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px}.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:12px}
-.avg{background:linear-gradient(120deg,#17365d,#134e6f);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:14px;box-shadow:var(--sh)}
-.avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
-.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 6px;display:flex;align-items:center;gap:8px}.avg .d{font-size:12px;opacity:.75;margin-top:6px}
-.bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}.avg .bar{background:#ffffff30}.avg .bar i{background:#5eead4}
-.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}
-.legend{background:#0f2a47;color:#fff;border-radius:10px;padding:10px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;font-size:14px}.legend .sq{width:20px;height:20px;margin-right:8px;vertical-align:middle}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
-.card,.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh)}.card{padding:16px 18px;border-left:4px solid var(--a)}
-.card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}
-.dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#16803c26;color:#16a34a}.dl.dn{background:#dc262626;color:#ef4444}
-.fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input:not([type=checkbox]){padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:170px}
-.mse{position:relative;flex:1;min-width:230px}.mse-btn{width:100%;text-align:left;padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.mse-btn::after{content:"▾"}.mse-list{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:30;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sh);max-height:300px;overflow:auto;padding:4px}
-.mse.open .mse-list{display:block}.mse-item{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap}
-.mse-item:hover{background:var(--bg)}.mse-item input{accent-color:var(--a);cursor:pointer;margin:0;width:14px;height:14px;flex:0 0 auto}
-#sub{font-size:12px;color:var(--m);margin:8px 2px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.stack{display:grid;gap:18px;align-content:start}
-.panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
-.rank{display:grid;gap:4px;align-content:start;max-height:460px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 62px;gap:10px;align-items:center;font-size:13px;cursor:pointer;padding:4px;border-radius:8px}.row:hover{background:var(--bg)}
-.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}
-.f{display:grid;grid-template-columns:150px 1fr 120px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
-.hist{display:flex;gap:10px;align-items:flex-end;min-height:150px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:11px;color:var(--m);text-align:center}.col i{width:100%;border-radius:6px 6px 0 0;min-height:2px}.col b{color:var(--t);font-size:12px}
-svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .gl{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle{cursor:pointer}
-.tw{overflow:auto;max-height:480px}table{width:100%;border-collapse:collapse;font-size:13px}
-th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:var(--bg)}
-.empty,.fonte,.leg{font-size:12px;color:var(--m)}.fonte{margin-top:18px;line-height:1.6}.leg{margin-top:8px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.f{grid-template-columns:120px 1fr 100px}.fp{position:static}}
-@media(max-width:550px){header{padding:16px}main{padding:14px}.filters select,.filters input{min-width:100%}}
-</style>
+
 <link rel="stylesheet" href="css/home-button.css">
+    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/apoio-presencial.css">
 </head>
 <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 <header><div><h1>Dashboard de Apoios Realizados</h1><p id="hsub"></p></div><a class="home-button" href="index.html">Início</a></header>
-<main>
+<main id="conteudo" tabindex="-1">
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub"></p><div class="items" id="avg"></div></section>
 <div class="legend"><span>Índice de apoios realizados</span><span><i class="sq r"></i>Menor que 2</span><span><i class="sq y"></i>Maior ou igual a 2 e menor que 3</span><span><i class="sq g"></i>Maior ou igual a 3</span></div>
 <section class="cards" id="cards"></section>
@@ -56,7 +20,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <div class="mse" id="selPWrap"><button type="button" class="mse-btn" id="selPBtn">Consolidado</button><div class="mse-list" id="selPList"></div></div>
 <select id="fai"><option value="">Todas as faixas do índice</option><option value="g">Verde (3 ou mais)</option><option value="y">Amarelo (2 a menos de 3)</option><option value="r">Vermelho (menos de 2)</option></select>
 <select id="vis"><option value="all" selected>All / Todos</option><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option></select>
-<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg" style="margin:6px 2px 0">Semanas: abra a lista e <b>marque várias</b> para agregá-las; “Consolidado” equivale a todas marcadas.</p><div id="sub"></div></section>
+<button type="button" class="btn" id="reset">Limpar filtros</button></div><p class="leg s-apoio-presencial-1">Semanas: abra a lista e <b>marque várias</b> para agregá-las; “Consolidado” equivale a todas marcadas.</p><div id="sub"></div></section>
 <section class="grid">
 <article class="panel"><h2>Ranking do índice de apoios realizados</h2><p id="r1p">Cor pela faixa do índice. Clique numa escola para filtrar. A marca vermelha indica o índice regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Índice e cobertura de professores</h2><p>Cada bolha é uma escola; o tamanho mostra o total de professores. As faixas de fundo seguem o semáforo do índice.</p><div id="sc"></div><div class="leg">A linha vermelha vertical marca a cobertura regional de professores apoiados.</div></article>
@@ -66,7 +30,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-spac
 <article class="panel"><h2>Distribuição do índice</h2><p>Quantas escolas há em cada faixa de valor.</p><div id="hs" class="hist"></div></article>
 </div>
 </section>
-<article class="panel"><h2>Resultados por escola</h2><p>Clique no título de uma coluna para ordenar. A ordenação inicial é pelo índice.</p><div class="tw"><table><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv">Exportar CSV</button></p></article>
+<article class="panel"><h2>Resultados por escola</h2><p>Clique no título de uma coluna para ordenar. A ordenação inicial é pelo índice.</p><div class="tw"><table><thead></thead><tbody></tbody></table></div><p class="s-apoio-presencial-2"><button class="btn" id="csv">Exportar CSV</button></p></article>
 <p class="fonte" id="fonte" data-atualizacao="apoio">Fonte: Atualizado em 17/11/2026. Fonte: Escola Total.</p>
 <p class="fonte" id="fonteDetalhe"></p>
 </main>
@@ -160,7 +124,7 @@ $('#csv').onclick=()=>{const t=[COLS.map(c=>c[1]).join(';'),...sorted(LT).map(x=
   });
   GRUPOS=g;
   const numSem=s=>{const m=String(s).match(/^(\d+)\s*-/);return m?+m[1]:0};
-  const chaves=Object.keys(g).sort((a,b)=>{const A=a.split('|'),B=b.split('|');return Number(B[0])-Number(A[0])||numSem(B[1])-numSem(A[1])||B[1].localeCompare(A[1],'pt-BR')});
+  const chaves=Object.keys(g).sort((a,b)=>{const A=g[a],B=g[b],ta=A.label||A.periodo,tb=B.label||B.periodo;return Number(B.ano)-Number(A.ano)||numSem(tb)-numSem(ta)||tb.localeCompare(ta,'pt-BR')});
   const anos=new Set(chaves.map(k=>g[k].ano));
   selP.innerHTML='<label class="mse-item"><input type="checkbox" value="__consolidado__" checked> Consolidado</label>'+chaves.map(k=>{const x=g[k];const txt=(anos.size>1?x.ano+' · ':'')+(x.label||x.periodo);return `<label class="mse-item" title="${esc(x.ano+' · '+x.periodo)}"><input type="checkbox" value="${esc(k)}"> ${esc(txt)}</label>`}).join('');
   selPWrap.style.display='';aplicarSemanas(chaves);

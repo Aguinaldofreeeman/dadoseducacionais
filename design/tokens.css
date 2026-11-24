@@ -1,0 +1,653 @@
+/* ==========================================================================
+   tokens.css — base portátil de design tokens
+   Web & App Design skill · MIT
+
+   Uso: linke este arquivo antes de qualquer CSS de componente.
+   Componente consome SOMENTE a camada semântica (seção 2).
+   Todos os contrastes abaixo foram medidos; ver comentário de cada par.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVOS — valor cru. Nunca usar em componente.
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* neutro frio */
+  --n-0:    #ffffff;
+  --n-50:   #f7f8fa;
+  --n-100:  #eef0f4;
+  --n-200:  #dfe3ea;
+  --n-300:  #c6ccd8;
+  --n-400:  #9aa3b2;
+  --n-500:  #6b7484;
+  --n-600:  #4d5563;
+  --n-700:  #363d49;
+  --n-800:  #232932;
+  --n-900:  #14181f;
+  --n-950:  #0c0f14;
+
+  /* acento */
+  --blue-700: #1a4fb0;
+  --blue-600: #1f5fd0;
+  --blue-300: #7aa7ff;
+
+  /* status */
+  --green-700: #17754a;
+  --green-50:  #e5f3ec;
+  --amber-800: #8a5a00;
+  --amber-50:  #fdf3d8;
+  --red-700:   #b3302f;
+  --red-50:    #fbe9e8;
+  --cyan-800:  #1a5fb4;
+  --cyan-50:   #e7eef8;
+
+  /* séries de dados (claro) */
+  --s-1: #1f5fd0;
+  --s-2: #c2410c;
+  --s-3: #0f766e;
+  --s-4: #7c3aed;
+  --s-5: #a16207;
+  --s-6: #be185d;
+}
+
+/* --------------------------------------------------------------------------
+   2. SEMÂNTICOS — claro (default)
+   -------------------------------------------------------------------------- */
+
+:root {
+  --surface:        var(--n-0);
+  --surface-2:      var(--n-50);
+  --surface-3:      var(--n-100);
+  --surface-inverse: var(--n-900);
+
+  --text:           var(--n-900);   /* 17.79:1 em #fff */
+  --text-muted:     var(--n-600);   /*  7.51:1 em #fff */
+  --text-subtle:    #5f6878;        /*  5.62:1 em #fff */
+  --text-inverse:   var(--n-0);
+
+  --border:         var(--n-200);   /* decorativo */
+  --border-strong:  #8b95a3;        /*  3.03:1 em #fff — borda de controle */
+
+  --accent:         var(--blue-600);/*  5.82:1 em #fff */
+  --accent-hover:   var(--blue-700);/*  7.53:1 em #fff */
+  --accent-bg:      #e7eef8;        /* fundo de destaque */
+  --accent-fg:      var(--n-0);     /*  5.82:1 sobre accent */
+  --focus:          var(--blue-600);
+
+  --good:     var(--green-700);
+  --good-bg:  var(--green-50);   /* 4.99:1 */
+  --warn:     var(--amber-800);
+  --warn-bg:  var(--amber-50);   /* 5.36:1 */
+  --bad:      var(--red-700);
+  --bad-bg:   var(--red-50);     /* 5.30:1 */
+  --info:     var(--cyan-800);
+  --info-bg:  var(--cyan-50);    /* 5.38:1 */
+
+  --series-1: var(--s-1);
+  --series-2: var(--s-2);
+  --series-3: var(--s-3);
+  --series-4: var(--s-4);
+  --series-5: var(--s-5);
+  --series-6: var(--s-6);
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .06), 0 1px 3px rgb(0 0 0 / .10);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / .12);
+}
+
+/* --------------------------------------------------------------------------
+   3. SEMÂNTICOS — escuro
+   Não é inversão: superfícies, contraste e sombras são redefinidos.
+   -------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  --surface:        var(--n-900);
+  --surface-2:      #1c2129;
+  --surface-3:      var(--n-800);
+  --surface-inverse: var(--n-0);
+
+  --text:           #e8ebf0;        /* 14.89:1 em #14181f */
+  --text-muted:     #a3acbb;        /*  7.77:1 */
+  --text-subtle:    #8b95a3;        /*  5.87:1 */
+  --text-inverse:   var(--n-900);
+
+  --border:         #2c333e;
+  --border-strong:  #5a6577;        /*  3.02:1 — borda de controle */
+
+  --accent:         var(--blue-300);/*  7.46:1 */
+  --accent-hover:   #a3c2ff;
+  --accent-bg:      #16233a;
+  --accent-fg:      var(--n-950);   /*  8.04:1 sobre accent */
+  --focus:          var(--blue-300);
+
+  --good:     #4ade80;
+  --good-bg:  #10281c;   /* 10.21:1 */
+  --warn:     #fbbf24;
+  --warn-bg:  #2b2110;   /* 10.66:1 */
+  --bad:      #f87171;
+  --bad-bg:   #2d1618;   /*  6.43:1 */
+  --info:     #60a5fa;
+  --info-bg:  #101f31;   /*  7.00:1 */
+
+  --series-1: #7aa7ff;
+  --series-2: #ffa07a;
+  --series-3: #5eead4;
+  --series-4: #c4b5fd;
+  --series-5: #fcd34d;
+  --series-6: #f9a8d4;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .5);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / .6);
+}
+
+/* Respeita o sistema, a menos que o usuário force claro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface:        var(--n-900);
+    --surface-2:      #1c2129;
+    --surface-3:      var(--n-800);
+    --surface-inverse: var(--n-0);
+
+    --text:           #e8ebf0;
+    --text-muted:     #a3acbb;
+    --text-subtle:    #8b95a3;
+    --text-inverse:   var(--n-900);
+
+    --border:         #2c333e;
+    --border-strong:  #5a6577;
+
+    --accent:         var(--blue-300);
+    --accent-hover:   #a3c2ff;
+    --accent-bg:      #16233a;
+    --accent-fg:      var(--n-950);
+    --focus:          var(--blue-300);
+
+    --good:     #4ade80;
+    --good-bg:  #10281c;
+    --warn:     #fbbf24;
+    --warn-bg:  #2b2110;
+    --bad:      #f87171;
+    --bad-bg:   #2d1618;
+    --info:     #60a5fa;
+    --info-bg:  #101f31;
+
+    --series-1: #7aa7ff;
+    --series-2: #ffa07a;
+    --series-3: #5eead4;
+    --series-4: #c4b5fd;
+    --series-5: #fcd34d;
+    --series-6: #f9a8d4;
+
+    --shadow-1: 0 1px 2px rgb(0 0 0 / .5);
+    --shadow-2: 0 8px 24px rgb(0 0 0 / .6);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. TIPOGRAFIA
+   Para usar fonte de marca: carregue-a e coloque-a primeiro na lista.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  --text-xs:   0.75rem;  /* 12px */
+  --text-sm:   0.875rem; /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg:   1.25rem;  /* 20px */
+  --text-xl:   1.5rem;   /* 24px */
+  --text-2xl:  2rem;     /* 32px */
+
+  --lh-xs:   1rem;
+  --lh-sm:   1.25rem;
+  --lh-base: 1.5rem;
+  --lh-lg:   1.75rem;
+  --lh-xl:   2rem;
+  --lh-2xl:  2.5rem;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semi:   600;
+  --weight-bold:   700;
+}
+
+/* --------------------------------------------------------------------------
+   5. ESPAÇO, RAIO, MOVIMENTO
+   -------------------------------------------------------------------------- */
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+}
+
+/* --------------------------------------------------------------------------
+   6. BASE
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--space-3);
+  line-height: 1.2;
+  font-weight: var(--weight-semi);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-2xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--text-xl);  letter-spacing: -0.01em; }
+h3 { font-size: var(--text-lg); }
+h4, h5, h6 { font-size: var(--text-base); }
+
+p { margin: 0 0 var(--space-4); max-width: 72ch; }
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  text-decoration-thickness: 1px;
+}
+a:hover { color: var(--accent-hover); }
+
+small { font-size: var(--text-sm); color: var(--text-muted); }
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+table { border-collapse: collapse; width: 100%; }
+
+/* Foco: visível sempre. Nunca remova sem substituto de igual contraste. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection { background: var(--accent); color: var(--accent-fg); }
+
+/* --------------------------------------------------------------------------
+   7. UTILITÁRIOS MÍNIMOS
+   -------------------------------------------------------------------------- */
+
+/* Números alinhados: obrigatório em tabela, KPI e eixo de gráfico. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .container { padding-inline: var(--space-5); }
+}
+
+/* Grid que se adapta sem breakpoint. */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. PREFERÊNCIAS E IMPRESSÃO
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms;
+    animation-iteration-count: 1;
+    transition-duration: .01ms;
+    scroll-behavior: auto;
+  }
+}
+
+@media print {
+  :root {
+    --surface: #fff;
+    --surface-2: #fff;
+    --surface-3: #fff;
+    --text: #000;
+    --text-muted: #333;
+    --border: #999;
+  }
+  nav, aside, button, .no-print { display: none; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10px; }
+  table, figure, .card { break-inside: avoid; }
+  thead { display: table-header-group; }
+  body { font-size: 11pt; }
+}
+
+/* LEGACY-TOKENS:START */
+/* Cores do HTML original, congeladas durante a migração. Não usar em código novo. */
+:root {
+  --legacy-c-0010a32d: #000;
+  --legacy-c-00b5b581: rgba(255,200,61,.14);
+  --legacy-c-014c8018: rgba(13,27,48,.82);
+  --legacy-c-0203c2ab: #0008;
+  --legacy-c-0203c2d6: #000c;
+  --legacy-c-0203c2d7: #000d;
+  --legacy-c-03a81bb0: #f59e0b22;
+  --legacy-c-03a81bb4: #f59e0b26;
+  --legacy-c-0739ec14: rgba(255,255,255,.09);
+  --legacy-c-0739ef3a: rgba(255,255,255,.14);
+  --legacy-c-0739ef59: rgba(255,255,255,.15);
+  --legacy-c-0739ef78: rgba(255,255,255,.16);
+  --legacy-c-0739ef97: rgba(255,255,255,.17);
+  --legacy-c-0739f2bd: rgba(255,255,255,.22);
+  --legacy-c-0739f6db: rgba(255,255,255,.35);
+  --legacy-c-073a027b: rgba(255,255,255,.68);
+  --legacy-c-073a05fe: rgba(255,255,255,.76);
+  --legacy-c-073a063c: rgba(255,255,255,.78);
+  --legacy-c-073a09fd: rgba(255,255,255,.88);
+  --legacy-c-0fd55ff5: rgba(23,54,93,.13);
+  --legacy-c-2a0be2e2: #0f172a0d;
+  --legacy-c-2a0be2fe: #0f172a1a;
+  --legacy-c-57ad753f: #5eead433;
+  --legacy-c-5fac324a: rgba(18,32,51,.05);
+  --legacy-c-5fac3269: rgba(18,32,51,.06);
+  --legacy-c-70aa39a7: #ffffff26;
+  --legacy-c-70aa39c0: #ffffff30;
+  --legacy-c-70aa39df: #ffffff40;
+  --legacy-c-70aa3fc3: #ffffffcc;
+  --legacy-c-8aa1cc7f: rgba(148,190,233,.16);
+  --legacy-c-8aa1d385: rgba(148,190,233,.32);
+  --legacy-c-8fe2b6e0: rgba(0,0,0,.14);
+  --legacy-c-8fe2ba63: rgba(0,0,0,.22);
+  --legacy-c-8fe2bac0: rgba(0,0,0,.25);
+  --legacy-c-8fe2bde6: rgba(0,0,0,.30);
+  --legacy-c-8fe3947a: rgba(0,0,0,0.5);
+  --legacy-c-905698be: #04170a;
+  --legacy-c-9056f6b9: #04211d;
+  --legacy-c-90685008: #059669;
+  --legacy-c-9072f0fc: #060a13;
+  --legacy-c-9073da0c: #062a2f;
+  --legacy-c-907549fc: #065f46;
+  --legacy-c-9080c8c8: #071120;
+  --legacy-c-90820053: #072e0f;
+  --legacy-c-90928913: #0891b2;
+  --legacy-c-909cff33: #091316;
+  --legacy-c-91d38436: #10262b;
+  --legacy-c-91d3bc54: #101d21;
+  --legacy-c-91ef9ca2: #122033;
+  --legacy-c-91efa029: #122117;
+  --legacy-c-91efb35b: #12263f;
+  --legacy-c-91f01c72: #12333a;
+  --legacy-c-91fdcada: #13263d;
+  --legacy-c-91fdff4a: #131c2e;
+  --legacy-c-91fe0a40: #131f17;
+  --legacy-c-920bd6d8: #14231b;
+  --legacy-c-920c169c: #141c26;
+  --legacy-c-922814fe: #16272c;
+  --legacy-c-9229dee8: #166534;
+  --legacy-c-922ab510: #16803c;
+  --legacy-c-92386b14: #17754a;
+  --legacy-c-92d2b5a0: #0a4a54;
+  --legacy-c-92debb5c: #0b1118;
+  --legacy-c-92debf34: #0b1220;
+  --legacy-c-92df6fd8: #0b1a2e;
+  --legacy-c-92ece1d9: #0c1510;
+  --legacy-c-92fd7827: #0d5c68;
+  --legacy-c-9309767c: #0e2138;
+  --legacy-c-9317996e: #0f243f;
+  --legacy-c-9317a49e: #0f2744;
+  --legacy-c-9317d529: #0f1c20;
+  --legacy-c-9318424b: #0f2a47;
+  --legacy-c-9318b689: #0f3a35;
+  --legacy-c-93193da9: #0f4f31;
+  --legacy-c-93bb4152: #22d3ee;
+  --legacy-c-93c11c81: #243142;
+  --legacy-c-93c1d0af: #243a40;
+  --legacy-c-93cf42f7: #25352a;
+  --legacy-c-93d1455f: #256a3a;
+  --legacy-c-93dd5337: #26334d;
+  --legacy-c-9485fc52: #1a2430;
+  --legacy-c-9486a556: #1a2a2f;
+  --legacy-c-94a290b5: #1c3036;
+  --legacy-c-94b12c11: #1d4472;
+  --legacy-c-94b1e800: #1d4f91;
+  --legacy-c-94bf0395: #1e2a4c;
+  --legacy-c-94bf4390: #1e4470;
+  --legacy-c-94c0045b: #1e4fa3;
+  --legacy-c-95a0b020: #374151;
+  --legacy-c-95a1b797: #37699f;
+  --legacy-c-96258b45: #fbbf2433;
+  --legacy-c-963d2fc5: #2a78d6;
+  --legacy-c-964a47fd: #2b52d1;
+  --legacy-c-9667224a: #2d5a8a;
+  --legacy-c-967bdbe9: #2dd4bf;
+  --legacy-c-96844ab4: #1d5fd0;
+  --legacy-c-9684c0c2: #2f8f63;
+  --legacy-c-970e2625: #422006;
+  --legacy-c-971c4cda: #43240f;
+  --legacy-c-97eff4d9: #3a1f1d;
+  --legacy-c-97f0690a: #3a2f16;
+  --legacy-c-97f112a1: #3a565d;
+  --legacy-c-97f13fae: #3a4a5e;
+  --legacy-c-980de2fb: #3c5a62;
+  --legacy-c-9866f770: rgba(16,38,43,.04);
+  --legacy-c-9866f78f: rgba(16,38,43,.05);
+  --legacy-c-9866fe76: rgba(16,38,43,.20);
+  --legacy-c-986702d2: rgba(16,38,43,.35);
+  --legacy-c-98c4d4d8: #526174;
+  --legacy-c-98d954f0: #52c487;
+  --legacy-c-98fd4967: #566779;
+  --legacy-c-9903a31f: #55c68a;
+  --legacy-c-99a68c8e: #4a5a4f;
+  --legacy-c-99a69076: #4a5b70;
+  --legacy-c-99d683ed: #4cb37a;
+  --legacy-c-99ed330f: #4f7078;
+  --legacy-c-9a711f4c: #60a5fa;
+  --legacy-c-9b5b384f: #5a6677;
+  --legacy-c-9b69b52b: #5b7277;
+  --legacy-c-9b69f514: #5b6b80;
+  --legacy-c-9b6ed567: #5aa9ff;
+  --legacy-c-9b77d0a5: #5c7391;
+  --legacy-c-9b77d430: #5c7479;
+  --legacy-c-9b858680: #5d687c;
+  --legacy-c-9b8bcafd: #5cc0cb;
+  --legacy-c-9ba99a9f: #5eead4;
+  --legacy-c-9c4bad07: #74857a;
+  --legacy-c-9c8412cb: #5f6878;
+  --legacy-c-9d1def40: #6b4e00;
+  --legacy-c-9d1f0249: #6b8288;
+  --legacy-c-9d3892ec: #6d28d9;
+  --legacy-c-9ee0629c: #7c3aed;
+  --legacy-c-9eed9dd9: #7d1f1e;
+  --legacy-c-9ef0be13: #7d8b81;
+  --legacy-c-9efe9d6c: #7e9499;
+  --legacy-c-9f09c558: #7f1d1d;
+  --legacy-c-9f204642: #7fd4dd;
+  --legacy-c-9fb9eb44: #93a4b6;
+  --legacy-c-9fb9f6a4: #93a7c4;
+  --legacy-c-9fbad86d: #93c5fd;
+  --legacy-c-a00118b7: #98aeb3;
+  --legacy-c-a010c602: #99f6e4;
+  --legacy-c-a079f9bd: #8a5d13;
+  --legacy-c-a089381f: #5f6878;
+  --legacy-c-a0b427ab: #8e9bb4;
+  --legacy-c-a0d3c8e7: #8fa6ab;
+  --legacy-c-a0d43213: #8fb3c4;
+  --legacy-c-a0d46af1: #8faaff;
+  --legacy-c-a1356efa: rgba(223,160,60,.38);
+  --legacy-c-a13571c3: rgba(223,160,60,.40);
+  --legacy-c-a22df162: #9a3f37;
+  --legacy-c-a26cd04d: #9db0b3;
+  --legacy-c-a6bc6e2e: #dc262626;
+  --legacy-c-a8e354e7: rgba(2,8,20,.55);
+  --legacy-c-a9f32e01: rgba(239,180,95,.32);
+  --legacy-c-a9f32e3f: rgba(239,180,95,.34);
+  --legacy-c-b251b754: #16803c26;
+  --legacy-c-bb201b95: rgba(2,8,20,.6);
+  --legacy-c-be65693b: rgba(47,125,246,.16);
+  --legacy-c-cdbe0b36: #0d948826;
+  --legacy-c-d67438d9: #04211dcc;
+  --legacy-c-df336ac4: rgba(255,255,255,.1);
+  --legacy-c-e0038544: rgba(255,255,255,.045);
+  --legacy-c-e01ebfaa: rgba(255,255,255,0.10);
+  --legacy-c-e01ec064: rgba(255,255,255,0.16);
+  --legacy-c-e01ec0a2: rgba(255,255,255,0.18);
+  --legacy-c-e01ec3a9: rgba(255,255,255,0.22);
+  --legacy-c-e0e9d705: rgba(60,120,216,.28);
+  --legacy-c-e3fc7c39: #a3aebb;
+  --legacy-c-e411d00a: #a63d34;
+  --legacy-c-e450d494: #a9b8ad;
+  --legacy-c-e451455e: #a9c7d3;
+  --legacy-c-e59b9f05: #b3302f;
+  --legacy-c-e5a94d1d: #b42318;
+  --legacy-c-e5aaaa1c: #b45309;
+  --legacy-c-e5cdc008: #b5c7ca;
+  --legacy-c-e5d5f02f: #b7791f;
+  --legacy-c-e5e2fd56: #b85046;
+  --legacy-c-e5e9f2ed: #b7c8dd;
+  --legacy-c-e5f0029e: #b91c1c;
+  --legacy-c-e7288c49: #c084fc;
+  --legacy-c-e742d802: #c2410c;
+  --legacy-c-e74400fb: #c25a52;
+  --legacy-c-e758ac2d: #c2d0d3;
+  --legacy-c-e7a81536: #c98f2a;
+  --legacy-c-e7bb5869: #c9d2df;
+  --legacy-c-e9010e1b: #d1fae5;
+  --legacy-c-e90df949: #d2e0e2;
+  --legacy-c-e946577c: #d6e0ea;
+  --legacy-c-e9465b42: #d6e1ef;
+  --legacy-c-e946cbbf: #d6f0dd;
+  --legacy-c-e946cbdd: #d6f0ec;
+  --legacy-c-e95bc89e: #d97706;
+  --legacy-c-e95d4f00: #8a5a00;
+  --legacy-c-ea0cd08a: #ccfbf1;
+  --legacy-c-ea195657: #cdd5df;
+  --legacy-c-ea9dd466: #e11d48;
+  --legacy-c-eaa71f19: #e0f2fe;
+  --legacy-c-eac2ec4d: #e2e7f1;
+  --legacy-c-eac3953e: #e2edf5;
+  --legacy-c-ead1a900: #e3ecf7;
+  --legacy-c-ead6ea87: #b3302f;
+  --legacy-c-ead7c45f: #e5645c;
+  --legacy-c-eaebd77b: #e5b95f;
+  --legacy-c-eaed983e: #e5f3ec;
+  --legacy-c-eaedd46d: #e5ebfc;
+  --legacy-c-eafba451: #e6f0e8;
+  --legacy-c-eafc6f50: #e6fffb;
+  --legacy-c-eb0a0ac2: #e7edf4;
+  --legacy-c-eb0a0e7f: #e7eef0;
+  --legacy-c-eb0a0e87: #e7eef8;
+  --legacy-c-eb0a1240: #e7eff0;
+  --legacy-c-eb182242: #e8edf3;
+  --legacy-c-eb182606: #e8eef6;
+  --legacy-c-eb25eede: #e9f1fb;
+  --legacy-c-eba46492: #dae7ff;
+  --legacy-c-ebb26cce: #dbe3dc;
+  --legacy-c-ebc1400c: #dceef0;
+  --legacy-c-ebe8e824: #dfa03c;
+  --legacy-c-ebead273: #dfe5ec;
+  --legacy-c-ebead275: #dfe5ee;
+  --legacy-c-ec469bf7: #f0746c;
+  --legacy-c-ec5aab0f: #f0c84a;
+  --legacy-c-ec5b2871: #f0d9a0;
+  --legacy-c-ec5b4909: #f0cb85;
+  --legacy-c-ec5cb339: #f0fdf4;
+  --legacy-c-ec5cb366: #f0fdfa;
+  --legacy-c-ec6a168f: #f1f4f9;
+  --legacy-c-ec75d3e6: #f2a09a;
+  --legacy-c-ec76c33b: #f2c230;
+  --legacy-c-ec7831d1: #f2f5f9;
+  --legacy-c-ec78358f: #f2f6f6;
+  --legacy-c-ec7840d5: #f2f9f9;
+  --legacy-c-ec7de414: #f43f5e;
+  --legacy-c-ec86458e: #f3f4f6;
+  --legacy-c-ec86497b: #f3f5fb;
+  --legacy-c-ec864d0d: #f3f6f3;
+  --legacy-c-ecb09b41: #f6f8fb;
+  --legacy-c-ecb09b42: #f6f8fc;
+  --legacy-c-ecb09ed9: #f6f9f9;
+  --legacy-c-ecb74ca9: #f87171;
+  --legacy-c-ecbe3694: #f7e6e4;
+  --legacy-c-ecbeb683: #f7f9fb;
+  --legacy-c-ecbf4caa: #f7fafa;
+  --legacy-c-ecccfe67: #f8eed6;
+  --legacy-c-ed51f4a3: #eb6834;
+  --legacy-c-ed599714: #eaf0f1;
+  --legacy-c-ed599ad6: #eaf1f2;
+  --legacy-c-ed599add: #eaf1f9;
+  --legacy-c-ed59a9ec: #eaf5ec;
+  --legacy-c-ed59e9ac: #eaeef3;
+  --legacy-c-ed612db0: #ec7f77;
+  --legacy-c-ed83dd9a: #edf0f4;
+  --legacy-c-ed83f7e3: #edf7f6;
+  --legacy-c-ed895b04: #ef4444;
+  --legacy-c-ed91fc9f: #eef2f6;
+  --legacy-c-ed91fca0: #eef2f7;
+  --legacy-c-ed91fccb: #eef2fb;
+  --legacy-c-ed92044c: #eef4fa;
+  --legacy-c-ed920bcf: #eef6fb;
+  --legacy-c-ed9e4467: #efb45f;
+  --legacy-c-ef0727f6: #fb7185;
+  --legacy-c-ef081408: #fb923c;
+  --legacy-c-ef0dcba2: #facc15;
+  --legacy-c-ef1b7a25: #fbbf24;
+  --legacy-c-ef1c1ddf: #fbe3d6;
+  --legacy-c-ef1c3486: #fbe9e8;
+  --legacy-c-ef384d10: #fde3de;
+  --legacy-c-ef3852fb: #fde68a;
+  --legacy-c-ef3fc96a: #ff6b72;
+  --legacy-c-ef46285e: #fecaca;
+  --legacy-c-ef46d53a: #fef2f2;
+  --legacy-c-ef53a029: #ffc83d;
+  --legacy-c-ef54fb9e: #fff6e0;
+  --legacy-c-ef55a0fc: #fffbeb;
+  --legacy-c-f420167d: rgba(0,0,0,.2);
+  --legacy-c-f42016bb: rgba(0,0,0,.4);
+  --legacy-c-fac1a915: rgba(245,179,1,.18);
+}
+/* LEGACY-TOKENS:END */

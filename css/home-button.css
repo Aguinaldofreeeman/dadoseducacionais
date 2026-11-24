@@ -6,7 +6,7 @@
     padding: 9px 18px;
     border: 0;
     border-radius: 7px;
-    background: #0d9488;
+    background: #0b6b62;
     color: #fff;
     font-weight: 700;
     line-height: 1.2;
@@ -16,11 +16,11 @@
 
 .home-button:hover,
 .home-button:focus-visible {
-    background: #0f766e;
+    background: #08564f;
     color: #fff;
 }
 
 .home-button:focus-visible {
-    outline: 3px solid rgba(13, 148, 136, .35);
+    outline: 3px solid var(--focus, #1f5fd0);
     outline-offset: 2px;
 }

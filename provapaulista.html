@@ -6,25 +6,13 @@
     <meta http-equiv="refresh" content="0; url=resultados_prova_paulista.html">
     <title>Prova Paulista - Resultados</title>
     <link rel="stylesheet" href="css/home-button.css">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f3f6fa; margin: 0; color: #243247; }
-        header { background: linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
-        .btn-nav { background-color: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .btn-nav:hover { background-color: #0f766e; }
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        main { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
-        
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .card h2 { margin-top: 0; color: #17365d; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .card p { font-size: 14px; color: #64748b; line-height: 1.6; }
 
-        .btn-action { display: inline-block; background-color: #0284c7; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; margin-top: 15px; }
-        .btn-action:hover { background-color: #0369a1; }
-    </style>
+    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/provapaulista.css">
 </head>
 <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <header>
         <h1>Painel Prova Paulista</h1>
         <div class="header-actions">
@@ -32,11 +20,11 @@
             <button id="btn-sair" class="btn-logout">Sair</button>
         </div>
     </header>
-    <main>
+    <main id="conteudo" tabindex="-1">
         <div class="card">
             <h2>Módulo de Indicadores da Prova Paulista</h2>
             <p>Acesse abaixo a consulta de resultados por unidade escolar, turma, disciplina, participação e aproveitamento:</p>
-            
+
             <a href="resultados_prova_paulista.html" class="btn-action">Acessar Resultados Detalhados &rarr;</a>
         </div>
     </main>

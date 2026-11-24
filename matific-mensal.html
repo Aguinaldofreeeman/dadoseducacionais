@@ -1,73 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Matific</title>
-<style>
-:root{--bg:#f1f5f9;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--p:#17365d;--a:#0d9488;--w:#f59e0b;--sh:0 1px 3px #0f172a1a,0 8px 24px #0f172a0d}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--c:#131c2e;--t:#e2e8f0;--m:#94a3b8;--b:#26334d;--p:#93c5fd;--sh:0 1px 3px #0008}}
-*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--t);margin:0}
-header{background:linear-gradient(120deg,#17365d,#0f4c75 60%,#0d9488);color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}.nav{display:flex;gap:8px;flex-wrap:wrap}
-.btn{padding:9px 14px;border-radius:8px;color:#fff;text-decoration:none;font:14px inherit;background:#ffffff26;border:0;cursor:pointer}.btn:hover{background:#ffffff40}
-main{max-width:1320px;margin:auto;padding:22px 30px 40px}
-.avg{background:linear-gradient(120deg,#17365d,#134e6f);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:18px;box-shadow:var(--sh)}
-.avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
-.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 7px}
-.avg .bar{background:#ffffff30}.avg .bar i{background:#5eead4}.avg .dl{margin-top:7px;background:#ffffff26;color:#fff}.avg .dl.up{background:#5eead433;color:#99f6e4}.avg .dl.dn{background:#fbbf2433;color:#fde68a}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
-.card,.panel{background:var(--c);border-radius:12px;box-shadow:var(--sh)}.card{padding:16px 18px;border-left:4px solid var(--a)}
-.card .k{color:var(--m);font-size:13px}.card .v{font-size:28px;color:var(--p);font-weight:700;margin:4px 0}.card .d{font-size:12px;color:var(--m);margin-bottom:6px}.card .dls{display:flex;flex-wrap:wrap;gap:5px}
-.dl{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--b);color:var(--m)}.dl.up{background:#0d948826;color:#0d9488}.dl.dn{background:#f59e0b26;color:#d97706}
-.fp{padding:12px 16px;margin-bottom:18px;position:sticky;top:0;z-index:5}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filters select,.filters input{padding:9px 11px;border:1px solid var(--b);border-radius:8px;font:14px inherit;background:var(--c);color:var(--t);flex:1;min-width:180px}.filters .btn{background:var(--p);color:#fff}
-#sub{font-size:12px;color:var(--m);margin:8px 2px 0}
-/* seletor de meses */
-.mp{padding:14px 16px;margin-bottom:14px}.mp h2{font-size:15px;color:var(--p);margin:0 0 2px}.mp>p{font-size:12px;color:var(--m);margin:0 0 10px}
-.chips{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
-.chip{position:relative;padding:10px 0 8px;border:1px solid var(--b);border-radius:9px;background:var(--c);color:var(--t);font:600 13px inherit;cursor:pointer;text-align:center}
-.chip small{display:block;font-weight:400;font-size:10px;color:var(--m);margin-top:1px}
-.chip:hover:not(:disabled){border-color:var(--a)}.chip:disabled{opacity:.38;cursor:not-allowed;background:transparent}
-.chip.cur{background:var(--a);border-color:var(--a);color:#fff}.chip.cur small{color:#ffffffcc}
-.chip.cmp{background:#f59e0b22;border-color:var(--w);color:var(--t)}
-.chip i{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font:600 9px inherit;font-style:normal;padding:1px 6px;border-radius:99px;background:var(--p);color:var(--c);white-space:nowrap}.chip.cmp i{background:var(--w);color:#1e293b}
-.mrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}.mrow .info{font-size:13px;flex:1;min-width:220px}.mrow .info b{color:var(--p)}
-.mrow .btn{background:var(--p);color:var(--c);padding:7px 12px;font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
-.panel{padding:20px}.panel h2{font-size:17px;color:var(--p);margin:0 0 4px}.panel>p{font-size:13px;color:var(--m);margin:0 0 14px}
-.rank{display:grid;gap:4px;align-content:start;max-height:460px;overflow-y:auto}.row{display:grid;grid-template-columns:24px 1fr 84px;gap:10px;align-items:center;font-size:13px;cursor:pointer;padding:4px;border-radius:8px}.row:hover{background:var(--bg)}
-.pos{color:var(--m);font-weight:700;text-align:center}.school{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row b{text-align:right;color:var(--p)}.row b small{display:block;font-weight:600;font-size:11px}.up{color:#0d9488}.dn{color:#d97706}
-.bar{position:relative;height:9px;background:var(--b);border-radius:99px;margin-top:4px}.bar i{display:block;height:100%;background:var(--a);border-radius:99px}
-.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f43f5e;border-radius:2px}.warn .bar i{background:var(--w)}
-.f{display:grid;grid-template-columns:150px 1fr 84px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px}.bar.big{height:22px;border-radius:6px;margin:0}.bar.big i{border-radius:6px}.fn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}.fn-col h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.fn-note{font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.5}@media(max-width:620px){.fn-grid{grid-template-columns:1fr}}.f strong{text-align:right}.f small{display:block;color:var(--m);font-weight:400}
-.hist{display:flex;gap:10px;align-items:flex-end;height:170px}.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;color:var(--m);text-align:center}
-.pr{display:flex;gap:3px;align-items:flex-end;width:100%;justify-content:center}.pr i{flex:1;background:var(--a);border-radius:6px 6px 0 0;min-height:2px;opacity:.55}.pr i.o{background:var(--w);opacity:.7}.col.me .pr i:not(.o){opacity:1;background:var(--p)}.col b{color:var(--t);font-size:11px}
-svg{width:100%;height:auto;display:block}svg text{fill:var(--m);font-size:11px}svg .g{stroke:var(--b)}svg .ref{stroke:#f43f5e;stroke-dasharray:4 4}svg circle,svg .pt{cursor:pointer}
-.tr2{display:grid;grid-template-columns:1fr 1fr;gap:22px}.tr2 h3{font-size:13px;margin:0 0 4px;color:var(--t)}
-.tw{overflow:auto;max-height:440px}table{width:100%;border-collapse:collapse;font-size:13px}
-th{position:sticky;top:0;background:var(--c);cursor:pointer;text-align:right;padding:9px 10px;border-bottom:2px solid var(--b);color:var(--m);font-size:12px;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:var(--bg)}
-.hm{width:auto;min-width:100%}.hm td{padding:0;border:0}.hm td.n{padding:3px 10px 3px 0;max-width:260px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;position:sticky;left:0;background:var(--c)}
-.hm td.c{text-align:center;font-size:11px;min-width:46px;height:26px;border:2px solid var(--c)}.hm th{text-align:center;min-width:46px;padding:6px 2px;cursor:pointer}.hm th.s{color:var(--a);border-bottom-color:var(--a)}.hm td.c.s{outline:2px solid var(--p);outline-offset:-2px}
-.hm th:first-child{left:0;z-index:2}
-.empty,.foot{font-size:12px;color:var(--m)}.foot{margin-top:18px}.leg{font-size:12px;color:var(--m);margin-top:10px}
-@media(max-width:850px){.grid,.tr2{grid-template-columns:1fr}.f{grid-template-columns:120px 1fr 76px}.fp{position:static}}
-@media(max-width:620px){.chips{grid-template-columns:repeat(6,1fr)}}
-@media(max-width:550px){header{padding:16px}main{padding:14px}.f{grid-template-columns:1fr}.filters select,.filters input{min-width:100%}}
-</style><link rel="stylesheet" href="css/home-button.css"></head><body>
+<link rel="stylesheet" href="css/home-button.css">    <link rel="stylesheet" href="design/tokens.css">
+    <link rel="stylesheet" href="design/app.css">
+    <link rel="stylesheet" href="design/pages/matific-mensal.css">
+</head><body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 <header><div><h1>Dashboard — Matific <span id="anoT">2026</span></h1><p>Unidade Regional de Ensino de Marília, Ensino Fundamental Anos Finais</p></div><div class="nav"><a href="index.html" class="home-button">Início</a></div></header>
-<main>
+<main id="conteudo" tabindex="-1">
 <section class="panel mp"><h2>Período</h2><p>Clique em um mês para ver os dados dele. Clique em outros meses para comparar: dá para selecionar quantos quiser, e clicar de novo tira o mês. Os meses sem dados ficam desativados.</p><div class="chips" id="mb"></div><div class="mrow"><div class="info" id="mi"></div><button class="btn" id="bcmp"></button><button class="btn" id="ball">Todos os meses</button><button class="btn" id="blast">Último mês</button></div></section>
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub">Referência para comparar cada escola e cada filtro.</p><div class="items" id="avg"></div></section>
 <section class="cards" id="cards"></section>
 <section class="panel fp"><div class="filters"><select id="selectEscola"><option value="">Todas as escolas</option></select><input id="q" type="search" placeholder="Buscar escola ou código"><select id="tier"><option value="">Todas as faixas</option><option value="up">Índice acima da média regional</option><option value="dn">Índice abaixo da média regional</option></select><select id="metric"><option value="indice">Ranking por índice semanal concluídas/aluno</option><option value="percAtivos">Ranking por % de alunos ativos</option><option value="concluidas">Ranking por atividades concluídas</option><option value="iniciadas">Ranking por atividades iniciadas</option></select><select id="vis"><option value="top">Top 10 / Destaque</option><option value="bot">Bottom 10 / Atenção</option><option value="all">All / Todos</option></select><button class="btn" id="reset">Limpar</button></div><div id="sub"></div></section>
-<article class="panel" style="margin-bottom:18px"><h2>Evolução em 2026</h2><p id="trp">Cada ponto é um mês. Clique num ponto para selecioná-lo; a linha tracejada é a média regional quando há filtro.</p><div class="tr2"><div><h3>% de alunos ativos</h3><div id="tr1"></div></div><div><h3>Índice semanal (concluídas por matrícula por semana)</h3><div id="tr2"></div></div></div></article>
+<article class="panel s-matific-mensal-1"><h2>Evolução em 2026</h2><p id="trp">Cada ponto é um mês. Clique num ponto para selecioná-lo; a linha tracejada é a média regional quando há filtro.</p><div class="tr2"><div><h3>% de alunos ativos</h3><div id="tr1"></div></div><div><h3>Índice semanal (concluídas por matrícula por semana)</h3><div id="tr2"></div></div></div></article>
 <section class="grid">
 <article class="panel"><h2 id="t1"></h2><p>Toque numa escola para filtrar. A marca vermelha indica a média regional.</p><div id="r1" class="rank"></div></article>
 <article class="panel"><h2>Participação e resultado por escola</h2><p id="scp">Cada bolha é uma escola; o tamanho mostra as matrículas. As linhas vermelhas cruzam na média regional.</p><div id="sc"></div><div class="leg" id="scl">Verde: índice igual ou acima da média. Amarelo: abaixo.</div></article>
 <article class="panel"><h2>Distribuição do índice semanal</h2><p>Quantas escolas há em cada faixa de atividades concluídas por aluno por semana.</p><div id="hs" class="hist"></div><div class="leg" id="hl"></div></article>
 <article class="panel"><h2>Funil de engajamento</h2><p>Dois funis independentes: pessoas (matrículas → ativos) e atividades (iniciadas → concluídas), comparados à média regional.</p><div id="fn"></div></article>
 </section>
-<article class="panel" id="cpP" style="margin-bottom:18px;display:none"><h2>Comparação dos meses selecionados</h2><p id="cpd"></p><div class="tw" style="max-height:none"><table id="cpR"></table></div><div class="tw" style="max-height:480px;margin-top:16px"><table id="cpE"></table></div></article>
-<article class="panel" style="margin-bottom:18px"><h2>Mapa de calor: escola × mês</h2><p id="hmp"></p><div class="tw" style="max-height:560px"><table class="hm" id="hm"></table></div></article>
-<article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p style="margin:12px 0 0"><button class="btn" id="csv" style="background:var(--p)">Exportar CSV</button></p></article>
+<article class="panel s-matific-mensal-2" id="cpP"><h2>Comparação dos meses selecionados</h2><p id="cpd"></p><div class="tw s-matific-mensal-3"><table id="cpR"></table></div><div class="tw s-matific-mensal-4"><table id="cpE"></table></div></article>
+<article class="panel s-matific-mensal-5"><h2>Mapa de calor: escola × mês</h2><p id="hmp"></p><div class="tw s-matific-mensal-6"><table class="hm" id="hm"></table></div></article>
+<article class="panel"><h2>Todas as escolas</h2><p>Clique no título de uma coluna para ordenar.</p><div class="tw"><table id="tb"><thead></thead><tbody></tbody></table></div><p class="s-matific-mensal-7"><button class="btn s-matific-mensal-8" id="csv">Exportar CSV</button></p></article>
 <p class="foot" id="fonte" data-atualizacao="matific-mensal">Fonte: Escola Total.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="js/atualizacao.js" defer></script><script>
@@ -125,17 +78,17 @@ function line(id,fmt,get,ymaxMin,step){const ms=avail(),names=new Set(base().map
 const W=520,H=230,Lm=46,Rm=12,T=14,B=30,mx=Math.ceil(Math.max(ymaxMin,...ser.map(s=>Math.max(s.v,filt?s.r:0)))*1.04/step)*step,X=m=>Lm+(m-1)/11*(W-Lm-Rm),Y=v=>H-B-v/mx*(H-T-B),sl=ch();
 let s=`<svg viewBox="0 0 ${W} ${H}">`;
 for(let v=0;v<=mx+1e-9;v+=step){s+=`<line x1="${Lm}" x2="${W-Rm}" y1="${Y(v)}" y2="${Y(v)}" class="g"/><text x="${Lm-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
-MS.forEach((n,i)=>{const m=i+1,on=sl.includes(m);s+=`<text x="${X(m)}" y="${H-10}" text-anchor="middle" ${on?'style="fill:var(--a);font-weight:700"':''}>${n}</text>`});
+MS.forEach((n,i)=>{const m=i+1,on=sl.includes(m);s+=`<text x="${X(m)}" y="${H-10}" text-anchor="middle" ${on?'style="fill:var(--p-a);font-weight:700"':''}>${n}</text>`});
 const path=k=>ser.map((p,i)=>(i?'L':'M')+X(p.m)+' '+Y(p[k])).join(' ');
 if(filt)s+=`<path d="${path('r')}" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-s+=`<path d="${path('v')}" fill="none" stroke="var(--p)" stroke-width="2"/>`;
-s+=ser.map(p=>{const on=sl.includes(p.m),c=p.m===cur();return`<g class="pt" data-m="${p.m}"><circle cx="${X(p.m)}" cy="${Y(p.v)}" r="${on?7:4.5}" fill="${on?(c?'var(--a)':'var(--w)'):'var(--c)'}" stroke="${on?'var(--c)':'var(--p)'}" stroke-width="${on?2:1.8}"><title>${MN[p.m-1]}: ${fmt(p.v)}${filt?' (região: '+fmt(p.r)+')':''}</title></circle><circle cx="${X(p.m)}" cy="${Y(p.v)}" r="14" fill="transparent"/></g>`}).join('');
+s+=`<path d="${path('v')}" fill="none" stroke="var(--p-p)" stroke-width="2"/>`;
+s+=ser.map(p=>{const on=sl.includes(p.m),c=p.m===cur();return`<g class="pt" data-m="${p.m}"><circle cx="${X(p.m)}" cy="${Y(p.v)}" r="${on?7:4.5}" fill="${on?(c?'var(--p-a)':'var(--p-w)'):'var(--p-c)'}" stroke="${on?'var(--p-c)':'var(--p-p)'}" stroke-width="${on?2:1.8}"><title>${MN[p.m-1]}: ${fmt(p.v)}${filt?' (região: '+fmt(p.r)+')':''}</title></circle><circle cx="${X(p.m)}" cy="${Y(p.v)}" r="14" fill="transparent"/></g>`}).join('');
 $(id).innerHTML=s+'</svg>'}
 function trend(){const e=selE.value;$('#trp').textContent=(e?sn(e)+' em cada mês. ':'')+'Cada ponto é um mês com dados. Clique num ponto para selecioná-lo'+(e||q.value||tier.value?'; a linha tracejada é a média regional.':'.');line('#tr1',v=>Math.round(v*100)+'%',a=>a.percAtivos,.4,.2);line('#tr2',v=>F(v,1),a=>a.indice,1,.5)}
 /* mapa de calor */
 function heat(l){const k=metric.value,f={indice:dec,percAtivos:v=>Math.round(v*100)+'%',concluidas:nf,iniciadas:nf}[k],ms=avail(),sl=ch(),mx=Math.max(...ms.flatMap(m=>L(m).map(x=>x[k])))||1,idx=new Map(ms.map(m=>[m,new Map(L(m).map(x=>[x.escola,x]))]));
 $('#hmp').textContent='Mostrando: '+NOME[k]+'. Quanto mais escuro, maior o valor. Clique no mês para selecioná-lo ou na escola para filtrar.';
-$('#hm').innerHTML='<thead><tr><th>Escola</th>'+ms.map(m=>`<th data-m="${m}" class="${sl.includes(m)?'s':''}">${MS[m-1]}</th>`).join('')+'</tr></thead><tbody>'+[...l].sort((a,b)=>b[k]-a[k]).map(x=>`<tr><td class="n" data-e="${esc(x.escola)}" title="${esc(x.escola)}">${esc(sn(x.escola))}</td>`+ms.map(m=>{const v=idx.get(m).get(x.escola);if(!v)return'<td class="c">–</td>';const a=Math.round(v[k]/mx*88)+6;return`<td class="c${sl.includes(m)?' s':''}" style="background:color-mix(in srgb,var(--a) ${a}%,var(--c));${a>55?'color:#fff':''}" title="${esc(sn(x.escola))} — ${MN[m-1]}: ${f(v[k])}">${f(v[k])}</td>`}).join('')+'</tr>').join('')+'</tbody>'}
+$('#hm').innerHTML='<thead><tr><th>Escola</th>'+ms.map(m=>`<th data-m="${m}" class="${sl.includes(m)?'s':''}">${MS[m-1]}</th>`).join('')+'</tr></thead><tbody>'+[...l].sort((a,b)=>b[k]-a[k]).map(x=>`<tr><td class="n" data-e="${esc(x.escola)}" title="${esc(x.escola)}">${esc(sn(x.escola))}</td>`+ms.map(m=>{const v=idx.get(m).get(x.escola);if(!v)return'<td class="c">–</td>';const a=Math.round(v[k]/mx*88)+6;return`<td class="c${sl.includes(m)?' s':''}" style="background:color-mix(in srgb,var(--p-a) ${a}%,var(--p-c));${a>55?'color:#fff':''}" title="${esc(sn(x.escola))} — ${MN[m-1]}: ${f(v[k])}">${f(v[k])}</td>`}).join('')+'</tr>').join('')+'</tbody>'}
 const cols=()=>[['escola','Escola'],['matriculas','Matrículas'],['percAtivos','% ativos'],['iniciadas','Iniciadas'],['concluidas','Concluídas'],['indice','Índice semanal']].concat(cmp()!=null?[['dPerc','Δ % ativos'],['dIndice','Δ índice']]:[]);
 const sorted=l=>[...l].sort((x,y)=>ts.k==='escola'?ts.d*x.escola.localeCompare(y.escola,'pt-BR'):ts.d*((x[ts.k]??-1e9)-(y[ts.k]??-1e9)));
 const sg=(v,f)=>v==null?'–':`<span class="${v>0?'up':v<0?'dn':''}">${v>0?'▲ ':v<0?'▼ ':''}${f(Math.abs(v))}</span>`;
@@ -154,7 +107,7 @@ rows=l.map(x=>{const v=ix.map(m=>m.get(x.escola)?.[k]);return{e:x.escola,v,last:
 key=r=>cs.k==='last'?r.last:cs.k==='d'?r.d:r.v[+cs.k];
 rows.sort((a,b)=>cs.k==='e'?cs.d*a.e.localeCompare(b.e,'pt-BR'):cs.d*((key(a)??-1e9)-(key(b)??-1e9)));
 const ar=c=>cs.k===c?(cs.d>0?' ▲':' ▼'):'';
-$('#cpE').innerHTML='<thead><tr><th data-cs="e" style="text-align:left">Escola'+ar('e')+'</th>'+sl.map((m,i)=>'<th data-cs="'+i+'">'+MS[m-1]+ar(String(i))+'</th>').join('')+'<th data-cs="d">Δ'+ar('d')+'</th></tr></thead><tbody>'+rows.map(r=>'<tr><td data-e="'+esc(r.e)+'" title="'+esc(r.e)+'" style="cursor:pointer">'+esc(sn(r.e))+'</td>'+r.v.map(v=>v==null?'<td>–</td>':'<td style="background:color-mix(in srgb,var(--a) '+(Math.round(v/mxv*70)+4)+'%,var(--c))">'+f(v)+'</td>').join('')+'<td>'+sg(r.d,fd)+'</td></tr>').join('')+'</tbody>'}
+$('#cpE').innerHTML='<thead><tr><th data-cs="e" style="text-align:left">Escola'+ar('e')+'</th>'+sl.map((m,i)=>'<th data-cs="'+i+'">'+MS[m-1]+ar(String(i))+'</th>').join('')+'<th data-cs="d">Δ'+ar('d')+'</th></tr></thead><tbody>'+rows.map(r=>'<tr><td data-e="'+esc(r.e)+'" title="'+esc(r.e)+'" style="cursor:pointer">'+esc(sn(r.e))+'</td>'+r.v.map(v=>v==null?'<td>–</td>':'<td style="background:color-mix(in srgb,var(--p-a) '+(Math.round(v/mxv*70)+4)+'%,var(--p-c))">'+f(v)+'</td>').join('')+'<td>'+sg(r.d,fd)+'</td></tr>').join('')+'</tbody>'}
 /* seletor de meses */
 function monthBar(){const c=cur(),p=cmp(),ms=avail();
 $('#mb').innerHTML=MS.map((n,i)=>{const m=i+1,h=has(m),cl=m===c?' cur':sel.includes(m)?' cmp':'';return`<button class="chip${cl}" data-m="${m}" ${h?'':'disabled'} title="${MN[i]}">${m===c?'<i>'+(p!=null?'atual':'mês')+'</i>':m===p?'<i>base</i>':sel.includes(m)?'<i>comp.</i>':''}${n}<small>${h?(DB.meses[m].semanas?DB.meses[m].semanas+(DB.meses[m].semanas>1?' sem.':' sem.'):'dados'):'sem dados'}</small></button>`}).join('');
