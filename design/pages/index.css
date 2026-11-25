@@ -82,10 +82,7 @@
             font-weight: 800;
             font-size: 14px;
             letter-spacing: 0.5px;
-            background: var(--accent);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: var(--accent-fg);
             min-width: 1ch;
         }
         .visit-counter.is-loading .visit-counter-value { opacity: 0.55; }
