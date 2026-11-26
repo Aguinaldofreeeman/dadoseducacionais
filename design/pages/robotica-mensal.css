@@ -3,7 +3,7 @@
 
 /* Layout: seletor de meses fixo no topo, KPIs, evolução mensal, ranking, dispersão,
    escola em foco, mapa de calor de todos os meses e tabela completa. */
-:root{
+:root{--page-max:1320px;
   --p-bg:var(--legacy-c-ec6a168f); --p-surface:var(--surface); --p-surface2:var(--legacy-c-ecb09b42); --p-ink:var(--legacy-c-91ef9ca2); --p-muted:var(--legacy-c-98fd4967); --p-line:var(--legacy-c-ebead275);
   --p-accent:var(--legacy-c-964a47fd); --p-accent-soft:var(--legacy-c-eaedd46d);
   --p-g:var(--legacy-c-99d683ed); --p-y:var(--legacy-c-ec76c33b); --p-r:var(--legacy-c-ead7c45f); --p-n:var(--legacy-c-e7bb5869); --p-on-status:var(--legacy-c-920bd6d8);
@@ -29,18 +29,14 @@
 }
 *{box-sizing:border-box}
 body{background:var(--p-bg);color:var(--p-ink);font-family:var(--p-f-body);font-size:14px;line-height:1.45;
-  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  padding-block:20px 40px;padding-left:0;padding-right:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--p-bg)}
-.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.wrap{max-width:var(--page-max);margin:0 auto;padding-inline:var(--space-5);display:flex;flex-direction:column;gap:16px}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--p-accent);outline-offset:2px}
 h1,h2,h3{font-family:var(--p-f-display);margin:0;text-wrap:balance}
 .num{font-variant-numeric:tabular-nums}
 
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;padding-top:4px}
-header.top h1{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:700;letter-spacing:-.02em}
-header.top p{margin:6px 0 0;color:var(--p-muted);max-width:62ch}
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--p-accent)}
 
 .card{background:var(--p-surface);border:1px solid var(--p-line);border-radius:14px;min-width:0}
 .card-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:16px 18px 0}

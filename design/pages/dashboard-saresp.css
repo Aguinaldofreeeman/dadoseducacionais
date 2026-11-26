@@ -1,7 +1,7 @@
 /* dashboard-saresp.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+:root{--page-max:1180px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --p-bg:var(--legacy-c-ec86497b);--p-card:var(--surface);--p-ink:var(--legacy-c-92debf34);--p-mut:var(--legacy-c-9b858680);--p-line:var(--legacy-c-eac2ec4d);--p-gold:var(--legacy-c-e95d4f00);--p-dia:var(--legacy-c-96844ab4);--p-bad:var(--legacy-c-ead6ea87);--p-eja:var(--legacy-c-a089381f);--p-g1:var(--legacy-c-be65693b);--p-g2:var(--legacy-c-fac1a915)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--p-bg:var(--legacy-c-9072f0fc);--p-card:var(--legacy-c-e0038544);--p-ink:var(--legacy-c-ed91fccb);--p-mut:var(--legacy-c-a0b427ab);--p-line:var(--legacy-c-0739ec14);--p-gold:var(--legacy-c-ef53a029);--p-dia:var(--legacy-c-9b6ed567);--p-bad:var(--legacy-c-ef3fc96a);--p-eja:var(--legacy-c-a0b427ab);--p-g1:var(--legacy-c-e0e9d705);--p-g2:var(--legacy-c-00b5b581)}}
 :root[data-theme="dark"]{--p-bg:var(--legacy-c-9072f0fc);--p-card:var(--legacy-c-e0038544);--p-ink:var(--legacy-c-ed91fccb);--p-mut:var(--legacy-c-a0b427ab);--p-line:var(--legacy-c-0739ec14);--p-gold:var(--legacy-c-ef53a029);--p-dia:var(--legacy-c-9b6ed567);--p-bad:var(--legacy-c-ef3fc96a);--p-eja:var(--legacy-c-a0b427ab);--p-g1:var(--legacy-c-e0e9d705);--p-g2:var(--legacy-c-00b5b581)}
@@ -9,7 +9,7 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:var(--p-bg);color:var(--p-ink);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh;
 background-image:var(--accent),var(--accent);background-repeat:no-repeat}
-.w{max-width:1180px;margin:0 auto;padding:28px 18px 60px}
+.w{max-width:var(--page-max);margin:0 auto;padding:28px var(--space-5) 60px}
 h1,h2,.big,.k b{font-family:"Space Grotesk",Inter,sans-serif}
 .eye{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--p-mut);font-weight:600}
 h1{font-size:clamp(30px,5.4vw,56px);line-height:1.04;letter-spacing:-.03em;margin:8px 0 6px}
@@ -66,6 +66,7 @@ footer{margin-top:30px;color:var(--p-mut);font-size:12px}
 @media(max-width:650px){.row.open .details{grid-template-columns:1fr 1fr}.tb{position:static}.actions{width:100%}.act{flex:1}.tb input{width:100%}}
 
 @media(max-width:860px){.kp{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.row{grid-template-columns:1fr auto;gap:10px}.tr{grid-column:1/-1;order:3}.pl{order:2}.nu{display:none}.hero{padding:18px 10px}}
+@media(max-width:640px){.hero{grid-template-columns:1fr;gap:12px}.ar{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .strategy{margin-top:24px}.frontgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}.front{font:inherit;text-align:left;color:var(--p-ink);cursor:pointer;background:var(--p-card);border:2px solid var(--p-line);border-radius:16px;padding:18px}.front[aria-pressed=true]{border-color:var(--p-dia)}.front strong{display:block;font-size:28px;margin:6px 0}.front small{display:block;color:var(--p-mut)}.settings{display:flex;flex-wrap:wrap;gap:14px;padding:12px 0}.settings label{font-size:12px;display:grid;gap:4px}.settings input{width:110px;padding:8px;border:1px solid var(--p-line);border-radius:8px;background:var(--p-bg);color:var(--p-ink)}.tag{display:inline-block;border:1px solid var(--p-line);border-radius:8px;padding:3px 6px;margin:5px 4px 0 0;font-size:11px;color:var(--p-ink)}.actionnote{margin-top:10px;padding:12px;border-left:3px solid var(--p-dia);background:var(--p-card);color:var(--p-mut);font-size:13px}.front:focus-visible{outline:3px solid var(--p-dia);outline-offset:3px}@media(max-width:700px){.frontgrid{grid-template-columns:1fr}.front strong{font-size:24px}}
@@ -73,6 +74,5 @@ footer{margin-top:30px;color:var(--p-mut);font-size:12px}
 
 
 /* Estilos antes inline (3) */
-.s-dashboard-saresp-1 { display:flex;justify-content:flex-end;margin-bottom:8px; }
 .s-dashboard-saresp-2 { background:var(--p-gold) }
 .s-dashboard-saresp-3 { background:var(--p-dia) }

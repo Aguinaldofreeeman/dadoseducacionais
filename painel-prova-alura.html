@@ -8,7 +8,6 @@
 <meta name="description" content="Painel de acesso restrito.">
 <link rel="icon" href="data:,">
 
-<link rel="stylesheet" href="css/home-button.css">
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
     <link rel="stylesheet" href="design/pages/painel-prova-alura.css">
@@ -18,7 +17,7 @@
 <noscript>Este painel precisa de JavaScript para funcionar.</noscript>
 <main class="gate" id="gate" hidden tabindex="-1">
   <div class="gate-card">
-    <h1>Painel Prova Paulista e Alura</h1>
+    <h2 class="gate-title">Painel Prova Paulista e Alura</h2>
     <p class="m" id="gSub">Acesso restrito. Entre com seu e-mail e senha para ver os dados.</p>
 
     <div id="gSetup" hidden>
@@ -57,14 +56,25 @@
 
 <div class="boot" role="status">Carregando…</div>
 
-<div class="wrap" id="app" hidden>
-  <header class="head">
+<header class="page-header">
+  <div class="page-header__inner">
     <div>
-      <h1>Prova Paulista e Avaliação Alura · Regional 2026</h1>
-      <p class="sub" id="sub">Análise por escola, 1º ao 3º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.</p>
+      <p class="page-header__title">Prova Paulista e Avaliação Alura</p>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
     </div>
-    <div class="who"><a href="index.html" class="home-button">Início</a><span class="stamp" id="stamp"></span><span class="whoUser"><span id="whoEmail"></span> <button class="btn ghost sm js-logout" type="button">Sair</button></span></div>
-  </header>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <button class="btn btn-logout js-logout" type="button">Sair</button>
+    </div>
+  </div>
+</header>
+  <section class="page-hero page-hero--editorial">
+    <h1>Prova Paulista e Avaliação Alura · Regional 2026</h1>
+    <p class="sub" id="sub">Análise por escola, 1º ao 3º bimestre. Prova Paulista medida pelo TEC, Alura pela média das avaliações mensais.</p>
+    <span class="stamp" id="stamp"></span>
+    <span class="whoUser"><span id="whoEmail"></span></span>
+  </section>
+<div class="wrap" id="app" hidden>
 
   <nav class="tabs" role="tablist" id="tabs" aria-label="Seções"><button role="tab" aria-selected="true" data-t="painel">Painel</button><button role="tab" aria-selected="false" data-t="dados">Atualizar dados · Admin</button></nav>
 
@@ -408,7 +418,6 @@ function applyData(D,meta){
   const bw=$('#bootWarn');bw.hidden=!META.warn;bw.textContent=META.warn||'';
   all();renderLines();
 }
-
 
 </script>
 <script>

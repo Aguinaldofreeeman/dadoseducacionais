@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -15,23 +15,25 @@
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 <div class="math" id="math"></div>
-<nav>
-  <a class="brand" href="index.html"><div class="mark">∑</div><div><b>Khan Academy - painel mensal</b><span>URE Marília</span></div></a>
-  <div class="nav-act">
-    <button class="ibtn" id="btnRefresh" title="Recarregar do Supabase"><i class="fas fa-rotate"></i></button>
-    <button class="ibtn" id="btnTheme" title="Tema"><i class="fas fa-sun"></i></button>
-    <button class="tbtn solid" id="btnCsv"><i class="fas fa-download"></i><span>CSV</span></button>
-    <a class="tbtn" href="index.html"><i class="fas fa-house"></i><span>Início</span></a>
-  </div>
-</nav>
-<main id="conteudo" tabindex="-1">
-  <div class="hero reveal">
+<header class="page-header">
+  <div class="page-header__inner">
     <div>
-      <h1 id="heroTitle">Fevereiro <em>2026</em></h1>
-      <div class="meta" id="heroMeta"></div>
+      <p class="page-header__title">Khan Academy · painel mensal</p>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn btn--on-brand" id="btnRefresh" type="button" title="Recarregar do Supabase"><i class="fas fa-rotate" aria-hidden="true"></i><span>Atualizar</span></button>
+      <button class="btn btn--on-brand" id="btnTheme" type="button" title="Tema"><i class="fas fa-sun" aria-hidden="true"></i><span>Tema</span></button>
+      <button class="btn btn--on-brand" id="btnCsv" type="button"><i class="fas fa-download" aria-hidden="true"></i><span>CSV</span></button>
+      <a class="home-button" href="index.html">Início</a>
     </div>
   </div>
-
+</header>
+<div class="page-hero page-hero--compact">
+    <h1 id="heroTitle">Fevereiro <em>2026</em></h1>
+    <div class="meta" id="heroMeta"></div>
+  </div>
+<main id="conteudo" tabindex="-1">
   <section class="panel period reveal">
     <div class="ph"><i class="fas fa-calendar-days"></i><h2>Período letivo <span id="anoT">2026</span></h2><span class="hint">meses sem dados ficam desativados</span></div>
     <p class="psub">Clique num mês para visualizá-lo. Use o seletor ao lado para comparar com outro mês importado.</p>

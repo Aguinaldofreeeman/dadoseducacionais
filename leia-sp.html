@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Public+Sans:wght@400..700&display=swap">
-<link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -16,12 +15,25 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <p class="page-header__title">Leitura em foco</p>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <button class="btn btn--on-brand" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button>
+    </div>
+  </div>
+</header>
+  <section class="page-hero page-hero--editorial">
+    <h1>Leitura em foco</h1>
+    <p>Acompanhe participação, páginas, livros e tempo de leitura por escola. Selecione uma ou mais semanas para comparar a evolução e identificar oportunidades de engajamento.</p>
+    <span class="badge" id="sourceBadge"><i></i><span>Dados embutidos</span></span>
+  </section>
 <main id="conteudo" tabindex="-1">
 <div class="wrap">
-  <header class="top">
-    <div><div class="eyebrow">Unidade Regional de Ensino de Marília</div><h1>Leitura em foco</h1><p>Acompanhe participação, páginas, livros e tempo de leitura por escola. Selecione uma ou mais semanas para comparar a evolução e identificar oportunidades de engajamento.</p></div>
-    <div class="top-actions"><a href="index.html" class="home-button">Início</a><span class="badge" id="sourceBadge"><i></i><span>Dados embutidos</span></span><button class="btn" id="themeBtn" type="button" aria-label="Alternar tema">Tema</button></div>
-  </header>
 
   <p id="dataStatus" class="note card" role="status">Carregando a fonte de dados…</p>
 

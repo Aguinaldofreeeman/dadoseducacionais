@@ -6,7 +6,6 @@
 <link rel="icon" href="data:,">
 <title>Tarefa SP — URE Marília</title>
 <meta name="description" content="Painel semanal do Tarefa SP na Unidade Regional de Ensino de Marília: participação, conclusão, acertos e IQ por escola.">
-<link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -14,19 +13,23 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-<header class="site-header">
-    <div class="header-inner">
-        <div>
-            <p class="eyebrow">Unidade Regional de Ensino de Marília</p>
-            <h1>Tarefa SP <span class="week-badge" id="semanaBadge">Semana 01</span></h1>
-            <p class="header-sub" id="headerSub">Participação, conclusão e qualidade das tarefas · 01.02 a 07.02 · 50 escolas</p>
-        </div>
-        <div class="header-actions">
-            <a class="home-button" href="index.html">Início</a>
-            <button class="btn-ghost" id="btn-sair" type="button">Sair</button>
-        </div>
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <p class="page-header__title">Tarefa SP</p>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
     </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <button class="btn btn-logout" id="btn-sair" type="button">Sair</button>
+    </div>
+  </div>
 </header>
+
+<section class="page-hero page-hero--compact">
+  <h1>Tarefa SP <span class="page-hero__tag" id="semanaBadge">Semana 01</span></h1>
+  <p class="page-hero__sub" id="headerSub">Participação, conclusão e qualidade das tarefas · 01.02 a 07.02 · 50 escolas</p>
+</section>
 
 <main id="conteudo" tabindex="-1">
     <div id="estado" class="state" role="status" aria-live="polite">

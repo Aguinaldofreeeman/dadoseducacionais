@@ -92,6 +92,63 @@
 }
 
 /* --------------------------------------------------------------------------
+   Hero editorial — título de conteúdo abaixo da barra de marca.
+   Mantém a hierarquia das páginas editoriais sem redefinir o header.
+   -------------------------------------------------------------------------- */
+
+.page-hero {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5) 0;
+}
+.page-hero--compact { padding-top: var(--space-5); }
+.page-hero h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-2xl);
+  line-height: 1.14;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+.page-hero--compact h1 { font-size: var(--text-xl); }
+.page-hero h1 span:not(.page-hero__tag),
+.page-hero--compact h1 em { color: var(--accent); font-style: normal; }
+.page-hero p {
+  margin: var(--space-3) 0 0;
+  max-width: 74ch;
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+.page-hero .eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.page-hero .badge,
+.page-hero .stamp,
+.page-hero .whoUser {
+  display: inline-block;
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.page-hero__tag {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-3);
+  padding: 4px var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+}
+
+/* --------------------------------------------------------------------------
    Cabeçalho de página — barra de marca compartilhada por todas as páginas.
    Única fonte de estilo do header: nenhuma página redefine header{}
    -------------------------------------------------------------------------- */
@@ -898,7 +955,8 @@ progress.track::-moz-progress-bar { background: var(--accent); border-radius: 99
 }
 
 @media (max-width: 640px) {
-  .app-header__inner { padding: var(--space-3) var(--space-4); }
+  .page-header__inner { padding: var(--space-3) var(--space-4); }
+  .page-hero { padding-inline: var(--space-4); }
   .main { padding: var(--space-4); }
   .card { padding: var(--space-4); }
   .field { min-width: 100%; }
@@ -921,8 +979,8 @@ progress.track::-moz-progress-bar { background: var(--accent); border-radius: 99
   .skip-link,
   .filters,
   .chart-data { display: none; }
-  .app-header { border-bottom: 1px solid #999; }
-  .app-header__inner { padding: 0 0 8px; }
+  .page-header { border-bottom: 1px solid #999; }
+  .page-header__inner { padding: 0 0 8px; }
   .main { padding: 0; max-width: none; }
   .card { break-inside: avoid; border-color: #999; }
   .kpi-grid { grid-template-columns: repeat(3, 1fr); }

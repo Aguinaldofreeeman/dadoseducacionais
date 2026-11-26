@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -17,38 +16,27 @@
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <p class="page-header__title">Atividades por escola</p>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <a class="btn btn--on-brand" href="#" id="robota-mensal-btn">Robótica Mensal</a>
+      <a class="btn btn--on-brand" href="Robotica_Marilia.html">Robótica Marília</a>
+    </div>
+  </div>
+</header>
+  <section class="page-hero page-hero--editorial">
+    <p class="eyebrow">Programa de Robótica · Marília</p>
+    <h1>Atividades por escola</h1>
+    <p>Escolha um mês ou combine vários meses de 2026. O painel mostra o período escolhido, compara com o primeiro mês e deixa você acompanhar cada escola mês a mês.</p>
+  </section>
 <main id="conteudo" tabindex="-1">
 <div class="wrap">
-  <header class="top">
-    <div>
-      <div class="eyebrow">Programa de Robótica · Marília</div>
-      <h1>Atividades por escola</h1>
-      <p>Escolha um mês ou combine vários meses de 2026. O painel mostra o período escolhido, compara com o primeiro mês e deixa você acompanhar cada escola mês a mês.</p>
-    </div>
-    <a class="home-button" href="index.html">Início</a>
-    <a class="btn home-button" href="#" id="robota-mensal-btn">Robótica Mensal</a>
-  </header>
-  <script>
-    (function () {
-      'use strict';
-      var btn = document.getElementById('robota-mensal-btn');
-      if (!btn) return;
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        // Reset to default view: last two available months, "Período somado"
-        st.meses = HAVE.slice(-2);
-        st.visao = 'periodo';
-        st.metrica = 'nota';
-        st.sort = { key: st.metrica, dir: -1 };
-        // Update localStorage
-        try { localStorage.setItem('robotica26', JSON.stringify({ meses: st.meses, metrica: st.metrica, visao: st.visoa })); } catch (e) { }
-        render();
-        var txt = 'Exibindo os dados embutidos de ' + periodLabel() + ' (a tabela resultados_robotica_mensal ainda não respondeu).';
-        var status = document.getElementById('data-status');
-        if (status) { status.textContent = txt; status.hidden = false; }
-      });
-    })();
-  </script>
+
   <p id="data-status" class="note" role="status" hidden></p>
 
   <section class="card filters" aria-label="Período e filtros">
