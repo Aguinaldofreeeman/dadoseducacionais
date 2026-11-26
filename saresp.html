@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SARESP - URE MARÍLIA</title>
-  <link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -12,13 +11,18 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-  <header>
+  <header class="page-header">
+  <div class="page-header__inner">
     <div>
-      <h1>SARESP — Metas Ouro e Diamante</h1>
-      <p>Unidade Regional de Ensino de Marília</p>
+      <h1 class="page-header__title">SARESP — Metas Ouro e Diamante</h1>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
     </div>
-    <div class="s-saresp-1"><a href="index.html" class="home-button">Início</a><a href="dashboard-saresp.html" class="btn s-saresp-2">Dashboard SARESP</a></div>
-  </header>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <a class="btn btn--on-brand" href="dashboard-saresp.html">Dashboard SARESP</a>
+    </div>
+  </div>
+</header>
   <main id="conteudo" tabindex="-1">
     <p class="intro">Nota Final consolidada de 2025, conquista das metas e alvos por escola para 2026.</p>
     <section class="cards" id="cards"></section>

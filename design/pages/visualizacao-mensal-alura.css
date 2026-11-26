@@ -1,5 +1,7 @@
 /* visualizacao-mensal-alura.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
+
+:root{--page-max:1120px}
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:var(--surface);color:var(--legacy-c-0010a32d)}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
 
 
@@ -18,10 +20,6 @@
 *{box-sizing:border-box}
 body{background:var(--p-bg);color:var(--p-ink);font-family:var(--p-font);font-size:15px;line-height:1.45}
 .wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{background:var(--p-accent);color:var(--p-headink)}
-header .wrap{padding-block:20px;display:flex;gap:12px 24px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
-h1{font-size:1.35rem;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
-header p{margin:0;font-size:.85rem;opacity:.8}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--p-bg);border-bottom:1px solid var(--p-line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--p-accent)}
 .bar .wrap{padding-block:12px;display:grid;gap:10px}

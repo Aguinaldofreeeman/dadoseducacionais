@@ -2,15 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Apoios Realizados</title>
-
-<link rel="stylesheet" href="css/home-button.css">
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
     <link rel="stylesheet" href="design/pages/apoio-presencial.css">
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-<header><div><h1>Dashboard de Apoios Realizados</h1><p id="hsub"></p></div><a class="home-button" href="index.html">Início</a></header>
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Dashboard de Apoios Realizados</h1>
+      <p class="page-header__sub" id="hsub"></p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+    </div>
+  </div>
+</header>
 <main id="conteudo" tabindex="-1">
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub"></p><div class="items" id="avg"></div></section>
 <div class="legend"><span>Índice de apoios realizados</span><span><i class="sq r"></i>Menor que 2</span><span><i class="sq y"></i>Maior ou igual a 2 e menor que 3</span><span><i class="sq g"></i>Maior ou igual a 3</span></div>

@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redação Paulista — Índice Quinzenal</title>
-  <link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -12,7 +11,17 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-  <header><div><h1>Redação Paulista — Índice Quinzenal</h1><p id="subtitulo">Diretoria de Ensino — Região de Marília</p></div><div class="nav"><a href="index.html" class="home-button">Início</a></div></header>
+  <header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Redação Paulista — Índice Quinzenal</h1>
+      <p class="page-header__sub" id="subtitulo">Diretoria de Ensino — Região de Marília</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+    </div>
+  </div>
+</header>
   <main id="conteudo" tabindex="-1">
     <p class="intro">Índice semanal da plataforma Redação Paulista e nota das produções textuais por unidade escolar, com todas as quinzenas da planilha de origem: <b>I</b> = índice semanal (valor bruto, não é percentual — por isso supera 1,0 em várias quinzenas) e <b>N</b> = nota das redações. A linha <b>MARILIA · Regional</b> reproduz a linha <i>Total</i> da planilha.</p>
     <section class="cards" id="cards"></section>

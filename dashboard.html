@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Plataforma de Dados Educacionais</title>
-    <link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -12,18 +11,20 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-    <header>
-        <div>
-            <h1>Dashboard Prova Paulista</h1>
-            <p>Resultados educacionais por escola, bimestre e disciplina</p>
-        </div>
-        <div class="header-actions">
-            <a href="index.html" class="home-button">Início</a>
-            <a href="dashboard-alura.html" class="btn-nav azul">Dashboard Alura</a>
-            <a href="resultados_prova_paulista.html" class="btn-nav azul">Resultados</a>
-            <button id="btn-sair" class="btn-logout">Sair</button>
-        </div>
-    </header>
+    <header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Dashboard Prova Paulista</h1>
+      <p class="page-header__sub">Resultados educacionais por escola, bimestre e disciplina</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <a class="btn btn--on-brand" href="dashboard-alura.html">Dashboard Alura</a>
+      <a class="btn btn--on-brand" href="resultados_prova_paulista.html">Resultados</a>
+      <button id="btn-sair" class="btn-logout">Sair</button>
+    </div>
+  </div>
+</header>
 
     <main id="conteudo" tabindex="-1">
         <div id="msg-erro" class="msg"></div>

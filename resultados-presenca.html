@@ -2,15 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Aluno Presente - URE MARÍLIA</title>
-
-<link rel="stylesheet" href="css/home-button.css">
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
     <link rel="stylesheet" href="design/pages/resultados-presenca.css">
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-<header><div><h1>Resultados Aluno Presente</h1><p>Unidade Regional de Ensino de Marília</p></div><a class="home-button" href="index.html">Início</a></header>
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Resultados Aluno Presente</h1>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+    </div>
+  </div>
+</header>
 <main id="conteudo" tabindex="-1">
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub"></p><div class="items" id="avg"></div></section>
 <div class="legend"><span>(%) de Presença</span><span><i class="sq r"></i>Menor que 85%</span><span><i class="sq y"></i>Maior ou igual a 85% e menor que 90%</span><span><i class="sq g"></i>Maior ou igual a 90%</span></div>

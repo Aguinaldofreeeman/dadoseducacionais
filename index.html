@@ -11,11 +11,13 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-    <header>
-        <h1>Plataforma de Dados Educacionais</h1>
-        <div class="header-actions">
-            <!-- Contador de Visitas -->
-            <div class="visit-counter is-loading" id="visit-counter" title="Visitas à plataforma" aria-label="Contador de visitas">
+    <header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Plataforma de Dados Educacionais</h1>
+    </div>
+    <div class="page-header__actions">
+      <div class="visit-counter is-loading" id="visit-counter" title="Visitas à plataforma" aria-label="Contador de visitas">
                 <span class="visit-counter-dot" aria-hidden="true"></span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path>
@@ -24,11 +26,11 @@
                 <span class="visit-counter-label">Visitas</span>
                 <span class="visit-counter-value" id="visit-counter-value" aria-live="polite">&mdash;</span>
             </div>
-            <!-- Botão da Área Administrativa (Exibido apenas para ADM) -->
-            <a id="btn-area-admin" href="admin.html" class="btn-admin-nav">Área Administrativa</a>
-            <button id="btn-sair" class="btn-logout s-index-1">Sair</button>
-        </div>
-    </header>
+      <a class="btn btn--on-brand" id="btn-area-admin" href="admin.html">Área Administrativa</a>
+      <button id="btn-sair" class="btn-logout s-index-1">Sair</button>
+    </div>
+  </div>
+</header>
     <main id="conteudo" tabindex="-1">
         <!-- Form de Login (para não autenticados) -->
         <div id="card-login" class="card login-container">

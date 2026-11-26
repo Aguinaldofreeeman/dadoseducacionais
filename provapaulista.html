@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="0; url=resultados_prova_paulista.html">
     <title>Prova Paulista - Resultados</title>
-    <link rel="stylesheet" href="css/home-button.css">
 
     <link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
@@ -13,13 +12,17 @@
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-    <header>
-        <h1>Painel Prova Paulista</h1>
-        <div class="header-actions">
-            <a href="index.html" class="home-button">Início</a>
-            <button id="btn-sair" class="btn-logout">Sair</button>
-        </div>
-    </header>
+    <header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Painel Prova Paulista</h1>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <button id="btn-sair" class="btn-logout">Sair</button>
+    </div>
+  </div>
+</header>
     <main id="conteudo" tabindex="-1">
         <div class="card">
             <h2>Módulo de Indicadores da Prova Paulista</h2>

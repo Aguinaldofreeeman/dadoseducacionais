@@ -1,18 +1,12 @@
 /* dashboard-alura.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
-        body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
-        header { background: var(--accent); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        header h1 { margin: 0; font-size: 21px; }
-        header p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.85; }
-        .header-actions { display: flex; gap: 8px; align-items: center; }
+        
+:root{--page-max:1400px}
+body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
         .btn-nav { background-color: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .btn-nav:hover { background-color: var(--accent-hover); }
-        .btn-nav.azul { background-color: var(--accent); }
-        .btn-nav.azul:hover { background-color: var(--accent-hover); }
-        .btn-logout { background-color: var(--bad); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
 
-        main { padding: 24px; max-width: 1400px; margin: 0 auto; box-sizing: border-box; }
+        main { padding: 24px; max-width: var(--page-max); margin: 0 auto; box-sizing: border-box; }
 
         .card { background: white; padding: 20px; border-radius: 8px;  margin-bottom: 20px; }
         .card h2 { margin-top: 0; color: var(--accent); font-size: 18px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }

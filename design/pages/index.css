@@ -1,15 +1,13 @@
 /* index.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
-        body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
-        header { background: var(--accent); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
-        .btn-admin-nav { background-color: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: none; }
-        .btn-admin-nav:hover { background-color: var(--accent-hover); }
-        .btn-logout { background-color: var(--bad); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
         
-        main { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+:root{--page-max:1000px}
+body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
+/* JS revela o botão de admin via estilo inline quando o perfil é ADM. */
+#btn-area-admin { display: none; }
+        
+        main { padding: 40px 20px; max-width: var(--page-max); margin: 0 auto; }
         .card { background: white; padding: 30px; border-radius: 8px;  }
         .card h2 { margin-top: 0; color: var(--accent); font-size: 22px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .user-welcome { font-size: 16px; color: var(--text); margin-bottom: 25px; }
@@ -96,7 +94,6 @@
             85%, 100% { transform: translateX(120%); }
         }
         @media (max-width: 640px) {
-            header { flex-wrap: wrap; gap: 10px; }
             .visit-counter-label { display: none; }
         }
     

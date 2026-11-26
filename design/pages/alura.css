@@ -1,14 +1,11 @@
 /* alura.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
-        body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
-        header { background: var(--accent); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .header-actions { display: flex; align-items: center; gap: 8px; }
+        
+:root{--page-max:1100px}
+body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
         .btn-nav { background-color: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .btn-nav:hover { background-color: var(--accent-hover); }
-        .home-button { min-height: 0; }
-        main { padding: 30px; max-width: 1100px; margin: 0 auto; }
+        main { padding: 30px; max-width: var(--page-max); margin: 0 auto; }
         
         .card { background: white; padding: 25px; border-radius: 8px;  margin-bottom: 25px; }
         .card h2 { margin-top: 0; color: var(--accent); font-size: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
@@ -35,12 +32,6 @@
         tr:hover { background-color: var(--surface-2); }
         .text-right { text-align: right; }
         .badge-pct { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; background-color: var(--legacy-c-e9010e1b); color: var(--legacy-c-907549fc); }
-    
-
-
-/* Estilos antes inline (6) */
-.s-alura-1 { background-color:var(--legacy-c-9d3892ec); }
-.s-alura-2 { background-color:var(--accent); }
 .s-alura-3 { display: flex; justify-content: space-between; align-items: center; }
 .s-alura-4 { background-color: var(--legacy-c-9d3892ec); cursor: pointer; }
 .s-alura-5 { font-size: 13px; color: var(--text-muted); margin: 0 0 14px 0; line-height: 1.5; }

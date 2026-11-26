@@ -1,11 +1,10 @@
 /* admin.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
-        body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
-        header { background: var(--accent); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 22px; }
-        .btn-logout { background-color: var(--bad); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
-        main { padding: 30px; max-width: 900px; margin: 0 auto; }
+        
+:root{--page-max:900px}
+body { font-family: Arial, sans-serif; background-color: var(--surface-2); margin: 0; color: var(--text); }
+        main { padding: 30px; max-width: var(--page-max); margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 8px;  margin-bottom: 25px; }
         
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }

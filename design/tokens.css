@@ -105,6 +105,7 @@
   --brand-fg-hover: #e7eef8;   /* hover do botão branco; 4.99:1 com --brand */
   --brand-soft:     rgb(255 255 255 / .14);
   --brand-line:     rgb(255 255 255 / .75); /* 4.01:1 contra --brand */
+  --brand-danger:   #b3302f;   /* Sair: 6.21:1 com branco, fixo nos 2 temas */
   --focus-on-brand: #ffffff;   /* anel de foco sobre --brand; 5.82:1 */
 }
 

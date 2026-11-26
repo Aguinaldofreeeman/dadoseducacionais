@@ -1,13 +1,13 @@
 /* matific-mensal.html — CSS extraído do HTML original. Refatorar gradualmente para app.css. */
 
 
+
+:root{--page-max:1320px}
 :root{--p-bg:var(--surface-2);--p-c:var(--surface);--p-t:var(--text);--p-m:var(--text-muted);--p-b:var(--border);--p-p:var(--accent);--p-a:var(--accent);--p-w:var(--warn);--p-sh:0 1px 3px var(--legacy-c-2a0be2fe),0 8px 24px var(--legacy-c-2a0be2e2)}
 @media(prefers-color-scheme:dark){:root{--p-bg:var(--legacy-c-92debf34);--p-c:var(--legacy-c-91fdff4a);--p-t:var(--border);--p-m:var(--text-subtle);--p-b:var(--legacy-c-93dd5337);--p-p:var(--legacy-c-9fbad86d);--p-sh:0 1px 3px var(--legacy-c-0203c2ab)}}
 *{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--p-bg);color:var(--p-t);margin:0}
-header{background:var(--accent);color:var(--surface);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-h1{margin:0;font-size:22px}header p{font-size:13px;opacity:.85;margin:5px 0 0}.nav{display:flex;gap:8px;flex-wrap:wrap}
 .btn{padding:9px 14px;border-radius:8px;color:var(--surface);text-decoration:none;font:14px inherit;background:var(--legacy-c-70aa39a7);border:0;cursor:pointer}.btn:hover{background:var(--legacy-c-70aa39df)}
-main{max-width:1320px;margin:auto;padding:22px 30px 40px}
+main{max-width: var(--page-max);margin:auto;padding:22px 30px 40px}
 .avg{background:var(--accent);color:var(--surface);border-radius:14px;padding:18px 22px;margin-bottom:18px;}
 .avg h2{margin:0 0 2px;font-size:17px}.avg>p{margin:0 0 14px;font-size:13px;opacity:.75}
 .items{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:20px}.avg .k{font-size:12px;opacity:.8}.avg .v{font-size:27px;font-weight:700;margin:2px 0 7px}
@@ -50,7 +50,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--p-b);text-align:right;white-sp
 .empty,.foot{font-size:12px;color:var(--p-m)}.foot{margin-top:18px}.leg{font-size:12px;color:var(--p-m);margin-top:10px}
 @media(max-width:850px){.grid,.tr2{grid-template-columns:1fr}.f{grid-template-columns:120px 1fr 76px}.fp{position:static}}
 @media(max-width:620px){.chips{grid-template-columns:repeat(6,1fr)}}
-@media(max-width:550px){header{padding:16px}main{padding:14px}.f{grid-template-columns:1fr}.filters select,.filters input{min-width:100%}}
+@media(max-width:550px){main{padding:14px}.f{grid-template-columns:1fr}.filters select,.filters input{min-width:100%}}
 
 
 
