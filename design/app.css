@@ -55,7 +55,8 @@
   flex-wrap: wrap;
 }
 
-.nav a,
+/* :not() impede que .nav a sobrescreva .home-button e .btn no cabeçalho. */
+.nav a:not(.home-button):not(.btn),
 .btn {
   display: inline-flex;
   align-items: center;
@@ -75,10 +76,10 @@
               color var(--dur-fast) var(--ease),
               border-color var(--dur-fast) var(--ease);
 }
-.nav a:hover,
+.nav a:not(.home-button):not(.btn):hover,
 .btn:hover { background: var(--surface-3); color: var(--text); }
 
-.nav a:active,
+.nav a:not(.home-button):not(.btn):active,
 .btn:active { transform: translateY(1px); }
 
 .btn:disabled,
@@ -110,9 +111,107 @@
 }
 
 .main {
-  max-width: 1400px;
+  max-width: var(--page-max);
   margin-inline: auto;
   padding: var(--space-5);
+}
+
+/* --------------------------------------------------------------------------
+   Cabeçalho de página — barra de marca compartilhada por todas as páginas.
+   Única fonte de estilo do header: nenhuma página redefine header{}
+   -------------------------------------------------------------------------- */
+
+.page-header {
+  background: var(--brand);
+  color: var(--brand-fg);
+}
+
+.page-header__inner {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--lh-sm);
+  font-weight: var(--weight-semi);
+  letter-spacing: -0.01em;
+  color: var(--brand-fg);
+}
+
+.page-header__sub {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--lh-sm);
+  color: var(--brand-fg);
+  opacity: .9;
+  max-width: 72ch;
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Ação primária do cabeçalho: botão branco com texto de marca. */
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--brand-fg);
+  color: var(--brand);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semi);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+.home-button:hover { background: var(--brand-fg-hover); color: var(--brand); }
+.home-button:active { transform: translateY(1px); }
+.home-button:focus-visible { outline: 2px solid var(--focus-on-brand); outline-offset: 2px; }
+
+/* Ações secundárias do cabeçalho: contorno sobre a barra de marca. */
+.page-header .btn--on-brand {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 1px solid var(--brand-line);
+  border-radius: var(--radius-md);
+  color: var(--brand-fg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+}
+.page-header .btn--on-brand:hover {
+  background: var(--brand-soft);
+  border-color: var(--brand-fg);
+  color: var(--brand-fg);
+}
+.page-header .btn--on-brand:focus-visible {
+  outline: 2px solid var(--focus-on-brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 550px) {
+  .page-header__inner { padding: var(--space-4); }
+  /* alvo de toque confortável quando o uso primário é toque */
+  .home-button,
+  .page-header .btn--on-brand { min-height: 44px; }
 }
 
 /* --------------------------------------------------------------------------

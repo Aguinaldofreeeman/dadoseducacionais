@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard — Matific</title>
-<link rel="stylesheet" href="css/home-button.css">    <link rel="stylesheet" href="design/tokens.css">
+<link rel="stylesheet" href="design/tokens.css">
     <link rel="stylesheet" href="design/app.css">
     <link rel="stylesheet" href="design/pages/matific.css">
 </head><body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-<header><div><h1>Dashboard — Matific</h1><p>Unidade Regional de Ensino de Marília<, Ensino Fundamental Anos Finais</p></div><div class="nav"><a href="index.html" class="home-button">Início</a><a href="matific-mensal.html" class="btn">Matific Mensal</a></div></header>
+<header class="page-header">
+  <div class="page-header__inner">
+    <div>
+      <h1 class="page-header__title">Dashboard — Matific</h1>
+      <p class="page-header__sub">Unidade Regional de Ensino de Marília · Ensino Fundamental Anos Finais</p>
+    </div>
+    <div class="page-header__actions">
+      <a class="home-button" href="index.html">Início</a>
+      <a class="btn btn--on-brand" href="matific-mensal.html">Matific Mensal</a>
+    </div>
+  </div>
+</header>
 <main id="conteudo" tabindex="-1">
 <section class="avg"><h2>Médias da Unidade Regional de Ensino</h2><p id="avgSub">Referência para comparar cada escola e cada filtro.</p><div class="items" id="avg"></div></section>
 <section class="cards" id="cards"></section>
